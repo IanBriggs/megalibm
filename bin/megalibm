@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+
+import os.path as path
+import sys
+
+PYTHON_DIR = path.abspath(path.dirname(__file__))
+GIT_DIR = path.split(PYTHON_DIR)[0]
+sys.path.append(path.join(GIT_DIR, "src"))
+
+
+from fptaylor.result import FPTaylorResult, CHECK_CONFIG
+
+from domain import Domain
+
+from forms.general import General
+from forms.horner import Horner
+
+from implementations.sine import Sine
+from implementations.cosine import Cosine
+
+from numeric_types.fp32 import FP32
+from numeric_types.fp64 import FP64
+
+from utils.logging import Logger
+from utils.timing import Timer
+
+from pprint import pprint
+
+import math
+
+logger = Logger(level=Logger.LOW)
+timer = Timer()
+
+
+
+
+def make_optuner_sins():
+    fp64 = FP64()
+    domain = Domain(0, fp64.half_pi())
+    domain.add_denormal(0, math.asin(2**-1022))
+    degrees = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    form = Horner
+
+    h_lines = ["#ifndef OPTUNER_SINS", "#define OPTUNER_SINS"]
+    c_lines = ["#include <assert.h>", "#include <math.h>"]
+    for deg in degrees:
+        name = "ord_{:02}_sin_fp64".format(2*deg - 1)
+        impl = Sine(fp64, name, domain, deg, form)
+
+        h_lines += impl.c_signature()
+        h_lines[-1] += ";"
+        c_lines += impl.to_c()
+
+        name = "rord_{:02}_sin_fp64".format(2*deg - 1)
+        impl = Sine(fp64, name, domain, deg, form)
+
+        impl.add_half_pi_reduction()
+        impl.add_abs()
+
+        h_lines += impl.c_signature()
+        h_lines[-1] += ";"
+        c_lines += impl.to_c()
+
+    h_lines += ["#endif"]
+
+    with open("optuner_sins.h", 'w') as f:
+        f.write("\n".join(h_lines))
+
+    with open("optuner_sins.c", 'w') as f:
+        f.write("\n".join(c_lines))
+
+
+
+
+def main(argv):
+    logger.set_log_level(Logger.EXTRA)
+
+    make_optuner_sins()
+
+
+if __name__ == "__main__":
+    import sys
+
+    retcode = 0
+    try:
+        retcode = main(sys.argv)
+    except KeyboardInterrupt:
+        print("\nBye")
+
+    sys.exit(retcode)
