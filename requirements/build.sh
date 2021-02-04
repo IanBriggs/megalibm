@@ -4,7 +4,6 @@ set -e
 
 
 SUCCESS=0
-
 SCRIPT_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LOG="${SCRIPT_LOCATION}/log.txt"
 rm -f "${LOG}"
@@ -36,6 +35,8 @@ rm -rf FPTaylor
 git clone https://github.com/soarlab/FPTaylor.git &>> "${LOG}"
 pushd FPTaylor
 git checkout indices
+eval `opam config env`
+opam switch 4.05.0
 make &>> "${LOG}"
 popd
 popd
