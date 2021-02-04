@@ -22,7 +22,7 @@ class GelpiaInfError(Exception):
 CACHE = dict()
 
 
-class GelpiaResult():
+class Result():
 
     # Setup logging to avoid runtime error
     gelpia_logging.set_log_filename(None)

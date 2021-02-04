@@ -1,0 +1,38 @@
+
+
+import numeric_types
+import sollya
+import lego_blocks.forms as forms
+from lambdas import types
+
+
+
+
+class Polynomial(types.Source):
+
+    def __init__(self, function, domain, monomials, coefficients):
+        self.monomials = monomials
+        self.coefficients = coefficients
+        super().__init__(function, domain)
+
+
+    def type_check(self):
+        assert(type(self.monomials) == list)
+        assert(type(self.coefficients) == list)
+        assert(len(self.monomials) == len(set(self.monomials)))
+        assert(len(self.coefficients) <= len(self.monomials))
+        assert(all([type(m) == int for m in self.monomials]))
+        assert(all([type(c) == float or c is None for c in self.coefficients]))
+
+        self.out_type = types.Poly(self.function, self.domain)
+
+
+    def generate(self):
+        res = sollya.Result(self.function + "(x)",
+                            self.domain,
+                            self.monomials,
+                            numeric_types.fp64())
+        return forms.Polynomial(self.function,
+                                self.monomials,
+                                res.coefficients,
+                                self.domain)

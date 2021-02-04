@@ -75,7 +75,7 @@ CHECK_CONFIG = {
 
 CACHE = dict()
 
-class FPTaylorResult():
+class Result():
 
     def __init__(self, query, config=None):
         self.query = query

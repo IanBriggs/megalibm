@@ -1,9 +1,7 @@
 
 
-from utils.logging import Logger
-
-
-logger = Logger()
+from error import Error
+from interval import Interval
 
 
 
@@ -11,6 +9,14 @@ logger = Logger()
 class Polynomial():
 
     def __init__(self, modeled_function, monomials, coefficients, domain):
+        assert(type(modeled_function) == str)
+        assert(type(monomials) == list)
+        assert(type(coefficients) == list)
+        assert(all(type(m) == int for m in monomials))
+        # assert(all(type(c) == float for c in coefficients))
+        assert(len(monomials) == len(coefficients))
+        assert(type(domain) == Interval)
+
         self.modeled_function = modeled_function
         paired = {m:c for m, c in zip(monomials, coefficients)}
         self.monomials = sorted(paired.keys())
@@ -20,5 +26,7 @@ class Polynomial():
 
 
     def add_algorithmic_error(self, error):
+        assert(type(error) == Error)
+
         self.algorithmic_errors.append(error)
 

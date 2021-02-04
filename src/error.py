@@ -1,27 +1,27 @@
 
 
-from utils.logging import Logger
-
-
-logger = Logger()
-
-
 
 
 class Error():
 
-    def __init__(self, analysis_program, normal_errors=None, denormal_errors=None):
+    def __init__(self, analysis_program, errors=None):
         self.analysis_program = analysis_program
-        self.normal_errors = normal_errors or dict()
-        self.denormal_errors = denormal_errors or dict()
+        if errors is None:
+            self.errors = dict()
+            self.errors["relative"] = dict()
+            self.errors["absolute"] = dict()
+        else:
+            self.errors = errors
 
 
     def __repr__(self):
-        return 'Error(analysis_program={}, normal_errors={}, denormal_errors={})'.format(self.analysis_program, self.normal_errors, self.denormal_errors)
-
-    def add_normal_error(self, domain, absolute_error, relative_error):
-        self.normal_errors[domain] = (absolute_error, relative_error)
+        return 'Error(analysis_program={}, errors={})'.format(self.analysis_program, self.errors)
 
 
-    def add_denormal_error(self, domain, absolute_error, relative_error):
-        self.denormal_errors[domain] = (absolute_error, relative_error)
+    def add_relative_error(self, domain, value):
+        self.errors["relative"][domain] = value
+
+
+    def add_absolute_error(self, domain):
+        self.errors["absolute"][domain] = value
+
