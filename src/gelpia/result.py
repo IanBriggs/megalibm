@@ -91,3 +91,6 @@ class Result():
 
         CACHE[self.query] = self
 
+
+    def __repr__(self):
+        return "Result({})".format(self.query)

@@ -13,6 +13,10 @@ class MakeTuple(types.Node):
         self.type_check()
 
 
+    def __repr__(self):
+        return "MakeTuple({}, {})".format(repr(self.a), repr(self.b))
+
+
     def type_check(self):
         self.out_type = types.Tuple(self.a.out_type, self.b.out_type)
 

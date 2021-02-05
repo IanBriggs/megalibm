@@ -15,6 +15,13 @@ class Horner(forms.Form):
         self.polynomial = polynomial
 
 
+    def __repr__(self):
+        return "Horner({}, {}, {}, {}, {}, {})".format(repr(self.numeric_type),
+                                                       repr(self.in_names),
+                                                       repr(self.out_names),
+                                                       repr(self.polynomial))
+
+
     def to_c(self):
         c_type = self.numeric_type.c_type()
         out = self.out_names[0]
@@ -26,28 +33,32 @@ class Horner(forms.Form):
                      in self.polynomial.coefficients]
 
         def expand_pow(n):
-            return "*".join([cast_in for _ in range(n)])
-
-        if mons[0] == 0:
-            parts.append("{} + ".format(cast_coef[0]))
-        else:
-            parts.append("{}*({} + ".format(expand_pow(mons[0]), cast_coef[0]))
-
-        for i in range(1, len(mons)-1):
-            power = mons[i] - mons[i-1]
-            parts.append("{}*({} + ".format(expand_pow(power), cast_coef[i]))
+            return "*".join(cast_in for _ in range(n))
 
         if len(mons) == 1:
-            final_power = mons[0]
+            if mons[0] == 0:
+                parts.append("{}".format(cast_coef[0]))
+            else:
+                parts.append("{}*{}".format(expand_pow(mons[0]), cast_coef[0]))
+
         else:
+            if mons[0] == 0:
+                parts.append("{} +".format(cast_coef[0]))
+            else:
+                parts.append("{}*({} + ".format(expand_pow(mons[0]), cast_coef[0]))
+
+            for i in range(1, len(mons)-1):
+                power = mons[i] - mons[i-1]
+                parts.append("{}*({} + ".format(expand_pow(power), cast_coef[i]))
+
             final_power = mons[-1] - mons[-2]
-        parts.append("{}*{}".format(expand_pow(final_power), cast_coef[-1]))
+            parts.append("{}*{}".format(expand_pow(final_power), cast_coef[-1]))
 
-        for i in range(1, len(mons)-1):
-            parts.append(")")
+            for i in range(1, len(mons)-1):
+                parts.append(")")
 
-        if mons[0] != 0:
-            parts.append(")")
+            if mons[0] != 0:
+                parts.append(")")
 
         rhs = "".join(parts)
         code = "{} {} = {};".format(c_type, out, rhs)

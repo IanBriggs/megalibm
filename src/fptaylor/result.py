@@ -111,6 +111,11 @@ class Result():
 
         CACHE[key] = self
 
+
+    def __repr__(self):
+        return "Result({}, {})".format(repr(self.query), repr(self.config))
+
+
     def _run(self):
         # Open a temporary directory we can run FPTaylor in.
         # The directory will be removed upon exiting the with block

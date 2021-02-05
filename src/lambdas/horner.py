@@ -1,7 +1,7 @@
 
 
 import numeric_types
-import lego_blocks.forms as froms
+import lego_blocks.forms as forms
 from lambdas import types
 
 

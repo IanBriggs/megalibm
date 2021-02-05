@@ -1,4 +1,4 @@
-
+1
 
 import lego_blocks
 
@@ -15,6 +15,12 @@ class SimpleAdditive(lego_blocks.LegoBlock):
 
         self.period = period
 
+
+    def __repr__(self):
+        return "SimpleAdditive({}, {}, {}, {})".format(repr(self.numeric_type),
+                                                       repr(self.in_names),
+                                                       repr(self.out_names),
+                                                       repr(self.period))
 
     def to_c(self):
         fmt = {

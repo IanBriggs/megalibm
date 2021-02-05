@@ -9,7 +9,7 @@ requirements/FPTaylor/fptaylor: requirements/build.sh
 clean:
 	find . -type d -name "__pycache__" -exec ${RM} -r {} +
 	find bin -type f -name "*.html" -exec ${RM} {} +
-	$(RM) -r bin/1611*
+	$(RM) -r bin/161*
 
 .PHONY: clean-requirements
 clean-requirements:

@@ -7,6 +7,9 @@ class NumericType():
     def __init__(self):
         raise NotImplementedError()
 
+    def __repr__(self):
+        raise NotImplementedError()
+
     def c_abs(self):
         raise NotImplementedError()
 
@@ -38,6 +41,9 @@ class fp32(NumericType):
     def __init__(self):
         pass
 
+    def __repr__(self):
+        return "fp32()"
+
     def c_abs(self):
         return "fabsf"
 
@@ -67,6 +73,9 @@ class fp64(NumericType):
 
     def __init__(self):
         pass
+
+    def __repr__(self):
+        return "fp64()"
 
     def c_abs(self):
         return "fabs"

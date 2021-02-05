@@ -16,6 +16,13 @@ class Polynomial(types.Source):
         super().__init__(function, domain)
 
 
+    def __repr__(self):
+        return "Polynomial({}, {}, {}, {})".format(repr(self.function),
+                                                   repr(self.domain),
+                                                   repr(self.monomials),
+                                                   repr(self.coefficients))
+
+
     def type_check(self):
         assert(type(self.monomials) == list)
         assert(type(self.coefficients) == list)

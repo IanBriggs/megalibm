@@ -14,6 +14,13 @@ class General(forms.Form):
         self.polynomial = polynomial
 
 
+    def __repr__(self):
+        return "General({}, {}, {}, {}, {}, {})".format(repr(self.numeric_type),
+                                                        repr(self.in_names),
+                                                        repr(self.out_names),
+                                                        repr(self.polynomial))
+
+
     def to_c(self):
         c_type = self.numeric_type.c_type()
         cast_in = "(({}){})".format(c_type, self.in_names[0])

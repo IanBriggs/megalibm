@@ -20,7 +20,7 @@ timer = Timer()
 CACHE = dict()
 
 
-class SollyaResult():
+class Result():
 
     default_config = {
         "prec" : 2**7,
@@ -33,7 +33,7 @@ class SollyaResult():
         self.domain = domain
         self.monomials = monomials
         self.numeric_type = numeric_type
-        self.config = config or SollyaResult.default_config
+        self.config = config or Result.default_config
 
         self.stdout = None
         self.stderr = None
@@ -59,28 +59,38 @@ class SollyaResult():
             CACHE[self.query] = self
 
 
+    def __repr__(self):
+        return "Result({}, {}, {}, {}, {})".format(repr(self.func),
+                                                   repr(self.domain),
+                                                   repr(self.monomials),
+                                                   repr(self.numeric_type),
+                                                   repr(self.config))
+
+
     def _generate_query(self):
         monomials_str = ", ".join([str(m) for m in self.monomials])
         lines = [
             'prec = {}!;'.format(self.config["prec"]),
             'algo_analysis_bound = {};'.format(self.config["analysis_bound"]),
-            'I = [{};{}];'.format(*self.domain.full_domain()),
+            'I = [{};{}];'.format(self.domain.inf, self.domain.sup),
             'f = {};'.format(self.func),
             'monomials = [|{}|];'.format(monomials_str),
             'p = fpminimax(f, monomials, [|{}...|], I, floating, relative);'.format(self.numeric_type.sollya_type()),
         ]
 
-        norms = self.domain.normal_domains()
-        for i, dom in enumerate(norms):
-            sollya_dom = "[{};{}]".format(*dom)
-            lines.append('rel_norm_err_{} = sup(supnorm(p, f, {}, relative, algo_analysis_bound));'.format(i, sollya_dom))
-            lines.append('abs_norm_err_{} = sup(supnorm(p, f, {}, absolute, algo_analysis_bound));'.format(i, sollya_dom))
+        norms = list()
+        # norms = self.domain.normal_domains()
+        # for i, dom in enumerate(norms):
+        #     sollya_dom = "[{};{}]".format(*dom)
+        #     lines.append('rel_norm_err_{} = sup(supnorm(p, f, {}, relative, algo_analysis_bound));'.format(i, sollya_dom))
+        #     lines.append('abs_norm_err_{} = sup(supnorm(p, f, {}, absolute, algo_analysis_bound));'.format(i, sollya_dom))
 
-        denorms = self.domain.denormal_domains()
-        for i, dom in enumerate(denorms):
-            sollya_dom = "[{};{}]".format(*dom)
-            lines.append('rel_denorm_err_{} = sup(supnorm(p, f, {}, relative, algo_analysis_bound));'.format(i, sollya_dom))
-            lines.append('abs_denorm_err_{} = sup(supnorm(p, f, {}, absolute, algo_analysis_bound));'.format(i, sollya_dom))
+        denorms = list()
+        # denorms = self.domain.denormal_domains()
+        # for i, dom in enumerate(denorms):
+        #     sollya_dom = "[{};{}]".format(*dom)
+        #     lines.append('rel_denorm_err_{} = sup(supnorm(p, f, {}, relative, algo_analysis_bound));'.format(i, sollya_dom))
+        #     lines.append('abs_denorm_err_{} = sup(supnorm(p, f, {}, absolute, algo_analysis_bound));'.format(i, sollya_dom))
 
         all_coef = ['coeff(p,{})'.format(m) for m in self.monomials]
         fmt_coef = '@"\\", \\""@'.join(all_coef)
@@ -159,15 +169,15 @@ class SollyaResult():
 
         self.error = Error("Sollya")
 
-        for i, dom in enumerate(self.domain.normal_domains()):
-            rel_err = data["relative_normal_errors"][i]
-            abs_err = data["absolute_normal_errors"][i]
-            self.error.add_normal_error(dom, abs_err, rel_err)
+        # for i, dom in enumerate(self.domain.normal_domains()):
+        #     rel_err = data["relative_normal_errors"][i]
+        #     abs_err = data["absolute_normal_errors"][i]
+        #     self.error.add_normal_error(dom, abs_err, rel_err)
 
-        for i, dom in enumerate(self.domain.denormal_domains()):
-            rel_err = data["relative_denormal_errors"][i]
-            abs_err = data["absolute_denormal_errors"][i]
-            self.error.add_denormal_error(dom, abs_err, rel_err)
+        # for i, dom in enumerate(self.domain.denormal_domains()):
+        #     rel_err = data["relative_denormal_errors"][i]
+        #     abs_err = data["absolute_denormal_errors"][i]
+        #     self.error.add_denormal_error(dom, abs_err, rel_err)
 
 
 

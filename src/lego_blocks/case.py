@@ -21,6 +21,14 @@ class Case(lego_blocks.LegoBlock):
         self.cases = cases
 
 
+    def __repr__(self):
+        return "Case({}, {}, {}, {}, {}, {})".format(repr(self.numeric_type),
+                                                     repr(self.in_names),
+                                                     repr(self.out_names),
+                                                     repr(self.mod),
+                                                     repr(self.cases))
+
+
     def to_c(self):
         fmt = {
             "k": self.in_names[1],

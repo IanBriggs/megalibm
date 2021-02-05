@@ -16,6 +16,13 @@ class LegoBlock():
         self.out_names = out_names
 
 
+    def __repr__(self):
+        class_name = type(self).__name__
+        return "{}({}, {}, {})".format(class_name,
+                                       repr(self.in_names),
+                                       repr(self.out_names))
+
+
     def to_c(self):
         raise NotImplementedError()
 
