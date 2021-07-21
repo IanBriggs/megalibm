@@ -1,19 +1,35 @@
-.PHONY: nightly
-nightly: requirements/FPTaylor/fptaylor clean
-	cd bin && ./check.sh
 
-requirements/FPTaylor/fptaylor: requirements/build.sh
-	cd requirements && ./build.sh
+
+.PHONY: build
+build: bin/script
+
+
+bin/script: requirements/done | bin
+	cd bin && ln -s ../src/script.py script
+	chmod +x $@
+
+bin/nightly.sh: bin/script
+	cd bin && ln -s ../src/nightly.sh nightly.sh
+	chmod +x $@
+
+.PHONY: nightly
+nightly: bin/nightly.sh
+	$<
+
+requirements/done: requirements/build.sh
+	$<
 
 .PHONY: clean
 clean:
 	find . -type d -name "__pycache__" -exec ${RM} -r {} +
-	find bin -type f -name "*.html" -exec ${RM} {} +
-	$(RM) -r bin/161*
 
 .PHONY: clean-requirements
-clean-requirements:
-	$(RM) -r requirements/FPTaylor
-	$(RM) -r requirements/gelpia
-	$(RM) requirements/log.txt
-	$(RM) requirements/debug_eniroment.sh
+clean-requirements: requirements/clean.sh
+	$<
+
+.PHONY: distclean
+distclean: clean clean-requirements
+	$(RM) -r bin
+
+bin:
+	mkdir bin
