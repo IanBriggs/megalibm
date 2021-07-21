@@ -48,7 +48,7 @@ ri = lambdas.RepeatInf(rf)
 logger(ri)
 logger("  Type: {}", ri.out_type)
 
-my_cos = lambdas.FlipAboutZeroX(ri)
+my_cos = lambdas.MirrorAboutZeroX(ri)
 logger(my_cos)
 logger("  Type: {}", my_cos.out_type)
 

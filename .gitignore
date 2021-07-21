@@ -1,5 +1,7 @@
-requirements/FPTaylor/
-requirements/debug_enironment.sh
-requirements/gelpia/
-requirements/log.txt
 __pycache__
+bin
+requirements/debug_env.sh
+requirements/done
+requirements/log.txt
+requirements/something/
+nightlies/
