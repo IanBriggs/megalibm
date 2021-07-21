@@ -25,9 +25,6 @@ class Timer():
         assert(self._start is not None)
         self._times.append(time.perf_counter() - self._start)
         self._start = None
-
-    def last_time(self):
-        assert(self._start is None)
         return self._times[-1]
 
     def elapsed(self):
@@ -84,8 +81,6 @@ class Timer():
         return self._times.copy()
 
 
-
-
 def main(argv):
     iters = 10000000
     try:
@@ -100,6 +95,7 @@ def main(argv):
     my_timer = Timer()
     for _ in range(iters):
         my_timer.start()
+        pass
         my_timer.stop()
 
     total_stop = time.perf_counter()
@@ -111,42 +107,44 @@ def main(argv):
 
     loop_stop = time.perf_counter()
 
-    times = len(my_timer)
-    minimum = my_timer.minimum() * 1000
-    average = my_timer.average() * 1000
-    median = my_timer.median() * 1000
-    maximum = my_timer.maximum() * 1000
-    stddev = my_timer.stddev() * 1000
+    iterations = len(my_timer)
+    assert(iters == iterations)
+    minimum = my_timer.minimum() * 1e9
+    average = my_timer.average() * 1e9
+    median = my_timer.median() * 1e9
+    maximum = my_timer.maximum() * 1e9
+    stddev = my_timer.stddev() * 1e9
 
     total_time = total_stop - total_start
     loop_overhead = loop_stop - loop_start
     timer_overhead = total_time - loop_overhead
     per_start_stop = timer_overhead / iters
-    ms_per_start_stop = per_start_stop * 1000
-
+    ns_per_start_stop = per_start_stop * 1e9
 
     print("Stats:")
-    print(f"     times: {times}")
-    print(f"   minimum: {minimum:.6f} msec")
-    print(f"   average: {average:.6f} msec")
-    print(f"    median: {median:.6f} msec")
-    print(f"   maximum: {maximum:.6f} msec")
-    print(f"    stddev: {stddev:.6f} msec")
+    print(f" iterations: {iterations}")
+    print(f"    minimum: {minimum:.6f} nsec")
+    print(f"    average: {average:.6f} nsec")
+    print(f"     median: {median:.6f} nsec")
+    print(f"    maximum: {maximum:.6f} nsec")
+    print(f"     stddev: {stddev:.6f} nsec")
     print()
     print("Overhead:")
-    print(f"       total time: {total_time:.4f} sec")
-    print(f"    loop overhead: {loop_overhead:.4f} sec")
-    print(f"   timer overhead: {timer_overhead:.4f} sec")
-    print(f"per time overhead: {ms_per_start_stop:.4f} msec")
+    print(f"        total time: {total_time:.4f} sec")
+    print(f"     loop overhead: {loop_overhead:.4f} sec")
+    print(f"    timer overhead: {timer_overhead:.4f} sec")
+    print(f" per pair overhead: {ns_per_start_stop:.4f} nsec")
 
 
 if __name__ == "__main__":
     import sys
 
-    retcode = 0
+    retcode = 130  # meaning "Script terminated by Control-C"
+
     try:
         retcode = main(sys.argv)
     except KeyboardInterrupt:
-        print("\nBye")
+        print("")
+        print("Goodbye")
 
     sys.exit(retcode)

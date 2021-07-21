@@ -7,9 +7,9 @@ import sys
 
 
 class Logger():
-    # +-------------------------------------------------------------------------+
-    # | Level Constants                                                         |
-    # +-------------------------------------------------------------------------+
+    # +-----------------------------------------------------------------------+
+    # | Level Constants                                                       |
+    # +-----------------------------------------------------------------------+
     NONE = -10
     QUIET = 0
     LOW = 10
@@ -33,9 +33,9 @@ class Logger():
         norm = string.lower()
         return self_class.CONSTANT_DICT[norm]
 
-    # +-------------------------------------------------------------------------+
-    # | Color printing using ANSI escape codes                                  |
-    # +-------------------------------------------------------------------------+
+    # +-----------------------------------------------------------------------+
+    # | Color printing using ANSI escape codes                                |
+    # +-----------------------------------------------------------------------+
     COLOR_CODES = {
         "black":   "\x1b[30m",
         "red":     "\x1b[31m",
@@ -92,9 +92,9 @@ class Logger():
     def white(self_class, text):
         return self_class.color_text("white", text)
 
-    # +-------------------------------------------------------------------------+
-    # | Class variables                                                         |
-    # +-------------------------------------------------------------------------+
+    # +-----------------------------------------------------------------------+
+    # | Class variables                                                       |
+    # +-----------------------------------------------------------------------+
 
     # Current level
     LOG_LEVEL = LOW
@@ -135,9 +135,9 @@ class Logger():
         #       during the lifetime?
         self_class.LOG_FILE = open(filename, "w")
 
-    # +-------------------------------------------------------------------------+
-    # | Member functions                                                        |
-    # +-------------------------------------------------------------------------+
+    # +-----------------------------------------------------------------------+
+    # | Member functions                                                      |
+    # +-----------------------------------------------------------------------+
     def __init__(self, level=None, color=None, def_color=None):
         # Use defaults if arguments aren't set
         #     Note: ternary has to be used for level since a level of 0 is
@@ -168,7 +168,7 @@ class Logger():
         # If this was the last logger and the log had been sent to a file close
         #     the file
         # todo: This is only called when the object is garbage collected
-        #       and so has no garantee that it will ever be called
+        #       and so has no guarantee that it will ever be called
         #       This means we will most likely leave an open file handle on
         #       exit, but I don't know of a better way to do this
         #       Context managers won't help since a logger is meant to be
@@ -192,7 +192,7 @@ class Logger():
         # If out is not set then use the member output
         out = out or Logger.LOG_FILE
 
-        # Add begining parts to message and finish all formating
+        # Add beginning parts to message and finish all formatting
         pre = pre or ""
         mod = self.color(self.module)
         full_message = "{} {}:{} {}".format(datetime.datetime.now(),
@@ -239,9 +239,9 @@ class Logger():
             formatted_message = self.format_message(message, *args)
             self._log(formatted_message, pre=formatted_funcname)
 
-    def blog(self, description, text):
+    def blog(self, description, text, level=None):
         # Log a block of text
-        if self.should_log():
+        if self.should_log(level):
             self._log("{}:\n\n{}\n".format(description, text))
 
     def warning(self, message, *args):
@@ -268,8 +268,6 @@ class Logger():
             print(Logger.strip_color(full_message), file=Logger.LOG_FILE)
 
 
-
-
 def main(argv):
     logger.set_log_level(Logger.EXTRA)
 
@@ -289,23 +287,43 @@ def main(argv):
     logger(Logger.white("  white"))
 
     logger("Logging can be done multiple ways:")
-    logger("  logger(message, *args)")
-    logger.log("  logger.log(message, *args)")
-    logger.llog(Logger.QUIET, "  logger.llog(level, message, *args)")
-    logger.dlog("logger.dlog(message, *args)")
-    logger.blog("description", "logger.blog(description, text)")
-    logger.warning("logger.warning(message, *args)")
-    logger.error("logger.error(message, *args)")
+    print()
+    print("> logger.log(\"hello world\")")
+    logger.log("hello world")
+    print()
+    print("> logger.log(\"formatting is {}\", \"great\")")
+    logger.log("formatting is {}", "great")
+    print()
+    print("> logger(\"Can be called directly\")")
+    logger("Can be called directly")
+    print()
+    print("> logger.llog(Logger.QUIET, \"Can specify a logging level\")")
+    logger.llog(Logger.QUIET, "Can specify a logging level")
+    print()
+    print("> logger.dlog(\"Can automatically include the def name\")")
+    logger.dlog("Can automatically include the def name")
+    print()
+    print("> logger.blog(\"Can\", \"log blocks\\nof\\ntext\")")
+    logger.blog("Can", "log blocks\nof\ntext")
+    print()
+    print("> logger.warning(\"Can warn\")")
+    logger.warning("Can warn")
+    print()
+    print("> logger.error(\"or error\")")
+    logger.error("or error")
 
     return 0
 
-if __name__ == "__main__":
-    logger = Logger()
 
-    retcode = 0
+if __name__ == "__main__":
+    logger = Logger(color=Logger.cyan, def_color=Logger.green)
+
+    retcode = 130  # meaning "Script terminated by Control-C"
+
     try:
         retcode = main(sys.argv)
     except KeyboardInterrupt:
-        print("\nBye")
+        print("")
+        print("Goodbye")
 
     sys.exit(retcode)

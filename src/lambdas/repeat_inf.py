@@ -2,20 +2,34 @@
 
 import lego_blocks
 import numeric_types
+import fpcore
+
 from interval import Interval
 from lambdas import types
+from utils import Logger
 
-from math import inf, pi
+from wolframclient.evaluation import WolframLanguageSession
+from wolframclient.language import wl, wlexpr
+
+from math import pi
 
 
+logger = Logger(level=Logger.HIGH)
 
-def is_periodic_function(func):
-    return func in {"sin", "cos"}
+
 
 def has_period_function(func, period):
-    if func in {"sin", "cos"}:
-        return period == 2*pi
-    return False
+    arg = func.arguments[0]
+    flipped_arg = period + arg
+    flipped = func.substitute(arg, flipped_arg)
+    query = func - flipped
+    logger("Query: {}", query)
+    wolf_query = query.to_wolfram()
+    logger("Wolf Query: {}", wolf_query)
+    session = WolframLanguageSession()
+    res = session.evaluate(wlexpr(wolf_query))
+    logger("Wolf's Result: {}", res)
+    return  res == 0
 
 
 class RepeatInf(types.Transform):
@@ -23,12 +37,11 @@ class RepeatInf(types.Transform):
     def type_check(self):
         our_in_type = self.in_node.out_type
         assert(type(our_in_type) == types.Impl)
-        assert(our_in_type.domain.inf == 0.0)
-        assert(is_periodic_function(our_in_type.function))
+        assert(float(our_in_type.domain.inf) == 0.0)
         assert(has_period_function(our_in_type.function, our_in_type.domain.sup))
 
         self.out_type = types.Impl(our_in_type.function,
-                             Interval(0.0, inf))
+                             Interval("0.0", "INFINITY"))
 
 
     def generate(self):

@@ -1,8 +1,9 @@
 
 
 import numeric_types
-import sollya
+import cmd_sollya
 import lego_blocks.forms as forms
+
 from lambdas import types
 
 
@@ -10,9 +11,9 @@ from lambdas import types
 
 class Polynomial(types.Source):
 
-    def __init__(self, function, domain, monomials, coefficients):
+    def __init__(self, function, domain, monomials, coefficients=None):
         self.monomials = monomials
-        self.coefficients = coefficients
+        self.coefficients = coefficients or list()
         super().__init__(function, domain)
 
 
@@ -35,10 +36,10 @@ class Polynomial(types.Source):
 
 
     def generate(self):
-        res = sollya.Result(self.function + "(x)",
-                            self.domain,
-                            self.monomials,
-                            numeric_types.fp64())
+        res = cmd_sollya.Result(self.function,
+                                self.domain,
+                                self.monomials,
+                                numeric_types.fp64())
         return forms.Polynomial(self.function,
                                 self.monomials,
                                 res.coefficients,

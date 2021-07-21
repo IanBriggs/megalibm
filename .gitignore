@@ -2,3 +2,4 @@ requirements/FPTaylor/
 requirements/debug_enironment.sh
 requirements/gelpia/
 requirements/log.txt
+__pycache__

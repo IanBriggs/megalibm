@@ -2,14 +2,37 @@
 
 import lego_blocks
 import numeric_types
+import fpcore
+
 from interval import Interval
 from lambdas import types
+from utils import Logger
+
+from wolframclient.evaluation import WolframLanguageSession
+from wolframclient.language import wl, wlexpr
 
 from math import pi
 
 
+logger = Logger(level=Logger.HIGH)
+
+
+
 
 def is_negation_function(func, low, middle, high):
+    arg = func.arguments[0]
+    negated_arg = high - arg
+    negated = func.substitute(arg, negated_arg)
+    query = func + negated
+    logger("Query: {}", query)
+    wolf_query = query.to_wolfram()
+    logger("Wolf Query: {}", wolf_query)
+    session = WolframLanguageSession()
+    res = session.evaluate(wlexpr(wolf_query))
+    logger("Wolf's Result: {}", res)
+    return  res == 0
+
+
     if (func == "sin"
         and low == 0.0
         and middle == pi
@@ -27,14 +50,15 @@ class RepeatNegate(types.Transform):
 
     def type_check(self):
         our_in_type = self.in_node.out_type
+        old_high = our_in_type.domain.sup
+        new_high = fpcore.Operation("*", fpcore.Number("2"), old_high)
         assert(type(our_in_type) == types.Impl)
-        assert(our_in_type.domain.inf == 0.0)
+        assert(float(our_in_type.domain.inf) == 0.0)
         assert(is_negation_function(our_in_type.function,
                                     0.0,
-                                    our_in_type.domain.sup,
-                                    2*our_in_type.domain.sup))
+                                    old_high,
+                                    new_high))
 
-        new_high = 2 * our_in_type.domain.sup
         self.out_type = types.Impl(our_in_type.function,
                              Interval(0, new_high))
 

@@ -1,4 +1,4 @@
-
+ 
 
 from error import Error
 from interval import Interval
@@ -9,7 +9,6 @@ from interval import Interval
 class Polynomial():
 
     def __init__(self, modeled_function, monomials, coefficients, domain):
-        assert(type(modeled_function) == str)
         assert(type(monomials) == list)
         assert(type(coefficients) == list)
         assert(all(type(m) == int for m in monomials))

@@ -48,14 +48,13 @@ class Result():
             self.stderr = cached.stderr
             self.returncode = cached.returncode
             self.coefficients = cached.coefficients
-            self.error = cached.error
 
         else:
             timer.start()
             self._run()
             self._parse_output()
-            timer.stop()
-            logger("Sollya time: {} sec", timer.last_time())
+            el = timer.stop()
+            logger("Sollya time: {} sec", el)
             CACHE[self.query] = self
 
 
@@ -69,57 +68,24 @@ class Result():
 
     def _generate_query(self):
         monomials_str = ", ".join([str(m) for m in self.monomials])
+        mid = (float(self.domain.inf) + float(self.domain.sup))/2
         lines = [
             'prec = {}!;'.format(self.config["prec"]),
             'algo_analysis_bound = {};'.format(self.config["analysis_bound"]),
-            'I = [{};{}];'.format(self.domain.inf, self.domain.sup),
-            'f = {};'.format(self.func),
+            'I = [{};{}];'.format(self.domain.inf.to_sollya(), self.domain.sup.to_sollya()),
+            'f = {};'.format(self.func.to_sollya()),
             'monomials = [|{}|];'.format(monomials_str),
-            'p = fpminimax(f, monomials, [|{}...|], I, floating, relative);'.format(self.numeric_type.sollya_type()),
+            'formats = [|{}...|];'.format(self.numeric_type.sollya_type()),
+            'p = fpminimax(f, monomials, formats, I, floating, absolute);',
         ]
-
-        norms = list()
-        # norms = self.domain.normal_domains()
-        # for i, dom in enumerate(norms):
-        #     sollya_dom = "[{};{}]".format(*dom)
-        #     lines.append('rel_norm_err_{} = sup(supnorm(p, f, {}, relative, algo_analysis_bound));'.format(i, sollya_dom))
-        #     lines.append('abs_norm_err_{} = sup(supnorm(p, f, {}, absolute, algo_analysis_bound));'.format(i, sollya_dom))
-
-        denorms = list()
-        # denorms = self.domain.denormal_domains()
-        # for i, dom in enumerate(denorms):
-        #     sollya_dom = "[{};{}]".format(*dom)
-        #     lines.append('rel_denorm_err_{} = sup(supnorm(p, f, {}, relative, algo_analysis_bound));'.format(i, sollya_dom))
-        #     lines.append('abs_denorm_err_{} = sup(supnorm(p, f, {}, absolute, algo_analysis_bound));'.format(i, sollya_dom))
 
         all_coef = ['coeff(p,{})'.format(m) for m in self.monomials]
         fmt_coef = '@"\\", \\""@'.join(all_coef)
 
-        all_rne = ['rel_norm_err_{}'.format(i) for i in range(len(norms))]
-        fmt_rne = '@"\\", \\""@'.join(all_rne)
-        fmt_rne = '"null"' if fmt_rne == "" else fmt_rne
-
-        all_ane = ['abs_norm_err_{}'.format(i) for i in range(len(norms))]
-        fmt_ane = '@"\\", \\""@'.join(all_ane)
-        fmt_ane = '"null"' if fmt_ane == "" else fmt_ane
-
-        all_rde = ['rel_denorm_err_{}'.format(i) for i in range(len(denorms))]
-        fmt_rde = '@"\\", \\""@'.join(all_rde)
-        fmt_rde = '"null"' if fmt_rde == "" else fmt_rde
-
-        all_ade = ['abs_denorm_err_{}'.format(i) for i in range(len(denorms))]
-        fmt_ade = '@"\\", \\""@'.join(all_ade)
-        fmt_ade = '"null"' if fmt_ade == "" else fmt_ade
-
         more_lines = [
             'display = hexadecimal!;',
             'print("{");',
-            'print("  \\"coefficients\\" : [\\""@{}@"\\"],");'.format(fmt_coef),
-            'display = decimal!;',
-            'print("  \\"relative_normal_errors\\" : [\\""@{}@"\\"],");'.format(fmt_rne),
-            'print("  \\"absolute_normal_errors\\" : [\\""@{}@"\\"],");'.format(fmt_ane),
-            'print("  \\"relative_denormal_errors\\" : [\\""@{}@"\\"],");'.format(fmt_rde),
-            'print("  \\"absolute_denormal_errors\\" : [\\""@{}@"\\"]");'.format(fmt_ade),
+            'print("  \\"coefficients\\" : [\\""@{}@"\\"]");'.format(fmt_coef),
             'print("}");',
         ]
 
@@ -137,12 +103,12 @@ class Result():
                 f.write(self.query)
                 f.flush()
 
-            # Put together the FPTaylor command
+            # Put together the Sollya command
             run_command = "sollya --warnonstderr {}".format(query_name)
             logger("Command: '{}'", run_command)
             logger.blog("Query", self.query)
 
-            # Call FPTaylor
+            # Call Sollya
             with subprocess.Popen(shlex.split(run_command),
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
@@ -166,18 +132,6 @@ class Result():
         data = json.loads(self.stdout)
 
         self.coefficients = data["coefficients"]
-
-        self.error = Error("Sollya")
-
-        # for i, dom in enumerate(self.domain.normal_domains()):
-        #     rel_err = data["relative_normal_errors"][i]
-        #     abs_err = data["absolute_normal_errors"][i]
-        #     self.error.add_normal_error(dom, abs_err, rel_err)
-
-        # for i, dom in enumerate(self.domain.denormal_domains()):
-        #     rel_err = data["relative_denormal_errors"][i]
-        #     abs_err = data["absolute_denormal_errors"][i]
-        #     self.error.add_denormal_error(dom, abs_err, rel_err)
 
 
 

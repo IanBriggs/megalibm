@@ -1,21 +1,26 @@
 
 
-from utils.various import parse_float
+import fpcore
+
 from utils.logging import Logger
 
 
 logger = Logger()
 
 
-# todo: this should probably be arbitrary precision or rationals
+def parse_bound(string):
+    wrapped = "(FPCore () {})".format(string)
+    fpc = fpcore.parse(wrapped)
+    return fpc.body
+
 
 class Interval():
 
     def __init__(self, inf, sup):
-        self.inf = parse_float(inf)
-        self.sup = parse_float(sup)
+        self.inf = parse_bound(inf)
+        self.sup = parse_bound(sup)
 
-        assert(self.inf <= self.sup)
+        assert(float(self.inf) <= float(self.sup))
 
 
     def __str__(self):
@@ -23,25 +28,25 @@ class Interval():
 
 
     def __repr__(self):
-        return "Interval({}, {})".format(self.inf, self.sup)
+        return 'Interval("{}", "{}")'.format(self.inf, self.sup)
 
 
     def __abs__(self):
         #                 0
         # <---------------+--------------->
         #                    [********]
-        if self.inf >= 0.0:
+        if float(self.inf) >= 0.0:
             return Interval(self.inf, self.sup)
         #                 0
         # <---------------+--------------->
         #               [********]
-        if self.inf <= 0.0 and 0.0 <= self.sup:
+        if float(self.inf) <= 0.0 and 0.0 <= float(self.sup):
             abs_max = max(-self.inf, self.sup)
             return Interval(0.0, abs_max)
         #                 0
         # <---------------+--------------->
         #      [********]
-        if self.sup <= 0.0:
+        if float(self.sup) <= 0.0:
             return Interval(-self.sup, -self.sup)
         else:
             assert 0, "Unreachable"
