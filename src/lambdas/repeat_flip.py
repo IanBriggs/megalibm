@@ -56,13 +56,16 @@ class RepeatFlip(types.Transform):
         in_name = self.gensym("in")
         out_red = self.gensym("out")
         k = self.gensym("k")
-        add = lego_blocks.SimpleAdditive(numeric_types.fp64(), [in_name], [out_red, k], our_in_type.domain.sup)
+        add = lego_blocks.SimpleAdditive(numeric_types.fp64(),
+                                         [in_name],
+                                         [out_red, k],
+                                         our_in_type.domain.sup)
 
         in_case = out_red
         out_case = so_far[0].in_names[0]
         cases = {
             0: in_case,
-            1: "{}-{}".format(our_in_type.domain.sup, in_case),
+            1: "{}-{}".format(our_in_type.domain.sup.to_c(), in_case),
         }
         case = lego_blocks.Case(numeric_types.fp64(), [in_case, k], [out_case], 2, cases)
 

@@ -61,3 +61,8 @@ class ASTNode:
         msg = "to_sollya is not defined for {}".format(class_name)
         raise NotImplementedError(msg)
 
+    def to_c(self):
+        class_name = type(self).__name__
+        msg = "to_c is not defined for {}".format(class_name)
+        raise NotImplementedError(msg)
+

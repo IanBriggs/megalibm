@@ -101,3 +101,14 @@ class Operation(Expr):
             return "({}{}{})".format(s_args[0], self.op, s_args[1])
 
         return "{}({})".format(self.op, ", ".join(s_args)) 
+
+    def to_c(self):
+        c_args = [arg.to_c() for arg in self.args]
+
+        if len(c_args) == 1 and self.op in {"+", "-"}:
+            return "({}{})".format(self.op, c_args[0])
+
+        if len(c_args) == 2 and self.op in {"+", "-", "*", "/"}:
+            return "({}{}{})".format(c_args[0], self.op, c_args[1])
+
+        return "{}({})".format(self.op, ", ".join(c_args)) 

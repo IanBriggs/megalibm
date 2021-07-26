@@ -44,6 +44,12 @@ class Constant(Atom):
         }
         return mapping[self.source]
 
+    def to_c(self):
+        mapping = {
+            "PI" : "M_PI"
+        }
+        return mapping[self.source]
+
 
 
 

@@ -23,7 +23,7 @@ CACHE = dict()
 class Result():
 
     default_config = {
-        "prec" : 2**7,
+        "prec" : 2**9,
         "analysis_bound" : 2**-100,
         "minmize_target" : "relative",
     }

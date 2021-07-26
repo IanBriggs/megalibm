@@ -50,6 +50,9 @@ class RepeatInf(types.Transform):
         in_name = self.gensym("in")
         out_red = so_far[0].in_names[0]
         k = self.gensym("k")
-        add = lego_blocks.SimpleAdditive(numeric_types.fp64(), [in_name], [out_red, k], our_in_type.domain.sup)
+        add = lego_blocks.SimpleAdditive(numeric_types.fp64(),
+                                         [in_name],
+                                         [out_red, k],
+                                         our_in_type.domain.sup)
 
         return [add] + so_far

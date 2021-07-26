@@ -23,7 +23,7 @@ requirements/done: requirements/build.sh
 
 .PHONY: clean
 clean:
-	find . -type d -name "__pycache__" -exec ${RM} -r {} +
+	find . -type d -name "__pycache__" -exec ${RM} -r {}
 
 .PHONY: clean-requirements
 clean-requirements: requirements/clean.sh

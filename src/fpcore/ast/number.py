@@ -20,3 +20,6 @@ class Number(Atom):
     def to_sollya(self):
         return self.source
 
+    def to_c(self):
+        return self.source
+

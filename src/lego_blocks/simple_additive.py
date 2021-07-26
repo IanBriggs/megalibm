@@ -1,6 +1,7 @@
-1
+
 
 import lego_blocks
+import fpcore
 
 
 
@@ -11,8 +12,6 @@ class SimpleAdditive(lego_blocks.LegoBlock):
         super().__init__(numeric_type, in_names, out_names)
         assert(len(self.in_names) == 1)
         assert(len(self.out_names) == 2)
-        #assert(type(period) == float)
-
         self.period = period
 
 
@@ -28,11 +27,13 @@ class SimpleAdditive(lego_blocks.LegoBlock):
             "out": self.out_names[0],
             "type": self.numeric_type.c_type(),
         }
+        inv_period = fpcore.Operation("/", fpcore.Number("1"), self.period)
         fmt["cast_in"] = "(({}){})".format(fmt["type"], self.in_names[0])
-        fmt["cast_period"] = "(({}){})".format(fmt["type"], self.period)
+        fmt["cast_period"] = "(({}){})".format(fmt["type"], self.period.to_c())
+        fmt["cast_inv_period"] = "(({}){})".format(fmt["type"], inv_period.to_c())
 
         lines = [
-            "int {k} = floor({cast_in}/{cast_period});".format(**fmt),
+            "int {k} = (int) floor({cast_in}*{cast_inv_period});".format(**fmt),
             "{type} {out} = {cast_in} - {k}*{cast_period};".format(**fmt),
         ]
 

@@ -26,7 +26,7 @@ logger.set_log_level(Logger.HIGH)
 
 function = fpcore.parse("(FPCore (x) (- 1 (cos x)))")
 domain = Interval("0.0", "PI")
-monomials = [0, 2, 4]
+monomials = list(range(0,26,2))
 
 p = lambdas.Polynomial(function, domain, monomials, list())
 logger(p)
