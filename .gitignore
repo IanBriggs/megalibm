@@ -5,3 +5,5 @@ requirements/done
 requirements/log.txt
 requirements/something/
 nightlies/
+data/
+obj/
