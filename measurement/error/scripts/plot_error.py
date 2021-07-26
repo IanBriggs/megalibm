@@ -63,15 +63,14 @@ def plot_error(input_choice, x, fx, fpx, err):
     fig.set_size_inches(6.4*2, 4.8*2)
 
     fname = "{}.png".format(title.replace(" ", "_"))
-    print("  Saving: {}".format(fname))
+    print('<img src="{}"/>'.format(fname))
     fig.savefig(fname)
     plt.close()
 
     maxabserr = max(err[1:])
     avgabserr = sum(err[1:])/len(err[1:])
-    print("    Max value of error: {}".format(maxabserr))
-    print("    Avg value of error: {}".format(avgabserr))
-
+    print("Avg value of error: {}".format(avgabserr))
+    print("<hr>")
 
 def plot_abs_vs_rel(input_choice, x, fx, fpx, abs_err, rel_err):
     assert(x[0] == "Input")
@@ -122,7 +121,7 @@ def plot_abs_vs_rel(input_choice, x, fx, fpx, abs_err, rel_err):
     fig.set_size_inches(6.4*2, 4.8*2)
 
     fname = "{}.png".format(title.replace(" ", "_"))
-    print("  Saving: {}".format(fname))
+    print('<img src="{}"/>'.format(fname))
     fig.savefig(fname)
     plt.close()
 
@@ -148,12 +147,12 @@ def main(argv):
     for columns,fname in zip(columnss, fnames):
         parts = fname.split("_")
         input_choice = parts[-1].split(".")[0]
-        print("Plotting: {} (~correct rounding for whole expression)".format(columns[1][0]), flush=True)
+        print("<header><h1>Plotting: {} (~correct rounding for whole expression)</h1></header>".format(columns[1][0]), flush=True)
         plot_error(input_choice, columns[0], columns[1], columns[1], columns[2])
         plot_error(input_choice, columns[0], columns[1], columns[1], columns[3])
         plot_abs_vs_rel(input_choice, columns[0], columns[1], columns[1], columns[2], columns[3])
         for i in range(4, len(columns), 3):
-            print("Plotting: {}".format(columns[i][0]), flush=True)
+            print("<header><h1>Plotting: {}</h1></header>".format(columns[i][0]), flush=True)
             plot_error(input_choice, columns[0], columns[1], columns[i], columns[i+1])
             plot_error(input_choice, columns[0], columns[1], columns[i], columns[i+2])
             plot_abs_vs_rel(input_choice, columns[0], columns[1], columns[i], columns[i+1], columns[i+2])

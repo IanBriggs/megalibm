@@ -22,10 +22,21 @@ EOF
 
 # Run megalibm
 cd ${GIT_LOCATION}
-for e in ${GIT_LOCATION}/examples/*.py
+
+./${GIT_LOCATION}/examples/lambda_versin.py | tee "${THIS_NIGHTLY_LOCATION}/index.html"
+
+cd ${GIT_LOCATION}/measurement/error
+make
+mkdir -p data
+for i in 0 1 2 3 4 5
 do
-    $e | tee "${THIS_NIGHTLY_LOCATION}/index.html"
+    ./bin/versin_error $i > data/versin_error_$i.tsv
 done
+
+./scripts/plot_error.py data/*.tsv | tee "${THIS_NIGHTLY_LOCATION}/index.html"
+
+mv *.png "${THIS_NIGHTLY_LOCATION}"
+
 
 cat <<EOF >> "${THIS_NIGHTLY_LOCATION}/index.html"
 </pre>
@@ -35,6 +46,6 @@ EOF
 
 
 if [ "$(hostname)" = "warfa" ] && [ "${USER}" = "p92" ] ; then
-    scp -r "${check_date}" uwplse.org:/var/www/megalibm/
+    scp -r "${THIS_NIGHTLY_LOCATION}" uwplse.org:/var/www/megalibm/
 fi
 
