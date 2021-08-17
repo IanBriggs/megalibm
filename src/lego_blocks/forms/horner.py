@@ -43,13 +43,13 @@ class Horner(forms.Form):
 
         else:
             if mons[0] == 0:
-                parts.append("{} +".format(cast_coef[0]))
+                parts.append("{} \n        +".format(cast_coef[0]))
             else:
-                parts.append("{}*({} + ".format(expand_pow(mons[0]), cast_coef[0]))
+                parts.append("{}*({} \n        + ".format(expand_pow(mons[0]), cast_coef[0]))
 
             for i in range(1, len(mons)-1):
                 power = mons[i] - mons[i-1]
-                parts.append("{}*({} + ".format(expand_pow(power), cast_coef[i]))
+                parts.append("{}*({} \n        + ".format(expand_pow(power), cast_coef[i]))
 
             final_power = mons[-1] - mons[-2]
             parts.append("{}*{}".format(expand_pow(final_power), cast_coef[-1]))
@@ -60,7 +60,7 @@ class Horner(forms.Form):
             if mons[0] != 0:
                 parts.append(")")
 
-        rhs = "".join(parts)
+        rhs = "({})".format("".join(parts))
         code = "{} {} = {};".format(c_type, out, rhs)
 
         return [code]

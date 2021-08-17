@@ -19,3 +19,5 @@ from .first import First
 from .second import Second
 
 from .generate_c_code import generate_c_code
+
+from .narrow import Narrow

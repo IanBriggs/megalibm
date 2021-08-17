@@ -1,33 +1,30 @@
 
 
 CC ?= gcc
-CFLAGS ?= -Wall -Wextra -Wconversion -O3 -march=native -mtune=native
+CFLAGS ?= -Wall -Wextra -Wconversion -O3 -march=native -mtune=native -fno-builtin -DNDEBUG
 CFLAGS += -Iinclude
 
-ORACLE_O = obj/oracle_functions.o
-ORACLE_I = include
+BIN_SRCS = $(wildcard generated/main_*.c)
+BINS = $(foreach s,$(BIN_SRCS),$(patsubst generated/main_%.c,bin/main_%,$s))
+SRCS = $(filter-out $(BIN_SRCS),$(wildcard generated/*.c))
+OBJS = $(foreach s,$(SRCS),$(patsubst generated/%.c,obj/%.o,$s))
+OBJS += obj/table_generation.o
+OBJS += obj/xmalloc.o
 
-TABLE_O = obj/table_generation.o
-TABLE_I = include
-
-OBJ = ${ORACLE_O} ${TABLE_O}
-INC = -I${ORACLE_I} -I${TABLE_I}
-
-
-BINS = $(foreach s,$(wildcard src/*_error.c),$(patsubst src/%_error.c,bin/%_error,$s))
+CFLAGS +=  -Igenerated
 
 
 .PHONY: all
 all: ${BINS}
 
 
-bin/%_error: src/%_error.c ${OBJ} | bin
-	$(CC) ${CFLAGS} ${INC} $< ${OBJ} -lmpfr -lm -o $@
+bin/main_%: generated/main_%.c ${OBJS} | bin
+	$(CC) ${CFLAGS} $< ${OBJS} -lmpfr -lgmp -lm -o $@
 
-${ORACLE_O}: src/oracle_functions.c include/oracle_functions.h | obj
-	$(CC) ${CFLAGS} $< -c -o $@
+obj/%.o: generated/%.c generated/%.h | obj
+	$(CC) ${CFLAGS} $< -c -o $@	
 
-${TABLE_O}: src/table_generation.c include/table_generation.h | obj
+obj/%.o: src/%.c include/%.h | obj
 	$(CC) ${CFLAGS} $< -c -o $@
 
 

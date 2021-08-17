@@ -19,14 +19,14 @@ from interval import Interval
 from utils.logging import Logger
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
-logger.set_log_level(Logger.HIGH)
-
+logger.set_log_level(Logger.QUIET)
+#logger.set_log_level(Logger.HIGH)
 
 
 
 function = fpcore.parse("(FPCore (x) (- 1 (cos x)))")
-domain = Interval("0.0", "PI")
-monomials = list(range(0,26,2))
+domain = Interval("(- PI)", "PI")
+monomials = list(range(2,26,2))
 
 p = lambdas.Polynomial(function, domain, monomials, list())
 logger(p)
@@ -36,7 +36,11 @@ g = lambdas.Horner(p)
 logger(g)
 logger("  Type: {}", g.out_type)
 
-rf = lambdas.RepeatFlip(g)
+n = lambdas.Narrow(g, Interval("0.0", "PI"))
+logger(n)
+logger("  Type: {}", n.out_type)
+
+rf = lambdas.RepeatFlip(n)
 logger(rf)
 logger("  Type: {}", rf.out_type)
 
@@ -51,6 +55,7 @@ logger("  Type: {}", my_versin.out_type)
 sig, src = lambdas.generate_c_code(my_versin, "my_versin")
 logger(sig)
 
+print("\n".join(src))
+
 src = ["#include <math.h>", "#include <assert.h>\n\n"] + src
 logger.blog("C function", "\n".join(src))
-

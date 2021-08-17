@@ -23,7 +23,7 @@ CACHE = dict()
 class Result():
 
     default_config = {
-        "prec" : 2**9,
+        "prec" : 2**10,
         "analysis_bound" : 2**-100,
         "minmize_target" : "relative",
     }
@@ -76,7 +76,7 @@ class Result():
             'f = {};'.format(self.func.to_sollya()),
             'monomials = [|{}|];'.format(monomials_str),
             'formats = [|{}...|];'.format(self.numeric_type.sollya_type()),
-            'p = fpminimax(f, monomials, formats, I, floating, absolute);',
+            'p = fpminimax(f, monomials, formats, I, floating, {});'.format(self.config["minmize_target"]),
         ]
 
         all_coef = ['coeff(p,{})'.format(m) for m in self.monomials]
@@ -87,6 +87,7 @@ class Result():
             'print("{");',
             'print("  \\"coefficients\\" : [\\""@{}@"\\"]");'.format(fmt_coef),
             'print("}");',
+            'quit;'
         ]
 
         lines.extend(more_lines)
@@ -104,7 +105,7 @@ class Result():
                 f.flush()
 
             # Put together the Sollya command
-            run_command = "sollya --warnonstderr {}".format(query_name)
+            run_command = "sollya --flush --warnonstderr {}".format(query_name)
             logger("Command: '{}'", run_command)
             logger.blog("Query", self.query)
 
