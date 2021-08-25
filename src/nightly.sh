@@ -31,10 +31,11 @@ cat <<EOF > "${THIS_NIGHTLY_LOCATION}/index.html"
 EOF
 
 # Run megalibm
-cd ${GIT_LOCATION}
-
+cd ${GIT_LOCATION}/measurement/error
+mkdir -p generated
+cd generated
 echo "<pre>" >> "${THIS_NIGHTLY_LOCATION}/index.html"
-./examples/lambda_versin.py | tee -a "${THIS_NIGHTLY_LOCATION}/index.html"
+../../../examples/lambda_versin.py | tee -a "${THIS_NIGHTLY_LOCATION}/index.html"
 echo "</pre>" >> "${THIS_NIGHTLY_LOCATION}/index.html"
 
 cd ${GIT_LOCATION}/measurement/error
@@ -50,7 +51,7 @@ cat <<EOF >> "${THIS_NIGHTLY_LOCATION}/index.html"
 
 EOF
 echo "" >> "${THIS_NIGHTLY_LOCATION}/index.html"
-for i in 0 1 2 3 4 5
+for i in 0 1 2 3
 do
     ./bin/main_versin $i > data/versin_error_$i.json
     cat <<EOF >> "${THIS_NIGHTLY_LOCATION}/index.html"
@@ -81,5 +82,9 @@ echo "</html>" >> "${THIS_NIGHTLY_LOCATION}/index.html"
 
 if [ "$(hostname)" = "warfa" ] && [ "${USER}" = "p92" ] ; then
     scp -r "${THIS_NIGHTLY_LOCATION}" uwplse.org:/var/www/megalibm/
+fi
+
+if command -v nightly-results &>/dev/null; then
+    nightly-results url https://megalibm.uwplse.org/${check_date}/
 fi
 

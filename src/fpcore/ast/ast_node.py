@@ -66,3 +66,13 @@ class ASTNode:
         msg = "to_c is not defined for {}".format(class_name)
         raise NotImplementedError(msg)
 
+    def to_libm_c(self):
+        class_name = type(self).__name__
+        msg = "to_libm_c is not defined for {}".format(class_name)
+        raise NotImplementedError(msg)
+
+    def to_mpfr_c(self, *args):
+        class_name = type(self).__name__
+        msg = "to_mpfr_c is not defined for {}".format(class_name)
+        raise NotImplementedError(msg)
+

@@ -112,23 +112,27 @@ def main(argv):
         with open(fname, "r") as f:
             data = json.load(f)
 
+        funcnames = data["functions"]
+        libm_name = [f for f in funcnames if "libm" in f][0]
+        gen_name = [f for f in funcnames if "libm" not in f][0]
+            
         print("  Plotting 1/3")
         plot_error("Absolute Error Domain {}".format(input_typ),
                    data["regions"], 
-                   data["functions"]["libm_versin"]["abs_max_errors"],
-                   data["functions"]["my_versin_26"]["abs_max_errors"])
+                   data["functions"][libm_name]["abs_max_errors"],
+                   data["functions"][gen_name]["abs_max_errors"])
         print("  Plotting 2/3")
         plot_error("Relative Error Domain {}".format(input_typ),
                    data["regions"], 
-                   data["functions"]["libm_versin"]["rel_max_errors"],
-                   data["functions"]["my_versin_26"]["rel_max_errors"],
+                   data["functions"][libm_name]["rel_max_errors"],
+                   data["functions"][gen_name]["rel_max_errors"],
                    True)
         print("  Plotting 3/3")
         plot_abs_vs_rel("Absolute vs Relative Error Domain {}".format(input_typ),
-                        data["functions"]["libm_versin"]["abs_max_errors"],
-                        data["functions"]["libm_versin"]["rel_max_errors"],
-                        data["functions"]["my_versin_26"]["abs_max_errors"],
-                        data["functions"]["my_versin_26"]["rel_max_errors"])
+                        data["functions"][libm_name]["abs_max_errors"],
+                        data["functions"][libm_name]["rel_max_errors"],
+                        data["functions"][gen_name]["abs_max_errors"],
+                        data["functions"][gen_name]["rel_max_errors"])
         print("  Done")
 
 

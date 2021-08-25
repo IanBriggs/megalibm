@@ -23,7 +23,8 @@ requirements/done: requirements/build.sh
 
 .PHONY: clean
 clean:
-	find . -type d -name "__pycache__" -exec ${RM} -r {}
+	find . -type d -name "__pycache__" -exec ${RM} -r {} +
+	$(MAKE) -C measurement clean
 
 .PHONY: clean-requirements
 clean-requirements: requirements/clean.sh
@@ -33,6 +34,7 @@ clean-requirements: requirements/clean.sh
 distclean: clean clean-requirements
 	$(RM) -r bin
 	$(RM) -r nightlies
+	$(MAKE) -C measurement distclean
 
 bin:
 	mkdir bin

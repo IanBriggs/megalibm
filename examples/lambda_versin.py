@@ -15,6 +15,7 @@ import fpcore
 import lambdas
 import numeric_types
 
+from assemble_c_files import *
 from interval import Interval
 from utils.logging import Logger
 
@@ -52,10 +53,37 @@ my_versin = lambdas.MirrorAboutZeroX(ri)
 logger(my_versin)
 logger("  Type: {}", my_versin.out_type)
 
-sig, src = lambdas.generate_c_code(my_versin, "my_versin")
-logger(sig)
+libm_funcname = "libm_versin"
+libm_sig, libm_src = lambdas.generate_libm_c_code(my_versin.out_type, libm_funcname)
+logger.blog("C libm function", "\n".join(libm_src))
+
+mpfr_funcname = "mpfr_versin"
+mpfr_sig, mpfr_src = lambdas.generate_mpfr_c_code(my_versin.out_type, mpfr_funcname)
+logger.blog("C mpfr function", "\n".join(mpfr_src))
+
+funcname = "my_versin"
+sig, src = lambdas.generate_c_code(my_versin, funcname)
+logger.blog("C function", "\n".join(src))
+
+
+header_lines = assemble_header([libm_sig, mpfr_sig, sig])
+header_fname = "versin.h"
+with open(header_fname, "w") as f:
+    f.write("\n".join(header_lines))
+
+func_lines = assemble_functions([libm_src, mpfr_src, src], header_fname)
+func_fname = "versin.c"
+with open(func_fname, "w") as f:
+    f.write("\n".join(func_lines))
+
+domains = [("-M_PI/4", "M_PI/4"),
+           ("-M_PI", "M_PI"),
+           ("-10*M_PI", "10*M_PI"),
+           ("-100*M_PI", "100*M_PI"),]
+    
+main_lines = assemble_error_main(mpfr_funcname, [libm_funcname, funcname], header_fname, domains)
+main_fname = "main_versin.c"
+with open(main_fname, "w") as f:
+    f.write("\n".join(main_lines))
 
 print("\n".join(src))
-
-src = ["#include <math.h>", "#include <assert.h>\n\n"] + src
-logger.blog("C function", "\n".join(src))

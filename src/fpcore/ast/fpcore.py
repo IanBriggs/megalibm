@@ -78,3 +78,17 @@ class FPCore(ASTNode):
 
     def to_sollya(self):
         return self.body.to_sollya()
+
+    def to_c(self):
+        return self.body.to_c()
+
+    def to_libm_c(self):
+        return self.body.to_libm_c()
+
+    def to_mpfr_c(self, outname):
+        lines = list()
+        temps = list()
+        top_name = self.body.to_mpfr_c(lines, temps)
+        temps = temps[:-1]
+        lines[-1] = lines[-1].replace(top_name, outname)
+        return lines, temps

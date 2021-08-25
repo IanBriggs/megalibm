@@ -19,5 +19,7 @@ from .first import First
 from .second import Second
 
 from .generate_c_code import generate_c_code
+from .generate_libm_c_code import generate_libm_c_code
+from .generate_mpfr_c_code import generate_mpfr_c_code
 
 from .narrow import Narrow

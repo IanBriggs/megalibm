@@ -112,3 +112,37 @@ class Operation(Expr):
             return "({}{}{})".format(c_args[0], self.op, c_args[1])
 
         return "{}({})".format(self.op, ", ".join(c_args)) 
+
+    def to_libm_c(self):
+        c_args = [arg.to_libm_c() for arg in self.args]
+
+        if len(c_args) == 1 and self.op in {"+", "-"}:
+            return "({}{})".format(self.op, c_args[0])
+
+        if len(c_args) == 2 and self.op in {"+", "-", "*", "/"}:
+            return "({}{}{})".format(c_args[0], self.op, c_args[1])
+
+        return "{}({})".format(self.op, ", ".join(c_args)) 
+
+    def to_mpfr_c(self, lines, temps):
+        mpfr_functions = {
+            "sin" : "mpfr_sin",
+            "cos" : "mpfr_cos",
+            "tan" : "mpfr_tan",
+            "+" : "mpfr_add",
+            "-" : "mpfr_sub",
+            "*" : "mpfr_mul",
+            "/" : "mpfr_div",
+            }
+        c_args = [arg.to_mpfr_c(lines, temps) for arg in self.args]
+
+        my_name = "generated_{}".format(len(temps))
+
+        fname = mpfr_functions[self.op]
+
+        line = ("  " + fname + "(" + my_name + ", "
+                + ", ".join(c_args) + ", MPFR_RNDN);")
+
+        lines.append(line)
+        temps.append(my_name)
+        return my_name

@@ -42,3 +42,8 @@ class Variable(Atom):
     def to_sollya(self):
         return self.source
 
+    def to_libm_c(self):
+        return self.source
+
+    def to_mpfr_c(self, lines, temps):
+        return self.source

@@ -50,6 +50,20 @@ class Constant(Atom):
         }
         return mapping[self.source]
 
+    def to_libm_c(self):
+        return self.to_c()
+
+    def to_mpfr_c(self, lines, temps):
+        mapping = {
+            "PI" : "mpfr_const_pi"
+        }
+        my_name = "generated_{}".format(len(temps))
+        func = mapping[self.source]
+        lines.append("  {}({}, MPFR_RNDN);".format(func, my_name))
+        temps.append(my_name);
+        return my_name
+
+
 
 
 
