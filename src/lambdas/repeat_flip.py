@@ -38,7 +38,7 @@ class RepeatFlip(types.Transform):
     def type_check(self):
         our_in_type = self.in_node.out_type
         old_high = our_in_type.domain.sup
-        new_high = fpcore.Operation("*", fpcore.Number("2"), old_high)
+        new_high = fpcore.ast.Operation("*", fpcore.ast.Number("2"), old_high)
         assert(type(our_in_type) == types.Impl)
         assert(float(our_in_type.domain.inf) == 0.0)
         assert(is_symmetric_function(our_in_type.function,
@@ -65,7 +65,7 @@ class RepeatFlip(types.Transform):
         out_case = so_far[0].in_names[0]
         cases = {
             0: in_case,
-            1: "{}-{}".format(our_in_type.domain.sup.to_c(), in_case),
+            1: "{}-{}".format(our_in_type.domain.sup.to_libm_c(), in_case),
         }
         case = lego_blocks.Case(numeric_types.fp64(), [in_case, k], [out_case], 2, cases)
 
