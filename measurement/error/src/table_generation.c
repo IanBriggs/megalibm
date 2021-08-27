@@ -50,6 +50,34 @@ compare(mpfr_t expected, double actual, double* absolute, double* relative)
 }
 
 static void
+reference_on_region(size_t samples, mpfr_t* reals,
+                    double* absolutes, double* relatives, error* ferror)
+{
+  for (size_t i=0; i<samples; i++) {
+    double actual = mpfr_get_d(reals[i], MPFR_RNDN);
+    compare(reals[i], actual, &absolutes[i], &relatives[i]);
+  }
+
+  qsort(absolutes, samples, sizeof(double), qsort_cmp);
+  qsort(relatives, samples, sizeof(double), qsort_cmp);
+
+  double absum = 0.0;
+  double relsum = 0.0;
+  for (size_t i=0; i<samples; i++) {
+    absum += absolutes[i];
+    relsum += relatives[i];
+  }
+  
+  ferror->abs_max = absolutes[samples-1];
+  ferror->abs_avg = absum/((double) samples);
+  ferror->abs_med = absolutes[((size_t) samples/2)];
+
+  ferror->rel_max = relatives[samples-1];
+  ferror->rel_avg = relsum/((double) samples);
+  ferror->rel_med = relatives[((size_t) samples/2)];
+}
+
+static void
 run_on_region(unop_fp64 f, size_t samples, double* inputs, mpfr_t* reals,
               double* absolutes, double* relatives, error* ferror)
 {
@@ -117,8 +145,8 @@ generate_table(size_t region_count, double* regions, size_t samples,
   assert(func_count > 0);
   assert(funcs != NULL);
 
-  error** errorss = (error**) xmalloc(sizeof(error*) * func_count);
-  for (size_t i=0; i<func_count; i++) {
+  error** errorss = (error**) xmalloc(sizeof(error*) * (func_count+1));
+  for (size_t i=0; i<=func_count; i++) {
     errorss[i] = (error*) xmalloc(sizeof(error) * region_count);
   }
 
@@ -139,8 +167,10 @@ generate_table(size_t region_count, double* regions, size_t samples,
       oracle(reals[i], inputs[i]);
     }
 
-    for (size_t fidx=0; fidx<func_count; fidx++) {
-      unop_fp64 f = funcs[fidx].func;
+    reference_on_region(samples, reals, absolutes, relatives, &errorss[0][region]);
+
+    for (size_t fidx=1; fidx<=func_count; fidx++) {
+      unop_fp64 f = funcs[fidx-1].func;
       error* ferror = &errorss[fidx][region];
       run_on_region(f, samples, inputs, reals, absolutes, relatives, ferror);
     }
@@ -191,8 +221,12 @@ print_json(size_t region_count, double* regions,
   printf("  ],\n");
 
   printf("  \"functions\": {\n");
-  for (size_t i=0; i<func_count-1; i++) {
-    printf("    \"%s\": {\n", funcs[i].name);
+  for (size_t i=0; i<func_count; i++) {
+    if (i == 0) {
+      printf("    \"reference\": {\n");
+    } else {
+      printf("    \"%s\": {\n", funcs[i-1].name);
+    }
 
     printf("      \"abs_max_errors\": [\n");
     for (size_t j=0; j<region_count-1; j++) {
@@ -244,44 +278,44 @@ print_json(size_t region_count, double* regions,
 
   printf("      \"abs_max_errors\": [\n");
   for (size_t j=0; j<region_count-1; j++) {
-    printf("        %1.16e,\n", errorss[func_count-1][j].abs_max);
+    printf("        %1.16e,\n", errorss[func_count][j].abs_max);
   }
-  printf("        %1.16e\n", errorss[func_count-1][region_count-1].abs_max);
+  printf("        %1.16e\n", errorss[func_count][region_count-1].abs_max);
   printf("      ],\n");
 
   printf("      \"abs_avg_errors\": [\n");
   for (size_t j=0; j<region_count-1; j++) {
-    printf("        %1.16e,\n", errorss[func_count-1][j].abs_avg);
+    printf("        %1.16e,\n", errorss[func_count][j].abs_avg);
   }
-  printf("        %1.16e\n", errorss[func_count-1][region_count-1].abs_avg);
+  printf("        %1.16e\n", errorss[func_count][region_count-1].abs_avg);
   printf("      ],\n");
 
   printf("      \"abs_med_errors\": [\n");
   for (size_t j=0; j<region_count-1; j++) {
-    printf("        %1.16e,\n", errorss[func_count-1][j].abs_med);
+    printf("        %1.16e,\n", errorss[func_count][j].abs_med);
   }
-  printf("        %1.16e\n", errorss[func_count-1][region_count-1].abs_med);
+  printf("        %1.16e\n", errorss[func_count][region_count-1].abs_med);
   printf("      ],\n");
 
   printf("      \"rel_max_errors\": [\n");
   for (size_t j=0; j<region_count-1; j++) {
-    printf("        %1.16e,\n", errorss[func_count-1][j].rel_max);
+    printf("        %1.16e,\n", errorss[func_count][j].rel_max);
   }
-  printf("        %1.16e\n", errorss[func_count-1][region_count-1].rel_max);
+  printf("        %1.16e\n", errorss[func_count][region_count-1].rel_max);
   printf("      ],\n");
 
   printf("      \"rel_avg_errors\": [\n");
   for (size_t j=0; j<region_count-1; j++) {
-    printf("        %1.16e,\n", errorss[func_count-1][j].rel_avg);
+    printf("        %1.16e,\n", errorss[func_count][j].rel_avg);
   }
-  printf("        %1.16e\n", errorss[func_count-1][region_count-1].rel_avg);
+  printf("        %1.16e\n", errorss[func_count][region_count-1].rel_avg);
   printf("      ],\n");
 
   printf("      \"rel_med_errors\": [\n");
   for (size_t j=0; j<region_count-1; j++) {
-    printf("        %1.16e,\n", errorss[func_count-1][j].rel_med);
+    printf("        %1.16e,\n", errorss[func_count][j].rel_med);
   }
-  printf("        %1.16e\n", errorss[func_count-1][region_count-1].rel_med);
+  printf("        %1.16e\n", errorss[func_count][region_count-1].rel_med);
   printf("      ]\n");
 
   printf("    }\n");
