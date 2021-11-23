@@ -58,12 +58,20 @@ class Tuple():
 USED_NAMES = set()
 
 class Node():
-
+    """ 
+    A node is an ast node for the lambda language.
+    It represents both the relationship between the input type and output type
+      as well as the C code generation through lego blocks.
+    """
     def __init__(self):
         raise NotImplementedError()
 
-    def type_check(self):
+    def type_check_forawrd(self):
         # check that in_node.out_type matches requirements and set this out_type
+        raise NotImplementedError()
+
+    def type_check_backward(self):
+        # check that out_type can be created from this Node and set in_node.out_type
         raise NotImplementedError()
 
     def generate(self):
@@ -105,6 +113,12 @@ class Transform(Node):
         self.in_node = in_node
         self.type_check()
 
+    @classmethod
+    def generate_hole(cls, out_type):
+        # Given an out_type, return possible in types that this Transform could
+        # use to reach that out_type
+        raise NotImplementedError()
+        
     def __repr__(self):
         class_name = type(self).__name__
         return "{}({})".format(class_name,

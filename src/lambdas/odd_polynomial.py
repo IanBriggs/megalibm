@@ -1,15 +1,17 @@
 
+import lambdas
 
+import math
 import numeric_types
 import cmd_sollya
 import lego_blocks.forms as forms
 
 from lambdas import types
+from lambdas.flip_about_zero_x import is_odd_function
 
 
 
-
-class Polynomial(types.Source):
+class OddPolynomial(types.Source):
 
     def __init__(self, function, domain, monomials, coefficients=None):
         self.monomials = monomials
@@ -18,10 +20,10 @@ class Polynomial(types.Source):
 
 
     def __repr__(self):
-        return "Polynomial({}, {}, {}, {})".format(repr(self.function),
-                                                   repr(self.domain),
-                                                   repr(self.monomials),
-                                                   repr(self.coefficients))
+        return "OddPolynomial({}, {}, {}, {})".format(repr(self.function),
+                                                      repr(self.domain),
+                                                      repr(self.monomials),
+                                                      repr(self.coefficients))
 
 
     def type_check(self):
@@ -31,6 +33,8 @@ class Polynomial(types.Source):
         assert(len(self.coefficients) <= len(self.monomials))
         assert(all([type(m) == int for m in self.monomials]))
         assert(all([type(c) == float or c is None for c in self.coefficients]))
+        assert(is_odd_function(self.function))
+        assert(all(m%2 == 1 for m in self.monomials))
 
         self.out_type = types.Poly(self.function, self.domain)
 
@@ -44,3 +48,18 @@ class Polynomial(types.Source):
                                 self.monomials,
                                 res.coefficients,
                                 self.domain)
+    @classmethod
+    def generate_hole(cls, out_type):
+        # We only output
+        # (Poly (func) low high)
+        # where low and high are finite
+        if (type(out_type) != types.Poly
+            or not math.isfinite(float(out_type.domain.inf))
+            or not math.isfinite(float(out_type.domain.sup))
+            or not is_odd_function(out_type.function)):
+            return list()
+
+        # To get this output we just need be contructed with given args
+        # TODO: how should monomials be done?
+        return [(out_type.function, out_type.domain, list(range(1,31,2))),]
+

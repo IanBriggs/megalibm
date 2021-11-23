@@ -1,5 +1,6 @@
 
 
+import lambdas
 import lego_blocks
 import numeric_types
 import fpcore
@@ -27,10 +28,10 @@ def is_symmetric_function(func, low, middle, high):
     logger("Query: {}", query)
     wolf_query = query.to_wolfram()
     logger("Wolf Query: {}", wolf_query)
-    session = WolframLanguageSession()
-    res = session.evaluate(wlexpr(wolf_query))
-    logger("Wolf's Result: {}", res)
-    return  res == 0
+    with WolframLanguageSession() as session:
+        res = session.evaluate(wlexpr(wolf_query))
+        logger("Wolf's Result: {}", res)
+        return  res == 0
 
 
 class RepeatFlip(types.Transform):
@@ -70,3 +71,26 @@ class RepeatFlip(types.Transform):
         case = lego_blocks.Case(numeric_types.fp64(), [in_case, k], [out_case], 2, cases)
 
         return [add, case] + so_far
+
+    @classmethod
+    def generate_hole(cls, out_type):
+        # We only output
+        # (Impl (func) 0.0 (* 2 bound))
+        # where (func) is symmetric for [0.0, bound] w.r.t. [bound, (* 2 bound)]
+        if (type(out_type) != types.Impl
+            or float(out_type.domain.inf) != 0.0):
+            return list()
+
+        two_bound = out_type.domain.sup
+        bound = two_bound / fpcore.ast.Number("2")
+        if not is_symmetric_function(out_type.function,
+                                    0.0,
+                                    bound,
+                                    two_bound):
+            return list()
+
+        # To get this output we need as input
+        # (Impl (func) 0.0 bound)
+        in_type = types.Impl(out_type.function, Interval(0.0, bound))
+        return [lambdas.Hole(in_type)]
+        

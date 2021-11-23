@@ -21,13 +21,16 @@ def to_wolfram(self):
 @add_method(Constant)
 def to_wolfram(self):
     mapping = {
-        "PI" : "Pi"
+        "PI" : "Pi",
+        "INFINITY" : "Infinity"
     }
     return mapping[self.source]
 
 @add_method(Operation)
 def to_wolfram(self):
-    w_args = [arg.to_wolfram() for arg in self.args]
+    w_args = list()
+    for a in self.args:
+        w_args.append(a.to_wolfram())
 
     if len(w_args) == 1 and self.op in {"+", "-"}:
         return "({}{})".format(self.op, w_args[0])

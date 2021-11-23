@@ -25,3 +25,10 @@ class MakeTuple(types.Node):
         ga = self.a.generate()
         gb = self.b.generate()
         return (ga, gb)
+
+    @classmethod
+    def generate_hole(cls, out_type):
+        # TODO: this method
+        return list()
+
+

@@ -22,7 +22,7 @@ bin/main_%: generated/main_%.c ${OBJS} | bin
 	$(CC) ${CFLAGS} $< ${OBJS} -lmpfr -lgmp -lm -o $@
 
 obj/%.o: generated/%.c generated/%.h | obj
-	$(CC) ${CFLAGS} $< -c -o $@	
+	$(CC) ${CFLAGS} $< -c -o $@
 
 obj/%.o: src/%.c include/%.h | obj
 	$(CC) ${CFLAGS} $< -c -o $@
@@ -46,4 +46,4 @@ clean:
 .PHONY: distclean
 distclean: clean
 	$(RM) -r data
-
+	$(RM) -r generated

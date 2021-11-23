@@ -8,7 +8,7 @@ logger = Logger(level=Logger.EXTRA)
 
 
 @add_method(ASTNode)
-def substitute(self, obj):
+def substitute(self, old, new):
     # Make sure calling substitute leads to an error if not overridden
     class_name = type(self).__name__
     msg = "substitute not implemented for class {}".format(class_name)

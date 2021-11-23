@@ -1,6 +1,7 @@
 
 
-from .polynomial import Polynomial
+from .even_polynomial import EvenPolynomial
+from .odd_polynomial import OddPolynomial
 
 from .general import General
 from .horner import Horner
@@ -23,3 +24,5 @@ from .generate_libm_c_code import generate_libm_c_code
 from .generate_mpfr_c_code import generate_mpfr_c_code
 
 from .narrow import Narrow
+
+from .hole import Hole

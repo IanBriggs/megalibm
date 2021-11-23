@@ -3,6 +3,8 @@
 import lego_blocks
 import numeric_types
 import fpcore
+import interval
+import lambdas
 
 from interval import Interval
 from lambdas import types
@@ -26,10 +28,10 @@ def has_period_function(func, period):
     logger("Query: {}", query)
     wolf_query = query.to_wolfram()
     logger("Wolf Query: {}", wolf_query)
-    session = WolframLanguageSession()
-    res = session.evaluate(wlexpr(wolf_query))
-    logger("Wolf's Result: {}", res)
-    return  res == 0
+    with WolframLanguageSession() as session:
+        res = session.evaluate(wlexpr(wolf_query))
+        logger("Wolf's Result: {}", res)
+        return  res == 0
 
 
 class RepeatInf(types.Transform):
@@ -56,3 +58,33 @@ class RepeatInf(types.Transform):
                                          our_in_type.domain.sup)
 
         return [add] + so_far
+
+    @classmethod
+    def generate_hole(cls, out_type):
+        # We only output
+        # (Impl (func) 0.0 INFINITY)
+        # where (func) is periodic
+        if (type(out_type) != types.Impl
+            or float(out_type.domain.inf) != 0.0
+            or float(out_type.domain.sup) != float("inf")):
+            return list()
+
+        # TODO: real periodicity test, for now just guess some pi values
+        # only take the smallest
+        period = None
+        possible_periods = [
+            interval.parse_bound("PI"),
+            interval.parse_bound("(* 2 PI)"),
+        ]
+        for p in possible_periods:
+            if has_period_function(out_type.function, p):
+                period = p
+                break
+
+        if period == None:
+            return list()
+
+        # To get this output we need as input
+        # (Impl (func) 0.0 period)
+        in_type = types.Impl(out_type.function, Interval(0.0, period))
+        return [lambdas.Hole(in_type)]

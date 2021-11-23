@@ -3,6 +3,8 @@
 import lego_blocks
 import numeric_types
 
+import lambdas
+
 from interval import Interval
 from lambdas import types
 from utils import Logger
@@ -24,10 +26,10 @@ def is_even_function(func):
     logger("Query: {}", query)
     wolf_query = query.to_wolfram()
     logger("Wolf Query: {}", wolf_query)
-    session = WolframLanguageSession()
-    res = session.evaluate(wlexpr(wolf_query))
-    logger("Wolf's Result: {}", res)
-    return  res == 0
+    with WolframLanguageSession() as session:
+        res = session.evaluate(wlexpr(wolf_query))
+        logger("Wolf's Result: {}", res)
+        return  res == 0
 
 
 
@@ -53,3 +55,21 @@ class MirrorAboutZeroX(types.Transform):
         abs = lego_blocks.Abs(numeric_types.fp64(), [in_name], [out_abs, sign])
 
         return [abs] + so_far
+
+    @classmethod
+    def generate_hole(cls, out_type):
+        # We only output
+        # (Impl (func) (- bound) bound)
+        # where (func) is even
+        if (type(out_type) != types.Impl
+            or -float(out_type.domain.inf) != float(out_type.domain.sup)):
+            return list()
+
+        if not is_even_function(out_type.function):
+            return list()
+
+        # To get this output we need as input
+        # (Impl (func) 0.0 bound)
+        in_type = types.Impl(out_type.function,
+                             Interval(0.0, out_type.domain.sup))
+        return [lambdas.Hole(in_type)]

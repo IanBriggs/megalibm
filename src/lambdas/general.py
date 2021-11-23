@@ -1,4 +1,5 @@
 
+import lambdas
 
 import lego_blocks.forms as forms
 import numeric_types
@@ -20,3 +21,16 @@ class General(types.Transform):
         in_name = self.gensym("in")
         out_name = self.gensym("out")
         return [forms.General(numeric_types.fp64(), [in_name], [out_name], p)]
+
+    @classmethod
+    def generate_hole(cls, out_type):
+        # We only output
+        # (Impl (func) low high)
+        if type(out_type) != types.Impl:
+            return list()
+
+        # To get this output we need as input
+        # (Poly (func) low high)
+        in_type = types.Poly(out_type.function,
+                             out_type.domain)
+        return [lambdas.Hole(in_type)]

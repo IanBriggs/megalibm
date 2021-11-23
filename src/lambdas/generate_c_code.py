@@ -14,7 +14,12 @@ def generate_c_code(lam, name):
     signature = "{} {}({} {})".format(out_type, name, in_type, in_name)
     signature_h = signature + ";"
 
-    lines = [signature, "{"]
+    lines = [
+        signature,
+        "{",
+        "// {}".format(lam)
+    ]
+
 
     for p in passes:
         lines += ["    "+l for l in p.to_c()]

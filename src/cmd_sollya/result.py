@@ -6,11 +6,12 @@ from utils.timing import Timer
 
 from os import path
 
+import fpcore
 import json
 import shlex
 import subprocess
 import tempfile
-
+from interval import Interval
 
 logger = Logger(level=Logger.HIGH, color=Logger.green)
 timer = Timer()
@@ -20,15 +21,20 @@ timer = Timer()
 CACHE = dict()
 
 
+class FailedGenError(Exception):
+    def __init__(self, func, domain):
+        self.func = func
+        self.domain = domain
+
 class Result():
 
     default_config = {
-        "prec" : 2**10,
-        "analysis_bound" : 2**-100,
+        "prec" : 128,
+        "analysis_bound" : 2**-20,
         "minmize_target" : "relative",
     }
 
-    def __init__(self, func, domain, monomials, numeric_type, config=None):
+    def __init__(self, func, domain, monomials, numeric_type, config=None, is_retry=False):
         self.func = func
         self.domain = domain
         self.monomials = monomials
@@ -39,23 +45,41 @@ class Result():
         self.stderr = None
         self.returncode = None
 
+        timer.start()
+        # Defauult query
         self._generate_query()
+        have_res = self._try_cache()
+        if not have_res:
+            have_res = self._try_run()
 
-        if self.query in CACHE:
-            logger("Used cache")
-            cached = CACHE[self.query]
-            self.stdout = cached.stdout
-            self.stderr = cached.stderr
-            self.returncode = cached.returncode
-            self.coefficients = cached.coefficients
+        # Try symmetric around domain.inf
+        if not have_res:
+            logger("Sollya call failed, retrying with mirrored domain")
+            diff = domain.sup - domain.inf
+            new_domain = Interval(domain.inf - diff, domain.sup)
+            self.domain = new_domain
+            self._generate_query()
+            have_res = self._try_cache()
+        if not have_res:
+            have_res = self._try_run()
 
-        else:
-            timer.start()
-            self._run()
-            self._parse_output()
-            el = timer.stop()
-            logger("Sollya time: {} sec", el)
-            CACHE[self.query] = self
+        # Try slightly asymmetric
+        if not have_res:
+            logger("Sollya call failed, retrying with symetric mirrored domain")
+            diff = domain.sup - domain.inf
+            new_domain = Interval(domain.inf - diff, domain.sup + fpcore.ast.Number("0.00390625"))
+            self.domain = new_domain
+            self._generate_query()
+            have_res = self._try_cache()
+        if not have_res:
+            have_res = self._try_run()
+
+
+        el = timer.stop()
+        logger("Sollya time: {} sec", el)
+
+        if not have_res:
+            raise FailedGenError(func, domain)
 
 
     def __repr__(self):
@@ -64,6 +88,30 @@ class Result():
                                                    repr(self.monomials),
                                                    repr(self.numeric_type),
                                                    repr(self.config))
+
+    def _try_cache(self):
+        if self.query in CACHE:
+            logger("Used cache")
+            cached = CACHE[self.query]
+            if cached == None:
+                return False
+            self.stdout = cached.stdout
+            self.stderr = cached.stderr
+            self.returncode = cached.returncode
+            self.coefficients = cached.coefficients
+            return True
+        return False
+
+
+    def _try_run(self):
+        try:
+            self._run()
+            self._parse_output()
+            CACHE[self.query] = self
+            return True
+        except json.decoder.JSONDecodeError:
+            CACHE[self.query] = None
+            return False
 
 
     def _generate_query(self):
@@ -76,7 +124,7 @@ class Result():
             'f = {};'.format(self.func.to_sollya()),
             'monomials = [|{}|];'.format(monomials_str),
             'formats = [|{}...|];'.format(self.numeric_type.sollya_type()),
-            'p = fpminimax(f, monomials, formats, I, floating, {});'.format(self.config["minmize_target"]),
+            'p = remez(f, monomials, I);',
         ]
 
         all_coef = ['coeff(p,{})'.format(m) for m in self.monomials]
@@ -121,6 +169,7 @@ class Result():
                 self.stdout = raw_out.decode("utf8").strip()
                 self.stderr = raw_err.decode("utf8").strip()
                 self.returncode = p.returncode
+                self._compress_stderr()
 
                 logger.blog("stdout", self.stdout)
                 if self.stderr != "":
@@ -128,6 +177,21 @@ class Result():
                     logger.blog("stderr", self.stderr)
                 logger("Return code: {}", self.returncode)
 
+    def _compress_stderr(self):
+        warning_0 = "\nWarning: at least one of the given expressions or a subexpression is not correctly typed\nor its evaluation has failed because of some error on a side-effect."
+        self._replace_repeats_stderr(warning_0)
+        warning_1 = "Warning: degenerated system in a non Haar context. The algorithm may be incorrect.\n"
+        self._replace_repeats_stderr(warning_1)
+
+    def _replace_repeats_stderr(self, warning):
+        count = self.stderr.count(warning)
+        if count == 0:
+            return
+        find = count * warning
+        join = "" if warning.endswith("\n") else "\n"
+        replace = warning + join + f"(repeated {count} times)\n"
+        assert find in self.stderr
+        self.stderr = self.stderr.replace(find, replace)
 
     def _parse_output(self):
         data = json.loads(self.stdout)

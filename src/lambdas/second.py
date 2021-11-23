@@ -17,3 +17,15 @@ class Second(types.Transform):
     def generate(self):
         ga, gb = super().generate()
         return gb
+
+    @classmethod
+    def generate_hole(cls, out_type):
+        # We output anything
+        # (thing)
+        # To get this output we need as input
+        # (Tuple (do-not-care) (thing))
+        return list()
+
+    # TODO: this method
+    # in_type = types.Impl(out_type.function, Interval(0.0, period))
+    # return [lambdas.Hole(in_type)]

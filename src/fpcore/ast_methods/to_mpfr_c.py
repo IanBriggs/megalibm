@@ -40,9 +40,14 @@ def to_mpfr_c(self, lines, temps):
 @add_method(Operation)
 def to_mpfr_c(self, lines, temps):
     mpfr_functions = {
+        "pow" : "mpfr_pow",
+        "sqrt" : "mpfr_sqrt",
+        "exp" : "mpfr_exp",
+        "log" : "mpfr_log",
         "sin" : "mpfr_sin",
         "cos" : "mpfr_cos",
         "tan" : "mpfr_tan",
+        "atan" : "mpfr_atan",
         "+" : "mpfr_add",
         "-" : "mpfr_sub",
         "*" : "mpfr_mul",
@@ -51,6 +56,8 @@ def to_mpfr_c(self, lines, temps):
     c_args = [arg.to_mpfr_c(lines, temps) for arg in self.args]
     my_name = "generated_{}".format(len(temps))
     fname = mpfr_functions[self.op]
+    if self.op == "-" and len(c_args) == 1:
+        fname = "mpfr_neg"
     line = ("  " + fname + "(" + my_name + ", "
             + ", ".join(c_args) + ", MPFR_RNDN);")
     lines.append(line)

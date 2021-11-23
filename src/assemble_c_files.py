@@ -48,8 +48,8 @@ def assemble_error_main(mpfr_func, other_funcs, header_fname, domains):
                   "    printf(\"Option not available\\n\");"
                   "    exit(1);",
                   "  }",
-                  "  size_t region_count = ((size_t) 1) << 10;",
-                  "  size_t samples = ((size_t) 1) << 14;",
+                  "  size_t region_count = ((size_t) 1) << 8;",
+                  "  size_t samples = ((size_t) 1) << 12;",
                   "  double* regions = generate_linear_regions(low, high, region_count);",
                   "  error** errorss = generate_table(region_count, regions, samples,",
                   "                                   {},".format(mpfr_func),
