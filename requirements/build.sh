@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 set -e
 
 SCRIPT_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -33,29 +32,91 @@ trap finish EXIT
 
 
 
-# something
-echo "Installing something"
-DONE_SOMETHING_MARKER="${SCRIPT_LOCATION}/something/done"
-if [ -f "${DONE_SOMETHING_MARKER}" ]; then
-    echo "  something already installed"
+# rust
+echo "Installing rust"
+RUST_HOME="${SCRIPT_LOCATION}/rust"
+DONE_RUST_MARKER="${RUST_HOME}/done"
+export RUSTUP_HOME="${RUST_HOME}" # needed since rustup doesn't have --prefix
+export CARGO_HOME="${RUST_HOME}/cargo" # ditto
+if [ -f "${DONE_RUST_MARKER}" ]; then
+    echo "  rust already installed"
 else
     cd "${SCRIPT_LOCATION}"
 
     echo "  Cleaning build location"
-    rm -rf something
+    rm -rf rust
 
-    echo "  Building something"
-    mkdir something
-    echo "something was made" >> "${LOG}" 2>&1
+    echo "  Dowloading and running rustup script"
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+         >> "${LOG}" 2>&1
 
     echo "  Done"
-    touch "${DONE_SOMETHING_MARKER}"
+    touch "${DONE_RUST_MARKER}"
 fi
 
+export PATH="${CARGO_HOME}/bin:${PATH}"
 
-# Debug environment source file
-cd "${SCRIPT_LOCATION}"
-echo "export PATH=${SCRIPT_LOCATION}/something:\$PATH" >> "${DEBUG_ENV}"
+echo "export RUSTUP_HOME=\"${RUST_HOME}\"" >> "${DEBUG_ENV}"
+echo "export CARGO_HOME=\"${RUST_HOME}/cargo\"" >> "${DEBUG_ENV}"
+echo "export PATH=\"${CARGO_HOME}/bin:\$PATH"\" >> "${DEBUG_ENV}"
+
+
+
+
+# # egg
+# echo "Installing egg"
+# EGG_HOME="${SCRIPT_LOCATION}/egg"
+# DONE_EGG_MARKER="${EGG_HOME}/done"
+# if [ -f "${DONE_EGG_MARKER}" ]; then
+#     echo "  egg already installed"
+# else
+#     cd "${SCRIPT_LOCATION}"
+
+#     echo "  Cleaning build location"
+#     rm -rf egg
+
+#     echo "  Cloning egg"
+#     git clone https://github.com/egraphs-good/egg.git >> "${LOG}" 2>&1
+
+#     echo "  Building egg"
+#     cd egg
+#     make >> "${LOG}" 2>&1
+
+#     echo "  Done"
+#     touch "${DONE_EGG_MARKER}"
+# fi
+
+
+
+
+# snake_egg
+echo "Installing snake_egg (IanBriggs fork)"
+SNAKE_EGG_HOME="${SCRIPT_LOCATION}/snake_egg"
+DONE_SNAKE_EGG_MARKER="${SNAKE_EGG_HOME}/done"
+if [ -f "${DONE_SNAKE_EGG_MARKER}" ]; then
+    echo "  snake_egg already installed"
+else
+    cd "${SCRIPT_LOCATION}"
+
+    echo "  Cleaning build location"
+    rm -rf snake_egg
+
+    echo "  Cloning snake_egg"
+    git clone https://github.com/IanBriggs/snake-egg.git snake_egg \
+        >> "${LOG}" 2>&1
+
+    echo "  Building snake_egg"
+    cd snake_egg
+    make >> "${LOG}" 2>&1
+
+    echo "  Done"
+    touch "${DONE_SNAKE_EGG_MARKER}"
+fi
+
+export PYTHONPATH="${SNAKE_EGG_HOME}/target/release:${PYTHONPATH}"
+
+echo "export PYTHONPATH=\"${SNAKE_EGG_HOME}/target/release:\$PYTHONPATH"\" >> "${DEBUG_ENV}"
+
 
 
 # Indicate success

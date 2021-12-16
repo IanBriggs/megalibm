@@ -17,10 +17,17 @@ rm -f "${DEBUG_ENV}"
 
 
 
-# something
-echo "Cleaning something"
-cd "${SCRIPT_LOCATION}"
-rm -rf something
+# rust
+echo "Cleaning rust"
+rm -rf "${SCRIPT_LOCATION}/rust"
+
+# # egg
+# echo "Cleaning egg"
+# rm -rf "${SCRIPT_LOCATION}/egg"
+
+# snake_egg
+echo "Cleaning snake_egg"
+rm -rf "${SCRIPT_LOCATION}/snake_egg"
 
 # remove various files
 echo "Cleaning build.sh"
