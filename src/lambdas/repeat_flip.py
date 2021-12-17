@@ -4,13 +4,14 @@ import lambdas
 import lego_blocks
 import numeric_types
 import fpcore
+import snake_egg_rules
 
 from interval import Interval
 from lambdas import types
 from utils import Logger
 
-from wolframclient.evaluation import WolframLanguageSession
-from wolframclient.language import wl, wlexpr
+# from wolframclient.evaluation import WolframLanguageSession
+# from wolframclient.language import wl, wlexpr
 
 from math import pi
 
@@ -20,18 +21,18 @@ logger = Logger(level=Logger.HIGH)
 
 
 
-def is_symmetric_function(func, low, middle, high):
-    arg = func.arguments[0]
-    flipped_arg = high - arg
-    flipped = func.substitute(arg, flipped_arg)
-    query = func - flipped
-    logger("Query: {}", query)
-    wolf_query = query.to_wolfram()
-    logger("Wolf Query: {}", wolf_query)
-    with WolframLanguageSession() as session:
-        res = session.evaluate(wlexpr(wolf_query))
-        logger("Wolf's Result: {}", res)
-        return  res == 0
+# def is_symmetric_function(func, low, middle, high):
+#     arg = func.arguments[0]
+#     flipped_arg = high - arg
+#     flipped = func.substitute(arg, flipped_arg)
+#     query = func - flipped
+#     logger("Query: {}", query)
+#     wolf_query = query.to_wolfram()
+#     logger("Wolf Query: {}", wolf_query)
+#     with WolframLanguageSession() as session:
+#         res = session.evaluate(wlexpr(wolf_query))
+#         logger("Wolf's Result: {}", res)
+#         return  res == 0
 
 
 class RepeatFlip(types.Transform):
@@ -42,7 +43,7 @@ class RepeatFlip(types.Transform):
         new_high = fpcore.ast.Operation("*", fpcore.ast.Number("2"), old_high)
         assert(type(our_in_type) == types.Impl)
         assert(float(our_in_type.domain.inf) == 0.0)
-        assert(is_symmetric_function(our_in_type.function,
+        assert(snake_egg_rules.is_symmetric(our_in_type.function,
                                      0.0,
                                      old_high,
                                      new_high))
@@ -83,7 +84,7 @@ class RepeatFlip(types.Transform):
 
         two_bound = out_type.domain.sup
         bound = two_bound / fpcore.ast.Number("2")
-        if not is_symmetric_function(out_type.function,
+        if not snake_egg_rules.is_symmetric(out_type.function,
                                     0.0,
                                     bound,
                                     two_bound):
@@ -93,4 +94,3 @@ class RepeatFlip(types.Transform):
         # (Impl (func) 0.0 bound)
         in_type = types.Impl(out_type.function, Interval(0.0, bound))
         return [lambdas.Hole(in_type)]
-        

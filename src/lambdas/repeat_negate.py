@@ -3,13 +3,14 @@ import lambdas
 import lego_blocks
 import numeric_types
 import fpcore
+import snake_egg_rules
 
 from interval import Interval
 from lambdas import types
 from utils import Logger
 
-from wolframclient.evaluation import WolframLanguageSession
-from wolframclient.language import wl, wlexpr
+# from wolframclient.evaluation import WolframLanguageSession
+# from wolframclient.language import wl, wlexpr
 
 from math import pi
 
@@ -19,18 +20,18 @@ logger = Logger(level=Logger.HIGH)
 
 
 
-def is_negation_function(func, low, middle, high):
-    arg = func.arguments[0]
-    negated_arg = high - arg
-    negated = func.substitute(arg, negated_arg)
-    query = func + negated
-    logger("Query: {}", query)
-    wolf_query = query.to_wolfram()
-    logger("Wolf Query: {}", wolf_query)
-    with WolframLanguageSession() as session:
-        res = session.evaluate(wlexpr(wolf_query))
-        logger("Wolf's Result: {}", res)
-        return  res == 0
+# def is_negation_function(func, low, middle, high):
+#     arg = func.arguments[0]
+#     negated_arg = high - arg
+#     negated = func.substitute(arg, negated_arg)
+#     query = func + negated
+#     logger("Query: {}", query)
+#     wolf_query = query.to_wolfram()
+#     logger("Wolf Query: {}", wolf_query)
+#     with WolframLanguageSession() as session:
+#         res = session.evaluate(wlexpr(wolf_query))
+#         logger("Wolf's Result: {}", res)
+#         return  res == 0
 
 
 class RepeatNegate(types.Transform):
@@ -41,7 +42,7 @@ class RepeatNegate(types.Transform):
         new_high = old_high * fpcore.ast.Number("2")
         assert(type(our_in_type) == types.Impl)
         assert(float(our_in_type.domain.inf) == 0.0)
-        assert(is_negation_function(our_in_type.function,
+        assert(snake_egg_rules.is_negation(our_in_type.function,
                                     0.0,
                                     old_high,
                                     new_high))
@@ -83,7 +84,7 @@ class RepeatNegate(types.Transform):
 
         two_bound = out_type.domain.sup
         bound = two_bound / fpcore.ast.Number("2")
-        if not is_negation_function(out_type.function,
+        if not snake_egg_rules.is_negation(out_type.function,
                                    0.0,
                                    bound,
                                    two_bound):

@@ -58,7 +58,7 @@ class Tuple():
 USED_NAMES = set()
 
 class Node():
-    """ 
+    """
     A node is an ast node for the lambda language.
     It represents both the relationship between the input type and output type
       as well as the C code generation through lego blocks.
@@ -118,7 +118,7 @@ class Transform(Node):
         # Given an out_type, return possible in types that this Transform could
         # use to reach that out_type
         raise NotImplementedError()
-        
+
     def __repr__(self):
         class_name = type(self).__name__
         return "{}({})".format(class_name,

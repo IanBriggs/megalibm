@@ -5,13 +5,14 @@ import numeric_types
 import fpcore
 import interval
 import lambdas
+import snake_egg_rules
 
 from interval import Interval
 from lambdas import types
 from utils import Logger
 
-from wolframclient.evaluation import WolframLanguageSession
-from wolframclient.language import wl, wlexpr
+# from wolframclient.evaluation import WolframLanguageSession
+# from wolframclient.language import wl, wlexpr
 
 from math import pi
 
@@ -20,18 +21,18 @@ logger = Logger(level=Logger.HIGH)
 
 
 
-def has_period_function(func, period):
-    arg = func.arguments[0]
-    flipped_arg = period + arg
-    flipped = func.substitute(arg, flipped_arg)
-    query = func - flipped
-    logger("Query: {}", query)
-    wolf_query = query.to_wolfram()
-    logger("Wolf Query: {}", wolf_query)
-    with WolframLanguageSession() as session:
-        res = session.evaluate(wlexpr(wolf_query))
-        logger("Wolf's Result: {}", res)
-        return  res == 0
+# def has_period_function(func, period):
+#     arg = func.arguments[0]
+#     flipped_arg = period + arg
+#     flipped = func.substitute(arg, flipped_arg)
+#     query = func - flipped
+#     logger("Query: {}", query)
+#     wolf_query = query.to_wolfram()
+#     logger("Wolf Query: {}", wolf_query)
+#     with WolframLanguageSession() as session:
+#         res = session.evaluate(wlexpr(wolf_query))
+#         logger("Wolf's Result: {}", res)
+#         return  res == 0
 
 
 class RepeatInf(types.Transform):
@@ -40,7 +41,7 @@ class RepeatInf(types.Transform):
         our_in_type = self.in_node.out_type
         assert(type(our_in_type) == types.Impl)
         assert(float(our_in_type.domain.inf) == 0.0)
-        assert(has_period_function(our_in_type.function, our_in_type.domain.sup))
+        assert(snake_egg_rules.has_period(our_in_type.function, our_in_type.domain.sup))
 
         self.out_type = types.Impl(our_in_type.function,
                              Interval("0.0", "INFINITY"))
@@ -77,7 +78,7 @@ class RepeatInf(types.Transform):
             interval.parse_bound("(* 2 PI)"),
         ]
         for p in possible_periods:
-            if has_period_function(out_type.function, p):
+            if snake_egg_rules.has_period(out_type.function, p):
                 period = p
                 break
 
