@@ -1,0 +1,4 @@
+; -*- mode: scheme -*-
+
+(FPCore (x)
+  (tan x))

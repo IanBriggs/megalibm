@@ -1,0 +1,4 @@
+; -*- mode: scheme -*-
+
+(FPCore (x)
+  (/ (- 1 (cos x)) (sin x)))
