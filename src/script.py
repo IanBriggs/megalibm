@@ -87,24 +87,24 @@ def main(argv):
     se_func = thefunc("x")
     eg_func = egraph.add(se_func)
 
-    #logger.blog("Starting dot", egraph.dot())
 
     for iter in range(1, 12):
         egraph.run(snake_egg_rules.rules, iter_limit=1)
 
-        #logger.blog("Dot", egraph.dot())
 
         expr_list = egraph.node_extract(se_func)
-        # if expr_count == len(expr_list):
-        #     logger("No new exprs found")
-        #     break
-        expr_count = len(expr_list)
         expr_lines = [str(snake_egg_rules.egg_to_fpcore(expr))
                       for expr in expr_list]
-        expr_lines = [l for l in expr_lines if "thefunc" in l]
+
+        #expr_lines = [l for l in expr_lines if "thefunc" in l]
         logger.blog(f"After {iter} iterations", "\n".join(expr_lines))
 
     return 0
+
+
+
+
+
 
 
 if __name__ == "__main__":

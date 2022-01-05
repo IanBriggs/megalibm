@@ -12,7 +12,6 @@ zero_arg = {
 }
 
 one_arg = {
-    neg:   lambda x: ast.Operation("-",     x),
     acos:  lambda x: ast.Operation("acos",  x),
     acosh: lambda x: ast.Operation("acosh", x),
     asin:  lambda x: ast.Operation("asin",  x),
@@ -27,8 +26,10 @@ one_arg = {
     exp:   lambda x: ast.Operation("exp",   x),
     expm1: lambda x: ast.Operation("expm1", x),
     fabs:  lambda x: ast.Operation("fabs",  x),
-    log:   lambda x: ast.Operation("log",   x),
+    inv:   lambda x: ast.Operation("inv",   x),
     log1p: lambda x: ast.Operation("log1p", x),
+    log:   lambda x: ast.Operation("log",   x),
+    neg:   lambda x: ast.Operation("-",     x),
     sin:   lambda x: ast.Operation("sin",   x),
     sinh:  lambda x: ast.Operation("sinh",  x),
     sqrt:  lambda x: ast.Operation("sqrt",  x),
@@ -70,9 +71,10 @@ def egg_to_fpcore(expr):
                              ast.Number(str(expr.numerator)),
                              ast.Number(str(expr.denominator)))
 
-    # print(f"{expr} ({T})")
-    # if T in zero_arg:
-    #     return zero_arg[T]()
+    # TODO: Definitely a bug, why are zero arg tuples weird?
+    #print(f"expr: '{expr}' of type: '{T}'")
+    #if T in zero_arg:
+    #    return zero_arg[T]()
 
     if expr in zero_arg:
         return zero_arg[expr]()
