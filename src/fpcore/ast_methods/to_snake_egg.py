@@ -1,8 +1,9 @@
 
 
-from fpcore.ast import ASTNode, Atom, Number, Constant, Operation, FPCore
+from fpcore.ast import ASTNode, Number, Constant, Operation, FPCore, Variable
 from utils import add_method, Logger
-from snake_egg_rules import operations
+
+import snake_egg_rules
 
 import snake_egg
 
@@ -11,6 +12,8 @@ import fractions
 
 logger = Logger(level=Logger.EXTRA)
 
+
+operations = snake_egg_rules.operations
 
 const_mapping = {
     "PI": operations.PI,
@@ -85,7 +88,7 @@ def to_snake_egg(self, to_rule):
     raise NotImplementedError(msg)
 
 
-@add_method(Atom)
+@add_method(Variable)
 def to_snake_egg(self, to_rule):
     if to_rule:
         return snake_egg.Var(self.source)
@@ -104,7 +107,6 @@ def to_snake_egg(self, to_rule):
 
 @add_method(Constant)
 def to_snake_egg(self, to_rule):
-    # todo: Constants
     return const_mapping[self.source]()
 
 
