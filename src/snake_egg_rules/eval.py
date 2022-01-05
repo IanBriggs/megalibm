@@ -25,12 +25,15 @@ def eval(op, args):
             f = fractions.Fraction(op)
             if f.denominator == 1:
                 return int(f.numerator)
-            return f
+            return None
         except ValueError as e:
-            logger.warning("Unable to parse as fraction: {}", op)
+            logger("Treating as variable: '{}'", op)
             return None
 
     if op in lambdas:
-        return lambdas[op](*args)
+        res = lambdas[op](*args)
+        if type(res) == int:
+            return res
+        return None
 
     return None
