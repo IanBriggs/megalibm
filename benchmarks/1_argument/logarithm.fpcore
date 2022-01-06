@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "logarithm"
+  (log x))

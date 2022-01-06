@@ -1,0 +1,9 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "qlog (example 3.10)"
+ :pre (and (< -1 x) (< x 1))
+ :herbie-target
+ (- (+ 1 x (/ (* x x) 2) (* 5/12 (pow x 3))))
+
+ (/ (log (- 1 x)) (log (+ 1 x))))

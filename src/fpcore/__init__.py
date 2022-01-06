@@ -10,6 +10,7 @@ from .ast_methods import (
     float,
     mul,
     neg,
+    remove_let,
     sub,
     substitute,
     to_libm_c,

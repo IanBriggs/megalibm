@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (N)
+ :name "2log (problem 3.3.6)"
+ (- (log (+ N 1)) (log N)))

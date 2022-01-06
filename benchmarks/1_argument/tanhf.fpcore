@@ -1,4 +1,5 @@
-; -*- mode: scheme -*-
+;; -*- mode: scheme -*-
 
 (FPCore (x)
+  :name "tanhf"
   (/ (- 1 (cos x)) (sin x)))

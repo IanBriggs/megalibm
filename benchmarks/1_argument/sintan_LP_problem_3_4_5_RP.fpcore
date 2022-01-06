@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "sintan (problem 3.4.5)"
+ (/ (- x (sin x)) (- x (tan x))))

@@ -39,13 +39,14 @@ one_arg = {
 
 two_arg = {
     add:       lambda x, y: ast.Operation("+", x, y),
-    sub:       lambda x, y: ast.Operation("-", x, y),
-    mul:       lambda x, y: ast.Operation("*", x, y),
-    div:       lambda x, y: ast.Operation("/", x, y),
     atan2:     lambda x, y: ast.Operation("atan2", x, y),
-    pow:       lambda x, y: ast.Operation("pow", x, y),
+    div:       lambda x, y: ast.Operation("/", x, y),
+    fmod:      lambda x, y: ast.Operation("fmod", x, y),
     hypot:     lambda x, y: ast.Operation("hypot", x, y),
+    mul:       lambda x, y: ast.Operation("*", x, y),
+    pow:       lambda x, y: ast.Operation("pow", x, y),
     remainder: lambda x, y: ast.Operation("remainder", x, y),
+    sub:       lambda x, y: ast.Operation("-", x, y),
 }
 
 three_arg = {

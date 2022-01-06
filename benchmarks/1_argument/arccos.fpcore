@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "arccos"
+ (* 2 (atan (sqrt (/ (- 1 x) (+ 1 x))))))

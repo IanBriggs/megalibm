@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "exponential minus one"
+  (- (exp x) 1))

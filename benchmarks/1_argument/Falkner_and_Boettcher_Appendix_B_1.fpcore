@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (v)
+ :name "Falkner and Boettcher, Appendix B, 1"
+ (acos (/ (- 1 (* 5 (* v v))) (- (* v v) 1))))

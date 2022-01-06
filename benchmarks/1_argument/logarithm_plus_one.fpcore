@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "logarithm plus one"
+  (log (+ x 1)))

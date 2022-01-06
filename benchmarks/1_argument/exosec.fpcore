@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "exosec"
+  (- (/ 1 (sin x)) 1))

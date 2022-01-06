@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "vercosin"
+  (+ 1 (cos x)))

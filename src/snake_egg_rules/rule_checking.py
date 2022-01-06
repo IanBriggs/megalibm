@@ -7,6 +7,19 @@ logger = Logger(Logger.LOW, color=Logger.blue)
 
 
 
+def egg_rule_to_expr(rule):
+    T = type(rule)
+
+    if T == int:
+        return rule
+
+    if T == snake_egg.Var:
+        return str(rule).strip().replace("?", "").strip()
+
+    args = (egg_rule_to_expr(a) for a in tuple(rule))
+    return T(*args)
+
+
 # This may be an incorrect idea
 # See if you can prove a rule using the other rules
 def check_for_redundant_rules(raw_rules, iter_limit=10):

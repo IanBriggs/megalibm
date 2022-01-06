@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Data.Random.Dice:roll from dice-0.1"
+ (- (* x x) 1.0))

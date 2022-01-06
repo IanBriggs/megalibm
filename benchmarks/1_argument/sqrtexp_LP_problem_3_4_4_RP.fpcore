@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "sqrtexp (problem 3.4.4)"
+ (sqrt (/ (- (exp (* 2 x)) 1) (- (exp x) 1))))

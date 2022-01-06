@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "exsec"
+  (- (/ 1 (cos x)) 1))

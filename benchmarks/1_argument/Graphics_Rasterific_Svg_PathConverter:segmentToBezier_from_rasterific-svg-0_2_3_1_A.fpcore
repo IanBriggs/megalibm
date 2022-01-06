@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Graphics.Rasterific.Svg.PathConverter:segmentToBezier from rasterific-svg-0.2.3.1, A"
+ :herbie-target
+ (/ (/ (* 8.0 (sin (* x 0.5))) 3.0) (/ (sin x) (sin (* x 0.5))))
+ (/ (* (* (/ 8.0 3.0) (sin (* x 0.5))) (sin (* x 0.5))) (sin x)))

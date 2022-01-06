@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "Trigonometry B"
+  (/ (- 1 (* (tan x) (tan x))) (+ 1 (* (tan x) (tan x)))))

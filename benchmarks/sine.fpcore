@@ -1,4 +1,0 @@
-; -*- mode: scheme -*-
-
-(FPCore (x)
-  (sin x))

@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "exp neg sub"
+ (exp (- (- 1 (* x x)))))

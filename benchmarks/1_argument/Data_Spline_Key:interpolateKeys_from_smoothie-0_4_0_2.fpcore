@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Data.Spline.Key:interpolateKeys from smoothie-0.4.0.2"
+ :herbie-target
+ (* x (* x (- 3.0 (* x 2.0))))
+ (* (* x x) (- 3.0 (* x 2.0))))

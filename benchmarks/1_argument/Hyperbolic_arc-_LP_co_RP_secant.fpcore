@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "Hyperbolic arc-(co)secant"
+ (log (+ (/ 1 x) (/ (sqrt (- 1 (* x x))) x))))

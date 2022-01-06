@@ -1,0 +1,5 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "Hyperbolic sine"
+ (/ (- (exp x) (exp (- x))) 2))
