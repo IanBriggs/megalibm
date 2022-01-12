@@ -59,7 +59,7 @@ def parse_arguments(argv):
     return args
 
 
-def extract_identities(func, max_iters=10):
+def extract_identities(func, max_iters=13):
     thevar = snake_egg.Var(func.arguments[0].source)
     thefunc = namedtuple("thefunc", "x")
 
@@ -97,15 +97,25 @@ def extract_identities(func, max_iters=10):
                       for expr in exprs}
 
         if old_expr_lines == expr_lines:
-            logger.log("Halted early")
-            break
+            logger.log("No change to egraph on iteration {}", iter)
 
-    logger.blog(f"After {iter} iterations", "\n".join(expr_lines))
+    filtered_lines = list()
+    for line in expr_lines:
+        if "thefunc" not in line:
+            #logger.log("thefunc not present: {}", line)
+            continue
+        if "thefunc" not in line.replace("(thefunc x)", ""):
+            #logger.log("No 's' function: {}", line)
+            continue
+        filtered_lines.append(line)
+
+    logger.blog(f"After {iter} iterations",
+                "per_func: " + "\nper_func: ".join(filtered_lines))
 
     snake_egg_rules.rules.pop() # remove gollum
     snake_egg_rules.rules.pop() # remove smeagol
 
-    return expr_lines
+    return filtered_lines
 
 
 def write_identity_webpage(filename, identities):
@@ -117,17 +127,22 @@ def write_identity_webpage(filename, identities):
         "<!doctype html>",
         "<html>",
         "<head>",
-        "<title>Megalibm Identities for {y}-{m}-{d}</title>",
+        f"<title>Megalibm Identities for {y}-{m}-{d}</title>",
         "</head>",
         "<body>",
-        "<h1>Identities:</h1>",
-        "<ul>",
+        f"<h1>All {len(identities)} Identities:</h1>",
+        "<table>",
+        "<tr>",
+        "<th>Count</th>",
+        "<th>Expr</th>",
+        "</tr>",
     ]
 
-    lines.extend([f"<li>{iden}</li>" for iden in identities])
+    lines.extend([f"<tr><td>{count}</td><td>{expr}</td><tr>"
+                  for expr, count in identities.items()])
 
     lines.extend([
-        "</ul>",
+        "</table>",
         "</boy>",
         "</html>"
         ])
@@ -143,12 +158,15 @@ def main(argv):
 
     args = parse_arguments(argv)
 
-    union = set()
-    for fname in os.listdir(args.dirname):
-        if not fname.endswith(".fpcore"):
-            continue
+    if os.path.isfile(args.dirname) and args.dirname.endswith(".fpcore"):
+        fnames = [args.dirname]
+    else:
+        fnames = [path.join(args.dirname, fname)
+                  for fname in os.listdir(args.dirname)
+                  if fname.endswith(".fpcore")]
 
-        fname = path.join(args.dirname, fname)
+    counts = dict()
+    for fname in fnames:
         with open(fname, "r") as f:
             text = f.read()
 
@@ -159,12 +177,17 @@ def main(argv):
 
         expr_lines = extract_identities(func)
 
-        union.update(expr_lines)
+        for line in expr_lines:
+            if line in counts:
+                counts[line] += 1
+            else:
+                counts[line] = 1
 
-    union = {u for u in union if "thefunc" in u}
-    logger.blog(f"All identites", "\n".join(union))
 
-    write_identity_webpage("index.html", union)
+    logger.blog(f"All identites",
+                "Count\tExpr" + "\n".join(f"{c}\t{e}" for e, c in counts.items()))
+
+    write_identity_webpage("index.html", counts)
 
     return 0
 
