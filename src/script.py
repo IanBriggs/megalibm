@@ -59,61 +59,85 @@ def parse_arguments(argv):
     return args
 
 
-def extract_identities(func, max_iters=13):
+def extract_identities(func, max_iters=5):
+    therules = snake_egg_rules.rules.copy()
     thevar = snake_egg.Var(func.arguments[0].source)
     thefunc = namedtuple("thefunc", "x")
 
-    thefunc_rule_do = snake_egg.Rewrite(thefunc(thevar),
-                                     func.to_snake_egg(to_rule=True),
-                                     "smeagol")
-    snake_egg_rules.rules.append(thefunc_rule_do)
+    # Add def and undef to ruleset
+    therules.append(snake_egg.Rewrite(thefunc(thevar),
+                                      func.to_snake_egg(to_rule=True),
+                                      "thefunc_to_body"))
+    therules.append(snake_egg.Rewrite(func.to_snake_egg(to_rule=True),
+                                      thefunc(thevar),
+                                      "body_to_thefunc"))
 
-    thefunc_rule_undo = snake_egg.Rewrite(func.to_snake_egg(to_rule=True),
-                                     thefunc(thevar),
-                                     "gollum")
-    snake_egg_rules.rules.append(thefunc_rule_undo)
-
+    # Add thefunc to the snake_egg --> fpcore parser
     parse_thefunc = lambda x: fpcore.ast.Operation("thefunc", x)
     snake_egg_rules.one_arg[thefunc] = parse_thefunc
 
+    # Create our egraph and add thefunc
     egraph = snake_egg.EGraph(snake_egg_rules.eval)
     se_func = thefunc("x")
-    eg_func = egraph.add(se_func)
+    egraph.add(se_func)
 
-    old_expr_lines = set()
-    expr_lines = set()
-    iter = 0
-    for iter in range(1, max_iters+1):
+    # Run for up to max_iters one at a time so we have output in the case of
+    #   errors
+    exprs = tuple()
+    iteration = 0
+    for iteration in range(1, max_iters+1):
         try:
-            egraph.run(snake_egg_rules.rules, iter_limit=1)
+            egraph.run(therules, iter_limit=1)
         except:
-            logger.warning("Egg ran into an issue")
+            logger.warning("Egg ran into an issue on iteration {}", iteration)
             break
 
         exprs = egraph.node_extract(se_func)
 
-        old_expr_lines = expr_lines
-        expr_lines = {str(snake_egg_rules.egg_to_fpcore(expr))
-                      for expr in exprs}
+    # If there was no issue the run a few extra iters to find unreduced output
+    extra_exprs = exprs
+    if iteration == max_iters:
+        for extra in range(2):
+            try:
+                egraph.run(therules, iter_limit=1)
+            except:
+                logger.warning("Egg ran into an issue")
+                break
 
-        if old_expr_lines == expr_lines:
-            logger.log("No change to egraph on iteration {}", iter)
+            extra_exprs = egraph.node_extract(se_func)
 
+    # Intersect the two expr sets
+    # The idea is that some expressions are redundant, but were generated later
+    #   in the egraph iterations, so give it a few more and intersect to exclude
+    #   those expressions.
+    exprs = set(exprs)
+    extra_exprs = set(extra_exprs)
+    intersection = set()
+    for expr in exprs:
+        if expr not in extra_exprs:
+            logger.log("extra iters removed: {}",
+                       snake_egg_rules.egg_to_fpcore(expr))
+            continue
+        intersection.add(expr)
+
+    expr_lines = {str(snake_egg_rules.egg_to_fpcore(expr))
+                  for expr in intersection}
+
+    # We are looking for two functions such that f(x) == t(f(s(x)))
+    # Remove expressions that do not contain the f function or where there is
+    #   no s function.
     filtered_lines = list()
     for line in expr_lines:
         if "thefunc" not in line:
-            #logger.log("thefunc not present: {}", line)
+            logger.log("thefunc not present: {}", line)
             continue
         if "thefunc" not in line.replace("(thefunc x)", ""):
-            #logger.log("No 's' function: {}", line)
+            logger.log("    only thefunc(x): {}", line)
             continue
         filtered_lines.append(line)
 
-    logger.blog(f"After {iter} iterations",
+    logger.blog(f"After {iteration} iterations",
                 "per_func: " + "\nper_func: ".join(filtered_lines))
-
-    snake_egg_rules.rules.pop() # remove gollum
-    snake_egg_rules.rules.pop() # remove smeagol
 
     return filtered_lines
 

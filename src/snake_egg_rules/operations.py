@@ -5,8 +5,8 @@ from collections import namedtuple
 
 nt = namedtuple
 
-PI        = nt("PI",         "")
-E         = nt("E",          "")
+CONST_PI  = nt("CONST_PI",   "")
+CONST_E   = nt("CONST_E",    "")
 
 neg       = nt("neg",        "x")
 inv       = nt("inv",        "x")   # x != 0

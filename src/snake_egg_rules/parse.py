@@ -7,8 +7,8 @@ import fractions
 
 
 zero_arg = {
-    PI: lambda: ast.Constant("PI"),
-    E:  lambda: ast.Constant("E"),
+    CONST_PI: lambda: ast.Constant("PI"),
+    CONST_E:  lambda: ast.Constant("E"),
 }
 
 one_arg = {
