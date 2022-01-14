@@ -164,8 +164,8 @@ def extract_identities(func, max_iters=10):
     for expr, id_num in expr_ids.items():
         if id_num in deduped:
             old = deduped[id_num]
-            old_str = snake_egg_rules.egg_to_fpcore(old)
-            expr_str = snake_egg_rules.egg_to_fpcore(expr)
+            old_str = str(snake_egg_rules.egg_to_fpcore(old))
+            expr_str = str(snake_egg_rules.egg_to_fpcore(expr))
             if expr_size(old) > expr_size(expr) or old_str < expr_str:
                 deduped[id_num] = expr
                 logger("replaced {} with {}", old, expr)
