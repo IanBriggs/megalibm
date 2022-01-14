@@ -58,19 +58,31 @@ def parse_arguments(argv):
 
     return args
 
+def run_egraph(egraph, rules, iters, gen_output):
+    output = None
+    iteration = 0
+    for iteration in range(1, iters+1):
+        try:
+            egraph.run(rules, iter_limit=1, time_limit=600, node_limit=10000000)
+        except:
+            logger.warning("Egg ran into an issue on iteration {}", iteration)
+            break
+        output = gen_output(egraph)
+    return iteration, output
 
-def extract_identities(func, max_iters=5):
+
+def generate_all_identities(func, max_iters):
     therules = snake_egg_rules.rules.copy()
     thevar = snake_egg.Var(func.arguments[0].source)
     thefunc = namedtuple("thefunc", "x")
 
     # Add def and undef to ruleset
-    therules.append(snake_egg.Rewrite(thefunc(thevar),
-                                      func.to_snake_egg(to_rule=True),
-                                      "thefunc_to_body"))
-    therules.append(snake_egg.Rewrite(func.to_snake_egg(to_rule=True),
-                                      thefunc(thevar),
-                                      "body_to_thefunc"))
+    try:
+        therules.append(snake_egg.Rewrite(func.to_snake_egg(to_rule=True),
+                                          thefunc(thevar),
+                                          "body_to_thefunc"))
+    except:
+        logger.warning("unable to undef function")
 
     # Add thefunc to the snake_egg --> fpcore parser
     parse_thefunc = lambda x: fpcore.ast.Operation("thefunc", x)
@@ -78,33 +90,17 @@ def extract_identities(func, max_iters=5):
 
     # Create our egraph and add thefunc
     egraph = snake_egg.EGraph(snake_egg_rules.eval)
-    se_func = thefunc("x")
+    se_func = func.to_snake_egg(to_rule=False)
     egraph.add(se_func)
 
     # Run for up to max_iters one at a time so we have output in the case of
     #   errors
-    exprs = tuple()
-    iteration = 0
-    for iteration in range(1, max_iters+1):
-        try:
-            egraph.run(therules, iter_limit=1)
-        except:
-            logger.warning("Egg ran into an issue on iteration {}", iteration)
-            break
-
-        exprs = egraph.node_extract(se_func)
+    iteration, exprs = run_egraph(egraph, therules, max_iters,
+                                  lambda eg: eg.node_extract(se_func))
 
     # If there was no issue the run a few extra iters to find unreduced output
-    extra_exprs = exprs
-    if iteration == max_iters:
-        for extra in range(2):
-            try:
-                egraph.run(therules, iter_limit=1)
-            except:
-                logger.warning("Egg ran into an issue")
-                break
-
-            extra_exprs = egraph.node_extract(se_func)
+    _, extra_exprs = run_egraph(egraph, therules, 2,
+                                lambda eg: eg.node_extract(se_func))
 
     # Intersect the two expr sets
     # The idea is that some expressions are redundant, but were generated later
@@ -114,32 +110,59 @@ def extract_identities(func, max_iters=5):
     extra_exprs = set(extra_exprs)
     intersection = set()
     for expr in exprs:
+        exstr = str(snake_egg_rules.egg_to_fpcore(expr))
         if expr not in extra_exprs:
-            logger.log("extra iters removed: {}",
-                       snake_egg_rules.egg_to_fpcore(expr))
+            logger.log("extra iters removed: {}", exstr)
+            continue
+        if "thefunc" not in exstr:
+            logger.log("thefunc not present: {}", exstr)
             continue
         intersection.add(expr)
 
-    expr_lines = {str(snake_egg_rules.egg_to_fpcore(expr))
-                  for expr in intersection}
+    return iteration, intersection
 
-    # We are looking for two functions such that f(x) == t(f(s(x)))
-    # Remove expressions that do not contain the f function or where there is
-    #   no s function.
-    filtered_lines = list()
-    for line in expr_lines:
-        if "thefunc" not in line:
-            logger.log("thefunc not present: {}", line)
+def extract_identities(func, max_iters=10):
+    iteration, exprs = generate_all_identities(func, max_iters)
+
+    # Filter the results by:
+    #  1. Adding all exprs to an egraph
+    #  3. Churn egraph
+    #  4. Now expressions will share ids, dedup groups by them
+
+    egraph = snake_egg.EGraph(snake_egg_rules.eval)
+    expr_ids = dict()
+    for expr in exprs:
+        id_num = egraph.add(expr)
+        expr_ids[expr] = str(id_num)
+
+    for churn in range(3):
+        try:
+            egraph.run(snake_egg_rules.rules, iter_limit=1)
+        except:
+            logger.warning("Egg ran into an issue")
+            break
+
+        for expr in exprs:
+            id_num = egraph.add(expr)
+            expr_ids[expr] = str(id_num)
+
+    deduped = dict()
+    for expr, id_num in expr_ids.items():
+        if id_num in deduped:
+            logger("equivalent expressions {} == {}",
+                   snake_egg_rules.egg_to_fpcore(deduped[id_num]),
+                   snake_egg_rules.egg_to_fpcore(expr))
             continue
-        if "thefunc" not in line.replace("(thefunc x)", ""):
-            logger.log("    only thefunc(x): {}", line)
-            continue
-        filtered_lines.append(line)
+        deduped[id_num] = expr
+
+    exprs = deduped.values()
+
+    lines = [str(snake_egg_rules.egg_to_fpcore(expr)) for expr in exprs]
 
     logger.blog(f"After {iteration} iterations",
-                "per_func: " + "\nper_func: ".join(filtered_lines))
+                "per_func: " + "\nper_func: ".join(lines))
 
-    return filtered_lines
+    return lines
 
 
 def write_identity_webpage(filename, identities):
