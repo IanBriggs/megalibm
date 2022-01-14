@@ -77,10 +77,13 @@ def generate_all_identities(func, max_iters):
     thefunc = namedtuple("thefunc", "x")
 
     # Add def and undef to ruleset
+    therules.append(snake_egg.Rewrite(thefunc(thevar),
+                                      func.to_snake_egg(to_rule=True),
+                                      "def"))
     try:
         therules.append(snake_egg.Rewrite(func.to_snake_egg(to_rule=True),
                                           thefunc(thevar),
-                                          "body_to_thefunc"))
+                                          "undef"))
     except:
         logger.warning("unable to undef function")
 
@@ -90,7 +93,7 @@ def generate_all_identities(func, max_iters):
 
     # Create our egraph and add thefunc
     egraph = snake_egg.EGraph(snake_egg_rules.eval)
-    se_func = func.to_snake_egg(to_rule=False)
+    se_func = thefunc("x")
     egraph.add(se_func)
 
     # Run for up to max_iters one at a time so we have output in the case of
@@ -121,6 +124,17 @@ def generate_all_identities(func, max_iters):
 
     return iteration, intersection
 
+def expr_size(expr, _cache=dict()):
+    if expr in _cache:
+        return _cache[expr]
+
+    size = 1
+    if isinstance(expr, tuple):
+        size += sum(expr_size(arg) for arg in expr)
+
+    _cache[expr] = size
+    return size
+
 def extract_identities(func, max_iters=10):
     iteration, exprs = generate_all_identities(func, max_iters)
 
@@ -149,9 +163,14 @@ def extract_identities(func, max_iters=10):
     deduped = dict()
     for expr, id_num in expr_ids.items():
         if id_num in deduped:
-            logger("equivalent expressions {} == {}",
-                   snake_egg_rules.egg_to_fpcore(deduped[id_num]),
-                   snake_egg_rules.egg_to_fpcore(expr))
+            old = deduped[id_num]
+            old_str = snake_egg_rules.egg_to_fpcore(old)
+            expr_str = snake_egg_rules.egg_to_fpcore(expr)
+            if expr_size(old) > expr_size(expr) or old_str < expr_str:
+                deduped[id_num] = expr
+                logger("replaced {} with {}", old, expr)
+                continue
+            logger("equivalent expressions {} == {}", old_str, expr_str)
             continue
         deduped[id_num] = expr
 
@@ -185,8 +204,11 @@ def write_identity_webpage(filename, identities):
         "</tr>",
     ]
 
+    identities = [(expr, count) for expr, count in identities.items()]
+    identities.sort(key=lambda t: t[1])
+
     lines.extend([f"<tr><td>{count}</td><td>{expr}</td><tr>"
-                  for expr, count in identities.items()])
+                  for expr, count in identities])
 
     lines.extend([
         "</table>",
@@ -232,7 +254,8 @@ def main(argv):
 
 
     logger.blog(f"All identites",
-                "Count\tExpr" + "\n".join(f"{c}\t{e}" for e, c in counts.items()))
+                "Count\tExpr\n" + "\n".join(f"{c}\t{e}"
+                                            for e, c in counts.items()))
 
     write_identity_webpage("index.html", counts)
 
