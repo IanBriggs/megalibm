@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -x
-#set -e
+set -e
 
 SCRIPT_DIR=$(dirname "${0}")
 SCRIPT_LOCATION=$(readlink -f "${SCRIPT_DIR}")

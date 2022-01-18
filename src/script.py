@@ -135,7 +135,7 @@ def expr_size(expr, _cache=dict()):
     _cache[expr] = size
     return size
 
-def extract_identities(func, max_iters=10):
+def extract_identities(func, max_iters=15):
     iteration, exprs = generate_all_identities(func, max_iters)
 
     # Filter the results by:
@@ -151,7 +151,7 @@ def extract_identities(func, max_iters=10):
 
     for churn in range(3):
         try:
-            egraph.run(snake_egg_rules.rules, iter_limit=1)
+            egraph.run(snake_egg_rules.rules, iter_limit=1, time_limit=600, node_limit=10000000)
         except:
             logger.warning("Egg ran into an issue")
             break
@@ -168,7 +168,7 @@ def extract_identities(func, max_iters=10):
             expr_str = str(snake_egg_rules.egg_to_fpcore(expr))
             if expr_size(old) > expr_size(expr) or old_str < expr_str:
                 deduped[id_num] = expr
-                logger("replaced {} with {}", old, expr)
+                logger("replaced {} with {}", old_str, expr_str)
                 continue
             logger("equivalent expressions {} == {}", old_str, expr_str)
             continue
@@ -205,7 +205,7 @@ def write_identity_webpage(filename, identities):
     ]
 
     identities = [(expr, count) for expr, count in identities.items()]
-    identities.sort(key=lambda t: t[1])
+    identities.sort(key=lambda t: -t[1])
 
     lines.extend([f"<tr><td>{count}</td><td>{expr}</td><tr>"
                   for expr, count in identities])
