@@ -1,5 +1,0 @@
-;; -*- mode: scheme -*-
-
-(FPCore  (x)
- :name "Data.Random.Distribution.Normal:doubleStdNormalZ from random-fu-0.2.6.2"
- (- (+ x x) 1.0))

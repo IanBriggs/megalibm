@@ -13,6 +13,7 @@ from .ast_methods import (
     remove_let,
     sub,
     substitute,
+    to_html,
     to_libm_c,
     to_mpfr_c,
     to_snake_egg,

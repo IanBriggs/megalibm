@@ -19,7 +19,11 @@ lambdas = {
     ops.div: lambda x, y: x / y,
 }
 
+REPORTED = set()
+
+
 def eval(op, args):
+    global REPORTED
     if type(op) in {int, float, str, fractions.Fraction}:
         try:
             f = fractions.Fraction(op)
@@ -27,7 +31,9 @@ def eval(op, args):
                 return int(f.numerator)
             return None
         except ValueError as e:
-            logger("Treating as variable: '{}'", op)
+            if op not in REPORTED:
+                logger("Treating as variable: '{}'", op)
+                REPORTED.add(op)
             return None
 
     if op in lambdas:

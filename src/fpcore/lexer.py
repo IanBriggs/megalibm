@@ -161,6 +161,7 @@ class FPCoreLexer(Lexer):
         "!=", "and", "or", "not", "isfinite",
         "isinf", "isnan", "isnormal", "signbit",
         "dim", "size", "ref",
+        "thefunc",
         ], key=len)
     for i in range(len(OPERATIONS)):
         SYMBOL[OPERATIONS[i]] = OPERATION

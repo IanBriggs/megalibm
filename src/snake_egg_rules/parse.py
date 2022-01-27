@@ -12,6 +12,7 @@ zero_arg = {
 }
 
 one_arg = {
+    thefunc: lambda x: ast.Operation("thefunc", x),
     acos:  lambda x: ast.Operation("acos",  x),
     acosh: lambda x: ast.Operation("acosh", x),
     asin:  lambda x: ast.Operation("asin",  x),
