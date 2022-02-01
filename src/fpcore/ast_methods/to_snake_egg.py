@@ -21,6 +21,7 @@ const_mapping = {
 }
 
 unop_mapping = {
+  "thefunc":    operations.thefunc,
   "+":          operations.uadd,
   "-":          operations.neg,
   "acos":       operations.acos,

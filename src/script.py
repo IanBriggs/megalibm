@@ -30,9 +30,10 @@ timer = Timer()
 
 ITERS = [
     10,  # Main iters for finding identities
-    10,  # Iters for dedup
-    10,  # Iters for definition finding I(x) - f(x) = 0
-    10,  # Iters for definition finding I(x) / f(x) = 1
+    11, # Iters for backoff dedup
+    5,  # Iters for simple dedup
+    1,  # Iters for definition finding I(x) - f(x) = 0
+    1,  # Iters for definition finding I(x) / f(x) = 1
 ]
 
 
@@ -40,7 +41,7 @@ ITERS = [
 
 
 def parse_arguments(argv):
-    num_cpus = multiprocessing.cpu_count() // 2
+    num_cpus = 1 #multiprocessing.cpu_count() // 2
     parser = argparse.ArgumentParser(description='Default script description')
     parser.add_argument("-v", "--verbosity",
                         nargs="?",
@@ -84,12 +85,16 @@ def parse_arguments(argv):
 
     return args
 
-def run_egraph(egraph, rules, iters, gen_output):
+def run_egraph(egraph, rules, iters, gen_output, use_simple):
     output = None
     iteration = 0
     for iteration in range(1, iters+1):
         try:
-            egraph.run(rules, iter_limit=1, time_limit=600, node_limit=10000000)
+            egraph.run(rules,
+                       iter_limit=1,
+                       time_limit=600,
+                       node_limit=10000000,
+                       use_simple_scheduler=use_simple)
         except:
             logger.warning("Egg ran into an issue on iteration {}", iteration)
             break
@@ -124,7 +129,8 @@ def generate_all_identities(func, max_iters):
     # Run for up to max_iters one at a time so we have output in the case of
     #   errors
     iteration, exprs = run_egraph(egraph, therules, max_iters,
-                                  lambda eg: eg.node_extract(se_func))
+                                  lambda eg: eg.node_extract(se_func),
+                                  False)
     exprs = list(exprs)
     exprs.sort(key=lambda e: str(e), reverse=True)
     exprs.sort(key=lambda e: len(str(e)))
@@ -155,7 +161,7 @@ def filter_keep_thefunc(exprs):
     return new_exprs
 
 
-def filter_dedup(exprs, max_iters):
+def filter_dedup(exprs, max_iters, use_simple):
     timer = Timer()
     timer.start()
 
@@ -167,7 +173,8 @@ def filter_dedup(exprs, max_iters):
 
     iteration, expr_ids = run_egraph(egraph, snake_egg_rules.rules, max_iters,
                                      lambda eg: {e:str(eg.add(e))
-                                                 for e in exprs})
+                                                 for e in exprs},
+                                     use_simple)
 
     deduped = dict()
     for expr, id_num in expr_ids.items():
@@ -205,7 +212,7 @@ def filter_defs_sub(exprs, func, max_iters):
     #  1. Add I(x)-f(x) and 0 to a new egraph
     #  2. Union the two
     #  3. Run with rules that do not define f(x)
-    #  4. Check if <body> - f(x) is in the egraph and it equals 1
+    #  4. Check if <body> - f(x) is in the egraph and it equals 0
     # Then we know that I(x) doe not give us new information
     fx = snake_egg_rules.thefunc("x")
     sub = snake_egg_rules.sub
@@ -217,14 +224,14 @@ def filter_defs_sub(exprs, func, max_iters):
         egraph.add(Ix_sub_fx)
         egraph.add(0)
         egraph.union(Ix_sub_fx, 0)
+        egraph.rebuild()
         iteration, _ = run_egraph(egraph, snake_egg_rules.rules, max_iters,
-                                  lambda eg: None)
+                                  lambda eg: None,
+                                  True)
 
         body_sub_fx = sub(func.to_snake_egg(to_rule=False), fx)
-        zero_id = egraph.add(0)
-        bsf_id = egraph.add(body_sub_fx)
 
-        if zero_id == bsf_id:
+        if egraph.equiv(0, body_sub_fx):
             logger.llog(Logger.HIGH, "definition identity sub: {}", Ix)
             continue
         new_exprs.append(Ix)
@@ -244,10 +251,10 @@ def filter_defs_div(exprs, func, max_iters):
     #  I(x) = 2*<body> - f(x)
     # where <body> is the body of f(x).
     # So if we:
-    #  1. Add I(x)-f(x) and 0 to a new egraph
+    #  1. Add I(x)/f(x) and 1 to a new egraph
     #  2. Union the two
     #  3. Run with rules that do not define f(x)
-    #  4. Check if <body> - f(x) is in the egraph and it equals 1
+    #  4. Check if <body> / f(x) is in the egraph and it equals 1
     # Then we know that I(x) doe not give us new information
     fx = snake_egg_rules.thefunc("x")
     div = snake_egg_rules.div
@@ -259,15 +266,15 @@ def filter_defs_div(exprs, func, max_iters):
         egraph.add(Ix_div_fx)
         egraph.add(1)
         egraph.union(Ix_div_fx, 1)
+        egraph.rebuild()
         iteration, _ = run_egraph(egraph, snake_egg_rules.rules, max_iters,
-                                  lambda eg: None)
+                                  lambda eg: None,
+                                  True)
 
         body_div_fx = div(func.to_snake_egg(to_rule=False), fx)
-        zero_id = egraph.add(1)
-        bsf_id = egraph.add(body_div_fx)
 
-        if zero_id == bsf_id:
-            logger.llog(Logger.HIGH, "definition identity mul: {}", Ix)
+        if egraph.equiv(1, body_div_fx):
+            logger.llog(Logger.HIGH, "definition identity div: {}", Ix)
             continue
         new_exprs.append(Ix)
     elapsed = timer.stop()
@@ -296,9 +303,10 @@ def extract_identities(func):
     iteration, exprs = generate_all_identities(func, ITERS[0])
 
     exprs = filter_keep_thefunc(exprs)
-    exprs = filter_dedup(exprs, ITERS[1])
-    exprs = filter_defs_sub(exprs, func, ITERS[2])
-    exprs = filter_defs_div(exprs, func, ITERS[3])
+    exprs = filter_dedup(exprs, ITERS[1], False)
+    exprs = filter_dedup(exprs, ITERS[2], True)
+    exprs = filter_defs_sub(exprs, func, ITERS[3])
+    exprs = filter_defs_div(exprs, func, ITERS[4])
 
     lines = [str(snake_egg_rules.egg_to_fpcore(expr)) for expr in exprs]
     lines.sort(reverse=True)
@@ -396,15 +404,18 @@ def write_identity_webpage(filename, identities):
 
 
 def handle_work_item(fname):
-    with open(fname, "r") as f:
-        text = f.read()
+    try:
+        with open(fname, "r") as f:
+            text = f.read()
 
-    func = fpcore.parse(text)
-    func.remove_let()
+        func = fpcore.parse(text)
+        func.remove_let()
 
-    expr_lines = extract_identities(func)
+        expr_lines = extract_identities(func)
 
-    return func, expr_lines
+        return func, expr_lines
+    except Exception as e:
+        return None, e
 
 
 def main(argv):
@@ -418,6 +429,8 @@ def main(argv):
     per_func_identities = dict(tuples)
     counts = dict()
     for func, ids in per_func_identities.items():
+        if func == None:
+            raise e
         for i in ids:
             counts[i] = counts.get(i, 0) + 1
 
