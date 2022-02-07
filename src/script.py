@@ -98,7 +98,7 @@ def run_egraph(egraph, rules, iters, gen_output, use_simple):
         except:
             logger.warning("Egg ran into an issue on iteration {}", iteration)
             break
-        output = gen_output(egraph)
+    output = gen_output(egraph)
     return iteration, output
 
 
