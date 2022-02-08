@@ -171,6 +171,9 @@ def filter_dedup(exprs, max_iters, use_simple):
     #  4. Now expressions will share ids, dedup groups by them
     egraph = snake_egg.EGraph(snake_egg_rules.eval)
 
+    for expr in exprs:
+        egraph.add(expr)
+
     iteration, expr_ids = run_egraph(egraph, snake_egg_rules.rules, max_iters,
                                      lambda eg: {e:str(eg.add(e))
                                                  for e in exprs},
@@ -178,10 +181,10 @@ def filter_dedup(exprs, max_iters, use_simple):
 
     deduped = dict()
     for expr, id_num in expr_ids.items():
+        expr_str = str(snake_egg_rules.egg_to_fpcore(expr))
         if id_num in deduped:
             old = deduped[id_num]
             old_str = str(snake_egg_rules.egg_to_fpcore(old))
-            expr_str = str(snake_egg_rules.egg_to_fpcore(expr))
             if (expr_size(old) > expr_size(expr)
                 or (expr_size(old) == expr_size(expr) and old_str < expr_str)):
                 deduped[id_num] = expr
@@ -191,6 +194,7 @@ def filter_dedup(exprs, max_iters, use_simple):
             logger.llog(Logger.HIGH, "expression: {}", old_str)
             logger.llog(Logger.HIGH, "  equal to: {}", expr_str)
             continue
+        logger.llog(Logger.HIGH, "passing through: {}", expr_str)
         deduped[id_num] = expr
     new_exprs = deduped.values()
     elapsed = timer.stop()
@@ -298,6 +302,8 @@ def expr_size(expr, _cache=dict()):
 
 
 def extract_identities(func):
+    props = {p.name: p.value for p in func.properties}
+    logger.dlog("Name: {}", props.get("name", "NoName"))
     logger.dlog("f(x): {}", func.body)
 
     iteration, exprs = generate_all_identities(func, ITERS[0])
@@ -430,7 +436,7 @@ def main(argv):
     counts = dict()
     for func, ids in per_func_identities.items():
         if func == None:
-            raise e
+            raise ids
         for i in ids:
             counts[i] = counts.get(i, 0) + 1
 
