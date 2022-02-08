@@ -117,8 +117,8 @@ raw_rules = [
 
   # Difference of cubes
   # difference-of-cubes (polynomials)
-    #pow ["sum-cubes",         add(pow(a, 3), pow(b, 3)),  mul(add(mul(a, a), sub(mul(b, b), mul(a, b))), add(a, b))],
-    #pow ["difference-cubes",  sub(pow(a, 3), pow(b, 3)),  mul(add(mul(a, a), add(mul(b, b), mul(a, b))), sub(a, b))],
+  ["sum-cubes",         add(pow(a, 3), pow(b, 3)),  mul(add(mul(a, a), sub(mul(b, b), mul(a, b))), add(a, b))],
+  ["difference-cubes",  sub(pow(a, 3), pow(b, 3)),  mul(add(mul(a, a), add(mul(b, b), mul(a, b))), sub(a, b))],
     #pow #div ["flip3-+",           add(a, b),                  div(add(pow(a, 3), pow(b, 3)), add(mul(a, a), sub(mul(b, b), mul(a, b))))],
     #pow #div ["flip3--",           sub(a, b),                  div(sub(pow(a, 3), pow(b, 3)), add(mul(a, a), add(mul(b, b), mul(a, b))))],
 
@@ -160,7 +160,7 @@ raw_rules = [
   #["sqrt-prod",                 sqrt(mul(x, y)),        mul(sqrt(x), sqrt(y))],  #sqrt       x*y >= 0                          -/->  x >= 0 && y >= 0
   #["sqrt-div",                  sqrt(div(x, y)),        div(sqrt(x), sqrt(y))],  #sqrt #div  y != 0 && x/y >= 0                -/->  x >= 0 && y >= 0 && sqrt(y) != 0
     #pow #sqrt #div ["sqrt-pow1",  sqrt(pow(x, y)),        pow(x, div(y, 2))],
-    #pow #sqrt #div ["sqrt-pow2",  pow(sqrt(x), y),        pow(x, div(y, 2))],
+  ["sqrt-pow2",  pow(sqrt(x), y),        pow(x, div(y, 2))],
   ["sqrt-unprod",                mul(sqrt(x), sqrt(y)),  sqrt(mul(x, y))],        #sqrt       x >= 0 && y >= 0                  --->  x*y >= 0
   ["sqrt-undiv",                 div(sqrt(x), sqrt(y)),  sqrt(div(x, y))],        #sqrt #div  x >= 0 && y >= 0 && sqrt(y) != 0  --->  y != 0 && x/y >= 0
   #["add-sqr-sqrt",              x,                      mul(sqrt(x), sqrt(x))],  #sqrt       ()                                -/->  x >= 0
@@ -171,12 +171,12 @@ raw_rules = [
   ["rem-cbrt-cube",  cbrt(pow(x, 3)),                      x],  #pow  <something>  ---> ()
   ["rem-3cbrt-lft",  mul(mul(cbrt(x), cbrt(x)), cbrt(x)),  x],
   ["rem-3cbrt-rft",  mul(cbrt(x), mul(cbrt(x), cbrt(x))),  x],
-    #pow ["cube-neg",       pow(neg(x), 3),                       neg(pow(x, 3))],
+  ["cube-neg",       pow(neg(x), 3),                       neg(pow(x, 3))],
 
   # cubes-distribute (arithmetic simplify)
-    #pow ["cube-prod",  pow(mul(x, y), 3),  mul(pow(x, 3), pow(y, 3))],
-    #pow #div ["cube-div",   pow(div(x, y), 3),  div(pow(x, 3), pow(y, 3))],
-    #pow ["cube-mult",  pow(x, 3),          mul(x, mul(x, x))],
+  ["cube-prod",  pow(mul(x, y), 3),  mul(pow(x, 3), pow(y, 3))],
+  ["cube-div",   pow(div(x, y), 3),  div(pow(x, 3), pow(y, 3))],
+  ["cube-mult",  pow(x, 3),          mul(x, mul(x, x))],
 
   # cubes-transform (arithmetic)
   ["cbrt-prod",      cbrt(mul(x, y)),        mul(cbrt(x), cbrt(y))],
@@ -187,7 +187,7 @@ raw_rules = [
   ["add-cbrt-cube",  x,                      cbrt(mul(mul(x, x), x))],
 
   # cubes-canonicalize (arithmetic simplify)
-    #pow ["cube-unmult",  mul(x, mul(x, x)),  pow(x, 3)],
+  ["cube-unmult",  mul(x, mul(x, x)),  pow(x, 3)],
 
   # Exponentials
   # exp-expand (exponents)
@@ -210,14 +210,14 @@ raw_rules = [
   ["exp-diff",  exp(sub(a, b)),  div(exp(a), exp(b))],  #div ()  --->  exp(b) != 0
 
   # exp-factor (exponents simplify)
-  ["prod-exp",           mul(exp(a), exp(b)),  exp(add(a, b))],
-  ["rec-exp",            div(1, exp(a)),       exp(neg(a))],     #div        exp(a) != 0  --->  ()
-  ["div-exp",            div(exp(a), exp(b)),  exp(sub(a, b))],  #div        exp(b) != 0  --->  ()
-    #pow ["exp-prod",      exp(mul(a, b)),       pow(exp(a), b)],
-  ["exp-sqrt",           exp(div(a, 2)),       sqrt(exp(a))],    #sqrt #div  2 != 0       --->  exp(a) >= 0
-  ["exp-cbrt",           exp(div(a, 3)),       cbrt(exp(a))],    #div        3 != 0       --->  ()
-  ["exp-lft-sqr",        exp(mul(a, 2)),       mul(exp(a), exp(a))],
-    #pow ["exp-lft-cube",  exp(mul(a, 3)),       pow(exp(a), 3)],
+  ["prod-exp",      mul(exp(a), exp(b)),  exp(add(a, b))],
+  ["rec-exp",       div(1, exp(a)),       exp(neg(a))],     #div        exp(a) != 0  --->  ()
+  ["div-exp",       div(exp(a), exp(b)),  exp(sub(a, b))],  #div        exp(b) != 0  --->  ()
+  ["exp-prod",      exp(mul(a, b)),       pow(exp(a), b)],
+  ["exp-sqrt",      exp(div(a, 2)),       sqrt(exp(a))],    #sqrt #div  2 != 0       --->  exp(a) >= 0
+  ["exp-cbrt",      exp(div(a, 3)),       cbrt(exp(a))],    #div        3 != 0       --->  ()
+  ["exp-lft-sqr",   exp(mul(a, 2)),       mul(exp(a), exp(a))],
+  ["exp-lft-cube",  exp(mul(a, 3)),       pow(exp(a), 3)],
 
   # Powers
   # pow-reduce (exponents simplify)
