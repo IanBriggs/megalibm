@@ -27,7 +27,7 @@ raw_rules = [
   ["associate-*r*",   mul(a, mul(b, c)),  mul(mul(a, b), c)],
   ["associate-*l*",   mul(mul(a, b), c),  mul(a, mul(b, c))],
   ["associate-*r/",   mul(a, div(b, c)),  div(mul(a, b), c)],  #div c != 0              --->  c != 0
-  #["associate-*l/",  mul(div(a, b), c),  div(mul(a, c), b)],  #div b != 0              -/->  c != 0
+  ["associate-*l/",  mul(div(a, b), c),  div(mul(a, c), b)],
   ["associate-/r*",   div(a, mul(b, c)),  div(div(a, b), c)],  #div b*c != 0            --->  b != 0 && c != 0
   #["associate-/l*",  div(mul(b, c), a),  div(b, div(a, c))],  #div a != 0              -/->  c != 0 && a/c != 0
   ["associate-/r/",   div(a, div(b, c)),  mul(div(a, b), c)],  #div c != 0 && b/c != 0  --->  b != 0
@@ -71,7 +71,7 @@ raw_rules = [
   ["difference-of-sqr-1",    sub(mul(a, a), 1),          mul(add(a, 1), sub(a, 1))],
   ["difference-of-sqr--1",   add(mul(a, a), neg(1)),     mul(add(a, 1), sub(a, 1))],
     #pow #div ["sqr-pow",                pow(a, b),                  mul(pow(a, div(b, 2)), pow(a, div(b, 2)))],
-    #pow ["pow-sqr",                mul(pow(a, b), pow(a, b)),  pow(a, mul(2, b))],
+  ["pow-sqr",                mul(pow(a, b), pow(a, b)),  pow(a, mul(2, b))],
 
   # difference-of-squares-flip (polynomials)
   #["flip-+",  add(a, b),  div(sub(mul(a, a), mul(b, b)), sub(a, b))],  #div ()  -/->  a-b != 0
