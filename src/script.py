@@ -30,10 +30,10 @@ timer = Timer()
 
 ITERS = [
     10,  # Main iters for finding identities
-    11, # Iters for backoff dedup
+    6, # Iters for backoff dedup
     5,  # Iters for simple dedup
-    1,  # Iters for definition finding I(x) - f(x) = 0
-    1,  # Iters for definition finding I(x) / f(x) = 1
+    3,  # Iters for definition finding I(x) - f(x) = 0
+    3,  # Iters for definition finding I(x) / f(x) = 1
 ]
 
 
@@ -41,7 +41,7 @@ ITERS = [
 
 
 def parse_arguments(argv):
-    num_cpus = 1 #multiprocessing.cpu_count() // 2
+    num_cpus = multiprocessing.cpu_count() // 2
     parser = argparse.ArgumentParser(description='Default script description')
     parser.add_argument("-v", "--verbosity",
                         nargs="?",
@@ -88,16 +88,15 @@ def parse_arguments(argv):
 def run_egraph(egraph, rules, iters, gen_output, use_simple):
     output = None
     iteration = 0
-    for iteration in range(1, iters+1):
-        try:
-            egraph.run(rules,
-                       iter_limit=1,
-                       time_limit=600,
-                       node_limit=10000000,
-                       use_simple_scheduler=use_simple)
-        except:
-            logger.warning("Egg ran into an issue on iteration {}", iteration)
-            break
+    try:
+        egraph.run(rules,
+                   iter_limit=iters,
+                   time_limit=600,
+                   node_limit=10000000,
+                   use_simple_scheduler=use_simple)
+    except:
+        logger.warning("Egg ran into an issue on iteration {}", iteration)
+
     output = gen_output(egraph)
     return iteration, output
 
@@ -151,6 +150,26 @@ def filter_keep_thefunc(exprs):
         exstr = str(snake_egg_rules.egg_to_fpcore(expr))
         if "thefunc" not in exstr:
             logger.llog(Logger.HIGH, "missing \"thefunc\": {}", exstr)
+            continue
+        new_exprs.append(expr)
+    elapsed = timer.stop()
+
+    logger.dlog("Removed {} identities in {:4f} seconds",
+                len(exprs)-len(new_exprs), elapsed)
+
+    return new_exprs
+
+
+def filter_max(exprs):
+    timer = Timer()
+    timer.start()
+
+    new_exprs = list()
+    for expr in exprs:
+        exstr = str(snake_egg_rules.egg_to_fpcore(expr))
+        exstr.replace("thefunc(x)", "")
+        if "thefunc" not in exstr:
+            logger.llog(Logger.HIGH, "only has \"thefunc(x)\": {}", exstr)
             continue
         new_exprs.append(expr)
     elapsed = timer.stop()
@@ -309,6 +328,7 @@ def extract_identities(func):
     iteration, exprs = generate_all_identities(func, ITERS[0])
 
     exprs = filter_keep_thefunc(exprs)
+    exprs = filter_max(exprs)
     exprs = filter_dedup(exprs, ITERS[1], False)
     exprs = filter_dedup(exprs, ITERS[2], True)
     exprs = filter_defs_sub(exprs, func, ITERS[3])
@@ -450,6 +470,8 @@ def main(argv):
 
     write_per_func_webpage("per_func.html", per_func_identities)
     write_identity_webpage("index.html", counts)
+
+    logger("{} unique identities", len(counts))
 
     return 0
 

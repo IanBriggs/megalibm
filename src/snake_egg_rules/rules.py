@@ -183,8 +183,8 @@ raw_rules = [
   ["cbrt-div",       cbrt(div(x, y)),        div(cbrt(x), cbrt(y))],  #div y != 0        --->  cbrt(y) != 0
   ["cbrt-unprod",    mul(cbrt(x), cbrt(y)),  cbrt(mul(x, y))],
   ["cbrt-undiv",     div(cbrt(x), cbrt(y)),  cbrt(div(x, y))],        #div cbrt(y) != 0  --->  y != 0
-  ["add-cube-cbrt",  x,                      mul(mul(cbrt(x), cbrt(x)), cbrt(x))],
-  ["add-cbrt-cube",  x,                      cbrt(mul(mul(x, x), x))],
+  #bad ["add-cube-cbrt",  x,                      mul(mul(cbrt(x), cbrt(x)), cbrt(x))],
+  #bad ["add-cbrt-cube",  x,                      cbrt(mul(mul(x, x), x))],
 
   # cubes-canonicalize (arithmetic simplify)
   ["cube-unmult",  mul(x, mul(x, x)),  pow(x, 3)],
