@@ -41,7 +41,7 @@ ITERS = [
 
 
 def parse_arguments(argv):
-    num_cpus = multiprocessing.cpu_count() // 2
+    num_cpus = 1# multiprocessing.cpu_count() // 2
     parser = argparse.ArgumentParser(description='Default script description')
     parser.add_argument("-v", "--verbosity",
                         nargs="?",
