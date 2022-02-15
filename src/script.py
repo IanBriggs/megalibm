@@ -18,6 +18,8 @@ import fpcore
 import snake_egg
 import snake_egg_rules
 
+import z3
+
 import datetime
 
 from collections import namedtuple
@@ -29,11 +31,12 @@ timer = Timer()
 
 
 ITERS = [
-    10,  # Main iters for finding identities
-    6, # Iters for backoff dedup
+    10, # Main iters for finding identities
+    6,  # Iters for backoff dedup
     5,  # Iters for simple dedup
     3,  # Iters for definition finding I(x) - f(x) = 0
     3,  # Iters for definition finding I(x) / f(x) = 1
+    10,  # Iters for generator dedup
 ]
 
 
@@ -167,7 +170,7 @@ def filter_max(exprs):
     new_exprs = list()
     for expr in exprs:
         exstr = str(snake_egg_rules.egg_to_fpcore(expr))
-        exstr.replace("thefunc(x)", "")
+        exstr.replace("(thefunc x)", "")
         if "thefunc" not in exstr:
             logger.llog(Logger.HIGH, "only has \"thefunc(x)\": {}", exstr)
             continue
@@ -320,6 +323,129 @@ def expr_size(expr, _cache=dict()):
     return size
 
 
+def cross_identity(A, B):
+    # A = (ta (f (sa x)))
+    # B = (tb (f (sb x)))
+    # A*B = (ta (tb (f (sb (sa x)))))
+    x = fpcore.ast.Variable("x")
+    f = fpcore.ast.Operation("thefunc", x)
+    ta = A.extract_t()
+    tb = B.extract_t()
+    sa = A.extract_s()
+    sb = B.extract_s()
+
+    ta_tb = ta.substitute(x, tb)
+    ta_tb_f = ta_tb.substitute(x, f)
+    ta_tb_f_sb = ta_tb_f.substitute(x, sb)
+    ta_tb_f_sb_sa = ta_tb_f_sb.substitute(x, sa)
+
+    return ta_tb_f_sb_sa
+
+
+def dedup_generators(identities, iters):
+    timer = Timer()
+    timer.start()
+
+    query = [
+        "(define-fun btoi ((b Bool)) Int",
+        "  (ite b 1 0))",
+    ]
+
+    query.extend([f"(declare-const I_{I} Bool)"
+                  for I in range(len(identities))])
+
+    cross_products = dict()
+    I = 0
+    for first in identities:
+        first.sat_expr = f"I_{I}"
+        logger("Crossing: {}", first)
+        crossed = list()
+        J = 0
+        for second in identities:
+            logger("  with: {}", second)
+            cross = cross_identity(first, second)
+            cross.sat_expr = f"(and I_{I} I_{J})"
+            logger("    becomes: {}", cross)
+            crossed.append(cross)
+            J += 1
+        cross_products[first] = crossed
+        I += 1
+
+    egraph = snake_egg.EGraph(snake_egg_rules.eval)
+
+    flat_cross_products = list()
+    for key, value in cross_products.items():
+        egraph.add(key.to_snake_egg(to_rule=False))
+        flat_cross_products.append(key)
+        for cross in value:
+            egraph.add(cross.to_snake_egg(to_rule=False))
+            flat_cross_products.append(cross)
+
+    _, ids = run_egraph(egraph, snake_egg_rules.rules, iters,
+                        lambda eg: {e:str(eg.add(e.to_snake_egg(to_rule=False)))
+                                    for e in flat_cross_products},
+                        False)
+
+    groups = list(set(ids.values()))
+
+    query.extend([f"(declare-const group_{G} Bool)"
+                  for G in range(len(groups))])
+
+    G = 0
+    for g in groups:
+        line = f"(assert (= group_{G} (or "
+        G += 1
+        exprs_in_group = list()
+        for key, value in cross_products.items():
+            if ids[key] == g:
+                exprs_in_group.append(key.sat_expr)
+            for cross in value:
+                if ids[cross] == g:
+                    exprs_in_group.append(cross.sat_expr)
+
+        line += " ".join(exprs_in_group) + ")))"
+        query.append(line)
+
+    line = "(assert (= true (and "
+    line += " ".join([f"group_{G}" for G in range(len(groups))]) + ")))"
+    query.append(line)
+
+    query.append("(declare-const cost Int)")
+
+    line = "(assert (= cost (+ "
+    line += " ".join([f"(btoi I_{I})" for I in range(len(identities))]) + ")))"
+    query.append(line)
+
+    query.append("(minimize cost)")
+    query.append("(check_sat)")
+
+    query = "\n".join(query)
+
+    logger.blog("Z3 query", query)
+
+    ctx = z3.Context("model_validate", "true")
+    optimizer = z3.Optimize(ctx=ctx)
+    optimizer.from_string(query)
+    state = optimizer.check()
+    if str(state) != "sat":
+        assert False, "Impossible!"
+    z3_model = optimizer.model()
+    model = {d.name(): z3_model[d] for d in z3_model}
+    for I, iden in enumerate(identities):
+        name = f"I_{I}"
+        logger("{}: {}", model[name], iden)
+
+    new_identities = [iden for I,iden in enumerate(identities)
+                      if model[f"I_{I}"]]
+
+    elapsed = timer.stop()
+    logger.dlog("Removed {} identities in {:4f} seconds",
+                len(identities)-len(new_identities), elapsed)
+
+    return new_identities
+
+
+
 def extract_identities(func):
     props = {p.name: p.value for p in func.properties}
     logger.dlog("Name: {}", props.get("name", "NoName"))
@@ -328,13 +454,16 @@ def extract_identities(func):
     iteration, exprs = generate_all_identities(func, ITERS[0])
 
     exprs = filter_keep_thefunc(exprs)
-    exprs = filter_max(exprs)
+    #exprs = filter_max(exprs)
     exprs = filter_dedup(exprs, ITERS[1], False)
     exprs = filter_dedup(exprs, ITERS[2], True)
     exprs = filter_defs_sub(exprs, func, ITERS[3])
     exprs = filter_defs_div(exprs, func, ITERS[4])
 
-    lines = [str(snake_egg_rules.egg_to_fpcore(expr)) for expr in exprs]
+    exprs = [snake_egg_rules.egg_to_fpcore(expr) for expr in exprs]
+    exprs = dedup_generators(exprs, ITERS[5])
+
+    lines = [str(expr) for expr in exprs]
     lines.sort(reverse=True)
     lines.sort(key=len)
 
@@ -437,10 +566,17 @@ def handle_work_item(fname):
         func = fpcore.parse(text)
         func.remove_let()
 
+        if func.arguments[0].source != "x":
+            var = func.arguments[0]
+            x = fpcore.ast.Variable("x")
+            func.arguments[0] = x
+            func = func.substitute(var, x)
+
         expr_lines = extract_identities(func)
 
         return func, expr_lines
     except Exception as e:
+        raise e
         return None, e
 
 
@@ -449,8 +585,11 @@ def main(argv):
 
     args = parse_arguments(argv)
 
-    with multiprocessing.Pool(processes=args.procs) as pool:
-        tuples = pool.map(handle_work_item, args.fnames, chunksize=1)
+    if args.procs == 1:
+        tuples = [handle_work_item(fname) for fname in args.fnames]
+    else:
+        with multiprocessing.Pool(processes=args.procs) as pool:
+            tuples = pool.map(handle_work_item, args.fnames, chunksize=1)
 
     per_func_identities = dict(tuples)
     counts = dict()

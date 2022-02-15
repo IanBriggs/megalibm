@@ -6,7 +6,10 @@ from . import ast
 
 from .ast_methods import (
     add,
+    copy,
     equals,
+    extract_s,
+    extract_t,
     float,
     mul,
     neg,
