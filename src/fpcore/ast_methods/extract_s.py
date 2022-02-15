@@ -7,6 +7,8 @@ from utils import add_method, Logger
 logger = Logger(level=Logger.EXTRA)
 
 
+
+
 @add_method(ASTNode)
 def extract_s(self):
     # Make sure calling extract_s leads to an error if not overridden
@@ -26,7 +28,7 @@ def extract_s(self):
         inner = arg.extract_s()
         if inner != None:
             return inner
-    assert False, "Unable to find 'thefunc'"
+    return None
 
 @add_method(FPCore)
 def extract_s(self):
