@@ -1,6 +1,6 @@
 
 
-from fpcore.ast import ASTNode, Atom, Operation, FPCore, Variable, Number
+from fpcore.ast import ASTNode, Atom, Constant, Operation, FPCore, Variable, Number
 from utils import add_method, Logger
 
 
@@ -21,6 +21,10 @@ def extract_t(self):
 @add_method(Number)
 def extract_t(self):
     return Number(self.source)
+
+@add_method(Constant)
+def extract_t(self):
+    return Constant(self.source)
 
 @add_method(Operation)
 def extract_t(self):
