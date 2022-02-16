@@ -363,7 +363,7 @@ def dedup_generators(identities, iters):
         J = 0
         for second in identities:
             logger("  with: {}", second)
-            cross = cross_identity(first, second)
+            cross = first.cross(second)
             cross.sat_expr = f"(and I_{I} I_{J})"
             logger("    becomes: {}", cross)
             crossed.append(cross)

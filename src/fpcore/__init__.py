@@ -7,6 +7,7 @@ from . import ast
 from .ast_methods import (
     add,
     copy,
+    cross,
     equals,
     extract_s,
     extract_t,
