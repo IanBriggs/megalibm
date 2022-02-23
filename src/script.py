@@ -36,7 +36,7 @@ ITERS = [
     5,  # Iters for simple dedup
     3,  # Iters for definition finding I(x) - f(x) = 0
     3,  # Iters for definition finding I(x) / f(x) = 1
-    10,  # Iters for generator dedup
+    5,  # Iters for generator dedup
 ]
 
 
@@ -351,20 +351,30 @@ def dedup_generators(identities, iters):
         "  (ite b 1 0))",
     ]
 
+    query.extend([f"(declare-const core_I_{I} Bool) ; {iden}"
+                  for I,iden in enumerate(identities)])
+
     query.extend([f"(declare-const I_{I} Bool)"
-                  for I in range(len(identities))])
+                  for I,iden in enumerate(identities)])
+
+    query.extend([f"(declare-const len_I_{I} Int)"
+                  for I,iden in enumerate(identities)])
+
+    query.extend([f"(assert (> len_I_{I} 0))"
+                  for I,iden in enumerate(identities)])
 
     cross_products = dict()
     I = 0
     for first in identities:
-        first.sat_expr = f"I_{I}"
+        first.sat_expr = None
         logger("Crossing: {}", first)
         crossed = list()
         J = 0
         for second in identities:
             logger("  with: {}", second)
             cross = first.cross(second)
-            cross.sat_expr = f"(and I_{I} I_{J})"
+            cross.sat_expr = (
+                f"(and I_{I} I_{J} (= len_I_{{}} (+ len_I_{I} len_I_{J})))")
             logger("    becomes: {}", cross)
             crossed.append(cross)
             J += 1
@@ -384,40 +394,32 @@ def dedup_generators(identities, iters):
     _, ids = run_egraph(egraph, snake_egg_rules.rules, iters,
                         lambda eg: {e:str(eg.add(e.to_snake_egg(to_rule=False)))
                                     for e in flat_cross_products},
-                        False)
+                        True)
 
     groups = list(set(ids.values()))
 
-    query.extend([f"(declare-const group_{G} Bool)"
-                  for G in range(len(groups))])
+    for I, iden in enumerate(identities):
+        gid = ids[iden]
+        query.append(f"(assert (= I_{I} (or (and core_I_{I} (= len_I_{I} 1))")
+        for e in flat_cross_products:
+            if ids[e] != gid or e.sat_expr == None:
+                continue
+            query.append("  " + e.sat_expr.format(I))
+        query[-1] += ")))"
 
-    G = 0
-    for g in groups:
-        line = f"(assert (= group_{G} (or "
-        G += 1
-        exprs_in_group = list()
-        for key, value in cross_products.items():
-            if ids[key] == g:
-                exprs_in_group.append(key.sat_expr)
-            for cross in value:
-                if ids[cross] == g:
-                    exprs_in_group.append(cross.sat_expr)
-
-        line += " ".join(exprs_in_group) + ")))"
-        query.append(line)
-
-    line = "(assert (= true (and "
-    line += " ".join([f"group_{G}" for G in range(len(groups))]) + ")))"
+    line = "(assert (and "
+    line += " ".join([f"I_{I}" for I in range(len(identities))]) + "))"
     query.append(line)
 
     query.append("(declare-const cost Int)")
 
     line = "(assert (= cost (+ "
-    line += " ".join([f"(btoi I_{I})" for I in range(len(identities))]) + ")))"
+    line += " ".join([f"(btoi core_I_{I})" for I in
+                      range(len(identities))]) + ")))"
     query.append(line)
 
     query.append("(minimize cost)")
-    query.append("(check_sat)")
+    query.append("(check-sat)")
 
     query = "\n".join(query)
 
@@ -436,7 +438,7 @@ def dedup_generators(identities, iters):
         logger("{}: {}", model[name], iden)
 
     new_identities = [iden for I,iden in enumerate(identities)
-                      if model[f"I_{I}"]]
+                      if model[f"core_I_{I}"]]
 
     elapsed = timer.stop()
     logger.dlog("Removed {} identities in {:4f} seconds",
