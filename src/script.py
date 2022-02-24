@@ -44,7 +44,7 @@ ITERS = [
 
 
 def parse_arguments(argv):
-    num_cpus = 1# multiprocessing.cpu_count() // 2
+    num_cpus = 1 #multiprocessing.cpu_count() // 2
     parser = argparse.ArgumentParser(description='Default script description')
     parser.add_argument("-v", "--verbosity",
                         nargs="?",
@@ -394,7 +394,7 @@ def dedup_generators(identities, iters):
     _, ids = run_egraph(egraph, snake_egg_rules.rules, iters,
                         lambda eg: {e:str(eg.add(e.to_snake_egg(to_rule=False)))
                                     for e in flat_cross_products},
-                        True)
+                        False)
 
     groups = list(set(ids.values()))
 
