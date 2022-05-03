@@ -2,7 +2,7 @@
 
 from .operations import *
 
-from .ruler-rules import rules
+from .ruler_rules import rules
 
 from .queries import *
 
