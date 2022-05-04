@@ -97,8 +97,9 @@ def run_egraph(egraph, rules, iters, gen_output, use_simple):
                    time_limit=600,
                    node_limit=10000000,
                    use_simple_scheduler=use_simple)
-    except:
+    except BaseException as e:
         logger.warning("Egg ran into an issue on iteration {}", iteration)
+        raise e
 
     output = gen_output(egraph)
     return iteration, output
@@ -120,8 +121,9 @@ def generate_all_identities(func, max_iters):
     therules.append(rw(from_def, to_def, "def"))
     try:
         therules.append(rw(to_def, from_def, "undef"))
-    except:
-        logger.warning("unable to undef function")
+    except Exception as e:
+        logger.warning("Unable to undef function")
+        logger.warning("Due to: {}", e)
 
     # Create our egraph and add thefunc
     egraph = snake_egg.EGraph(snake_egg_rules.eval)
@@ -560,21 +562,17 @@ def write_identity_webpage(filename, identities):
 
 
 def handle_work_item(func):
-    try:
-        func.remove_let()
+    func.remove_let()
 
-        if func.arguments[0].source != "x":
-            var = func.arguments[0]
-            x = fpcore.ast.Variable("x")
-            func.arguments[0] = x
-            func = func.substitute(var, x)
+    if func.arguments[0].source != "x":
+        var = func.arguments[0]
+        x = fpcore.ast.Variable("x")
+        func.arguments[0] = x
+        func = func.substitute(var, x)
 
-        expr_lines = extract_identities(func)
+    expr_lines = extract_identities(func)
 
-        return func, expr_lines
-    except Exception as e:
-        raise e
-        return None, e
+    return func, expr_lines
 
 
 def main(argv):
