@@ -301,8 +301,6 @@ def parse(text):
     timer.start()
     parsed = _parser.parse(tokens)
     timer.stop()
-    if len(parsed) == 1:
-        return parsed[0]
     return parsed
 
 

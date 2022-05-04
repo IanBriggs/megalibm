@@ -560,12 +560,8 @@ def write_identity_webpage(filename, identities):
         f.write(text)
 
 
-def handle_work_item(fname):
+def handle_work_item(func):
     try:
-        with open(fname, "r") as f:
-            text = f.read()
-
-        func = fpcore.parse(text)
         func.remove_let()
 
         if func.arguments[0].source != "x":
@@ -587,11 +583,19 @@ def main(argv):
 
     args = parse_arguments(argv)
 
+    work_items = list()
+    for fname in args.fnames:
+        with open(fname, "r") as f:
+            text = f.read()
+
+        funcs = fpcore.parse(text)
+        work_items.extend(funcs)
+
     if args.procs == 1:
-        tuples = [handle_work_item(fname) for fname in args.fnames]
+        tuples = [handle_work_item(func) for func in work_items]
     else:
         with multiprocessing.Pool(processes=args.procs) as pool:
-            tuples = pool.map(handle_work_item, args.fnames, chunksize=1)
+            tuples = pool.map(handle_work_item, work_items, chunksize=1)
 
     per_func_identities = dict(tuples)
     counts = dict()
