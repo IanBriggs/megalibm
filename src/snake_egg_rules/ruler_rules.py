@@ -65,7 +65,6 @@ raw_rules = [
 	["56", a, sub(a, 0)],
 	["57", sub(a, 0), a],
 	["58", sub(a, a), 0],
-	["59", div(a, a), 1],
 	["60", neg(a), div(a, -1)],
 	["61", div(a, -1), neg(a)],
 	["62", neg(a), mul(a, -1)],
