@@ -590,19 +590,22 @@ def main(argv):
         funcs = fpcore.parse(text)
         work_items.extend(funcs)
 
+    funcs = work_items
+    work_items = list()
     header = True
-    for func in work_items:
-        if len(func.arguments) != 1:
-            if header:
-                msg = ("Currently only functions in a single variable are"
-                       " supported")
-                logger.warning(msg)
-                header = False
-            name = func.get_any_name()
-            if name == None:
-                logger.warning("Dropping {}", func)
-            else:
-                logger.warning("Dropping {}", name)
+    for func in funcs:
+        if len(func.arguments) == 1:
+            work_items.append(func)
+            continue
+        if header:
+            msg = "Currently only functions in a single variable are supported"
+            logger.warning(msg)
+            header = False
+        name = func.get_any_name()
+        if name == None:
+            logger.warning("Dropping {}", func)
+        else:
+            logger.warning("Dropping {}", name)
 
     if args.procs == 1:
         tuples = [handle_work_item(func) for func in work_items]
