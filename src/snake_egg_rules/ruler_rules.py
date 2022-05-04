@@ -74,7 +74,6 @@ raw_rules = [
 	["66", add(a, a), mul(2, a)],
 	["67", mul(2, a), add(a, a)],
 	["68", add(mul(sin(a), sin(a)), mul(cos(a), cos(a))), 1],
-	["69", div(0, a), 0],
 	["70", mul(a, 0), 0],
 	["71", sub(a, -1), add(a, 1)],
 	["72", add(a, 1), sub(a, -1)],
