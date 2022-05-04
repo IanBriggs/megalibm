@@ -56,11 +56,11 @@ def parse_arguments(argv):
                         nargs="?",
                         type=str,
                         help="Redirect logging to given file.")
-    parser.add_argument("-p", "--procs",
-                        help="Execute using the selected number of processes",
-                        type=int,
-                        default=num_cpus,
-                        action="store")
+    # parser.add_argument("-p", "--procs",
+    #                     help="Execute using the selected number of processes",
+    #                     type=int,
+    #                     default=num_cpus,
+    #                     action="store")
     parser.add_argument("dirname",
                         help="Directory with the fpcore files")
     args = parser.parse_args(argv[1:])
@@ -78,13 +78,13 @@ def parse_arguments(argv):
                        if fname.endswith(".fpcore")]
     args.fnames.sort()
 
-    args.procs = min(len(args.fnames), args.procs)
+    # args.procs = min(len(args.fnames), args.procs)
 
     logger.dlog("Settings:")
     logger.dlog("    dirname: {}", args.dirname)
     logger.dlog("  verbosity: {}", args.verbosity)
     logger.dlog("   log-file: {}", args.log_file)
-    logger.dlog("      procs: {}", args.procs)
+    # logger.dlog("      procs: {}", args.procs)
 
     return args
 
@@ -607,11 +607,12 @@ def main(argv):
         else:
             logger.warning("Dropping {}", name)
 
-    if args.procs == 1:
-        tuples = [handle_work_item(func) for func in work_items]
-    else:
-        with multiprocessing.Pool(processes=args.procs) as pool:
-            tuples = pool.map(handle_work_item, work_items, chunksize=1)
+    tuples = [handle_work_item(func) for func in work_items]
+    # if args.procs == 1:
+    #     tuples = [handle_work_item(func) for func in work_items]
+    # else:
+    #     with multiprocessing.Pool(processes=args.procs) as pool:
+    #         tuples = pool.map(handle_work_item, work_items, chunksize=1)
 
     per_func_identities = dict(tuples)
     counts = dict()
