@@ -29,7 +29,7 @@ raw_rules = [
 	["20", mul(b, add(a, c)), add(mul(a, b), mul(b, c))],
 	["21", div(sub(mul(a, b), c), b), sub(a, div(c, b))],
 	["22", sub(a, div(c, b)), div(sub(mul(a, b), c), b)],
-	["23", div(a, sub(div(b, c), a)), div(c, sub(div(b, a), c))],
+	#["23", div(a, sub(div(b, c), a)), div(c, sub(div(b, a), c))],
 	["24", mul(a, b), mul(b, a)],
 	["25", add(a, b), add(b, a)],
 	["26", mul(a, add(b, b)), mul(b, add(a, a))],
