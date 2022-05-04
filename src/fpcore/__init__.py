@@ -12,6 +12,7 @@ from .ast_methods import (
     extract_s,
     extract_t,
     float,
+    get_any_name,
     mul,
     neg,
     remove_let,

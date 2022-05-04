@@ -449,8 +449,7 @@ def dedup_generators(identities, iters):
 
 
 def extract_identities(func):
-    props = {p.name: p.value for p in func.properties}
-    logger.dlog("Name: {}", props.get("name", "NoName"))
+    logger.dlog("Name: {}", func.get_any_name())
     logger.dlog("f(x): {}", func.body)
 
     iteration, exprs = generate_all_identities(func, ITERS[0])
@@ -590,6 +589,20 @@ def main(argv):
 
         funcs = fpcore.parse(text)
         work_items.extend(funcs)
+
+    header = True
+    for func in work_items:
+        if len(func.arguments) != 1:
+            if header:
+                msg = ("Currently only functions in a single variable are"
+                       " supported")
+                logger.warning(msg)
+                header = False
+            name = func.get_any_name()
+            if name == None:
+                logger.warning("Dropping {}", func)
+            else:
+                logger.warning("Dropping {}", name)
 
     if args.procs == 1:
         tuples = [handle_work_item(func) for func in work_items]
