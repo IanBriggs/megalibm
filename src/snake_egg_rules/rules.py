@@ -8,7 +8,7 @@ x, y, z, a, b, c, d = vars("x y z a b c d")
 
 
 raw_rules = [
-
+  
   # Commutativity
   # commutativity (arithmetic simplify fp-safe)
   ["+-commutative",  add(a, b),  add(b, a)],
