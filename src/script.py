@@ -56,11 +56,11 @@ def parse_arguments(argv):
                         nargs="?",
                         type=str,
                         help="Redirect logging to given file.")
-    parser.add_argument("-p", "--procs",
-                        help="Execute using the selected number of processes",
-                        type=int,
-                        default=num_cpus,
-                        action="store")
+    # parser.add_argument("-p", "--procs",
+    #                     help="Execute using the selected number of processes",
+    #                     type=int,
+    #                     default=num_cpus,
+    #                     action="store")
     parser.add_argument("dirname",
                         help="Directory with the fpcore files")
     args = parser.parse_args(argv[1:])
@@ -78,13 +78,13 @@ def parse_arguments(argv):
                        if fname.endswith(".fpcore")]
     args.fnames.sort()
 
-    args.procs = min(len(args.fnames), args.procs)
+    # args.procs = min(len(args.fnames), args.procs)
 
     logger.dlog("Settings:")
     logger.dlog("    dirname: {}", args.dirname)
     logger.dlog("  verbosity: {}", args.verbosity)
     logger.dlog("   log-file: {}", args.log_file)
-    logger.dlog("      procs: {}", args.procs)
+    # logger.dlog("      procs: {}", args.procs)
 
     return args
 
@@ -97,8 +97,9 @@ def run_egraph(egraph, rules, iters, gen_output, use_simple):
                    time_limit=600,
                    node_limit=10000000,
                    use_simple_scheduler=use_simple)
-    except:
+    except BaseException as e:
         logger.warning("Egg ran into an issue on iteration {}", iteration)
+        raise e
 
     output = gen_output(egraph)
     return iteration, output
@@ -120,8 +121,9 @@ def generate_all_identities(func, max_iters):
     therules.append(rw(from_def, to_def, "def"))
     try:
         therules.append(rw(to_def, from_def, "undef"))
-    except:
-        logger.warning("unable to undef function")
+    except Exception as e:
+        logger.warning("Unable to undef function")
+        logger.warning("Due to: {}", e)
 
     # Create our egraph and add thefunc
     egraph = snake_egg.EGraph(snake_egg_rules.eval)
@@ -449,8 +451,7 @@ def dedup_generators(identities, iters):
 
 
 def extract_identities(func):
-    props = {p.name: p.value for p in func.properties}
-    logger.dlog("Name: {}", props.get("name", "NoName"))
+    logger.dlog("Name: {}", func.get_any_name())
     logger.dlog("f(x): {}", func.body)
 
     iteration, exprs = generate_all_identities(func, ITERS[0])
@@ -560,26 +561,18 @@ def write_identity_webpage(filename, identities):
         f.write(text)
 
 
-def handle_work_item(fname):
-    try:
-        with open(fname, "r") as f:
-            text = f.read()
+def handle_work_item(func):
+    func.remove_let()
 
-        func = fpcore.parse(text)
-        func.remove_let()
+    if func.arguments[0].source != "x":
+        var = func.arguments[0]
+        x = fpcore.ast.Variable("x")
+        func.arguments[0] = x
+        func = func.substitute(var, x)
 
-        if func.arguments[0].source != "x":
-            var = func.arguments[0]
-            x = fpcore.ast.Variable("x")
-            func.arguments[0] = x
-            func = func.substitute(var, x)
+    expr_lines = extract_identities(func)
 
-        expr_lines = extract_identities(func)
-
-        return func, expr_lines
-    except Exception as e:
-        raise e
-        return None, e
+    return func, expr_lines
 
 
 def main(argv):
@@ -587,11 +580,37 @@ def main(argv):
 
     args = parse_arguments(argv)
 
-    if args.procs == 1:
-        tuples = [handle_work_item(fname) for fname in args.fnames]
-    else:
-        with multiprocessing.Pool(processes=args.procs) as pool:
-            tuples = pool.map(handle_work_item, args.fnames, chunksize=1)
+    work_items = list()
+    for fname in args.fnames:
+        with open(fname, "r") as f:
+            text = f.read()
+
+        funcs = fpcore.parse(text)
+        work_items.extend(funcs)
+
+    funcs = work_items
+    work_items = list()
+    header = True
+    for func in funcs:
+        if len(func.arguments) == 1:
+            work_items.append(func)
+            continue
+        if header:
+            msg = "Currently only functions in a single variable are supported"
+            logger.warning(msg)
+            header = False
+        name = func.get_any_name()
+        if name == None:
+            logger.warning("Dropping {}", func)
+        else:
+            logger.warning("Dropping {}", name)
+
+    tuples = [handle_work_item(func) for func in work_items]
+    # if args.procs == 1:
+    #     tuples = [handle_work_item(func) for func in work_items]
+    # else:
+    #     with multiprocessing.Pool(processes=args.procs) as pool:
+    #         tuples = pool.map(handle_work_item, work_items, chunksize=1)
 
     per_func_identities = dict(tuples)
     counts = dict()
