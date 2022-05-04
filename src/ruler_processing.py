@@ -1,9 +1,6 @@
-from ctypes.wintypes import HDC
 import sys
 import json
 from dataclasses import dataclass
-
-from numpy import isin
 from sexpdata import loads, dumps, car, cdr
 
 prelude = """
@@ -47,7 +44,7 @@ def is_operator(s):
 
 def lisp_to_c_style(sexpr):
   if not isinstance(sexpr, list):
-    return sexpr
+    return dumps(sexpr, str_as='symbol')
   elif isinstance(sexpr, list):
     if sexpr == []:
       return ""
@@ -92,19 +89,22 @@ def process_rules(input, output):
     f.write(prelude)
     count = 0
     rules = []
-    content = json.loads(open(input, 'r').read())['new_eqs']
+    content = json.loads(open(input, 'r').read())['all_eqs']
     for c in content:
-      if c['bidirectional']:
-        r1 = RulerRule(str(count), c['lhs'], c['rhs'])
-        count += 1
-        rules.append(r1)
-        r2 = RulerRule(str(count), c['rhs'], c['lhs'])
-        count += 1
-        rules.append(r2)
+      if ("cis " in str(c['lhs'])) or ("cis " in str(c['rhs'])):
+        continue
       else:
-        r = RulerRule(str(count), c['lhs'], c['rhs'])
-        count += 1
-        rules.append(r)
+        if c['bidirectional']:
+          r1 = RulerRule(str(count), c['lhs'], c['rhs'])
+          count += 1
+          rules.append(r1)
+          r2 = RulerRule(str(count), c['rhs'], c['lhs'])
+          count += 1
+          rules.append(r2)
+        else:
+          r = RulerRule(str(count), c['lhs'], c['rhs'])
+          count += 1
+          rules.append(r)
     mk_rules(rules, f)
     f.write(epilogue)
 
