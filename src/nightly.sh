@@ -22,7 +22,7 @@ cd "${THIS_NIGHTLY_LOCATION}"
 
 # Gather output files
 
-if [ "$(hostname)" = "warfa" ] && [ "${USER}" = "p92" ] ; then
+if [ "$(hostname)" = "warfa" ] && [ "${USER}" != "ibriggs" ] ; then
     scp -r "${THIS_NIGHTLY_LOCATION}" uwplse.org:/var/www/megalibm/
 fi
 
