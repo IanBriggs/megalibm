@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import argparse
+import datetime
 import os
 import os.path as path
-import multiprocessing
 import sys
 
 BIN_DIR = path.abspath(path.dirname(__file__))
@@ -14,41 +14,19 @@ EGG_DIR = path.join(REQ_DIR, "snake_egg", "target", "release")
 sys.path.append(SRC_DIR)
 sys.path.append(EGG_DIR)
 
+import find_identities
 import fpcore
-import snake_egg
-import snake_egg_rules
-
-import z3
-
-import datetime
-
-from collections import namedtuple
-
 from utils import Logger, Timer
 
 logger = Logger(Logger.LOW, color=Logger.blue, def_color=Logger.cyan)
 timer = Timer()
 
 
-ITERS = [
-    10, # Main iters for finding identities
-    6,  # Iters for backoff dedup
-    5,  # Iters for simple dedup
-    3,  # Iters for definition finding I(x) - f(x) = 0
-    3,  # Iters for definition finding I(x) / f(x) = 1
-    5,  # Iters for generator dedup
-]
-
-
-
-
-
 def parse_arguments(argv):
-    num_cpus = 1 #multiprocessing.cpu_count() // 2
     parser = argparse.ArgumentParser(description='Default script description')
     parser.add_argument("-v", "--verbosity",
                         nargs="?",
-                        default="high",#"low",
+                        default="high",  # "low",
                         const="medium",
                         choices=list(Logger.CONSTANT_DICT),
                         help="Set output verbosity")
@@ -56,11 +34,6 @@ def parse_arguments(argv):
                         nargs="?",
                         type=str,
                         help="Redirect logging to given file.")
-    # parser.add_argument("-p", "--procs",
-    #                     help="Execute using the selected number of processes",
-    #                     type=int,
-    #                     default=num_cpus,
-    #                     action="store")
     parser.add_argument("dirname",
                         help="Directory with the fpcore files")
     args = parser.parse_args(argv[1:])
@@ -78,402 +51,12 @@ def parse_arguments(argv):
                        if fname.endswith(".fpcore")]
     args.fnames.sort()
 
-    # args.procs = min(len(args.fnames), args.procs)
-
     logger.dlog("Settings:")
     logger.dlog("    dirname: {}", args.dirname)
     logger.dlog("  verbosity: {}", args.verbosity)
     logger.dlog("   log-file: {}", args.log_file)
-    # logger.dlog("      procs: {}", args.procs)
 
     return args
-
-def run_egraph(egraph, rules, iters, gen_output, use_simple):
-    output = None
-    iteration = 0
-    try:
-        egraph.run(rules,
-                   iter_limit=iters,
-                   time_limit=600,
-                   node_limit=10000000,
-                   use_simple_scheduler=use_simple)
-    except BaseException as e:
-        logger.warning("Egg ran into an issue on iteration {}", iteration)
-        raise e
-
-    output = gen_output(egraph)
-    return iteration, output
-
-
-def generate_all_identities(func, max_iters):
-    timer = Timer()
-    timer.start()
-
-    therules = snake_egg_rules.rules.copy()
-    thevar = snake_egg.Var(func.arguments[0].source)
-    thefunc = snake_egg_rules.thefunc
-
-    from_def = thefunc(thevar)
-    to_def = func.to_snake_egg(to_rule=True)
-    rw = snake_egg.Rewrite
-
-    # Add def and undef to ruleset
-    therules.append(rw(from_def, to_def, "def"))
-    try:
-        therules.append(rw(to_def, from_def, "undef"))
-    except Exception as e:
-        logger.warning("Unable to undef function")
-        logger.warning("Due to: {}", e)
-
-    # Create our egraph and add thefunc
-    egraph = snake_egg.EGraph(snake_egg_rules.eval)
-    se_func = thefunc("x")
-    egraph.add(se_func)
-
-    # Run for up to max_iters one at a time so we have output in the case of
-    #   errors
-    iteration, exprs = run_egraph(egraph, therules, max_iters,
-                                  lambda eg: eg.node_extract(se_func),
-                                  False)
-    exprs = list(exprs)
-    exprs.sort(key=lambda e: str(e), reverse=True)
-    exprs.sort(key=lambda e: len(str(e)))
-    elapsed = timer.stop()
-
-    logger.dlog("Generated {} identities in {:4f} seconds",
-                len(exprs), elapsed)
-
-    return iteration, exprs
-
-
-def filter_keep_thefunc(exprs):
-    timer = Timer()
-    timer.start()
-
-    new_exprs = list()
-    for expr in exprs:
-        exstr = str(snake_egg_rules.egg_to_fpcore(expr))
-        if "thefunc" not in exstr:
-            logger.llog(Logger.HIGH, "missing \"thefunc\": {}", exstr)
-            continue
-        new_exprs.append(expr)
-    elapsed = timer.stop()
-
-    logger.dlog("Removed {} identities in {:4f} seconds",
-                len(exprs)-len(new_exprs), elapsed)
-
-    return new_exprs
-
-
-def filter_max(exprs):
-    timer = Timer()
-    timer.start()
-
-    new_exprs = list()
-    for expr in exprs:
-        exstr = str(snake_egg_rules.egg_to_fpcore(expr))
-        exstr.replace("(thefunc x)", "")
-        if "thefunc" not in exstr:
-            logger.llog(Logger.HIGH, "only has \"thefunc(x)\": {}", exstr)
-            continue
-        new_exprs.append(expr)
-    elapsed = timer.stop()
-
-    logger.dlog("Removed {} identities in {:4f} seconds",
-                len(exprs)-len(new_exprs), elapsed)
-
-    return new_exprs
-
-
-def filter_dedup(exprs, max_iters, use_simple):
-    timer = Timer()
-    timer.start()
-
-    # Filter the results by:
-    #  1. Adding all exprs to an egraph
-    #  3. Churn egraph
-    #  4. Now expressions will share ids, dedup groups by them
-    egraph = snake_egg.EGraph(snake_egg_rules.eval)
-
-    for expr in exprs:
-        egraph.add(expr)
-
-    iteration, expr_ids = run_egraph(egraph, snake_egg_rules.rules, max_iters,
-                                     lambda eg: {e:str(eg.add(e))
-                                                 for e in exprs},
-                                     use_simple)
-
-    deduped = dict()
-    for expr, id_num in expr_ids.items():
-        expr_str = str(snake_egg_rules.egg_to_fpcore(expr))
-        if id_num in deduped:
-            old = deduped[id_num]
-            old_str = str(snake_egg_rules.egg_to_fpcore(old))
-            if (expr_size(old) > expr_size(expr)
-                or (expr_size(old) == expr_size(expr) and old_str < expr_str)):
-                deduped[id_num] = expr
-                logger.llog(Logger.HIGH, "replaced: {}", old_str)
-                logger.llog(Logger.HIGH, "    with: {}", expr_str)
-                continue
-            logger.llog(Logger.HIGH, "expression: {}", old_str)
-            logger.llog(Logger.HIGH, "  equal to: {}", expr_str)
-            continue
-        logger.llog(Logger.HIGH, "passing through: {}", expr_str)
-        deduped[id_num] = expr
-    new_exprs = deduped.values()
-    elapsed = timer.stop()
-
-    logger.dlog("Removed {} identities in {:4f} seconds",
-                len(exprs)-len(new_exprs), elapsed)
-
-    return new_exprs
-
-
-def filter_defs_sub(exprs, func, max_iters):
-    timer = Timer()
-    timer.start()
-
-    # We can have exprs for the form
-    #  I(x) = 2*<body> - f(x)
-    # where <body> is the body of f(x).
-    # So if we:
-    #  1. Add I(x)-f(x) and 0 to a new egraph
-    #  2. Union the two
-    #  3. Run with rules that do not define f(x)
-    #  4. Check if <body> - f(x) is in the egraph and it equals 0
-    # Then we know that I(x) doe not give us new information
-    fx = snake_egg_rules.thefunc("x")
-    sub = snake_egg_rules.sub
-
-    new_exprs = list()
-    for Ix in exprs:
-        egraph = snake_egg.EGraph(snake_egg_rules.eval)
-        Ix_sub_fx = sub(Ix, fx)
-        egraph.add(Ix_sub_fx)
-        egraph.add(0)
-        egraph.union(Ix_sub_fx, 0)
-        egraph.rebuild()
-        iteration, _ = run_egraph(egraph, snake_egg_rules.rules, max_iters,
-                                  lambda eg: None,
-                                  True)
-
-        body_sub_fx = sub(func.to_snake_egg(to_rule=False), fx)
-
-        if egraph.equiv(0, body_sub_fx):
-            logger.llog(Logger.HIGH, "definition identity sub: {}", Ix)
-            continue
-        new_exprs.append(Ix)
-    elapsed = timer.stop()
-
-    logger.dlog("Removed {} identities in {:4f} seconds",
-                len(exprs)-len(new_exprs), elapsed)
-
-    return new_exprs
-
-
-def filter_defs_div(exprs, func, max_iters):
-    timer = Timer()
-    timer.start()
-
-    # We can have exprs for the form
-    #  I(x) = 2*<body> - f(x)
-    # where <body> is the body of f(x).
-    # So if we:
-    #  1. Add I(x)/f(x) and 1 to a new egraph
-    #  2. Union the two
-    #  3. Run with rules that do not define f(x)
-    #  4. Check if <body> / f(x) is in the egraph and it equals 1
-    # Then we know that I(x) doe not give us new information
-    fx = snake_egg_rules.thefunc("x")
-    div = snake_egg_rules.div
-
-    new_exprs = list()
-    for Ix in exprs:
-        egraph = snake_egg.EGraph(snake_egg_rules.eval)
-        Ix_div_fx = div(Ix, fx)
-        egraph.add(Ix_div_fx)
-        egraph.add(1)
-        egraph.union(Ix_div_fx, 1)
-        egraph.rebuild()
-        iteration, _ = run_egraph(egraph, snake_egg_rules.rules, max_iters,
-                                  lambda eg: None,
-                                  True)
-
-        body_div_fx = div(func.to_snake_egg(to_rule=False), fx)
-
-        if egraph.equiv(1, body_div_fx):
-            logger.llog(Logger.HIGH, "definition identity div: {}", Ix)
-            continue
-        new_exprs.append(Ix)
-    elapsed = timer.stop()
-
-    logger.dlog("Removed {} identities in {:4f} seconds",
-                len(exprs)-len(new_exprs), elapsed)
-
-    return new_exprs
-
-
-def expr_size(expr, _cache=dict()):
-    if expr in _cache:
-        return _cache[expr]
-
-    size = 1
-    if isinstance(expr, tuple):
-        size += sum(expr_size(arg) for arg in expr)
-
-    _cache[expr] = size
-    return size
-
-
-def cross_identity(A, B):
-    # A = (ta (f (sa x)))
-    # B = (tb (f (sb x)))
-    # A*B = (ta (tb (f (sb (sa x)))))
-    x = fpcore.ast.Variable("x")
-    f = fpcore.ast.Operation("thefunc", x)
-    ta = A.extract_t()
-    tb = B.extract_t()
-    sa = A.extract_s()
-    sb = B.extract_s()
-
-    ta_tb = ta.substitute(x, tb)
-    ta_tb_f = ta_tb.substitute(x, f)
-    ta_tb_f_sb = ta_tb_f.substitute(x, sb)
-    ta_tb_f_sb_sa = ta_tb_f_sb.substitute(x, sa)
-
-    return ta_tb_f_sb_sa
-
-
-def dedup_generators(identities, iters):
-    timer = Timer()
-    timer.start()
-
-    query = [
-        "(define-fun btoi ((b Bool)) Int",
-        "  (ite b 1 0))",
-    ]
-
-    query.extend([f"(declare-const core_I_{I} Bool) ; {iden}"
-                  for I,iden in enumerate(identities)])
-
-    query.extend([f"(declare-const I_{I} Bool)"
-                  for I,iden in enumerate(identities)])
-
-    query.extend([f"(declare-const len_I_{I} Int)"
-                  for I,iden in enumerate(identities)])
-
-    query.extend([f"(assert (> len_I_{I} 0))"
-                  for I,iden in enumerate(identities)])
-
-    cross_products = dict()
-    I = 0
-    for first in identities:
-        first.sat_expr = None
-        logger("Crossing: {}", first)
-        crossed = list()
-        J = 0
-        for second in identities:
-            logger("  with: {}", second)
-            cross = first.cross(second)
-            cross.sat_expr = (
-                f"(and I_{I} I_{J} (= len_I_{{}} (+ len_I_{I} len_I_{J})))")
-            logger("    becomes: {}", cross)
-            crossed.append(cross)
-            J += 1
-        cross_products[first] = crossed
-        I += 1
-
-    egraph = snake_egg.EGraph(snake_egg_rules.eval)
-
-    flat_cross_products = list()
-    for key, value in cross_products.items():
-        egraph.add(key.to_snake_egg(to_rule=False))
-        flat_cross_products.append(key)
-        for cross in value:
-            egraph.add(cross.to_snake_egg(to_rule=False))
-            flat_cross_products.append(cross)
-
-    _, ids = run_egraph(egraph, snake_egg_rules.rules, iters,
-                        lambda eg: {e:str(eg.add(e.to_snake_egg(to_rule=False)))
-                                    for e in flat_cross_products},
-                        False)
-
-    groups = list(set(ids.values()))
-
-    for I, iden in enumerate(identities):
-        gid = ids[iden]
-        query.append(f"(assert (= I_{I} (or (and core_I_{I} (= len_I_{I} 1))")
-        for e in flat_cross_products:
-            if ids[e] != gid or e.sat_expr == None:
-                continue
-            query.append("  " + e.sat_expr.format(I))
-        query[-1] += ")))"
-
-    line = "(assert (and "
-    line += " ".join([f"I_{I}" for I in range(len(identities))]) + "))"
-    query.append(line)
-
-    query.append("(declare-const cost Int)")
-
-    line = "(assert (= cost (+ "
-    line += " ".join([f"(btoi core_I_{I})" for I in
-                      range(len(identities))]) + ")))"
-    query.append(line)
-
-    query.append("(minimize cost)")
-    query.append("(check-sat)")
-
-    query = "\n".join(query)
-
-    logger.blog("Z3 query", query)
-
-    ctx = z3.Context("model_validate", "true")
-    optimizer = z3.Optimize(ctx=ctx)
-    optimizer.from_string(query)
-    state = optimizer.check()
-    if str(state) != "sat":
-        assert False, "Impossible!"
-    z3_model = optimizer.model()
-    model = {d.name(): z3_model[d] for d in z3_model}
-    for I, iden in enumerate(identities):
-        name = f"I_{I}"
-        logger("{}: {}", model[name], iden)
-
-    new_identities = [iden for I,iden in enumerate(identities)
-                      if model[f"core_I_{I}"]]
-
-    elapsed = timer.stop()
-    logger.dlog("Removed {} identities in {:4f} seconds",
-                len(identities)-len(new_identities), elapsed)
-
-    return new_identities
-
-
-
-def extract_identities(func):
-    logger.dlog("Name: {}", func.get_any_name())
-    logger.dlog("f(x): {}", func.body)
-
-    iteration, exprs = generate_all_identities(func, ITERS[0])
-
-    exprs = filter_keep_thefunc(exprs)
-    #exprs = filter_max(exprs)
-    exprs = filter_dedup(exprs, ITERS[1], False)
-    exprs = filter_dedup(exprs, ITERS[2], True)
-    exprs = filter_defs_sub(exprs, func, ITERS[3])
-    exprs = filter_defs_div(exprs, func, ITERS[4])
-
-    exprs = [snake_egg_rules.egg_to_fpcore(expr) for expr in exprs]
-    exprs = dedup_generators(exprs, ITERS[5])
-
-    lines = [str(expr) for expr in exprs]
-    lines.sort(reverse=True)
-    lines.sort(key=len)
-
-    logger.blog("After filtering",
-                "  " + "\n  ".join(lines))
-
-    return lines
 
 
 def write_per_func_webpage(filename, func_to_identities):
@@ -497,14 +80,14 @@ def write_per_func_webpage(filename, func_to_identities):
              func,
              ids)
             for func, ids in func_to_identities.items()]
-    info.sort(key=lambda t:t[0])
+    info.sort(key=lambda t: t[0])
     for name, func, ids in info:
         name = name.strip('"')
         lines.append(func.to_html())
 
         lines.append("<ul>")
 
-        ids.sort(key=lambda id:expr_size(id))
+        ids.sort(key=lambda id: find_identities.expr_size(id))
         for id in ids:
             lines.append(f"<li>{str(id)}</li>")
 
@@ -513,7 +96,7 @@ def write_per_func_webpage(filename, func_to_identities):
     lines.extend([
         "</body>",
         "</html>"
-        ])
+    ])
 
     text = "\n".join(lines)
 
@@ -553,7 +136,7 @@ def write_identity_webpage(filename, identities):
         "</table>",
         "</body>",
         "</html>"
-        ])
+    ])
 
     text = "\n".join(lines)
 
@@ -570,7 +153,7 @@ def handle_work_item(func):
         func.arguments[0] = x
         func = func.substitute(var, x)
 
-    expr_lines = extract_identities(func)
+    expr_lines = find_identities.extract_identities(func)
 
     return func, expr_lines
 
@@ -580,38 +163,34 @@ def main(argv):
 
     args = parse_arguments(argv)
 
+    # Read all the files, each file may have mutiple functions
     work_items = list()
     for fname in args.fnames:
         with open(fname, "r") as f:
             text = f.read()
 
-        funcs = fpcore.parse(text)
-        work_items.extend(funcs)
+        some_funcs = fpcore.parse(text)
+        work_items.extend(some_funcs)
 
-    funcs = work_items
+    # Filter the functions
+    old_work_items = work_items
     work_items = list()
-    header = True
-    for func in funcs:
+    nag_shown = True
+    for func in old_work_items:
         if len(func.arguments) == 1:
             work_items.append(func)
             continue
-        if header:
+        if nag_shown:
             msg = "Currently only functions in a single variable are supported"
             logger.warning(msg)
-            header = False
-        name = func.get_any_name()
-        if name == None:
-            logger.warning("Dropping {}", func)
-        else:
-            logger.warning("Dropping {}", name)
+            nag_shown = False
+        name = func.get_any_name() or func
+        logger.warning("Dropping {}", name)
 
+    # Run the identity finder
     tuples = [handle_work_item(func) for func in work_items]
-    # if args.procs == 1:
-    #     tuples = [handle_work_item(func) for func in work_items]
-    # else:
-    #     with multiprocessing.Pool(processes=args.procs) as pool:
-    #         tuples = pool.map(handle_work_item, work_items, chunksize=1)
 
+    # Get some statistics
     per_func_identities = dict(tuples)
     counts = dict()
     for func, ids in per_func_identities.items():
@@ -636,16 +215,13 @@ def main(argv):
     return 0
 
 
-
-
 if __name__ == "__main__":
     timer.start()
-
-    retcode = 130  # meaning "Script terminated by Control-C"
 
     try:
         retcode = main(sys.argv)
     except KeyboardInterrupt:
+        retcode = 130  # meaning "Script terminated by Control-C"
         print("")
         print("Goodbye")
 
