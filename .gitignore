@@ -3,7 +3,8 @@ bin
 requirements/debug_env.sh
 requirements/done
 requirements/log.txt
-requirements/something/
+requirements/rust/
+requirements/snake_egg/
 nightlies/
 data/
 obj/
