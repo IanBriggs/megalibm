@@ -10,8 +10,8 @@ from interval import Interval
 from lambdas import types
 from utils import Logger
 
-# from wolframclient.evaluation import WolframLanguageSession
-# from wolframclient.language import wl, wlexpr
+from wolframclient.evaluation import WolframLanguageSession
+from wolframclient.language import wl, wlexpr
 
 from math import pi
 
@@ -21,18 +21,18 @@ logger = Logger(level=Logger.HIGH)
 
 
 
-# def is_symmetric_function(func, low, middle, high):
-#     arg = func.arguments[0]
-#     flipped_arg = high - arg
-#     flipped = func.substitute(arg, flipped_arg)
-#     query = func - flipped
-#     logger("Query: {}", query)
-#     wolf_query = query.to_wolfram()
-#     logger("Wolf Query: {}", wolf_query)
-#     with WolframLanguageSession() as session:
-#         res = session.evaluate(wlexpr(wolf_query))
-#         logger("Wolf's Result: {}", res)
-#         return  res == 0
+def is_symmetric_function(func, low, middle, high):
+    arg = func.arguments[0]
+    flipped_arg = high - arg
+    flipped = func.substitute(arg, flipped_arg)
+    query = func - flipped
+    logger("Query: {}", query)
+    wolf_query = query.to_wolfram()
+    logger("Wolf Query: {}", wolf_query)
+    with WolframLanguageSession() as session:
+        res = session.evaluate(wlexpr(wolf_query))
+        logger("Wolf's Result: {}", res)
+        return  res == 0
 
 
 class RepeatFlip(types.Transform):
@@ -41,12 +41,12 @@ class RepeatFlip(types.Transform):
         our_in_type = self.in_node.out_type
         old_high = our_in_type.domain.sup
         new_high = fpcore.ast.Operation("*", fpcore.ast.Number("2"), old_high)
-        assert(type(our_in_type) == types.Impl)
-        assert(float(our_in_type.domain.inf) == 0.0)
-        assert(snake_egg_rules.is_symmetric(our_in_type.function,
-                                     0.0,
-                                     old_high,
-                                     new_high))
+        assert (type(our_in_type) == types.Impl)
+        assert (float(our_in_type.domain.inf) == 0.0)
+        assert (is_symmetric_function(our_in_type.function,
+                                      0.0,
+                                      old_high,
+                                      new_high))
 
         self.out_type = types.Impl(our_in_type.function,
                                    Interval(0, new_high))
@@ -84,7 +84,7 @@ class RepeatFlip(types.Transform):
 
         two_bound = out_type.domain.sup
         bound = two_bound / fpcore.ast.Number("2")
-        if not snake_egg_rules.is_symmetric(out_type.function,
+        if not is_symmetric_function(out_type.function,
                                     0.0,
                                     bound,
                                     two_bound):

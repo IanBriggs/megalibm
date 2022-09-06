@@ -99,7 +99,7 @@ def main(argv):
     logger("Name: {}", name)
     logger("Low: {}", low)
     logger("High: {}", high)
-    fpc = fpcore.parse(func)
+    fpc = fpcore.parse(func)[0]
     domain = Interval(low, high)
     generate_all_code(fpc, domain, name)
 

@@ -10,8 +10,8 @@ from interval import Interval
 from lambdas import types
 from utils import Logger
 
-# from wolframclient.evaluation import WolframLanguageSession
-# from wolframclient.language import wl, wlexpr
+from wolframclient.evaluation import WolframLanguageSession
+from wolframclient.language import wl, wlexpr
 
 from math import pi
 
@@ -19,18 +19,18 @@ from math import pi
 logger = Logger(level=Logger.HIGH)
 
 
-# def is_even_function(func):
-#     arg = func.arguments[0]
-#     flipped_arg = -arg
-#     flipped = func.substitute(arg, flipped_arg)
-#     query = func - flipped
-#     logger("Query: {}", query)
-#     wolf_query = query.to_wolfram()
-#     logger("Wolf Query: {}", wolf_query)
-#     with WolframLanguageSession() as session:
-#         res = session.evaluate(wlexpr(wolf_query))
-#         logger("Wolf's Result: {}", res)
-#         return  res == 0
+def is_even_function(func):
+    arg = func.arguments[0]
+    flipped_arg = -arg
+    flipped = func.substitute(arg, flipped_arg)
+    query = func - flipped
+    logger("Query: {}", query)
+    wolf_query = query.to_wolfram()
+    logger("Wolf Query: {}", wolf_query)
+    with WolframLanguageSession() as session:
+        res = session.evaluate(wlexpr(wolf_query))
+        logger("Wolf's Result: {}", res)
+        return  res == 0
 
 
 
@@ -41,7 +41,7 @@ class MirrorAboutZeroX(types.Transform):
         our_in_type = self.in_node.out_type
         assert(type(our_in_type) == types.Impl)
         assert(float(our_in_type.domain.inf) == 0.0)
-        assert(snake_egg_rules.is_even(our_in_type.function))
+        assert (is_even_function(our_in_type.function))
 
         self.out_type = types.Impl(our_in_type.function,
                                    Interval(-our_in_type.domain.sup,
@@ -66,7 +66,7 @@ class MirrorAboutZeroX(types.Transform):
             or -float(out_type.domain.inf) != float(out_type.domain.sup)):
             return list()
 
-        if not snake_egg_rules.is_even(out_type.function):
+        if not is_even_function(out_type.function):
             return list()
 
         # To get this output we need as input
