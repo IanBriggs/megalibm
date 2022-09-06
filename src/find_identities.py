@@ -10,36 +10,36 @@ timer = Timer()
 
 # This is where we find "useful" identities of a function.
 # To do so we start with a function `f(x) = <body>(x)`
-# This `<body>(x)` is placed in an EGraph and ran with a standard set of 
+# This `<body>(x)` is placed in an EGraph and ran with a standard set of
 # mathematical rules to generate many equivalent expressions.
-# Then a single iteration is ran in that EGraph to rewrite `<body>(?x)` to 
+# Then a single iteration is ran in that EGraph to rewrite `<body>(?x)` to
 # `f(?x)`, this allows us to identify things containing `f(<something>)`
 # To finish generation we take this EGraph and extract a representative
-# expression for each E_Node_ in the main E_Class_ while giving `f` a weight of 
+# expression for each E_Node_ in the main E_Class_ while giving `f` a weight of
 # 0 to cause it to occur if possible.
 # Now we need to filter this set of expressions down to a reasonable number.
 # 1. __Pre__: Only keep expressions containing `f`
-# 2. __Dedup__: Put all expressions in an EGraph and run with standard 
-#               mathematical rules. If two expressions are equal without 
+# 2. __Dedup__: Put all expressions in an EGraph and run with standard
+#               mathematical rules. If two expressions are equal without
 #               knowing what `f` means, then it is not interesting. This is
 #               done two times, once with the backoff scheduler and once with
-#               the simple scheduler. The first version removes a bulk of 
+#               the simple scheduler. The first version removes a bulk of
 #               identities, to allow the second to be more thorough.
 # 3. __DefSub__: Attempts to remove "definitional" identities that basically
-#                encode the definition of `f` in the expression (e.g. 
+#                encode the definition of `f` in the expression (e.g.
 #                `f(x) = sin(x)` with the identity `I(x) = 2*sin(x) - f(x)`)
-#                To do this we start with `f(x) = <body>(x)` and 
+#                To do this we start with `f(x) = <body>(x)` and
 #                `I(x) = <i-body>(x)`. We add `<i-body>(x) - f(x)` and `0` to
-#                the EGraph and union them before running with standard 
-#                mathematical rules. At the end, if `<body>(x) - f(x)` is in 
+#                the EGraph and union them before running with standard
+#                mathematical rules. At the end, if `<body>(x) - f(x)` is in
 #                the EGraph and equal to `0`, then the identity was encoding
 #                a definition.
-# 4. __DefDiv__: This does the same as above by inserting `<i-body>(x) / f(x)` 
+# 4. __DefDiv__: This does the same as above by inserting `<i-body>(x) / f(x)`
 #                and `1` into the EGraph.
 # 5. __Gen__: Attempts to remove "generator" identities. These are identities
-#             such as, for `f(x) = sin(x)`, `I_0(x) = sin(x + pi)` and 
-#             `I_1(x) = sin(x + 2*pi)`. You can generate `I_1(x)` by taking 
-#             `I_0(I_0(x))`. 
+#             such as, for `f(x) = sin(x)`, `I_0(x) = sin(x + pi)` and
+#             `I_1(x) = sin(x + 2*pi)`. You can generate `I_1(x)` by taking
+#             `I_0(I_0(x))`.
 # Hopefully what comes out the other end is a small set of identities that give
 # us new information about the function
 
@@ -52,10 +52,11 @@ ITERS = [
     5,  # Iters for generator dedup
 ]
 
+
 def generate_all_identities(func, max_iters):
     timer = Timer()
     timer.start()
-    
+
     # Create our egraph and add the function body
     egraph = snake_egg.EGraph(snake_egg_rules.eval)
     body = func.to_snake_egg(to_rule=False)
@@ -63,10 +64,10 @@ def generate_all_identities(func, max_iters):
 
     # Run with mathematical rules
     egraph.run(snake_egg_rules.rules,
-    iter_limit=max_iters,
-    time_limit=600,
-    node_limit=100_000,
-    use_simple_scheduler=False)
+               iter_limit=max_iters,
+               time_limit=600,
+               node_limit=100_000,
+               use_simple_scheduler=False)
 
     # Make rewrite for <body>(var) to f(var)
     pattern_var = snake_egg.Var(func.arguments[0].source)
@@ -76,10 +77,10 @@ def generate_all_identities(func, max_iters):
 
     # Run with undef rule
     egraph.run([rewrite_body_to_func],
-    iter_limit=1,
-    time_limit=600,
-    node_limit=100_000 + 10_000,
-    use_simple_scheduler=True)
+               iter_limit=1,
+               time_limit=600,
+               node_limit=100_000 + 10_000,
+               use_simple_scheduler=True)
 
     # Extract and sort the identities
     exprs = egraph.node_extract(body)
@@ -144,10 +145,10 @@ def filter_dedup(exprs, max_iters, use_simple):
 
     # Run with standard mathematical rules
     egraph.run(snake_egg_rules.rules,
-    iter_limit=max_iters,
-    time_limit=600,
-    node_limit=100_000,
-    use_simple_scheduler=use_simple)
+               iter_limit=max_iters,
+               time_limit=600,
+               node_limit=100_000,
+               use_simple_scheduler=use_simple)
     expr_ids = {expr: str(egraph.add(expr)) for expr in exprs}
 
     # Get a mapping from EGraph Id to set of expressions
@@ -213,10 +214,10 @@ def filter_defs_sub(exprs, func, max_iters):
         egraph.union(Ix_sub_fx, 0)
         egraph.rebuild()
         egraph.run(snake_egg_rules.rules,
-            iter_limit=max_iters,
-            time_limit=600,
-            node_limit=100_000,
-            use_simple_scheduler=True)
+                   iter_limit=max_iters,
+                   time_limit=600,
+                   node_limit=100_000,
+                   use_simple_scheduler=True)
         if egraph.equiv(0, body_sub_fx):
             logger.llog(Logger.HIGH, "definition identity sub: {}", Ix)
             continue
@@ -256,15 +257,15 @@ def filter_defs_div(exprs, func, max_iters):
         egraph.union(Ix_div_fx, 1)
         egraph.rebuild()
         egraph.run(snake_egg_rules.rules,
-            iter_limit=max_iters,
-            time_limit=600,
-            node_limit=100_000,
-            use_simple_scheduler=True)
+                   iter_limit=max_iters,
+                   time_limit=600,
+                   node_limit=100_000,
+                   use_simple_scheduler=True)
         if egraph.equiv(1, body_div_fx):
             logger.llog(Logger.HIGH, "definition identity div: {}", Ix)
             continue
         new_exprs.append(Ix)
-    
+
     elapsed = timer.stop()
     logger.dlog("{} to {} identities in {:4f} seconds",
                 len(exprs), len(new_exprs), elapsed)
@@ -321,7 +322,7 @@ def dedup_generators(identities, iters):
     query.extend([f"(declare-const len_I_{I} Int)"
                   for I, iden in enumerate(identities)])
 
-    query.extend([f"(assert (> len_I_{I} 0))"
+    query.extend([f"(assert (< 0 len_I_{I} 5))"
                   for I, iden in enumerate(identities)])
 
     cross_products = dict()
@@ -353,12 +354,12 @@ def dedup_generators(identities, iters):
             flat_cross_products.append(cross)
 
     egraph.run(snake_egg_rules.rules,
-            iter_limit=iters,
-            time_limit=600,
-            node_limit=100_000,
-            use_simple_scheduler=True)
-    ids = {e: str(egraph.add(e.to_snake_egg(to_rule=False))) 
-            for e in flat_cross_products}
+               iter_limit=iters,
+               time_limit=600,
+               node_limit=100_000,
+               use_simple_scheduler=True)
+    ids = {e: str(egraph.add(e.to_snake_egg(to_rule=False)))
+           for e in flat_cross_products}
 
     groups = list(set(ids.values()))
 
