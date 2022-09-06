@@ -17,7 +17,7 @@ mkdir "${THIS_NIGHTLY_LOCATION}"
 
 
 cd "${THIS_NIGHTLY_LOCATION}"
-/usr/bin/time -v "${SCRIPT_LOCATION}"/script "${GIT_LOCATION}/benchmarks/1_argument"
+/usr/bin/time -v "${SCRIPT_LOCATION}"/megalibm_identities "${GIT_LOCATION}/benchmarks/1_argument"
 
 
 # Gather output files

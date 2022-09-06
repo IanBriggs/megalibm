@@ -1,15 +1,18 @@
 
 
 .PHONY: build
-build: bin/script
+build: bin/megalibm_identities
 
+
+.PHONY: requirements
+requirements: requirements/done
 
 bin/script: requirements/done | bin
 	$(RM) $@
-	cd bin && ln -s ../src/script.py script
+	cd bin && ln -s ../src/megalibm_identities.py megalibm_identities
 	chmod +x $@
 
-bin/nightly.sh: bin/script
+bin/nightly.sh: bin/megalibm_identities
 	$(RM) $@
 	cd bin && ln -s ../src/nightly.sh nightly.sh
 	chmod +x $@
