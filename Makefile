@@ -1,18 +1,23 @@
 
 
 .PHONY: build
-build: bin/megalibm_identities
+build: bin/megalibm_identities bin/megalibm_generate
 
 
 .PHONY: requirements
 requirements: requirements/done
 
-bin/script: requirements/done | bin
+bin/megalibm_identities: requirements/done | bin
 	$(RM) $@
 	cd bin && ln -s ../src/megalibm_identities.py megalibm_identities
 	chmod +x $@
 
-bin/nightly.sh: bin/megalibm_identities
+bin/megalibm_generate: requirements/done | bin
+	$(RM) $@
+	cd bin && ln -s ../src/megalibm_generate.py megalibm_generate
+	chmod +x $@
+
+bin/nightly.sh: bin/megalibm_generate bin/megalibm_identities
 	$(RM) $@
 	cd bin && ln -s ../src/nightly.sh nightly.sh
 	chmod +x $@

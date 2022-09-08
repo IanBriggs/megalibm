@@ -45,13 +45,17 @@ def to_mpfr_c(self, lines, temps):
         "exp" : "mpfr_exp",
         "log" : "mpfr_log",
         "sin" : "mpfr_sin",
+        "asin" : "mpfr_asin",
         "cos" : "mpfr_cos",
+        "acos" : "mpfr_acos",
         "tan" : "mpfr_tan",
         "atan" : "mpfr_atan",
         "+" : "mpfr_add",
         "-" : "mpfr_sub",
         "*" : "mpfr_mul",
         "/" : "mpfr_div",
+        "fabs": "mpfr_abs",
+        "fmod": "mpfr_fmod",
     }
     c_args = [arg.to_mpfr_c(lines, temps) for arg in self.args]
     my_name = "generated_{}".format(len(temps))
