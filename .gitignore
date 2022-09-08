@@ -5,6 +5,7 @@ requirements/done
 requirements/log.txt
 requirements/rust/
 requirements/snake_egg/
+measurement/error/generated/
 nightlies/
 data/
 obj/
