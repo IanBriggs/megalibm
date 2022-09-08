@@ -2,36 +2,50 @@
 
 CC ?= gcc
 CFLAGS ?= -Wall -Wextra -Wconversion -O3 -march=native -mtune=native -fno-builtin -DNDEBUG
+CFLAGS += -Wno-unused-variable
 CFLAGS += -Iinclude
 
-BIN_SRCS = $(wildcard generated/main_*.c)
-BINS = $(foreach s,$(BIN_SRCS),$(patsubst generated/main_%.c,bin/main_%,$s))
-SRCS = $(filter-out $(BIN_SRCS),$(wildcard generated/*.c))
-OBJS = $(foreach s,$(SRCS),$(patsubst generated/%.c,obj/%.o,$s))
-OBJS += obj/table_generation.o
-OBJS += obj/xmalloc.o
+GEN_DIRS = $(wildcard generated/*)
+BINS = $(foreach g,$(GEN_DIRS),${g}/main)
+INTER = $(foreach g,$(GEN_DIRS),${g}/funcs.o)
+OBJS = obj/table_generation.o obj/xmalloc.o
 
-CFLAGS +=  -Igenerated
-
+DATA_0 = $(foreach g,$(GEN_DIRS),${g}/data_0.json)
+DATA_1 = $(foreach g,$(GEN_DIRS),${g}/data_1.json)
+DATA_2 = $(foreach g,$(GEN_DIRS),${g}/data_2.json)
+DATA_3 = $(foreach g,$(GEN_DIRS),${g}/data_3.json)
+DATAS = ${DATA_0} ${DATA_1} ${DATA_2} ${DATA_3}
 
 .PHONY: all
 all: ${BINS}
 
+.PHONY: run
+run: ${DATAS}
 
-bin/main_%: generated/main_%.c ${OBJS} | bin
-	$(CC) ${CFLAGS} $< ${OBJS} -lmpfr -lgmp -lm -o $@
+.PHONY: intermediates
+intermediates: ${OBJS} ${INTER}
 
-obj/%.o: generated/%.c generated/%.h | obj
-	$(CC) ${CFLAGS} $< -c -o $@
+generated/%/data_0.json: generated/%/main
+	./$< 0 > $@
+
+generated/%/data_1.json: generated/%/main
+	./$< 1 > $@
+
+generated/%/data_2.json: generated/%/main
+	./$< 2 > $@
+
+generated/%/data_3.json: generated/%/main
+	./$< 3 > $@
+
+
+generated/%/main: generated/%/main.c generated/%/funcs.o ${OBJS}
+	${CC} ${CFLAGS} -Igenerated/$* $^ -lmpfr -lgmp -lm -o $@
+
+generated/%/funcs.o: generated/%/funcs.c generated/%/funcs.h
+	${CC} ${CFLAGS} -Igenerated/$* $< -c -o $@
 
 obj/%.o: src/%.c include/%.h | obj
 	$(CC) ${CFLAGS} $< -c -o $@
-
-
-
-
-bin:
-	mkdir bin
 
 obj:
 	mkdir obj
