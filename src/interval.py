@@ -17,8 +17,8 @@ def parse_bound(string):
 class Interval():
 
     def __init__(self, inf, sup):
-        self.inf = parse_bound(inf)
-        self.sup = parse_bound(sup)
+        self.inf = parse_bound(inf) if type(inf) in {str, float} else inf
+        self.sup = parse_bound(sup) if type(sup) in {str, float} else sup
 
         assert (float(self.inf) <= float(self.sup))
 
@@ -45,8 +45,15 @@ class Interval():
         #      [********]
         if float(self.sup) <= 0.0:
             return Interval(-self.sup, -self.sup)
-        else:
-            assert 0, "Unreachable"
+
+        assert 0, "Unreachable"
+
+    def __getitem__(self, items):
+        if items == 0:
+            return self.inf
+        if items == 1:
+            return self.sup
+        assert False, "TODO: better interval indexing"
 
     def shift(self, k):
         diff = self.sup - self.inf
