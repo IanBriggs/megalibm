@@ -1,0 +1,9 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "fpbench ENA, section 1.4, exercise 4a"
+  :cite (conte-et-al-1980)
+  :herbie-target (* 1/6 (* x x))
+  :pre (<= (- INFINITY) x INFINITY)
+
+  (/ (- x (sin x)) (tan x)))

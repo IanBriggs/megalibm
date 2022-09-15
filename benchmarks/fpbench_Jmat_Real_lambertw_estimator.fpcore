@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "fpbench Jmat.Real.lambertw, estimator"
+ :pre (< 1 x INFINITY)
+ 
+ (- (log x) (log (log x))))

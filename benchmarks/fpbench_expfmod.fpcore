@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "fpbench expfmod"
+ :pre (or  (< (- PI_2) x PI_2) (and  (< (- INFINITY) x INFINITY) (<= 0 (cos x))))
+ 
+ (* (fmod (exp x) (sqrt (cos x))) (exp (- x))))

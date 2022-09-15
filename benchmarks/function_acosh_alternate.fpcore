@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function acosh alternate"
+  :pre (and (<= 1 x) (< x INFINITY))
+
+  (log (+ x (sqrt (- (* x x) 1)))))

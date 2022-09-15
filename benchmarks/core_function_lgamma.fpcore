@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "core function lgamma"
+  :pre (< 0 x INFINITY)
+
+  (lgamma x))

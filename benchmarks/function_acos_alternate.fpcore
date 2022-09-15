@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "function acos alternate"
+ :pre (<= (- 1) x 1)
+
+ (* 2 (atan (sqrt (/ (- 1 x) (+ 1 x))))))

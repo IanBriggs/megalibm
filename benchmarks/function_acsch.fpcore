@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function csch"
+  :pre (and (< (- INFINITY) x INFINITY) (!= (sinh x) 0))
+
+  (asinh (/ 1 x)))

@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "core function exp2"
+  :pre (< (- INFINITY) x INFINITY)
+
+  (exp2 x))

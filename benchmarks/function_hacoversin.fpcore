@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function hacoversin"
+  :pre (< (- INFINITY) x INFINITY)
+
+  (/ (- 1 (sin x)) 2))

@@ -1,5 +1,0 @@
-;; -*- mode: scheme -*-
-
-(FPCore (x)
-  :name "havercosin"
-  (/ (+ 1 (cos x)) 2))

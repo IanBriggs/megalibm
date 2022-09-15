@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function avercos"
+  :pre (<= 0 x 2)
+
+  (acos (- x 1)))

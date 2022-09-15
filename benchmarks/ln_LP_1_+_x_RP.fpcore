@@ -1,7 +1,0 @@
-;; -*- mode: scheme -*-
-
-(FPCore (x)
- :name "ln(1 + x)"
- :herbie-target
- (if (== (+ 1 x) 1) x (/ (* x (log (+ 1 x))) (- (+ 1 x) 1)))
- (log (+ 1 x)))

@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function csc"
+  :pre (and (< (- INFINITY) x INFINITY) (!= (sin x) 0))
+
+  (/ 1 (sin x)))

@@ -1,8 +1,0 @@
-;; -*- mode: scheme -*-
-
-(FPCore (N)
- :name "2atan (example 3.5)"
- :herbie-target
- (atan (/ 1 (+ 1 (* N (+ N 1)))))
-
- (- (atan (+ N 1)) (atan N)))

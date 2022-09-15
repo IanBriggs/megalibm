@@ -1,0 +1,6 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function acoth"
+  :pre (or (< 1 x INFINITY) (< (- INFINITY) x (- 1)))
+  (atanh (/ 1 x)))

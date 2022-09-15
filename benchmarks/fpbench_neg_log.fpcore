@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "fpbench neg log"
+ :pre (< 0 x 1)
+
+ (- (log (- (/ 1 x) 1))))
