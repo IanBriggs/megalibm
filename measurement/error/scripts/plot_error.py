@@ -25,9 +25,9 @@ def plot_error(title, input_regions, ref, libm, gens, log_y=False):
     input_regions -- sorted list of floats representing the domain
     ref -- list of floats representing error for the "real" function rounded to
            float
-    libm -- list of floats representing error for the function implemented 
+    libm -- list of floats representing error for the function implemented
             using libm
-    gens -- list of lists of floats representing error for the 
+    gens -- list of lists of floats representing error for the
             megalibm-generated functions
     log_y -- boolean indicating whether the y-axis should be log scale
     """
@@ -58,7 +58,7 @@ def plot_error(title, input_regions, ref, libm, gens, log_y=False):
         ax1.axvline(0, color="black", linewidth=1)
 
     # Plot all error sets
-    ax1.plot(xs, ref_ys, label="correctly rounded")
+    ax1.plot(xs, ref_ys, label="correctly rounded", linewidth=2)
     ax1.plot(xs, libm_ys, label="libm")
     for i, gen_ys in enumerate(gen_yss):
         ax1.plot(xs, gen_ys, label="generated_{}".format(i))
@@ -120,11 +120,11 @@ def plot_abs_vs_rel(title, ref, libm, gens):
 
     Keyword arguments:
     title -- Title of the plot
-    ref -- list of pairs of floats representing absolute and relative error for 
+    ref -- list of pairs of floats representing absolute and relative error for
            the "real" function rounded to float
     libm -- list of pairs of floats representing absolute and relative error for
             the libm version of the function
-    gens -- list of lists of pairs of floats representing  absolute and 
+    gens -- list of lists of pairs of floats representing  absolute and
             relative error for the megalibm-generated functions
     """
     fig = plt.figure(facecolor=(1, 1, 1))
@@ -136,7 +136,7 @@ def plot_abs_vs_rel(title, ref, libm, gens):
 
     # reference error
     ref_del, ref_eps = to_eps_del(*ref)
-    ax1.plot(ref_del, ref_eps, marker="o", label="correcly rounded")
+    ax1.plot(ref_del, ref_eps, marker="o", label="correcly rounded", linewidth=2)
 
     # libm error
     libm_del, libm_eps = to_eps_del(*libm)
@@ -209,9 +209,16 @@ def triple_plot(filename):
     func_name = libm_name[len("libm_"):]
 
     basename = path.split(filename)[1]
-    region_name = basename[basename.rindex("_"):basename.rindex(".")]
+    region_name = basename[basename.rindex("_")+1:basename.rindex(".")]
     if len(region_name) == 0:
         region_name = "UnknownRegion"
+
+    print("  Plotting Value")
+    plot_error("{} Value {}".format(func_name, region_name),
+               data["regions"],
+               ref_data["avg_value"],
+               libm_data["avg_value"],
+               [gen_data["avg_value"] for gen_data in gen_datas])
 
     print("  Plotting Absolute error")
     plot_error("{} Absolute Error Domain {}".format(func_name, region_name),
@@ -236,7 +243,7 @@ def triple_plot(filename):
                     [(gen_data["abs_max_errors"], gen_data["rel_max_errors"])
                      for gen_data in gen_datas])
 
-    
+
     os.chdir(start)
 
 def main(argv):
