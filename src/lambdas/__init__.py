@@ -26,3 +26,5 @@ from .generate_mpfr_c_code import generate_mpfr_c_code
 from .narrow import Narrow
 
 from .hole import Hole
+
+from .punt_to_libm import PuntToLibm
