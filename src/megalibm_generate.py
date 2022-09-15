@@ -43,7 +43,8 @@ def parse_arguments(argv):
                         type=str,
                         help="Redirect logging to given file.")
     parser.add_argument("dirname",
-                        help="Directory with the fpcore files")
+                        help="Directory with the fpcore files",
+                        nargs="+")
     args = parser.parse_args(argv[1:])
 
     Logger.set_log_level(Logger.str_to_level(args.verbosity))
@@ -51,12 +52,15 @@ def parse_arguments(argv):
     if args.log_file is not None:
         Logger.set_log_filename(args.log_file)
 
-    if os.path.isfile(args.dirname) and args.dirname.endswith(".fpcore"):
-        args.fnames = [args.dirname]
-    else:
-        args.fnames = [path.join(args.dirname, fname)
-                       for fname in os.listdir(args.dirname)
-                       if fname.endswith(".fpcore")]
+    args.fnames = list()
+    for dn in args.dirname:
+        if os.path.isfile(dn) and dn.endswith(".fpcore"):
+            args.fnames.append(dn)
+        else:
+            args.fnames.extend([path.join(dn, fn)
+            for fn in os.listdir(dn)
+            if fn.endswith(".fpcore")])
+
     args.fnames.sort()
 
     logger.dlog("Settings:")
@@ -176,20 +180,7 @@ def generate_all_code(function, domain):
     name = c_ize_name(function)
     target = lambdas.types.Impl(function, domain)
 
-    start = os.getcwd()
-    if not path.isdir(name):
-        os.mkdir(name)
-    os.chdir(name)
-
     my_lambdas = synthesize(target)
-
-    libm_funcname = f"libm_{name}"
-    libm_sig, libm_src = lambdas.generate_libm_c_code(target, libm_funcname)
-    logger.blog("C libm function", "\n".join(libm_src))
-
-    mpfr_funcname = f"mpfr_{name}"
-    mpfr_sig, mpfr_src = lambdas.generate_mpfr_c_code(target, mpfr_funcname)
-    logger.blog("C mpfr function", "\n".join(mpfr_src))
 
     gen_sigs = list()
     gen_srcs = list()
@@ -205,6 +196,22 @@ def generate_all_code(function, domain):
         except cmd_sollya.FailedGenError:
             logger("Unable to generate polynomial, skipping")
 
+    if len(gen_funcnames) == 0:
+        return False
+
+    libm_funcname = f"libm_{name}"
+    libm_sig, libm_src = lambdas.generate_libm_c_code(target, libm_funcname)
+    logger.blog("C libm function", "\n".join(libm_src))
+
+    mpfr_funcname = f"mpfr_{name}"
+    mpfr_sig, mpfr_src = lambdas.generate_mpfr_c_code(target, mpfr_funcname)
+    logger.blog("C mpfr function", "\n".join(mpfr_src))
+
+    start = os.getcwd()
+    if not path.isdir(name):
+        os.mkdir(name)
+    os.chdir(name)
+
     header_lines = assemble_header([libm_sig, mpfr_sig] + gen_sigs)
     header_fname = "funcs.h"
     with open(header_fname, "w") as f:
@@ -216,22 +223,61 @@ def generate_all_code(function, domain):
     with open(func_fname, "w") as f:
         f.write("\n".join(func_lines))
 
-    fstr = str(function)
-    if any(f in fstr for f in {"sin", "cos", "tan"}):
-        domains = [("-M_PI/4", "M_PI/4"),
-                   ("-M_PI", "M_PI"),
-                   ("-10*M_PI", "10*M_PI"),
-                   ("-100*M_PI", "100*M_PI"), ]
-    elif float(domain.inf) == 0:
-        domains = [("0.0", "0.175"),
-                   ("0.0", "0.7"),
-                   ("0.0", "7"),
-                   ("0.0", "70"), ]
+    inf = str(domain[0])
+    sup = str(domain[1])
+    if inf == "(- PI_2)" and sup == "PI_2":
+        domains = [("-1.57079633", "1.57079633"),
+                   ("-0.78539816", "0.78539816"),
+                   ("-0.39269908", "0.39269908"),
+                   ("-0.19634954", "0.19634954")]
+    elif inf == "(- 26.5)" and sup == "26.5":
+        domains = [("-26.5", "26.5"),
+                   ("-16", "16"),
+                   ("-2", "2"),
+                   ("-0.5", "0.5")]
+    elif inf == "(- 0.577)" and sup == "0.577":
+        domains = [("-0.577", "0.577"),
+                   ("-0.5", "0.5"),
+                   ("-0.25", "0.25"),
+                   ("-0.125", "0.125")]
+    elif inf == "(- 1)" and sup == "1":
+        domains = [("-1", "1"),
+                   ("-0.5", "0.5"),
+                   ("-0.25", "0.25"),
+                   ("-0.125", "0.125")]
+    elif inf == "0" and sup == "2":
+        domains = [("0", "2"),
+                   ("0", "1"),
+                   ("0", "0.5"),
+                   ("0", "0.25")]
+    elif inf == "0" and sup == "1":
+        domains = [("0", "1"),
+                   ("0", "0.5"),
+                   ("0", "0.25"),
+                   ("0", "0.125")]
+    elif inf == "(- 1)" and sup == "INFINITY":
+        domains = [("-1", "64"),
+                   ("-1", "16"),
+                   ("-1", "4"),
+                   ("-1", "-0.5")]
+    elif inf == "0" and sup == "INFINITY":
+        domains = [("0", "64"),
+                   ("0", "16"),
+                   ("0", "4"),
+                   ("0", "0.5")]
+    elif inf == "1" and sup == "INFINITY":
+        domains = [("1", "64"),
+                   ("1", "16"),
+                   ("1", "4"),
+                   ("1", "1.5")]
+    elif inf == "(- INFINITY)" and sup == "INFINITY":
+        domains = [("-32", "32"),
+                   ("-8", "8"),
+                   ("-2", "2"),
+                   ("-1", "1")]
     else:
-        domains = [("-0.1", "0.1"),
-                   ("-1", "1"),
-                   ("-10", "10"),
-                   ("-100", "100"), ]
+        print(f"domain: ({inf}, {sup})")
+        assert False
 
     main_lines = assemble_error_main(mpfr_funcname,
                                      [libm_funcname] + gen_funcnames,
@@ -241,11 +287,13 @@ def generate_all_code(function, domain):
         f.write("\n".join(main_lines))
 
     os.chdir(start)
-
+    return True
 
 def handle_work_item(func):
+    logger("Working on: {}", c_ize_name(func))
     func.remove_let()
 
+    var = "x"
     if func.arguments[0].source != "x":
         var = func.arguments[0]
         x = fpcore.ast.Variable("x")
@@ -253,12 +301,14 @@ def handle_work_item(func):
         func = func.substitute(var, x)
 
     # TODO: figure out valid domain
-    domain = Interval("(- INFINITY)", "INFINITY")
+    func.extract_domain()
+    domain = func.domains[var]
     start = os.getcwd()
     if not path.isdir("generated"):
         os.mkdir("generated")
     os.chdir("generated")
-    generate_all_code(func, domain)
+    if not generate_all_code(func, domain):
+        logger.warning("Unable to generate for {}", c_ize_name(func))
     os.chdir(start)
     return func
 
@@ -271,6 +321,7 @@ def main(argv):
     # Read all the files, each file may have multiple functions
     work_items = list()
     for fname in args.fnames:
+        logger("Reading: {}", fname)
         with open(fname, "r") as f:
             text = f.read()
 
