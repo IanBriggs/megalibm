@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "fpbench segmenttobezier rasterific-svg-0.2.3.1"
+ :pre (and (< (- INFINITY) x INFINITY) (!= (sin x) 0))
+
+ (/ (* (* (/ 8 3) (sin (* x 0.5))) (sin (* x 0.5))) (sin x)))
