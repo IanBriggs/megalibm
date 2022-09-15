@@ -18,8 +18,6 @@ from math import pi
 logger = Logger(level=Logger.HIGH)
 
 
-
-
 def is_negation_function(func, low, middle, high):
     arg = func.arguments[0]
     negated_arg = high - arg
@@ -31,7 +29,7 @@ def is_negation_function(func, low, middle, high):
     with WolframLanguageSession() as session:
         res = session.evaluate(wlexpr(wolf_query))
         logger("Wolf's Result: {}", res)
-        return  res == 0
+        return res == 0
 
 
 class RepeatNegate(types.Transform):
@@ -40,38 +38,41 @@ class RepeatNegate(types.Transform):
         our_in_type = self.in_node.out_type
         old_high = our_in_type.domain.sup
         new_high = old_high * fpcore.ast.Number("2")
-        assert(type(our_in_type) == types.Impl)
-        assert(float(our_in_type.domain.inf) == 0.0)
+        assert (type(our_in_type) == types.Impl)
+        assert (float(our_in_type.domain.inf) == 0.0)
         assert (is_negation_function(our_in_type.function,
-                                    0.0,
-                                    old_high,
-                                    new_high))
+                                     0.0,
+                                     old_high,
+                                     new_high))
 
         self.out_type = types.Impl(our_in_type.function,
-                             Interval(0, new_high))
-
+                                   Interval(0, new_high))
 
     def generate(self):
         our_in_type = self.in_node.out_type
         so_far = super().generate()
         in_name = self.gensym("in")
         out_red = so_far[0].in_names[0]
-        k = self.gensym("k")
-        add = lego_blocks.SimpleAdditive(numeric_types.fp64(),
-                                         [in_name],
-                                         [out_red, k], our_in_type.domain.sup)
+        ifless_in = lego_blocks.IfLess(numeric_types.fp64(),
+                                       [in_name],
+                                       [out_red],
+                                       our_in_type.domain.sup.to_libm_c(),
+                                       in_name,
+                                       "{} - {}".format((our_in_type.domain.sup* fpcore.ast.Number("2")).to_libm_c(), in_name),
+                                       )
 
         in_case = so_far[-1].out_names[0]
         out_case = self.gensym("out")
-        cases = {
-            0: in_case,
-            1: "-{}".format(in_case),
-        }
-        case = lego_blocks.Case(numeric_types.fp64(),
-                                [in_case, k],
-                                [out_case], 2, cases)
 
-        return [add] + so_far + [case]
+        ifless_out = lego_blocks.IfLess(numeric_types.fp64(),
+                                        [in_name],
+                                        [out_case],
+                                        our_in_type.domain.sup.to_libm_c(),
+                                        in_case,
+                                        "-" + in_case,
+                                        )
+
+        return [ifless_in] + so_far + [ifless_out]
 
     @classmethod
     def generate_hole(cls, out_type):
@@ -79,15 +80,15 @@ class RepeatNegate(types.Transform):
         # (Impl (func) 0.0 (* 2 bound))
         # where (func) is a negation for [0.0, bound] w.r.t. [bound, (* 2 bound)]
         if (type(out_type) != types.Impl
-            or float(out_type.domain.inf) != 0.0):
+                or float(out_type.domain.inf) != 0.0):
             return list()
 
         two_bound = out_type.domain.sup
         bound = two_bound / fpcore.ast.Number("2")
         if not is_negation_function(out_type.function,
-                                   0.0,
-                                   bound,
-                                   two_bound):
+                                    0.0,
+                                    bound,
+                                    two_bound):
             return list()
 
         # To get this output we need as input
