@@ -17,7 +17,10 @@ DATA_3 = $(foreach g,$(GEN_DIRS),${g}/data_3.json)
 DATAS = ${DATA_0} ${DATA_1} ${DATA_2} ${DATA_3}
 
 .PHONY: all
-all: ${BINS}
+all: build
+
+.PHONY: build
+build: ${BINS}
 
 .PHONY: run
 run: ${DATAS}
