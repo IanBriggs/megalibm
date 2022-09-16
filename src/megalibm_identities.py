@@ -208,7 +208,7 @@ def main(argv):
                                             for c, e in tups))
 
     write_per_func_webpage("per_func.html", per_func_identities)
-    write_identity_webpage("index.html", counts)
+    write_identity_webpage("identities.html", counts)
 
     logger("{} unique identities", len(counts))
 
