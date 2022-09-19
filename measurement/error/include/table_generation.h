@@ -41,6 +41,7 @@ void free_table(size_t func_count, error **errorss);
 
 void print_json(size_t region_count, double *regions,
                 size_t func_count, entry *funcs,
-                error **errorss);
+                error **errorss,
+                char *func_name, char *func_body);
 
 #endif

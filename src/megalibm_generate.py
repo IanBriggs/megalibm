@@ -279,7 +279,9 @@ def generate_all_code(function, domain):
         print(f"domain: ({inf}, {sup})")
         assert False
 
-    main_lines = assemble_error_main(mpfr_funcname,
+    func_body = function.to_html()
+    main_lines = assemble_error_main(name, func_body,
+                                     mpfr_funcname,
                                      [libm_funcname] + gen_funcnames,
                                      header_fname, domains)
     main_fname = "main.c"
