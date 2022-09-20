@@ -62,5 +62,5 @@ class OddPolynomial(types.Source):
 
         # To get this output we just need be contructed with given args
         # TODO: how should monomials be done?
-        return [(out_type.function, out_type.domain, list(range(1,31,2))),]
+        return [(out_type.function, out_type.domain, [0] + list(range(1,31,2))),]
 
