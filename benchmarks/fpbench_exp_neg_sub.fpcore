@@ -2,6 +2,6 @@
 
 (FPCore (x)
  :name "fpbench exp neg sub"
- :pre (or (<= (- 26.5) x 26.5) (< (- INFINITY) x INFINITY))
+ :pre (or (<= (- 20) x 20) (< (- INFINITY) x INFINITY))
 
  (exp (- (- 1 (* x x)))))
