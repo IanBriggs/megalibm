@@ -35,7 +35,7 @@ class OddPolynomial(types.Source):
         assert(all([type(m) == int for m in self.monomials]))
         assert(all([type(c) == float or c is None for c in self.coefficients]))
         assert(is_odd_function(self.function))
-        assert(all(m%2 == 1 for m in self.monomials))
+        #assert(all(m%2 == 1 for m in self.monomials))
 
         self.out_type = types.Poly(self.function, self.domain)
 
