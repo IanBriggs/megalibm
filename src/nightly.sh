@@ -26,7 +26,7 @@ cat << EOF > index.html
 EOF
 
 # Run the identities nightly
-# /usr/bin/time -v "${SCRIPT_LOCATION}"/megalibm_identities "${GIT_LOCATION}/benchmarks/"
+/usr/bin/time -v "${SCRIPT_LOCATION}"/megalibm_identities "${GIT_LOCATION}/benchmarks/"
 
 # Run the generation nightly, this is more envolved
 /usr/bin/time -v "${SCRIPT_LOCATION}"/megalibm_generate "${GIT_LOCATION}/benchmarks/"
