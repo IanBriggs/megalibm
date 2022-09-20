@@ -1,5 +1,6 @@
 
 
+import math
 from error import Error
 from utils.logging import Logger
 from utils.timing import Timer
@@ -195,7 +196,9 @@ class Result():
 
     def _parse_output(self):
         data = json.loads(self.stdout)
-
+        for coef in data["coefficients"]:
+            if coef == "NaN":
+                raise json.JSONDecodeError("Sollya made NaN", "stdin", -1)
         self.coefficients = data["coefficients"]
 
 
