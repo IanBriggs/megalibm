@@ -3,8 +3,6 @@
 import math
 
 
-
-
 def generate_mpfr_c_code(typ, name):
     func = typ.function
 

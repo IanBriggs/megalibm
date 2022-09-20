@@ -11,8 +11,10 @@ zero_arg = {
     CONST_E: lambda: ast.Constant("E"),
 }
 
+
 def mkone(operation):
     return lambda x: ast.Operation(operation, x)
+
 
 one_arg = {
     thefunc: mkone("thefunc"),
@@ -45,8 +47,10 @@ one_arg = {
     tanh: mkone("tanh"),
 }
 
+
 def mktwo(operation):
     return lambda a, b: ast.Operation(operation, a, b)
+
 
 two_arg = {
     add: mktwo("+"),

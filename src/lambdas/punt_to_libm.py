@@ -23,7 +23,7 @@ class PuntToLibm(types.Source):
         # (Impl (func) low high)
         if (type(out_type) != types.Impl
             or not math.isfinite(float(out_type.domain.inf))
-            or not math.isfinite(float(out_type.domain.sup))):
+                or not math.isfinite(float(out_type.domain.sup))):
             return list()
 
         # To get this output we just need be contructed with given args

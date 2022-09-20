@@ -19,8 +19,6 @@ from math import pi
 logger = Logger(level=Logger.HIGH)
 
 
-
-
 def is_symmetric_function(func, low, middle, high):
     arg = func.arguments[0]
     flipped_arg = high - arg
@@ -32,7 +30,7 @@ def is_symmetric_function(func, low, middle, high):
     with WolframLanguageSession() as session:
         res = session.evaluate(wlexpr(wolf_query))
         logger("Wolf's Result: {}", res)
-        return  res == 0
+        return res == 0
 
 
 class RepeatFlip(types.Transform):
@@ -51,7 +49,6 @@ class RepeatFlip(types.Transform):
         self.out_type = types.Impl(our_in_type.function,
                                    Interval(0, new_high))
 
-
     def generate(self):
         our_in_type = self.in_node.out_type
         so_far = super().generate()
@@ -69,7 +66,8 @@ class RepeatFlip(types.Transform):
             0: in_case,
             1: "{}-{}".format(our_in_type.domain.sup.to_libm_c(), in_case),
         }
-        case = lego_blocks.Case(numeric_types.fp64(), [in_case, k], [out_case], 2, cases)
+        case = lego_blocks.Case(numeric_types.fp64(), [
+                                in_case, k], [out_case], 2, cases)
 
         return [add, case] + so_far
 
@@ -79,15 +77,15 @@ class RepeatFlip(types.Transform):
         # (Impl (func) 0.0 (* 2 bound))
         # where (func) is symmetric for [0.0, bound] w.r.t. [bound, (* 2 bound)]
         if (type(out_type) != types.Impl
-            or float(out_type.domain.inf) != 0.0):
+                or float(out_type.domain.inf) != 0.0):
             return list()
 
         two_bound = out_type.domain.sup
         bound = two_bound / fpcore.ast.Number("2")
         if not is_symmetric_function(out_type.function,
-                                    0.0,
-                                    bound,
-                                    two_bound):
+                                     0.0,
+                                     bound,
+                                     two_bound):
             return list()
 
         # To get this output we need as input

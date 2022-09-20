@@ -14,13 +14,16 @@ def __mul__(self, other):
     msg = "__mul__ not implemented for class {}".format(class_name)
     raise NotImplementedError(msg)
 
+
 @add_method(Atom)
 def __mul__(self, other):
     return Operation("-", self, other)
 
+
 @add_method(Operation)
 def __mul__(self, other):
     return Operation("-", self, other)
+
 
 @add_method(FPCore)
 def __mul__(self, other):

@@ -4,7 +4,6 @@ from interval import Interval
 from lambdas import types
 
 
-
 class Hole(types.Source):
 
     def __init__(self, out_type):

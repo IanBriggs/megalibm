@@ -12,8 +12,6 @@ from lambdas import types
 from lambdas.mirror_about_zero_x import is_even_function
 
 
-
-
 class EvenPolynomial(types.Source):
 
     def __init__(self, function, domain, monomials, coefficients=None):
@@ -21,26 +19,23 @@ class EvenPolynomial(types.Source):
         self.coefficients = coefficients or list()
         super().__init__(function, domain)
 
-
     def __repr__(self):
         return "EvenPolynomial({}, {}, {}, {})".format(repr(self.function),
-                                                      repr(self.domain),
-                                                      repr(self.monomials),
-                                                      repr(self.coefficients))
-
+                                                       repr(self.domain),
+                                                       repr(self.monomials),
+                                                       repr(self.coefficients))
 
     def type_check(self):
-        assert(type(self.monomials) == list)
-        assert(type(self.coefficients) == list)
-        assert(len(self.monomials) == len(set(self.monomials)))
-        assert(len(self.coefficients) <= len(self.monomials))
-        assert(all([type(m) == int for m in self.monomials]))
-        assert(all([type(c) == float or c is None for c in self.coefficients]))
+        assert (type(self.monomials) == list)
+        assert (type(self.coefficients) == list)
+        assert (len(self.monomials) == len(set(self.monomials)))
+        assert (len(self.coefficients) <= len(self.monomials))
+        assert (all([type(m) == int for m in self.monomials]))
+        assert (all([type(c) == float or c is None for c in self.coefficients]))
         assert (is_even_function(self.function))
-        assert(all(m%2 == 0 for m in self.monomials))
+        assert (all(m % 2 == 0 for m in self.monomials))
 
         self.out_type = types.Poly(self.function, self.domain)
-
 
     def generate(self):
         res = cmd_sollya.Result(self.function,
@@ -51,6 +46,7 @@ class EvenPolynomial(types.Source):
                                 self.monomials,
                                 res.coefficients,
                                 self.domain)
+
     @classmethod
     def generate_hole(cls, out_type):
         # We only output
@@ -67,5 +63,4 @@ class EvenPolynomial(types.Source):
         monomials = list(range(2, 30, 2))
         if out_type.function.eval(0) != 0:
             monomials = [0] + monomials
-        return [(out_type.function, out_type.domain, monomials),]
-
+        return [(out_type.function, out_type.domain, monomials), ]

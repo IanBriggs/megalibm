@@ -5,18 +5,17 @@ from interval import Interval
 from lambdas import types, hole
 
 
-
 class DoubleAngle(types.Transform):
 
     def type_check(self):
         our_in_type = self.in_node.out_type
-        assert(type(our_in_type) == types.Tuple)
-        assert(type(our_in_type.a) == types.Impl)
-        assert(type(our_in_type.b) == types.Impl)
-        assert(our_in_type.a.function == "sin")
-        assert(our_in_type.b.function == "cos")
-        assert(our_in_type.a.domain.inf == 0.0)
-        assert(our_in_type.b.domain.inf == 0.0)
+        assert (type(our_in_type) == types.Tuple)
+        assert (type(our_in_type.a) == types.Impl)
+        assert (type(our_in_type.b) == types.Impl)
+        assert (our_in_type.a.function == "sin")
+        assert (our_in_type.b.function == "cos")
+        assert (our_in_type.a.domain.inf == 0.0)
+        assert (our_in_type.b.domain.inf == 0.0)
 
         high = 2 * min(our_in_type.a.domain.sup, our_in_type.b.domain.sup)
         self.out_type = types.Tuple(types.Impl("sin", Interval(0.0, high)),
@@ -34,20 +33,20 @@ class DoubleAngle(types.Transform):
         a = out_type.a
         if (type(a) != types.Impl
             or type(a.function.body) != fpcore.Operation
-            or a.function.body.op != "sin"):
+                or a.function.body.op != "sin"):
             return list()
 
         b = out_type.b
         if (type(b) != types.Impl
             or type(b.function.body) != fpcore.Operation
-            or b.function.body.op != "cos"):
+                or b.function.body.op != "cos"):
             return list()
 
         a_high = a.domain.sup
         b_high = b.domain.sup
         if (float(a.domain.inf) != 0.0
             or float(b.domain.inf) != 0.0
-            or a_high != b_high):
+                or a_high != b_high):
             return list()
 
         a_arg = a.function.body.args[0]

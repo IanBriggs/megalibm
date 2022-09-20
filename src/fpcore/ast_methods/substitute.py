@@ -8,11 +8,12 @@ logger = Logger(level=Logger.EXTRA)
 
 
 @add_method(ASTNode)
-def substitute(self, old, new):
+def substitute(self, *args, **kwargs):
     # Make sure calling substitute leads to an error if not overridden
     class_name = type(self).__name__
     msg = "substitute not implemented for class {}".format(class_name)
     raise NotImplementedError(msg)
+
 
 @add_method(Atom)
 def substitute(self, old, new):
@@ -20,12 +21,14 @@ def substitute(self, old, new):
         return new
     return self
 
+
 @add_method(FPCore)
 def substitute(self, old, new):
     return FPCore(self.name,
                   self.arguments,
                   self.properties,
                   self.body.substitute(old, new))
+
 
 @add_method(Operation)
 def substitute(self, old, new):

@@ -3,8 +3,6 @@
 import math
 
 
-
-
 def generate_c_code(lam, name):
     passes = lam.generate()
     in_type = passes[0].numeric_type.c_type()
@@ -19,7 +17,6 @@ def generate_c_code(lam, name):
         "{",
         "// {}".format(lam)
     ]
-
 
     for p in passes:
         lines += ["    "+l for l in p.to_c()]

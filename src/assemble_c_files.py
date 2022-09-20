@@ -5,6 +5,7 @@ def assemble_header(decls):
     lines.extend(decls)
     return lines
 
+
 def assemble_functions(functions, header_fname):
     lines = ["#include \"{}\"".format(header_fname),
              "#include \"table_generation.h\"",
@@ -16,7 +17,9 @@ def assemble_functions(functions, header_fname):
         lines.append("")
     return lines
 
-def assemble_error_main(func_name, func_body, mpfr_func, other_funcs, header_fname, domains):
+
+def assemble_error_main(func_name, func_body, mpfr_func, other_funcs,
+                        header_fname, domains):
     lines = ["#include \"table_generation.h\"",
              "#include \"xmalloc.h\"",
              "#include \"{}\"".format(header_fname),
@@ -39,25 +42,27 @@ def assemble_error_main(func_name, func_body, mpfr_func, other_funcs, header_fna
                   "  }",
                   "  double low,high;",
                   "  switch (choice) {"])
-    for i,(low,high) in enumerate(domains):
+    for i, (low, high) in enumerate(domains):
         lines.extend(["  case {}:".format(i),
                       "    low = {};".format(low),
                       "    high = {};".format(high),
                       "    break;"])
     func_body = func_body.replace("\n", "\\\\n").replace('"', '\\\\\\"')
-    lines.extend(["  default:",
-                  "    printf(\"Option not available\\n\");"
-                  "    exit(1);",
-                  "  }",
-                  "  size_t region_count = ((size_t) 1) << 8;",
-                  "  size_t samples = ((size_t) 1) << 12;",
-                  "  double* regions = generate_linear_regions(low, high, region_count);",
-                  "  error** errorss = generate_table(region_count, regions, samples,",
-                  "                                   {},".format(mpfr_func),
-                  "                                   ENTRY_COUNT, ENTRIES);",
-                  "  print_json(region_count, regions, ENTRY_COUNT, ENTRIES, errorss, \"{}\", \"{}\");".format(func_name, func_body),
-                  "  free_table(ENTRY_COUNT, errorss);",
-                  "  mpfr_free_cache();",
-                  "  return 0;",
-                  "}"])
+    lines.extend([
+        "  default:",
+        "    printf(\"Option not available\\n\");"
+        "    exit(1);",
+        "  }",
+        "  size_t region_count = ((size_t) 1) << 8;",
+        "  size_t samples = ((size_t) 1) << 12;",
+        "  double* regions = generate_linear_regions(low, high, region_count);",
+        "  error** errorss = generate_table(region_count, regions, samples,",
+        "                                   {},".format(mpfr_func),
+        "                                   ENTRY_COUNT, ENTRIES);",
+        "  print_json(region_count, regions, ENTRY_COUNT, ENTRIES, errorss, \"{}\", \"{}\");".format(
+            func_name, func_body),
+        "  free_table(ENTRY_COUNT, errorss);",
+        "  mpfr_free_cache();",
+        "  return 0;",
+        "}"])
     return lines

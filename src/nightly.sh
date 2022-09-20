@@ -16,7 +16,7 @@ mkdir "${THIS_NIGHTLY_LOCATION}"
 
 # Make temporary splash page for two nightlies
 cd "${THIS_NIGHTLY_LOCATION}"
-cat << EOF > index.html
+cat <<EOF >index.html
 <!doctype html>
 <meta charset="utf-8" />
 <title>Megalibm Results for $(date +%Y-%m-%d)</title>

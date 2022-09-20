@@ -129,10 +129,10 @@ def plot_abs_vs_rel(title, ref, libm, gens):
 
     Keyword arguments:
     title -- Title of the plot
-    ref -- list of pairs of floats representing absolute and relative error for
-           the "real" function rounded to float
-    libm -- list of pairs of floats representing absolute and relative error for
-            the libm version of the function
+    ref -- list of pairs of floats representing absolute and relative error
+           for the "real" function rounded to float
+    libm -- list of pairs of floats representing absolute and relative error
+            for the libm version of the function
     gens -- list of lists of pairs of floats representing  absolute and
             relative error for the megalibm-generated functions
     """
@@ -233,36 +233,41 @@ def triple_plot(filename):
 
     print("  Plotting Value")
     name = plot_error("{} Value {}".format(func_name, region_name),
-               data["regions"],
-               ref_data["avg_value"],
-               libm_data["avg_value"],
-               [gen_data["avg_value"] for gen_data in gen_datas])
+                      data["regions"],
+                      ref_data["avg_value"],
+                      libm_data["avg_value"],
+                      [gen_data["avg_value"] for gen_data in gen_datas])
     imgnames.append(name)
 
     print("  Plotting Absolute error")
-    name = plot_error("{} Absolute Error Domain {}".format(func_name, region_name),
-               data["regions"],
-               ref_data["abs_max_errors"],
-               libm_data["abs_max_errors"],
-               [gen_data["abs_max_errors"] for gen_data in gen_datas])
+    name = plot_error("{} Absolute Error Domain {}".format(func_name,
+                                                           region_name),
+                      data["regions"],
+                      ref_data["abs_max_errors"],
+                      libm_data["abs_max_errors"],
+                      [gen_data["abs_max_errors"] for gen_data in gen_datas])
     imgnames.append(name)
 
     print("  Plotting Relative error")
-    name = plot_error("{} Relative Error Domain {}".format(func_name, region_name),
-               data["regions"],
-               ref_data["rel_max_errors"],
-               libm_data["rel_max_errors"],
-               [gen_data["rel_max_errors"] for gen_data in gen_datas])
+    name = plot_error("{} Relative Error Domain {}".format(func_name,
+                                                           region_name),
+                      data["regions"],
+                      ref_data["rel_max_errors"],
+                      libm_data["rel_max_errors"],
+                      [gen_data["rel_max_errors"] for gen_data in gen_datas])
     imgnames.append(name)
 
     print("  Plotting Epsilon vs Delta")
-    name = plot_abs_vs_rel("{} Absolute vs Relative Error Domain {}".format(func_name, region_name),
-                    (ref_data["abs_max_errors"],
-                     ref_data["rel_max_errors"]),
-                    (libm_data["abs_max_errors"],
-                     libm_data["rel_max_errors"]),
-                    [(gen_data["abs_max_errors"], gen_data["rel_max_errors"])
-                     for gen_data in gen_datas])
+    title = "{} Absolute vs Relative Error Domain {}".format(func_name,
+                                                             region_name),
+    name = plot_abs_vs_rel(title,
+                           (ref_data["abs_max_errors"],
+                            ref_data["rel_max_errors"]),
+                           (libm_data["abs_max_errors"],
+                            libm_data["rel_max_errors"]),
+                           [(gen_data["abs_max_errors"],
+                             gen_data["rel_max_errors"])
+                            for gen_data in gen_datas])
     imgnames.append(name)
 
     os.chdir(start)
@@ -272,7 +277,8 @@ def triple_plot(filename):
         libm_data["abs_avg_errors"]) / len(libm_data["abs_avg_errors"])
     libm_avg_rel_err = math.fsum(
         libm_data["rel_avg_errors"]) / len(libm_data["rel_avg_errors"])
-    for fname in [f for f in data["functions"] if f not in {"reference", libm_name}]:
+    for fname in [f for f in data["functions"] if
+                  f not in {"reference", libm_name}]:
         func_data = data["functions"][fname]
         func_avg_abs_err = math.fsum(
             func_data["abs_avg_errors"]) / len(func_data["abs_avg_errors"])
@@ -366,7 +372,7 @@ def make_generation_webpage(root):
                     "<img src=\"{}\" style=\"width:50%\">".format(imgnames[2]),
                     "<h3>Epsilon vs Delta</h3>",
                     "<img src=\"{}\" style=\"width:50%\">".format(imgnames[3]),
-                    ]))
+                ]))
             lines.append("    <td>[{}, {}]</td>".format(low, high))
             for impl_name in impl_names:
                 metric = metrics[impl_name]

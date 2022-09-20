@@ -8,7 +8,6 @@ from utils import Logger
 logger = Logger(level=Logger.HIGH)
 
 
-
 def is_even(func):
     se_func = func.to_snake_egg()
     logger.dlog("Func A: {}", se_func)

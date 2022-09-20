@@ -8,11 +8,12 @@ logger = Logger(level=Logger.EXTRA)
 
 
 @add_method(ASTNode)
-def to_html(self):
+def to_html(self, *args, **kwargs):
     # Make sure calling to_html leads to an error if not overridden
     class_name = type(self).__name__
     msg = "to_html not implemented for class {}".format(class_name)
     raise NotImplementedError(msg)
+
 
 @add_method(FPCore)
 def to_html(self):

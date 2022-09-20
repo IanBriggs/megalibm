@@ -1,7 +1,7 @@
 
 
 from fpcore.ast import (ASTNode, Atom, FPCore, Let, LetStar, Operation,
-                               Variable)
+                        Variable)
 from utils import add_method, Logger
 
 import copy
@@ -16,7 +16,7 @@ class FPCoreNameError(Exception):
 
 
 @add_method(ASTNode)
-def remove_let(self, environment_stack):
+def remove_let(self, *args, **kwargs):
     # Make sure calling remove_let leads to an error if not overridden
     class_name = type(self).__name__
     msg = "remove_let not implemented for class {}".format(class_name)
@@ -69,13 +69,11 @@ def remove_let(self, environment_stack):
 
 @add_method(FPCore)
 def remove_let(self):
-    inputs = {str(a):a for a in self.arguments}
-    environment_stack = [inputs,]
+    inputs = {str(a): a for a in self.arguments}
+    environment_stack = [inputs, ]
     new_body = self.body.remove_let(environment_stack)
     self.body = new_body
-    assert(len(environment_stack) == 1)
-
-
+    assert (len(environment_stack) == 1)
 
 
 def main(argv):

@@ -3,8 +3,6 @@
 from interval import Interval
 
 
-
-
 # Return types
 
 class Poly():
@@ -52,10 +50,9 @@ class Tuple():
         return str(self)
 
 
-
 # lambda object types
-
 USED_NAMES = set()
+
 
 class Node():
     """
@@ -63,15 +60,18 @@ class Node():
     It represents both the relationship between the input type and output type
       as well as the C code generation through lego blocks.
     """
+
     def __init__(self):
         raise NotImplementedError()
 
     def type_check_forawrd(self):
-        # check that in_node.out_type matches requirements and set this out_type
+        # check that in_node.out_type matches requirements and set this
+        # out_type
         raise NotImplementedError()
 
     def type_check_backward(self):
-        # check that out_type can be created from this Node and set in_node.out_type
+        # check that out_type can be created from this Node and set
+        # in_node.out_type
         raise NotImplementedError()
 
     def generate(self):
@@ -103,8 +103,8 @@ class Source(Node):
                                    repr(self.domain))
 
     def type_check(self):
-        assert(type(self.function) == str)
-        assert(type(self.domain) == Interval)
+        assert (type(self.function) == str)
+        assert (type(self.domain) == Interval)
 
 
 class Transform(Node):
@@ -115,8 +115,8 @@ class Transform(Node):
 
     @classmethod
     def generate_hole(cls, out_type):
-        # Given an out_type, return possible in types that this Transform could
-        # use to reach that out_type
+        # Given an out_type, return possible in types that this Transform
+        # could use to reach that out_type
         raise NotImplementedError()
 
     def __repr__(self):

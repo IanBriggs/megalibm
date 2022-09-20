@@ -30,23 +30,20 @@ def is_even_function(func):
     with WolframLanguageSession() as session:
         res = session.evaluate(wlexpr(wolf_query))
         logger("Wolf's Result: {}", res)
-        return  res == 0
-
-
+        return res == 0
 
 
 class MirrorAboutZeroX(types.Transform):
 
     def type_check(self):
         our_in_type = self.in_node.out_type
-        assert(type(our_in_type) == types.Impl)
-        assert(float(our_in_type.domain.inf) == 0.0)
+        assert (type(our_in_type) == types.Impl)
+        assert (float(our_in_type.domain.inf) == 0.0)
         assert (is_even_function(our_in_type.function))
 
         self.out_type = types.Impl(our_in_type.function,
                                    Interval(-our_in_type.domain.sup,
                                             our_in_type.domain.sup))
-
 
     def generate(self):
         so_far = super().generate()
@@ -63,7 +60,7 @@ class MirrorAboutZeroX(types.Transform):
         # (Impl (func) (- bound) bound)
         # where (func) is even
         if (type(out_type) != types.Impl
-            or -float(out_type.domain.inf) != float(out_type.domain.sup)):
+                or -float(out_type.domain.inf) != float(out_type.domain.sup)):
             return list()
 
         if not is_even_function(out_type.function):

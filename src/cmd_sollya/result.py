@@ -18,7 +18,6 @@ logger = Logger(level=Logger.HIGH, color=Logger.green)
 timer = Timer()
 
 
-
 CACHE = dict()
 
 
@@ -27,15 +26,17 @@ class FailedGenError(Exception):
         self.func = func
         self.domain = domain
 
+
 class Result():
 
     default_config = {
-        "prec" : 128,
-        "analysis_bound" : 2**-20,
-        "minmize_target" : "relative",
+        "prec": 128,
+        "analysis_bound": 2**-20,
+        "minmize_target": "relative",
     }
 
-    def __init__(self, func, domain, monomials, numeric_type, config=None, is_retry=False):
+    def __init__(self, func, domain, monomials, numeric_type,
+                 config=None, is_retry=False):
         self.func = func
         self.domain = domain
         self.monomials = monomials
@@ -68,20 +69,19 @@ class Result():
         if not have_res:
             logger("Sollya call failed, retrying with symetric mirrored domain")
             diff = domain.sup - domain.inf
-            new_domain = Interval(domain.inf - diff, domain.sup + fpcore.ast.Number("0.00390625"))
+            new_domain = Interval(domain.inf - diff,
+                                  domain.sup + fpcore.ast.Number("0.00390625"))
             self.domain = new_domain
             self._generate_query()
             have_res = self._try_cache()
         if not have_res:
             have_res = self._try_run()
 
-
         el = timer.stop()
         logger("Sollya time: {} sec", el)
 
         if not have_res:
             raise FailedGenError(func, domain)
-
 
     def __repr__(self):
         return "Result({}, {}, {}, {}, {})".format(repr(self.func),
@@ -103,7 +103,6 @@ class Result():
             return True
         return False
 
-
     def _try_run(self):
         try:
             self._run()
@@ -114,14 +113,14 @@ class Result():
             CACHE[self.query] = None
             return False
 
-
     def _generate_query(self):
         monomials_str = ", ".join([str(m) for m in self.monomials])
         mid = (float(self.domain.inf) + float(self.domain.sup))/2
         lines = [
             'prec = {}!;'.format(self.config["prec"]),
             'algo_analysis_bound = {};'.format(self.config["analysis_bound"]),
-            'I = [{};{}];'.format(self.domain.inf.to_sollya(), self.domain.sup.to_sollya()),
+            'I = [{};{}];'.format(
+                self.domain.inf.to_sollya(), self.domain.sup.to_sollya()),
             'f = {};'.format(self.func.to_sollya()),
             'monomials = [|{}|];'.format(monomials_str),
             'formats = [|{}...|];'.format(self.numeric_type.sollya_type()),
@@ -142,7 +141,6 @@ class Result():
         lines.extend(more_lines)
 
         self.query = "\n".join(lines)
-
 
     def _run(self):
         query_name = "query.sollya"
@@ -200,8 +198,6 @@ class Result():
             if coef == "NaN":
                 raise json.JSONDecodeError("Sollya made NaN", "stdin", -1)
         self.coefficients = data["coefficients"]
-
-
 
 
 def main(argv):

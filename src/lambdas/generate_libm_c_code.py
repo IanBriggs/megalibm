@@ -4,8 +4,6 @@ import numeric_types
 import math
 
 
-
-
 def generate_libm_c_code(typ, name):
     func = typ.function
     in_type = numeric_types.fp64().c_type()

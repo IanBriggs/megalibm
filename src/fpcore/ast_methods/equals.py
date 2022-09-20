@@ -8,15 +8,17 @@ logger = Logger(level=Logger.EXTRA)
 
 
 @add_method(ASTNode)
-def __eq__(self, obj):
+def __eq__(self, *args, **kwargs):
     # Make sure calling __eq__ leads to an error if not overridden
     class_name = type(self).__name__
     msg = "__eq__ not implemented for class {}".format(class_name)
     raise NotImplementedError(msg)
 
+
 @add_method(Atom)
 def __eq__(self, other):
     return type(self) == type(other) and self.source == other.source
+
 
 @add_method(FPCore)
 def __eq__(self, other):
@@ -26,6 +28,7 @@ def __eq__(self, other):
             and all(s_prop == o_prop for a_prop, o_prop
                     in zip(self.properties, other.properties))
             and self.body == other.body)
+
 
 @add_method(Operation)
 def __eq__(self, other):

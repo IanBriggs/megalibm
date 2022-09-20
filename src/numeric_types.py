@@ -1,7 +1,5 @@
 
 
-
-
 class NumericType():
 
     def __init__(self):
@@ -33,7 +31,6 @@ class NumericType():
 
     def sollya_type(self):
         raise NotImplementedError()
-
 
 
 class fp32(NumericType):

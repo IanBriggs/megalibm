@@ -1,7 +1,7 @@
 
 
 from utils import add_method
-from fpcore.ast import ASTNode, FPCore, Operation, Variable, Number
+from fpcore.ast import ASTNode, FPCore, Operation, Variable
 from utils import Logger
 from interval import Interval
 
@@ -26,7 +26,7 @@ class DomainError(Exception):
 
 
 @add_method(ASTNode)
-def extract_domain(self):
+def extract_domain(self, *args, **kwargs):
     # Make sure calling extract_domain leads to an error if not overridden
     class_name = type(self).__name__
     msg = "extract_domain not implemented for class {}".format(class_name)

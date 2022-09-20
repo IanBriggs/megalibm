@@ -20,7 +20,6 @@ from math import pi
 logger = Logger(level=Logger.HIGH)
 
 
-
 def has_period_function(func, period):
     arg = func.arguments[0]
     flipped_arg = period + arg
@@ -32,21 +31,20 @@ def has_period_function(func, period):
     with WolframLanguageSession() as session:
         res = session.evaluate(wlexpr(wolf_query))
         logger("Wolf's Result: {}", res)
-        return  res == 0
+        return res == 0
 
 
 class RepeatInf(types.Transform):
 
     def type_check(self):
         our_in_type = self.in_node.out_type
-        assert(type(our_in_type) == types.Impl)
-        assert(float(our_in_type.domain.inf) == 0.0)
+        assert (type(our_in_type) == types.Impl)
+        assert (float(our_in_type.domain.inf) == 0.0)
         assert (has_period_function(
             our_in_type.function, our_in_type.domain.sup))
 
         self.out_type = types.Impl(our_in_type.function,
-                             Interval("0.0", "INFINITY"))
-
+                                   Interval("0.0", "INFINITY"))
 
     def generate(self):
         our_in_type = self.in_node.out_type
@@ -68,7 +66,7 @@ class RepeatInf(types.Transform):
         # where (func) is periodic
         if (type(out_type) != types.Impl
             or float(out_type.domain.inf) != 0.0
-            or float(out_type.domain.sup) != float("inf")):
+                or float(out_type.domain.sup) != float("inf")):
             return list()
 
         # TODO: real periodicity test, for now just guess some pi values

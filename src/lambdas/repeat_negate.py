@@ -58,7 +58,8 @@ class RepeatNegate(types.Transform):
                                        [out_red],
                                        our_in_type.domain.sup.to_libm_c(),
                                        in_name,
-                                       "{} - {}".format((our_in_type.domain.sup* fpcore.ast.Number("2")).to_libm_c(), in_name),
+                                       "{} - {}".format((our_in_type.domain.sup *
+                                                       fpcore.ast.Number("2")).to_libm_c(), in_name),
                                        )
 
         in_case = so_far[-1].out_names[0]

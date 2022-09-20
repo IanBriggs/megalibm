@@ -8,19 +8,22 @@ logger = Logger(level=Logger.EXTRA)
 
 
 @add_method(ASTNode)
-def __add__(self, other):
+def __add__(self, *args, **kwargs):
     # Make sure calling __add__ leads to an error if not overridden
     class_name = type(self).__name__
     msg = "__add__ not implemented for class {}".format(class_name)
     raise NotImplementedError(msg)
 
+
 @add_method(Atom)
 def __add__(self, other):
     return Operation("+", self, other)
 
+
 @add_method(Operation)
 def __add__(self, other):
     return Operation("+", self, other)
+
 
 @add_method(FPCore)
 def __add__(self, other):

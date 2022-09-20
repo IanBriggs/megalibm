@@ -20,7 +20,6 @@ from math import pi
 logger = Logger(level=Logger.HIGH)
 
 
-
 def is_odd_function(func):
     arg = func.arguments[0]
     flipped_arg = -arg
@@ -32,22 +31,20 @@ def is_odd_function(func):
     with WolframLanguageSession() as session:
         res = session.evaluate(wlexpr(wolf_query))
         logger("Wolf's Result: {}", res)
-        return  res == 0
-
+        return res == 0
 
 
 class FlipAboutZeroX(types.Transform):
 
     def type_check(self):
         our_in_type = self.in_node.out_type
-        assert(type(our_in_type) == types.Impl)
-        assert(float(our_in_type.domain.inf) == 0.0)
-        assert(is_odd_function(our_in_type.function))
+        assert (type(our_in_type) == types.Impl)
+        assert (float(our_in_type.domain.inf) == 0.0)
+        assert (is_odd_function(our_in_type.function))
 
         self.out_type = types.Impl(our_in_type.function,
                                    Interval(-our_in_type.domain.sup,
                                             our_in_type.domain.sup))
-
 
     def generate(self):
         so_far = super().generate()
@@ -58,7 +55,8 @@ class FlipAboutZeroX(types.Transform):
 
         in_negflip = so_far[-1].out_names[0]
         out_name = self.gensym("out")
-        neg = lego_blocks.NegFlip(numeric_types.fp64(), [in_negflip, sign], [out_name])
+        neg = lego_blocks.NegFlip(numeric_types.fp64(), [
+                                  in_negflip, sign], [out_name])
 
         return [abs] + so_far + [neg]
 
@@ -68,7 +66,7 @@ class FlipAboutZeroX(types.Transform):
         # (Impl (func) (- bound) bound)
         # where (func) is odd
         if (type(out_type) != types.Impl
-            or -float(out_type.domain.inf) != float(out_type.domain.sup)):
+                or -float(out_type.domain.inf) != float(out_type.domain.sup)):
             return list()
 
         if not is_odd_function(out_type.function):

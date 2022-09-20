@@ -11,7 +11,6 @@ from lambdas import types
 from lambdas.flip_about_zero_x import is_odd_function
 
 
-
 class OddPolynomial(types.Source):
 
     def __init__(self, function, domain, monomials, coefficients=None):
@@ -19,26 +18,23 @@ class OddPolynomial(types.Source):
         self.coefficients = coefficients or list()
         super().__init__(function, domain)
 
-
     def __repr__(self):
         return "OddPolynomial({}, {}, {}, {})".format(repr(self.function),
                                                       repr(self.domain),
                                                       repr(self.monomials),
                                                       repr(self.coefficients))
 
-
     def type_check(self):
-        assert(type(self.monomials) == list)
-        assert(type(self.coefficients) == list)
-        assert(len(self.monomials) == len(set(self.monomials)))
-        assert(len(self.coefficients) <= len(self.monomials))
-        assert(all([type(m) == int for m in self.monomials]))
-        assert(all([type(c) == float or c is None for c in self.coefficients]))
-        assert(is_odd_function(self.function))
+        assert (type(self.monomials) == list)
+        assert (type(self.coefficients) == list)
+        assert (len(self.monomials) == len(set(self.monomials)))
+        assert (len(self.coefficients) <= len(self.monomials))
+        assert (all([type(m) == int for m in self.monomials]))
+        assert (all([type(c) == float or c is None for c in self.coefficients]))
+        assert (is_odd_function(self.function))
         #assert(all(m%2 == 1 for m in self.monomials))
 
         self.out_type = types.Poly(self.function, self.domain)
-
 
     def generate(self):
         res = cmd_sollya.Result(self.function,
@@ -49,6 +45,7 @@ class OddPolynomial(types.Source):
                                 self.monomials,
                                 res.coefficients,
                                 self.domain)
+
     @classmethod
     def generate_hole(cls, out_type):
         # We only output
@@ -62,8 +59,7 @@ class OddPolynomial(types.Source):
 
         # To get this output we just need be contructed with given args
         # TODO: how should monomials be done?
-        monomials = list(range(1,31,2))
+        monomials = list(range(1, 31, 2))
         if out_type.function.eval(0) != 0:
             monomials = [0] + monomials
-        return [(out_type.function, out_type.domain, monomials),]
-
+        return [(out_type.function, out_type.domain, monomials), ]

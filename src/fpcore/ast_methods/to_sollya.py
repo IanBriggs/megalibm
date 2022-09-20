@@ -8,22 +8,25 @@ logger = Logger(level=Logger.EXTRA)
 
 
 @add_method(ASTNode)
-def to_sollya(self):
+def to_sollya(self, *args, **kwargs):
     # Make sure calling to_sollya leads to an error if not overridden
     class_name = type(self).__name__
     msg = "to_sollya not implemented for class {}".format(class_name)
     raise NotImplementedError(msg)
 
+
 @add_method(Atom)
 def to_sollya(self):
     return self.source
 
+
 @add_method(Constant)
 def to_sollya(self):
     mapping = {
-        "PI" : "pi"
+        "PI": "pi"
     }
     return mapping[self.source]
+
 
 @add_method(Operation)
 def to_sollya(self):
@@ -35,7 +38,8 @@ def to_sollya(self):
     if len(s_args) == 2 and self.op in {"+", "-", "*", "/"}:
         return "({}{}{})".format(s_args[0], self.op, s_args[1])
 
-    return "{}({})".format(self.op, ", ".join(s_args)) 
+    return "{}({})".format(self.op, ", ".join(s_args))
+
 
 @add_method(FPCore)
 def to_sollya(self):

@@ -6,17 +6,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-
-
-void*
+void *
 xmalloc(size_t len)
 {
   assert(len > 0);
 
-  void* retval = malloc(len);
+  void *retval = malloc(len);
 
-  if (retval == NULL) {
+  if (retval == NULL)
+  {
     fprintf(stderr, "Unable to malloc memory\n");
     exit(EXIT_FAILURE);
   }
@@ -24,15 +22,15 @@ xmalloc(size_t len)
   return retval;
 }
 
-
-void*
-xrealloc(void* ptr, size_t new_size)
+void *
+xrealloc(void *ptr, size_t new_size)
 {
   assert(ptr != NULL);
 
-  void* retval = realloc(ptr, new_size);
+  void *retval = realloc(ptr, new_size);
 
-  if (retval == NULL) {
+  if (retval == NULL)
+  {
     fprintf(stderr, "Unable to realloc memory\n");
     exit(EXIT_FAILURE);
   }
@@ -40,9 +38,7 @@ xrealloc(void* ptr, size_t new_size)
   return retval;
 }
 
-
-void
-xfree(void* ptr)
+void xfree(void *ptr)
 {
   assert(ptr != NULL);
 

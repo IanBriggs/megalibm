@@ -5,8 +5,6 @@ from utils import Logger, Timer
 logger = Logger(Logger.LOW, color=Logger.blue)
 
 
-
-
 def egg_rule_to_expr(rule):
     T = type(rule)
 
@@ -25,7 +23,7 @@ def egg_rule_to_expr(rule):
 def check_for_redundant_rules(raw_rules, iter_limit=10):
     found_redundant = False
     for raw_rule in raw_rules:
-        name, frm, to  = raw_rule
+        name, frm, to = raw_rule
         frm = egg_rule_to_expr(frm)
         to = egg_rule_to_expr(to)
 
@@ -45,6 +43,8 @@ def check_for_redundant_rules(raw_rules, iter_limit=10):
     return found_redundant
 
 # See if you can prove one rule set only using rules from another
+
+
 def check_rule_cover(new_raw_rules, old_raw_rules, iter_limit=10):
     new_rules = [snake_egg.Rewrite(r[1], r[2], r[0])
                  for r in new_raw_rules]
@@ -53,7 +53,7 @@ def check_rule_cover(new_raw_rules, old_raw_rules, iter_limit=10):
     print("{:20}\t{:7}\t{:5}\t{}".format("Rule", "Covered", "Time", "Iters"))
     covered_count = 0
     for old_rule in old_raw_rules:
-        name, frm, to  = old_rule
+        name, frm, to = old_rule
         frm = egg_rule_to_expr(frm)
         to = egg_rule_to_expr(to)
 
@@ -81,15 +81,16 @@ def check_rule_cover(new_raw_rules, old_raw_rules, iter_limit=10):
 
 # See if non-zero expressions can be rewritten as 0
 def smoke_check_rules(raw_rules, iter_limit=10):
-    rules =  [snake_egg.Rewrite(r[1], r[2], r[0])
-                 for r in raw_rules]
+    rules = [snake_egg.Rewrite(r[1], r[2], r[0])
+             for r in raw_rules]
 
     seen = set()
     my_timer = Timer()
-    print("{:40}\t{:7}\t{:5}\t{}".format("Expression", "EqZero", "Time", "Iters"))
+    print("{:40}\t{:7}\t{:5}\t{}".format(
+        "Expression", "EqZero", "Time", "Iters"))
     eqzero_count = 0
     for raw_rule in raw_rules:
-        name, frm, to  = raw_rule
+        name, frm, to = raw_rule
         frm = egg_rule_to_expr(frm)
         frm_str = str(snake_egg_rules.egg_to_fpcore(frm))
 
