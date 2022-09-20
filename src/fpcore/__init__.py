@@ -8,6 +8,7 @@ from .ast_methods import (
     add,
     copy,
     cross,
+    eval,
     equals,
     extract_s,
     extract_t,
