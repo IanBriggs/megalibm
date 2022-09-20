@@ -33,7 +33,9 @@ exp       = nt("exp",        "x")
 expm1     = nt("expm1",      "x")
 fabs      = nt("fabs",       "x")
 log       = nt("log",        "x")   #  0 < x
+log10     = nt("log10",      "x")   #  0 < x
 log1p     = nt("log1p",      "x")   # -1 < x
+log2      = nt("log2",       "x")   #  0 < x
 sin       = nt("sin",        "x")
 sinh      = nt("sinh",       "x")
 sqrt      = nt("sqrt",       "x")   #  0 <= x

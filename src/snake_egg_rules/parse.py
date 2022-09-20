@@ -8,51 +8,62 @@ import fractions
 
 zero_arg = {
     CONST_PI: lambda: ast.Constant("PI"),
-    CONST_E:  lambda: ast.Constant("E"),
+    CONST_E: lambda: ast.Constant("E"),
 }
+
+def mkone(operation):
+    return lambda x: ast.Operation(operation, x)
 
 one_arg = {
-    thefunc: lambda x: ast.Operation("thefunc", x),
-    acos:  lambda x: ast.Operation("acos",  x),
-    acosh: lambda x: ast.Operation("acosh", x),
-    asin:  lambda x: ast.Operation("asin",  x),
-    asinh: lambda x: ast.Operation("asinh", x),
-    atan:  lambda x: ast.Operation("atan",  x),
-    atanh: lambda x: ast.Operation("atanh", x),
-    cbrt:  lambda x: ast.Operation("cbrt",  x),
-    cos:   lambda x: ast.Operation("cos",   x),
-    cosh:  lambda x: ast.Operation("cosh",  x),
-    erf:   lambda x: ast.Operation("erf",   x),
-    erfc:  lambda x: ast.Operation("erfc",  x),
-    exp:   lambda x: ast.Operation("exp",   x),
-    expm1: lambda x: ast.Operation("expm1", x),
-    fabs:  lambda x: ast.Operation("fabs",  x),
-    inv:   lambda x: ast.Operation("inv",   x),
-    log1p: lambda x: ast.Operation("log1p", x),
-    log:   lambda x: ast.Operation("log",   x),
-    neg:   lambda x: ast.Operation("-",     x),
-    sin:   lambda x: ast.Operation("sin",   x),
-    sinh:  lambda x: ast.Operation("sinh",  x),
-    sqrt:  lambda x: ast.Operation("sqrt",  x),
-    tan:   lambda x: ast.Operation("tan",   x),
-    tanh:  lambda x: ast.Operation("tanh",  x),
+    thefunc: mkone("thefunc"),
+    acos: mkone("acos"),
+    acosh: mkone("acosh"),
+    asin: mkone("asin"),
+    asinh: mkone("asinh"),
+    atan: mkone("atan"),
+    atanh: mkone("atanh"),
+    cbrt: mkone("cbrt"),
+    cos: mkone("cos"),
+    cosh: mkone("cosh"),
+    erf: mkone("erf"),
+    erfc: mkone("erfc"),
+    exp: mkone("exp"),
+    exp2: mkone("exp"),
+    expm1: mkone("expm1"),
+    fabs: mkone("fabs"),
+    inv: mkone("inv"),
+    lgamma: mkone("lgamma"),
+    log1p: mkone("log1p"),
+    log10: mkone("log10"),
+    log: mkone("log"),
+    log2: mkone("log2"),
+    neg: mkone("-"),
+    sin: mkone("sin"),
+    sinh: mkone("sinh"),
+    sqrt: mkone("sqrt"),
+    tan: mkone("tan"),
+    tanh: mkone("tanh"),
 }
 
+def mktwo(operation):
+    return lambda a, b: ast.Operation(operation, a, b)
+
 two_arg = {
-    add:       lambda x, y: ast.Operation("+", x, y),
-    atan2:     lambda x, y: ast.Operation("atan2", x, y),
-    div:       lambda x, y: ast.Operation("/", x, y),
-    fmod:      lambda x, y: ast.Operation("fmod", x, y),
-    hypot:     lambda x, y: ast.Operation("hypot", x, y),
-    mul:       lambda x, y: ast.Operation("*", x, y),
-    pow:       lambda x, y: ast.Operation("pow", x, y),
-    remainder: lambda x, y: ast.Operation("remainder", x, y),
-    sub:       lambda x, y: ast.Operation("-", x, y),
+    add: mktwo("+"),
+    atan2: mktwo("atan2"),
+    div: mktwo("/"),
+    fmod: mktwo("fmod"),
+    hypot: mktwo("hypot"),
+    mul: mktwo("*"),
+    pow: mktwo("pow"),
+    remainder: mktwo("remainder"),
+    sub: mktwo("-"),
 }
 
 three_arg = {
     fma: lambda x, y, z: ast.Operation("fma", x, y, z,),
 }
+
 
 def egg_to_fpcore(expr):
     T = type(expr)
@@ -75,7 +86,7 @@ def egg_to_fpcore(expr):
 
     # TODO: Definitely a bug, why are zero arg tuples weird?
     #print(f"expr: '{expr}' of type: '{T}'")
-    #if T in zero_arg:
+    # if T in zero_arg:
     #    return zero_arg[T]()
 
     if expr in zero_arg:
