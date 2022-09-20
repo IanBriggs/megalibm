@@ -17,11 +17,11 @@ def synthesize(target, fuel=10):
         lambdas.MakeTuple,
         lambdas.First,
         lambdas.Second,
-        lambdas.PuntToLibm,
+        #lambdas.PuntToLibm,
         #lambdas.General,
-        #lambdas.Horner,
-        #lambdas.EvenPolynomial,
-        #lambdas.OddPolynomial,
+        lambdas.Horner,
+        lambdas.EvenPolynomial,
+        lambdas.OddPolynomial,
     ]
 
     # Each list item is a tuple of what lambda calls

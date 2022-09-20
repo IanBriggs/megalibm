@@ -26,13 +26,13 @@ cat << EOF > index.html
 EOF
 
 # Run the identities nightly
-/usr/bin/time -v "${SCRIPT_LOCATION}"/megalibm_identities "${GIT_LOCATION}/benchmarks/"
+# /usr/bin/time -v "${SCRIPT_LOCATION}"/megalibm_identities "${GIT_LOCATION}/benchmarks/"
 
 # Run the generation nightly, this is more envolved
 /usr/bin/time -v "${SCRIPT_LOCATION}"/megalibm_generate "${GIT_LOCATION}/benchmarks/"
 
-rm -r "${GIT_LOCATION}/measurement/error/generated"
-mv "${GIT_LOCATION}/generated/" "${GIT_LOCATION}/measurement/error/"
+rm -rf "${GIT_LOCATION}/measurement/error/generated"
+mv "${THIS_NIGHTLY_LOCATION}/generated/" "${GIT_LOCATION}/measurement/error/"
 cd "${GIT_LOCATION}/measurement/error/"
 make -j6 build
 make -j6 run

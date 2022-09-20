@@ -243,7 +243,7 @@ void free_table(size_t func_count, error **errorss)
 void print_json(size_t region_count, double *regions,
                 size_t func_count, entry *funcs,
                 error **errorss,
-                cahr *func_name, char *func_body)
+                char *func_name, char *func_body)
 {
   // Due to how picky JSON is with commas everything here has the form:
   //  for thing in things[:-1]:
@@ -253,8 +253,8 @@ void print_json(size_t region_count, double *regions,
   printf("{\n");
 
   // Name and body
-  printf("  \"name\": \"%s\",", func_name);
-  printf("  \"body\": \"%s\",", func_body);
+  printf("  \"name\": \"%s\",\n", func_name);
+  printf("  \"body\": \"%s\",\n", func_body);
 
   // First a list of fenceposts for the region under test
   printf("  \"regions\": [\n");

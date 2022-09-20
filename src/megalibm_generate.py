@@ -2,7 +2,6 @@
 
 import argparse
 import datetime
-from genericpath import isdir
 import os
 import os.path as path
 import sys
@@ -18,6 +17,7 @@ sys.path.append(EGG_DIR)
 import fpcore
 import lambdas
 import cmd_sollya
+import find_identities
 
 from synthesize import synthesize
 from assemble_c_files import *
@@ -230,8 +230,8 @@ def generate_all_code(function, domain):
                    ("-0.78539816", "0.78539816"),
                    ("-0.39269908", "0.39269908"),
                    ("-0.19634954", "0.19634954")]
-    elif inf == "(- 26.5)" and sup == "26.5":
-        domains = [("-26.5", "26.5"),
+    elif inf == "(- 20)" and sup == "20":
+        domains = [("-20", "20"),
                    ("-16", "16"),
                    ("-2", "2"),
                    ("-0.5", "0.5")]
@@ -302,7 +302,6 @@ def handle_work_item(func):
         func.arguments[0] = x
         func = func.substitute(var, x)
 
-    # TODO: figure out valid domain
     func.extract_domain()
     domain = func.domains[var]
     start = os.getcwd()

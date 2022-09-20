@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
-
+import datetime
+from genericpath import isdir
+import glob
+import math
 import json
 import matplotlib.pyplot as plt
 import os
@@ -66,7 +69,10 @@ def plot_error(title, input_regions, ref, libm, gens, log_y=False):
     # Label the graph.
     ax1.set_title(title)
     ax1.set_xlabel("Input")
-    ax1.set_ylabel("Error")
+    if "Error" in title:
+        ax1.set_ylabel("Error")
+    else:
+        ax1.set_ylabel("Value")
     ax1.legend()
 
     # optionally set log scale
@@ -77,8 +83,11 @@ def plot_error(title, input_regions, ref, libm, gens, log_y=False):
     fig.set_size_inches(6.4*2, 4.8*2)
 
     # Save and close
-    plt.savefig("{}.png".format(title.replace(" ", "_")), bbox_inches='tight')
+    outname = "{}.png".format(title.replace(" ", "_"))
+    plt.savefig(outname, bbox_inches='tight')
     plt.close()
+
+    return outname
 
 
 def to_eps_del(abs_err, rel_err):
@@ -136,7 +145,8 @@ def plot_abs_vs_rel(title, ref, libm, gens):
 
     # reference error
     ref_del, ref_eps = to_eps_del(*ref)
-    ax1.plot(ref_del, ref_eps, marker="o", label="correcly rounded", linewidth=2)
+    ax1.plot(ref_del, ref_eps, marker="o",
+             label="correcly rounded", linewidth=2)
 
     # libm error
     libm_del, libm_eps = to_eps_del(*libm)
@@ -161,13 +171,16 @@ def plot_abs_vs_rel(title, ref, libm, gens):
     fig.set_size_inches(6.4*2, 4.8*2)
 
     # Save and close
-    plt.savefig("{}.png".format(title.replace(" ", "_")), bbox_inches='tight')
+    outname = "{}.png".format(title.replace(" ", "_"))
+    plt.savefig(outname, bbox_inches='tight')
     plt.close()
+
+    return outname
 
 
 def triple_plot(filename):
     """
-    Generate absolute, relative, and epsilon-vs-delta plots.
+    Generate value, absolute, relative, and epsilon-vs-delta plots.
 
     Keyword arguments:
     filename -- A json file with the following structure:
@@ -176,6 +189,9 @@ def triple_plot(filename):
         "regions": [],
         "functions": {
             "reference": {
+                "val_max": [],
+                "val_avg": [],
+                "val_min": [],
                 "abs_max_errors": [],
                 "abs_avg_errors": [],
                 "abs_med_errors": [],
@@ -213,44 +229,163 @@ def triple_plot(filename):
     if len(region_name) == 0:
         region_name = "UnknownRegion"
 
+    imgnames = list()
+
     print("  Plotting Value")
-    plot_error("{} Value {}".format(func_name, region_name),
+    name = plot_error("{} Value {}".format(func_name, region_name),
                data["regions"],
                ref_data["avg_value"],
                libm_data["avg_value"],
                [gen_data["avg_value"] for gen_data in gen_datas])
+    imgnames.append(name)
 
     print("  Plotting Absolute error")
-    plot_error("{} Absolute Error Domain {}".format(func_name, region_name),
+    name = plot_error("{} Absolute Error Domain {}".format(func_name, region_name),
                data["regions"],
                ref_data["abs_max_errors"],
                libm_data["abs_max_errors"],
                [gen_data["abs_max_errors"] for gen_data in gen_datas])
+    imgnames.append(name)
 
     print("  Plotting Relative error")
-    plot_error("{} Relative Error Domain {}".format(func_name, region_name),
+    name = plot_error("{} Relative Error Domain {}".format(func_name, region_name),
                data["regions"],
                ref_data["rel_max_errors"],
                libm_data["rel_max_errors"],
                [gen_data["rel_max_errors"] for gen_data in gen_datas])
+    imgnames.append(name)
 
     print("  Plotting Epsilon vs Delta")
-    plot_abs_vs_rel("{} Absolute vs Relative Error Domain {}".format(func_name, region_name),
+    name = plot_abs_vs_rel("{} Absolute vs Relative Error Domain {}".format(func_name, region_name),
                     (ref_data["abs_max_errors"],
                      ref_data["rel_max_errors"]),
                     (libm_data["abs_max_errors"],
                      libm_data["rel_max_errors"]),
                     [(gen_data["abs_max_errors"], gen_data["rel_max_errors"])
                      for gen_data in gen_datas])
-
+    imgnames.append(name)
 
     os.chdir(start)
 
-def main(argv):
-    fnames = argv[1:]
+    metrics = dict()
+    libm_avg_abs_err = math.fsum(
+        libm_data["abs_avg_errors"]) / len(libm_data["abs_avg_errors"])
+    libm_avg_rel_err = math.fsum(
+        libm_data["rel_avg_errors"]) / len(libm_data["rel_avg_errors"])
+    for fname in [f for f in data["functions"] if f not in {"reference", libm_name}]:
+        func_data = data["functions"][fname]
+        func_avg_abs_err = math.fsum(
+            func_data["abs_avg_errors"]) / len(func_data["abs_avg_errors"])
+        func_avg_rel_err = math.fsum(
+            func_data["rel_avg_errors"]) / len(func_data["rel_avg_errors"])
+        abs_metric = func_avg_abs_err/libm_avg_abs_err
+        rel_metric = func_avg_rel_err/libm_avg_rel_err
+        metrics[fname] = (math.log(abs_metric), math.log(rel_metric))
 
-    for fname in fnames:
-        triple_plot(fname)
+    low = min(data["regions"])
+    high = max(data["regions"])
+
+    return low, high, metrics, imgnames
+
+
+def extract_header_info(filename):
+    with open(filename, "r") as f:
+        data = json.load(f)
+
+    name = data["name"]
+    body = data["body"]
+    impl_names = sorted([f for f in data["functions"] if
+                         f != "reference" and not f.startswith("libm_")])
+    return name, body, impl_names
+
+
+def make_generation_webpage(root):
+    today = datetime.date.today()
+    y = today.year
+    m = today.month
+    d = today.day
+    lines = [
+        "<!doctype html>",
+        "<html>",
+        " <head>",
+        "  <title>Megalibm Results for {}-{}-{}</title>".format(y, m, d),
+        " </head>",
+        " <body>",
+        "  <h1>General Metrics</h1>",
+        "  <p>TODO: explain methods and metric</p>",
+    ]
+
+    for dname in sorted(os.listdir(root)):
+        dirname = path.join(root, dname)
+        if not path.isdir(dirname):
+            print("Skipping: {}".format(dirname))
+            continue
+        json_files = glob.glob("{}/*.json".format(dirname))
+        func_name, func_body, impl_names = extract_header_info(json_files[0])
+        with open(path.join(dirname, "index.html"), "w") as f:
+            f.write("\n".join([
+                "<!doctype html>",
+                "<html>",
+                "<head>",
+                "<title>{}: Megalibm Results for {}-{}-{}</title>".format(
+                    func_name, y, m, d),
+                "<style>",
+                ".func {",
+                "      font-size: 300%;",
+                "}",
+                "</style>",
+                "</head>",
+                "<body>",
+                "<h1>{}</h1>".format(func_name),
+                "<div class=\"func\">{}</div>".format(func_body),
+            ]))
+
+        lines.extend([
+            "  <h2><a href=\"{}/index.html\">{}</a></h2>".format(
+                dname, func_name),
+            "  <table>",
+            "   <tr>",
+            "    <th>Input Domain</th>"
+        ])
+        for impl_name in impl_names:
+            lines.append("    <th>{}</th>".format(impl_name))
+        lines.append("   </tr>")
+
+        lines.append("   <tr>")
+        for filename in sorted(json_files):
+            low, high, metrics, imgnames = triple_plot(filename)
+
+            with open(path.join(dirname, "index.html"), "a") as f:
+                f.write("\n".join([
+                    "<h2> Domain [{}, {}]</h2>".format(low, high),
+                    "<h3>Value</h3>",
+                    "<img src=\"{}\" style=\"width:50%\">".format(imgnames[0]),
+                    "<h3>Absolute Error</h3>",
+                    "<img src=\"{}\" style=\"width:50%\">".format(imgnames[1]),
+                    "<h3>Relative Error</h3>",
+                    "<img src=\"{}\" style=\"width:50%\">".format(imgnames[2]),
+                    "<h3>Epsilon vs Delta</h3>",
+                    "<img src=\"{}\" style=\"width:50%\">".format(imgnames[3]),
+                    ]))
+            lines.append("    <td>[{}, {}]</td>".format(low, high))
+            for impl_name in impl_names:
+                metric = metrics[impl_name]
+                lines.append("    <th>{}</th>".format(metric))
+            lines.append("   </tr>")
+
+        lines.append("  </table>")
+
+    lines.extend([
+        " </body>",
+        "</html>"
+    ])
+
+    with open(path.join(root, "index.html"), "w") as f:
+        f.write("\n".join(lines))
+
+
+def main(argv):
+    make_generation_webpage(argv[1])
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ def assemble_functions(functions, header_fname):
         lines.append("")
     return lines
 
-def assemble_error_main(mpfr_func, other_funcs, header_fname, domains):
+def assemble_error_main(func_name, func_body, mpfr_func, other_funcs, header_fname, domains):
     lines = ["#include \"table_generation.h\"",
              "#include \"xmalloc.h\"",
              "#include \"{}\"".format(header_fname),
@@ -44,6 +44,7 @@ def assemble_error_main(mpfr_func, other_funcs, header_fname, domains):
                       "    low = {};".format(low),
                       "    high = {};".format(high),
                       "    break;"])
+    func_body = func_body.replace("\n", "\\\\n").replace('"', '\\\\\\"')
     lines.extend(["  default:",
                   "    printf(\"Option not available\\n\");"
                   "    exit(1);",
@@ -54,7 +55,7 @@ def assemble_error_main(mpfr_func, other_funcs, header_fname, domains):
                   "  error** errorss = generate_table(region_count, regions, samples,",
                   "                                   {},".format(mpfr_func),
                   "                                   ENTRY_COUNT, ENTRIES);",
-                  "  print_json(region_count, regions, ENTRY_COUNT, ENTRIES, errorss);",
+                  "  print_json(region_count, regions, ENTRY_COUNT, ENTRIES, errorss, \"{}\", \"{}\");".format(func_name, func_body),
                   "  free_table(ENTRY_COUNT, errorss);",
                   "  mpfr_free_cache();",
                   "  return 0;",
