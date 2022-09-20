@@ -260,11 +260,6 @@ class FPCoreParser(Parser):
     def binding(self, p):
         return ast.Binding(p.variable, p.expr)
 
-    #     | ( <variable> <expr> )
-    @_("LP variable expr RP")
-    def binding(self, p):
-        return ast.Binding(p.variable, p.expr)
-
 
     # update_binding :=
     #     | [ <variable> <expr> <expr> ]
