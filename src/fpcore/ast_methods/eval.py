@@ -7,7 +7,7 @@ import mpmath
 
 mpmath.prec = 1024
 
-logger = Logger(level=Logger.EXTRA)
+logger = Logger(color=Logger.cyan, level=Logger.LOW)
 
 
 @add_method(ASTNode)
@@ -116,6 +116,7 @@ def eval(self, assignment):
 @add_method(FPCore)
 def eval(self, *args):
     assert len(args) == len(self.arguments)
-    assignment = {name: arg for name, arg
+    assignment = {name.source: arg for name, arg
                   in zip(self.arguments, args)}
+    logger("Evalutaing with arguments: {}", assignment)
     return self.body.eval(assignment)
