@@ -259,7 +259,7 @@ def triple_plot(filename):
 
     print("  Plotting Epsilon vs Delta")
     title = "{} Absolute vs Relative Error Domain {}".format(func_name,
-                                                             region_name),
+                                                             region_name)
     name = plot_abs_vs_rel(title,
                            (ref_data["abs_max_errors"],
                             ref_data["rel_max_errors"]),
