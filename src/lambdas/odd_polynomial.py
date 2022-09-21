@@ -60,6 +60,9 @@ class OddPolynomial(types.Source):
         # To get this output we just need be contructed with given args
         # TODO: how should monomials be done?
         monomials = list(range(1, 31, 2))
-        if out_type.function.eval(0) != 0:
-            monomials = [0] + monomials
+        try:
+            if out_type.function.eval(0) != 0:
+                monomials = [0] + monomials
+        except ZeroDivisionError:
+            pass
         return [(out_type.function, out_type.domain, monomials), ]
