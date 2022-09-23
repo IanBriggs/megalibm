@@ -261,41 +261,41 @@ def plot_region(name, regions, data, domain_idx):
     imgnames = list()
 
     print("    Value")
-    name = line_plot("{} Value".format(name),
-                     regions,
-                     ref_data["avg_value"],
-                     libm_data["avg_value"],
-                     [gen_data["avg_value"] for gen_data in gen_datas],
-                     domain_idx)
-    imgnames.append(name)
+    img = line_plot("{} Value".format(name),
+                    regions,
+                    ref_data["avg_value"],
+                    libm_data["avg_value"],
+                    [gen_data["avg_value"] for gen_data in gen_datas],
+                    domain_idx)
+    imgnames.append(img)
 
     print("    Absolute error")
-    name = line_plot("{} Absolute Error".format(name),
-                     regions,
-                     ref_data["abs_max_errors"],
-                     libm_data["abs_max_errors"],
-                     [gen_data["abs_max_errors"] for gen_data in gen_datas],
-                     domain_idx)
-    imgnames.append(name)
+    img = line_plot("{} Absolute Error".format(name),
+                    regions,
+                    ref_data["abs_max_errors"],
+                    libm_data["abs_max_errors"],
+                    [gen_data["abs_max_errors"] for gen_data in gen_datas],
+                    domain_idx)
+    imgnames.append(img)
 
     print("    Relative error")
-    name = line_plot("{} Relative Error".format(name),
-                     regions,
-                     ref_data["rel_max_errors"],
-                     libm_data["rel_max_errors"],
-                     [gen_data["rel_max_errors"] for gen_data in gen_datas],
-                     domain_idx)
-    imgnames.append(name)
+    img = line_plot("{} Relative Error".format(name),
+                    regions,
+                    ref_data["rel_max_errors"],
+                    libm_data["rel_max_errors"],
+                    [gen_data["rel_max_errors"] for gen_data in gen_datas],
+                    domain_idx)
+    imgnames.append(img)
 
     print("    Epsilon vs Delta")
-    name = plot_abs_vs_rel(
+    img = plot_abs_vs_rel(
         "{} Epsilon vs Delta".format(name),
         (ref_data["abs_max_errors"], ref_data["rel_max_errors"]),
         (libm_data["abs_max_errors"], libm_data["rel_max_errors"]),
         [(gen_data["abs_max_errors"], gen_data["rel_max_errors"])
          for gen_data in gen_datas],
-         domain_idx)
-    imgnames.append(name)
+        domain_idx)
+    imgnames.append(img)
 
     return imgnames
 
@@ -395,6 +395,10 @@ def make_main_webpage(benchmarks_data):
         "    Therefore a metric of zero means correclty rounded.",
         "    This metric is calculated for both absolute and relative error.",
         "  </p>",
+        "  <p>",
+        "    Results are colored red if they are worse than using libm, and",
+        "     green if they are better",
+        "  </p>",
     ]
 
     for dirname, benchmark in benchmarks_data.items():
@@ -414,11 +418,14 @@ def make_main_webpage(benchmarks_data):
             "    </tr>",
             "    <tr>",
             "      <th></th>",
-            ])
+        ])
         for domain in data:
             lines.append("      <th>abs</th><th>rel</th>")
 
         lines.append("    </tr>")
+
+        libm_name = [f for f in data[domain]
+                     ["data"] if f.startswith("libm_")][0]
 
         for fname in data[domain]["data"]:
             if fname == "reference":
@@ -428,11 +435,17 @@ def make_main_webpage(benchmarks_data):
                 "      <td>{}</td>".format(fname),
             ])
             for domain in data:
+                abs_libm_metric = data[domain]["data"][libm_name]["abs_metric"]
                 abs_metric = data[domain]["data"][fname]["abs_metric"]
-                rel_metric = data[domain]["data"][fname]["rel_metric"]
+                abs_color = "green" if abs_metric < abs_libm_metric else "red"
                 lines.append(
-                    "      <td>{:0.4e}</td><td>{:0.4e}</td>".format(abs_metric, rel_metric))
+                    "      <td style='color:{};'>{:0.4e}</td>".format(abs_color, abs_metric))
 
+                rel_libm_metric = data[domain]["data"][libm_name]["rel_metric"]
+                rel_metric = data[domain]["data"][fname]["rel_metric"]
+                rel_color = "green" if rel_metric < rel_libm_metric else "red"
+                lines.append(
+                    "      <td style='color:{};'>{:0.4e}</td>".format(rel_color, rel_metric))
             lines.append("    </tr>")
 
         lines.extend([
