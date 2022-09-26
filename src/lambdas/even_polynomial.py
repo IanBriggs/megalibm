@@ -32,7 +32,7 @@ class EvenPolynomial(types.Source):
         assert (len(self.coefficients) <= len(self.monomials))
         assert (all([type(m) == int for m in self.monomials]))
         assert (all([type(c) == float or c is None for c in self.coefficients]))
-        assert (is_even_function(self.function))
+        #assert (is_even_function(self.function))
         assert (all(m % 2 == 0 for m in self.monomials))
 
         self.out_type = types.Poly(self.function, self.domain)
@@ -48,14 +48,14 @@ class EvenPolynomial(types.Source):
                                 self.domain)
 
     @classmethod
-    def generate_hole(cls, out_type):
+    def generate_hole(cls, out_type, egraph):
         # We only output
         # (Poly (func) low high)
         # where low and high are finite
         if (type(out_type) != types.Poly
             or not math.isfinite(float(out_type.domain.inf))
             or not math.isfinite(float(out_type.domain.sup))
-                or not is_even_function(out_type.function)):
+                or not is_even_function(out_type.function, egraph)):
             return list()
 
         # To get this output we just need be contructed with given args

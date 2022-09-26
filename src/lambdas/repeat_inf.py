@@ -11,8 +11,8 @@ from interval import Interval
 from lambdas import types
 from utils import Logger
 
-from wolframclient.evaluation import WolframLanguageSession
-from wolframclient.language import wl, wlexpr
+# from wolframclient.evaluation import WolframLanguageSession
+# from wolframclient.language import wl, wlexpr
 
 from math import pi
 
@@ -20,18 +20,15 @@ from math import pi
 logger = Logger(level=Logger.HIGH)
 
 
-def has_period_function(func, period):
+def has_period_function(func, egraph, period):
     arg = func.arguments[0]
     flipped_arg = period + arg
     flipped = func.substitute(arg, flipped_arg)
-    query = func - flipped
-    logger("Query: {}", query)
-    wolf_query = query.to_wolfram()
-    logger("Wolf Query: {}", wolf_query)
-    with WolframLanguageSession() as session:
-        res = session.evaluate(wlexpr(wolf_query))
-        logger("Wolf's Result: {}", res)
-        return res == 0
+    main_id = egraph.add(func.to_snake_egg(to_rule=False))
+    flip_id = egraph.add(flipped.to_snake_egg(to_rule=False))
+    logger("Egg says: {}equal", "not " if main_id != flip_id else "")
+    logger("Flipped: {}", flipped)
+    return main_id == flip_id
 
 
 class RepeatInf(types.Transform):
@@ -40,8 +37,7 @@ class RepeatInf(types.Transform):
         our_in_type = self.in_node.out_type
         assert (type(our_in_type) == types.Impl)
         assert (float(our_in_type.domain.inf) == 0.0)
-        assert (has_period_function(
-            our_in_type.function, our_in_type.domain.sup))
+#        assert (has_period_function(our_in_type.function, our_in_type.domain.sup))
 
         self.out_type = types.Impl(our_in_type.function,
                                    Interval("0.0", "INFINITY"))
@@ -60,7 +56,7 @@ class RepeatInf(types.Transform):
         return [add] + so_far
 
     @classmethod
-    def generate_hole(cls, out_type):
+    def generate_hole(cls, out_type, egraph):
         # We only output
         # (Impl (func) 0.0 INFINITY)
         # where (func) is periodic
@@ -77,7 +73,7 @@ class RepeatInf(types.Transform):
             interval.parse_bound("(* 2 PI)"),
         ]
         for p in possible_periods:
-            if has_period_function(out_type.function, p):
+            if has_period_function(out_type.function, egraph, p):
                 period = p
                 break
 

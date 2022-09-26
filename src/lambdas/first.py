@@ -16,7 +16,7 @@ class First(types.Transform):
         return ga
 
     @classmethod
-    def generate_hole(cls, out_type):
+    def generate_hole(cls, out_type, egraph):
         # We output anything
         # (thing)
         # To get this output we need as input

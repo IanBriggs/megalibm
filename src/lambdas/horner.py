@@ -21,7 +21,7 @@ class Horner(types.Transform):
         return [forms.Horner(numeric_types.fp64(), [in_name], [out_name], p)]
 
     @classmethod
-    def generate_hole(cls, out_type):
+    def generate_hole(cls, out_type, egraph):
         # We only output
         # (Impl (func) low high)
         if type(out_type) != types.Impl:

@@ -1,4 +1,6 @@
 
+import fpcore
+import lambdas
 import lego_blocks
 import numeric_types
 from interval import Interval
@@ -22,7 +24,7 @@ class DoubleAngle(types.Transform):
                                     types.Impl("cos", Interval(0.0, high)))
 
     @classmethod
-    def generate_hole(cls, out_type):
+    def generate_hole(cls, out_type, egraph):
         # We only output
         # (Tuple (Impl (sin arg) 0.0 high)
         #        (Impl (cos arg) 0.0 high))

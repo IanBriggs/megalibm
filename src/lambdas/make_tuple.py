@@ -22,6 +22,6 @@ class MakeTuple(types.Node):
         return (ga, gb)
 
     @classmethod
-    def generate_hole(cls, out_type):
+    def generate_hole(cls, out_type, egraph):
         # TODO: this method
         return list()

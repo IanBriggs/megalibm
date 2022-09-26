@@ -114,7 +114,7 @@ class Transform(Node):
         self.type_check()
 
     @classmethod
-    def generate_hole(cls, out_type):
+    def generate_hole(cls, out_type, egraph):
         # Given an out_type, return possible in types that this Transform
         # could use to reach that out_type
         raise NotImplementedError()

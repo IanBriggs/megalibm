@@ -1,6 +1,7 @@
 
 import lambdas
-
+import snake_egg_rules
+import snake_egg
 from utils.logging import Logger
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
@@ -24,6 +25,19 @@ def synthesize(target, fuel=10):
         lambdas.OddPolynomial,
     ]
 
+    # Setup the egg system
+    egraph = snake_egg.EGraph(snake_egg_rules.eval)
+    body = target.function.to_snake_egg(to_rule=False)
+    egraph.add(body)
+
+    # Run for a while
+    # TODO: How long? Which scheduler?
+    egraph.run(snake_egg_rules.rules,
+               iter_limit=10,
+               time_limit=600,
+               node_limit=100_000,
+               use_simple_scheduler=False)
+
     # Each list item is a tuple of what lambda calls
     completed = list()
     old_partials = [(list(), lambdas.Hole(target))]
@@ -32,7 +46,7 @@ def synthesize(target, fuel=10):
         for so_far, p in old_partials:
             for t in transforms:
                 logger("trying: {}", t)
-                new_holes = t.generate_hole(p.out_type)
+                new_holes = t.generate_hole(p.out_type, egraph)
                 for n in new_holes:
                     if type(n) == tuple:
                         logger("found match, complete type")

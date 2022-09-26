@@ -17,7 +17,8 @@ operations = snake_egg_rules.operations
 
 const_mapping = {
     "PI": operations.CONST_PI,
-    "E": operations.CONST_E
+    "E": operations.CONST_E,
+    "INFINITY": operations.CONST_INFINITY,
 }
 
 unop_mapping = {

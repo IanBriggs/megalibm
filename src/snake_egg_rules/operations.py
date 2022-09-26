@@ -9,6 +9,7 @@ thefunc   = nt("thefunc",    "x")
 
 CONST_PI  = nt("CONST_PI",   "")
 CONST_E   = nt("CONST_E",    "")
+CONST_INFINITY   = nt("CONST_INFINITY",    "")
 
 neg       = nt("neg",        "x")
 inv       = nt("inv",        "x")   # x != 0

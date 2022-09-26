@@ -9,8 +9,8 @@ from interval import Interval
 from lambdas import types
 from utils import Logger
 
-from wolframclient.evaluation import WolframLanguageSession
-from wolframclient.language import wl, wlexpr
+# from wolframclient.evaluation import WolframLanguageSession
+# from wolframclient.language import wl, wlexpr
 
 from math import pi
 
@@ -18,18 +18,16 @@ from math import pi
 logger = Logger(level=Logger.HIGH)
 
 
-def is_negation_function(func, low, middle, high):
+def is_negation_function(func, egraph, low, middle, high):
+    # TODO: currently only made for negation starting at 0
     arg = func.arguments[0]
     negated_arg = high - arg
     negated = func.substitute(arg, negated_arg)
-    query = func + negated
-    logger("Query: {}", query)
-    wolf_query = query.to_wolfram()
-    logger("Wolf Query: {}", wolf_query)
-    with WolframLanguageSession() as session:
-        res = session.evaluate(wlexpr(wolf_query))
-        logger("Wolf's Result: {}", res)
-        return res == 0
+    main_id = egraph.add(func.to_snake_egg(to_rule=False))
+    neg_id = egraph.add(negated.to_snake_egg(to_rule=False))
+    logger("Egg says: {}equal", "not " if main_id != neg_id else "")
+    logger("Negation: {}", negated)
+    return main_id == neg_id
 
 
 class RepeatNegate(types.Transform):
@@ -40,10 +38,10 @@ class RepeatNegate(types.Transform):
         new_high = old_high * fpcore.ast.Number("2")
         assert (type(our_in_type) == types.Impl)
         assert (float(our_in_type.domain.inf) == 0.0)
-        assert (is_negation_function(our_in_type.function,
-                                     0.0,
-                                     old_high,
-                                     new_high))
+        # assert (is_negation_function(our_in_type.function,
+        #                              0.0,
+        #                              old_high,
+        #                              new_high))
 
         self.out_type = types.Impl(our_in_type.function,
                                    Interval(0, new_high))
@@ -59,7 +57,7 @@ class RepeatNegate(types.Transform):
                                        our_in_type.domain.sup.to_libm_c(),
                                        in_name,
                                        "{} - {}".format((our_in_type.domain.sup *
-                                                       fpcore.ast.Number("2")).to_libm_c(), in_name),
+                                                         fpcore.ast.Number("2")).to_libm_c(), in_name),
                                        )
 
         in_case = so_far[-1].out_names[0]
@@ -76,7 +74,7 @@ class RepeatNegate(types.Transform):
         return [ifless_in] + so_far + [ifless_out]
 
     @classmethod
-    def generate_hole(cls, out_type):
+    def generate_hole(cls, out_type, egraph):
         # We only output
         # (Impl (func) 0.0 (* 2 bound))
         # where (func) is a negation for [0.0, bound] w.r.t. [bound, (* 2 bound)]
@@ -86,7 +84,7 @@ class RepeatNegate(types.Transform):
 
         two_bound = out_type.domain.sup
         bound = two_bound / fpcore.ast.Number("2")
-        if not is_negation_function(out_type.function,
+        if not is_negation_function(out_type.function, egraph,
                                     0.0,
                                     bound,
                                     two_bound):

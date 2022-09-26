@@ -16,7 +16,7 @@ class Second(types.Transform):
         return gb
 
     @classmethod
-    def generate_hole(cls, out_type):
+    def generate_hole(cls, out_type, egraph):
         # We output anything
         # (thing)
         # To get this output we need as input
