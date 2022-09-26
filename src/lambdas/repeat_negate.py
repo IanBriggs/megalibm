@@ -23,11 +23,12 @@ def is_negation_function(func, egraph, low, middle, high):
     arg = func.arguments[0]
     negated_arg = high - arg
     negated = func.substitute(arg, negated_arg)
+    neg_neg = -func
     main_id = egraph.add(func.to_snake_egg(to_rule=False))
-    neg_id = egraph.add(negated.to_snake_egg(to_rule=False))
-    logger("Egg says: {}equal", "not " if main_id != neg_id else "")
+    neg_neg_id = egraph.add(neg_neg.to_snake_egg(to_rule=False))
+    logger("Egg says: {}equal", "not " if main_id != neg_neg_id else "")
     logger("Negation: {}", negated)
-    return main_id == neg_id
+    return main_id == neg_neg_id
 
 
 class RepeatNegate(types.Transform):

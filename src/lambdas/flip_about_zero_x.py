@@ -24,11 +24,12 @@ def is_odd_function(func, egraph):
     arg = func.arguments[0]
     flipped_arg = -arg
     flipped = func.substitute(arg, flipped_arg)
+    flip_neg = -func
     main_id = egraph.add(func.to_snake_egg(to_rule=False))
-    flip_id = egraph.add(flipped.to_snake_egg(to_rule=False))
-    logger("Egg says: {}equal", "not " if main_id != flip_id else "")
+    flip_neg_id = egraph.add(flip_neg.to_snake_egg(to_rule=False))
+    logger("Egg says: {}equal", "not " if main_id != flip_neg_id else "")
     logger("Flipped: {}", flipped)
-    return main_id == flip_id
+    return main_id == flip_neg_id
 
 
 class FlipAboutZeroX(types.Transform):
