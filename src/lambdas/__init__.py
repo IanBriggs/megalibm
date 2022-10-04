@@ -1,5 +1,6 @@
 
 
+from .full_polynomial import FullPolynomial
 from .even_polynomial import EvenPolynomial
 from .odd_polynomial import OddPolynomial
 
