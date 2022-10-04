@@ -143,7 +143,7 @@ plot_func("cmnr_mr_table_sin.png",
           sin, [cmnr_mr_table_sin,
                 mr_table_sin])
 
-plot_func("r_cmnr_mr_table_sin.png",
+plot_func("ar_cmnr_mr_table_sin.png",
           -1.25*pi, 6.25*pi,
                     -1.0625, 1.0625,
           sin, [ar_cmnr_mr_table_sin,
