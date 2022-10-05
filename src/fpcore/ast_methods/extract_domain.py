@@ -1,41 +1,37 @@
-
-
-from utils import add_method
 from fpcore.ast import ASTNode, FPCore, Operation, Variable
-from utils import Logger
 from interval import Interval
+from utils import Logger, add_method
 
 
 logger = Logger(level=Logger.EXTRA)
 
 
 class NoPreError(Exception):
+    """FPCore doesn't have a ':pre' property"""
     pass
 
 
 class BadPreError(Exception):
+    """FPCore's ':pre' property is not useful for domain extraction"""
+
     def __init__(self, pre):
         self.pre = pre
 
 
 class DomainError(Exception):
+    """FPCore's ':pre' property doesn't define an upper and lower bound"""
+
     def __init__(self, low, high, name):
         self.low = low
         self.high = high
         self.name = name
 
 
-@add_method(ASTNode)
-def extract_domain(self, *args, **kwargs):
-    # Make sure calling extract_domain leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = "extract_domain not implemented for class {}".format(class_name)
-    raise NotImplementedError(msg)
-
-
 def normalize_comparison(comp):
-    # Given an n-arry comparison return a list of comparisons which all use
-    # "<=" and only have two arguments
+    """
+    Given an n-arry comparison return a list of comparisons which all use
+    "<=" and only have two arguments
+    """
 
     # Make exclusive comparisons inclusive
     if comp.op in {"<", ">"}:
@@ -51,7 +47,7 @@ def normalize_comparison(comp):
         comp.op = "<="
         comp.args = list(reversed(comp.args))
 
-    # Break comparison into overlaping pairs
+    # Break comparison into overlapping pairs
     ret_list = list()
     for i in range(len(comp.args)-1):
         ret_list.append(Operation("<=", comp.args[i], comp.args[i+1]))
@@ -60,7 +56,8 @@ def normalize_comparison(comp):
 
 
 def get_domains(precondition_list, arguments):
-    # Search preconditions for variable domains
+    """Search preconditions for variable domains"""
+
     string_arguments = {a.source for a in arguments}
     lower_domains = {s: None for s in string_arguments}
     upper_domains = {s: None for s in string_arguments}
@@ -103,11 +100,13 @@ def get_domains(precondition_list, arguments):
 
 
 def properties_to_argument_domains(arguments, properties):
-    # Take an FPCore and return and argument->domain mapping
-    # An incomplete mapping is an error
+    """
+    Take an FPCore and return and argument->domain mapping
+    An incomplete mapping is an error
+    """
 
     # Search the FPCore's properties for the :pre property
-    # todo: add support for multiple ':pre' properties
+    # TODO: add support for multiple ':pre' properties
     pre = None
     for prop in properties:
         if str(prop.name) == "pre":
@@ -122,7 +121,8 @@ def properties_to_argument_domains(arguments, properties):
     if type(pre.value) != Operation:
         raise BadPreError(pre)
 
-    # The pre can be a single bound description, or multiple joined with an 'and'
+    # The pre can be a single bound description,
+    # or multiple joined with an 'and'
     if pre.value.op == "and":
         property_list = list(pre.value.args)
     elif pre.value.op == "or":
@@ -139,7 +139,16 @@ def properties_to_argument_domains(arguments, properties):
     return domains
 
 
+@add_method(ASTNode)
+def extract_domain(self, *args, **kwargs):
+    # Make sure calling extract_domain leads to an error if not overridden
+    class_name = type(self).__name__
+    msg = f"extract_domain not implemented for class '{class_name}'"
+    raise NotImplementedError(msg)
+
+
 @add_method(FPCore)
 def extract_domain(self):
     self.domains = properties_to_argument_domains(self.arguments,
                                                   self.properties)
+    return self.domains
