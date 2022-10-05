@@ -1,10 +1,30 @@
 {
     "cSpell.words": [
+        "BINOP",
+        "cbrt",
         "decnum",
         "errok",
+        "fdim",
+        "fmax",
+        "fmin",
         "fpcore",
         "fpcores",
         "hexnum",
-        "retcode"
+        "isnormal",
+        "libm",
+        "mpfr",
+        "mpmath",
+        "nearbyint",
+        "prec",
+        "retcode",
+        "RNDN",
+        "signbit",
+        "sollya",
+        "SQRTPI",
+        "tgamma",
+        "thefunc",
+        "TRIOP",
+        "uadd",
+        "UNOP"
     ]
 }
