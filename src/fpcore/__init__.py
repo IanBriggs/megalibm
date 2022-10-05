@@ -11,8 +11,6 @@ from .ast_methods import (
     equals,
     eval,
     extract_domain,
-    extract_s,
-    extract_t,
     float,
     get_any_name,
     mul,
