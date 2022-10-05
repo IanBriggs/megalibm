@@ -1,7 +1,7 @@
 
 
 CC ?= gcc
-CFLAGS ?= -Wall -Wextra -Wconversion -O3 -march=native -mtune=native -fno-builtin -DNDEBUG
+CFLAGS ?= -Wall -Wextra -Wconversion -O3 -mtune=native -fno-builtin -DNDEBUG
 CFLAGS += -Wno-unused-variable
 CFLAGS += -Iinclude
 

@@ -12,6 +12,7 @@ from .double_angle import DoubleAngle
 from .repeat_flip import RepeatFlip
 from .repeat_negate import RepeatNegate
 from .repeat_inf import RepeatInf
+from .repeat_exp import RepeatExp
 
 from .flip_about_zero_x import FlipAboutZeroX
 from .mirror_about_zero_x import MirrorAboutZeroX

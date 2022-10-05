@@ -55,7 +55,8 @@ def __float__(self):
 
     if len(f_args) == 1:
         mapping = {
-            "-": (lambda x: -x)
+            "-": (lambda x: -x),
+            "log": (lambda x: math.log(x))
         }
         return mapping[self.op](f_args[0])
 
