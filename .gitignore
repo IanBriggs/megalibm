@@ -9,3 +9,4 @@ measurement/error/generated/
 nightlies/
 data/
 obj/
+.DS_Store
