@@ -1,7 +1,7 @@
 
 
 .PHONY: build
-build: bin/megalibm_identities bin/megalibm_generate
+build: bin/megalibm_identities bin/megalibm_template_identities bin/megalibm_generate
 
 
 .PHONY: requirements
@@ -12,12 +12,17 @@ bin/megalibm_identities: requirements/done | bin
 	cd bin && ln -s ../src/megalibm_identities.py megalibm_identities
 	chmod +x $@
 
+bin/megalibm_template_identities: requirements/done | bin
+	$(RM) $@
+	cd bin && ln -s ../src/megalibm_template_identities.py megalibm_template_identities
+	chmod +x $@
+
 bin/megalibm_generate: requirements/done | bin
 	$(RM) $@
 	cd bin && ln -s ../src/megalibm_generate.py megalibm_generate
 	chmod +x $@
 
-bin/nightly.sh: bin/megalibm_generate bin/megalibm_identities
+bin/nightly.sh: build
 	$(RM) $@
 	cd bin && ln -s ../src/nightly.sh nightly.sh
 	chmod +x $@
