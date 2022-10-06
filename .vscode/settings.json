@@ -3,6 +3,7 @@
         "BINOP",
         "cbrt",
         "decnum",
+        "egraph",
         "errok",
         "fdim",
         "fmax",
