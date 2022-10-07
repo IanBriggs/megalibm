@@ -96,6 +96,12 @@ def egg_to_fpcore(expr):
     if expr in zero_arg:
         return zero_arg[expr]()
 
+    if T not in one_arg and T not in two_arg and T not in three_arg:
+        p = egg_to_fpcore(expr.p)
+        s = str(expr)
+        op = s[:s.index("(")]
+        return ast.Operation(op, p)
+
     x = egg_to_fpcore(expr.x)
     if T in one_arg:
         return one_arg[T](x)

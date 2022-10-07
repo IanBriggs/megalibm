@@ -1,29 +1,41 @@
 # Experimentation on the idea that we can use rewrite rules to capture patterns
 # in an egraph.
-import snake_egg
-import snake_egg_rules
-from snake_egg import Rewrite
-from utils import Logger, Timer
+from snake_egg_rules.operations import *
 from collections import namedtuple
+
+import snake_egg
+from snake_egg import Rewrite
+
+import snake_egg_rules
+from utils import Logger, Timer
 
 logger = Logger(Logger.LOW, color=Logger.blue, def_color=Logger.cyan)
 timer = Timer()
 
-x, p = snake_egg.vars("x p")
-from snake_egg_rules.operations import *
-mirror_right = namedtuple("mirror-right", "p")
-mirror_left = namedtuple("mirror-left", "p")
-negate_right = namedtuple("negate-right", "p")
-negate_left = namedtuple("negate-left", "p")
+ITERS = [
+    5,  # Main iters for finding identities
+    6,  # Iters for backoff dedup
+    5,  # Iters for simple dedup
+    3,  # Iters for definition finding I(x) - f(x) = 0
+    3,  # Iters for definition finding I(x) / f(x) = 1
+    5,  # Iters for generator dedup
+]
+
+p = snake_egg.vars("p")
+
+mirror_right = namedtuple("mirror_right", "p")
+mirror_left = namedtuple("mirror_left", "p")
+negate_right = namedtuple("negate_right", "p")
+negate_left = namedtuple("negate_left", "p")
 periodic = namedtuple("periodic", "p")
 exp_recons = namedtuple("exp_recons", "p")
 raw_template_rules = [
-    ["capture-mirror-right", thefunc(add(mul(2, p), x)),      mirror_right(p)],
-    ["capture-mirror-left",  thefunc(sub(p, x)),              mirror_left(p)],
-    ["capture-negate-right", neg(thefunc(add(mul(2, p), x))), negate_right(p)],
-    ["capture-negate-left",  neg(thefunc(sub(p, x))),         negate_left(p)],
-    ["capture-periodic",     thefunc(add(p, x)),              periodic(p)],
-    ["capture-exp-recons",   div(thefunc(add(p, x)), 2),      exp_recons(p)],
+    ["capture-mirror-r",  thefunc(add(mul(2, p), "x")),      mirror_right(p)],
+    ["capture-mirror-l",   thefunc(sub(p, "x")),              mirror_left(p)],
+    ["capture-negate-r",  neg(thefunc(add(mul(2, p), "x"))), negate_right(p)],
+    ["capture-negate-l",   neg(thefunc(sub(p, "x"))),         negate_left(p)],
+    ["capture-periodic",      thefunc(add(p, "x")),              periodic(p)],
+    ["capture-exp-recon",   div(thefunc(add(p, "x")), 2),      exp_recons(p)],
 ]
 template_rules = list()
 for l in raw_template_rules:
@@ -31,6 +43,17 @@ for l in raw_template_rules:
     frm = l[1]
     to = l[2]
     template_rules.append(Rewrite(frm, to, name))
+
+raw_compound_template_rules = [
+    ["neg-mirror-to_negate-l", neg(mirror_left(p)), negate_left(p)],
+    ["neg-mirror-to_negate-r", neg(mirror_right(p)), negate_right(p)],
+]
+compound_template_rules = list()
+for l in raw_compound_template_rules:
+    name = l[0]
+    frm = l[1]
+    to = l[2]
+    compound_template_rules.append(Rewrite(frm, to, name))
 
 
 def generate_all_identities(func, max_iters):
@@ -42,37 +65,37 @@ def generate_all_identities(func, max_iters):
     body = func.to_snake_egg(to_rule=False)
     egraph.add(body)
 
-    # Run with mathematical rules
-    egraph.run(snake_egg_rules.rules,
-               iter_limit=max_iters,
-               time_limit=600,
-               node_limit=100_000,
-               use_simple_scheduler=False)
-
     # Make rewrite for <body>(var) to f(var)
     pattern_var = snake_egg.Var(func.arguments[0].source)
     pattern_func = snake_egg_rules.thefunc(pattern_var)
     pattern_body = func.to_snake_egg(to_rule=True)
     rewrite_body_to_func = Rewrite(pattern_body, pattern_func)
 
-    # Run with undef rule
-    egraph.run([rewrite_body_to_func],
-               iter_limit=1,
-               time_limit=600,
-               node_limit=100_000 + 10_000,
-               use_simple_scheduler=True)
-
-    # Run with template rules
-    egraph.run(template_rules,
-               iter_limit=1,
-               time_limit=600,
-               node_limit=100_000 + 10_000 + 10_000,
-               use_simple_scheduler=True)
-
+    extracted = set()
+    for _ in range(max_iters):
+        # Run with mathematical rules
+        egraph.run(snake_egg_rules.rules,
+                   iter_limit=1,
+                   time_limit=600,
+                   node_limit=100_000,
+                   use_simple_scheduler=True)
+        # Run with undef rule
+        egraph.run([rewrite_body_to_func],
+                   iter_limit=1,
+                   time_limit=600,
+                   node_limit=100_000 + 10_000,
+                   use_simple_scheduler=True)
+        # Run with template rules
+        egraph.run(template_rules,
+                   iter_limit=1,
+                   time_limit=600,
+                   node_limit=100_000 + 10_000 + 10_000,
+                   use_simple_scheduler=True)
+        # Extract
+        extracted.update(egraph.node_extract(body))
 
     # Extract and sort the identities
-    exprs = egraph.node_extract(body)
-    exprs = list(exprs)
+    exprs = list(extracted)
     exprs.sort(key=lambda e: str(e), reverse=True)
     exprs.sort(key=lambda e: len(str(e)))
 
@@ -82,15 +105,108 @@ def generate_all_identities(func, max_iters):
 
     return exprs
 
+
+def expr_size(expr, _cache=dict()):
+    if expr in _cache:
+        return _cache[expr]
+
+    size = 1
+    if isinstance(expr, tuple):
+        size += sum(expr_size(arg) for arg in expr)
+
+    _cache[expr] = size
+    return size
+
+
+def filter_dedup(exprs, max_iters, use_simple):
+    timer = Timer()
+    timer.start()
+
+    # Add all expressions to a fresh EGraph
+    egraph = snake_egg.EGraph(snake_egg_rules.eval)
+    for expr in exprs:
+        egraph.add(expr)
+
+    # Run with standard mathematical rules
+    egraph.run(snake_egg_rules.rules+compound_template_rules,
+               iter_limit=max_iters,
+               time_limit=600,
+               node_limit=100_000,
+               use_simple_scheduler=use_simple)
+    expr_ids = {expr: str(egraph.add(expr)) for expr in exprs}
+
+    # Get a mapping from EGraph Id to set of expressions
+    groups = dict()
+    for expr, id_num in expr_ids.items():
+        groups.setdefault(id_num, set()).add(expr)
+
+    # For each set in the mapping pick a representative
+    new_exprs = list()
+    for id, group in groups.items():
+        logger.blog("all equal", "\n".join(str(g) for g in group))
+        best = group.pop()
+        best_size = expr_size(best)
+        best_str = str(best)
+        while len(group) > 0:
+            new = group.pop()
+            new_size = expr_size(new)
+            new_str = str(new)
+            if new_size > best_size:
+                continue
+            if new_size < best_size:
+                best = new
+                best_size = new_size
+                best_str = new_str
+                continue
+            if new_str > best_str:
+                continue
+            best = new
+            best_size = new_size
+            best_str = new_str
+        new_exprs.append(best)
+
+    elapsed = timer.stop()
+    logger.dlog("{} to {} identities in {:4f} seconds",
+                len(exprs), len(new_exprs), elapsed)
+
+    return new_exprs
+
+
+def filter_keep_thefunc_and_templates(exprs):
+    timer = Timer()
+    timer.start()
+
+    new_exprs = list()
+    for expr in exprs:
+        exstr = str(snake_egg_rules.egg_to_fpcore(expr))
+        if all(s not in exstr for s in {"thefunc", "mirror_right", "mirror_left", "negate_right", "negate_left", "periodic", "exp_recons"}):
+            logger.llog(
+                Logger.HIGH, "missing \"thefunc\" and templates: {}", exstr)
+            continue
+        new_exprs.append(expr)
+
+    elapsed = timer.stop()
+    logger.dlog("{} to {} identities in {:4f} seconds",
+                len(exprs), len(new_exprs), elapsed)
+
+    return new_exprs
+
+
 def extract_identities(func):
     logger.dlog("Name: {}", func.get_any_name())
     logger.dlog("f(x): {}", func.body)
 
     exprs = generate_all_identities(func, ITERS[0])
 
-    # exprs = filter_keep_thefunc(exprs)
-    # exprs = filter_dedup(exprs, ITERS[1], False)
-    # exprs = filter_dedup(exprs, ITERS[2], True)
+    exprs = filter_keep_thefunc_and_templates(exprs)
+
+    old_len = len(exprs) + 1
+    while len(exprs) < old_len:
+        old_len = len(exprs)
+        exprs = filter_dedup(
+            exprs, ITERS[1], False)
+
+    exprs = filter_dedup(exprs, ITERS[2], True)
     # exprs = filter_defs_sub(exprs, func, ITERS[3])
     # exprs = filter_defs_div(exprs, func, ITERS[4])
 

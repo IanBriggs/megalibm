@@ -36,10 +36,10 @@ EOF
 # EOF
 
 # Run the identities nightly
-/usr/bin/time -v "${SCRIPT_LOCATION}"/megalibm_template_identities "${GIT_LOCATION}/benchmarks/"
+time "${SCRIPT_LOCATION}"/megalibm_template_identities "${GIT_LOCATION}/benchmarks/"
 
 # Run the generation nightly, this is more envolved
-/usr/bin/time -v "${SCRIPT_LOCATION}"/megalibm_generate "${GIT_LOCATION}/benchmarks/"
+time "${SCRIPT_LOCATION}"/megalibm_generate "${GIT_LOCATION}/benchmarks/"
 
 rm -rf "${GIT_LOCATION}/measurement/error/generated"
 mv "${THIS_NIGHTLY_LOCATION}/generated/" "${GIT_LOCATION}/measurement/error/"
