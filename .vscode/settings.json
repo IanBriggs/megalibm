@@ -1,8 +1,11 @@
 {
     "cSpell.words": [
+        "backoff",
         "BINOP",
         "cbrt",
         "decnum",
+        "dedup",
+        "dlog",
         "egraph",
         "errok",
         "fdim",
@@ -13,6 +16,7 @@
         "hexnum",
         "isnormal",
         "libm",
+        "llog",
         "mpfr",
         "mpmath",
         "nearbyint",
