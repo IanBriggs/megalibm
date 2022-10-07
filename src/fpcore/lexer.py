@@ -22,7 +22,7 @@ class FPCoreLexError(Exception):
 
 class FPCoreLexer(Lexer):
     tokens = {
-        # Delimitors
+        # Delimiters
         LP,  # left paren
         RP,  # right paren
         LB,  # left square bracket

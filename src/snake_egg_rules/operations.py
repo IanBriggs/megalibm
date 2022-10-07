@@ -45,7 +45,7 @@ tanh      = nt("tanh",       "x")
 
 atan2     = nt("atan2",      "x y") # x != 0 && y != 0
 pow       = nt("pow",        "x y") # (x < 0 && (int(y) == y || something something odd den)) || (x == 0 && 0 <= y) || (0 < x)
-hypot     = nt("hypot",      "x y") #  0 <= x && 0 <= y
+hypot     = nt("hypot",      "x y") # 0 <= x && 0 <= y
 remainder = nt("remainder",  "x y") # y != 0
 
 fma       = nt("fma",        "x y z")
