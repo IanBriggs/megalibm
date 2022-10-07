@@ -13,7 +13,7 @@ logger = Logger(Logger.LOW, color=Logger.blue, def_color=Logger.cyan)
 timer = Timer()
 
 ITERS = [
-    5,  # Main iters for finding identities
+    10,  # Main iters for finding identities
     6,  # Iters for backoff dedup
     5,  # Iters for simple dedup
     3,  # Iters for definition finding I(x) - f(x) = 0
@@ -31,11 +31,11 @@ periodic = namedtuple("periodic", "p")
 exp_recons = namedtuple("exp_recons", "p")
 raw_template_rules = [
     ["capture-mirror-r",  thefunc(add(mul(2, p), "x")),      mirror_right(p)],
-    ["capture-mirror-l",   thefunc(sub(p, "x")),              mirror_left(p)],
+    ["capture-mirror-l",  thefunc(sub(p, "x")),              mirror_left(p)],
     ["capture-negate-r",  neg(thefunc(add(mul(2, p), "x"))), negate_right(p)],
-    ["capture-negate-l",   neg(thefunc(sub(p, "x"))),         negate_left(p)],
-    ["capture-periodic",      thefunc(add(p, "x")),              periodic(p)],
-    ["capture-exp-recon",   div(thefunc(add(p, "x")), 2),      exp_recons(p)],
+    ["capture-negate-l",  neg(thefunc(sub(p, "x"))),         negate_left(p)],
+    ["capture-periodic",  thefunc(add(p, "x")),              periodic(p)],
+    ["capture-exp-recon", div(thefunc(add(p, "x")), 2),      exp_recons(p)],
 ]
 template_rules = list()
 for l in raw_template_rules:
@@ -71,30 +71,29 @@ def generate_all_identities(func, max_iters):
     pattern_body = func.to_snake_egg(to_rule=True)
     rewrite_body_to_func = Rewrite(pattern_body, pattern_func)
 
-    extracted = set()
-    for _ in range(max_iters):
-        # Run with mathematical rules
-        egraph.run(snake_egg_rules.rules,
-                   iter_limit=1,
-                   time_limit=600,
-                   node_limit=100_000,
-                   use_simple_scheduler=True)
-        # Run with undef rule
-        egraph.run([rewrite_body_to_func],
-                   iter_limit=1,
-                   time_limit=600,
-                   node_limit=100_000 + 10_000,
-                   use_simple_scheduler=True)
-        # Run with template rules
-        egraph.run(template_rules,
-                   iter_limit=1,
-                   time_limit=600,
-                   node_limit=100_000 + 10_000 + 10_000,
-                   use_simple_scheduler=True)
-        # Extract
-        extracted.update(egraph.node_extract(body))
+    # Run with mathematical rules
+    egraph.run(snake_egg_rules.rules,
+               iter_limit=max_iters,
+               time_limit=600,
+               node_limit=100_000,
+               use_simple_scheduler=False)
+
+    # Run with undef rule
+    egraph.run([rewrite_body_to_func],
+               iter_limit=max_iters,
+               time_limit=600,
+               node_limit=100_000 + 10_000,
+               use_simple_scheduler=True)
+
+    # Run with template rules
+    egraph.run(template_rules,
+               iter_limit=max_iters,
+               time_limit=600,
+               node_limit=100_000 + 10_000 + 10_000,
+               use_simple_scheduler=True)
 
     # Extract and sort the identities
+    extracted = egraph.node_extract(body)
     exprs = list(extracted)
     exprs.sort(key=lambda e: str(e), reverse=True)
     exprs.sort(key=lambda e: len(str(e)))
@@ -128,7 +127,7 @@ def filter_dedup(exprs, max_iters, use_simple):
         egraph.add(expr)
 
     # Run with standard mathematical rules
-    egraph.run(snake_egg_rules.rules+compound_template_rules,
+    egraph.run(snake_egg_rules.rules+template_rules+compound_template_rules,
                iter_limit=max_iters,
                time_limit=600,
                node_limit=100_000,
@@ -143,26 +142,15 @@ def filter_dedup(exprs, max_iters, use_simple):
     # For each set in the mapping pick a representative
     new_exprs = list()
     for id, group in groups.items():
-        logger.blog("all equal", "\n".join(str(g) for g in group))
-        best = group.pop()
-        best_size = expr_size(best)
-        best_str = str(best)
-        while len(group) > 0:
-            new = group.pop()
-            new_size = expr_size(new)
-            new_str = str(new)
-            if new_size > best_size:
-                continue
-            if new_size < best_size:
-                best = new
-                best_size = new_size
-                best_str = new_str
-                continue
-            if new_str > best_str:
-                continue
-            best = new
-            best_size = new_size
-            best_str = new_str
+        if len(group) == 1:
+            new_exprs.append(group.pop())
+            continue
+        logger.blog("all equal", "\n".join(
+            str(snake_egg_rules.egg_to_fpcore(g)) for g in group))
+        best_size = min(expr_size(e) for e in group)
+        best_in_group = {e for e in group if expr_size(e) == best_size}
+        best = min(best_in_group, key=lambda e: str(e))
+        logger("Picked representative {}", snake_egg_rules.egg_to_fpcore(best))
         new_exprs.append(best)
 
     elapsed = timer.stop()
@@ -204,7 +192,7 @@ def extract_identities(func):
     while len(exprs) < old_len:
         old_len = len(exprs)
         exprs = filter_dedup(
-            exprs, ITERS[1], False)
+            exprs, ITERS[1], True)
 
     exprs = filter_dedup(exprs, ITERS[2], True)
     # exprs = filter_defs_sub(exprs, func, ITERS[3])

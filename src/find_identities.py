@@ -322,7 +322,7 @@ def dedup_generators(identities, iters):
     query.extend([f"(declare-const len_I_{I} Int)"
                   for I, iden in enumerate(identities)])
 
-    query.extend([f"(assert (> len_I_{I} 0))"
+    query.extend([f"(assert (< 0 len_I_{I} 5))"
                   for I, iden in enumerate(identities)])
 
     cross_products = dict()
