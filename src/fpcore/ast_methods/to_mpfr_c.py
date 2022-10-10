@@ -110,15 +110,15 @@ def to_mpfr_c(self, lines, temps):
 
     if len(c_args) == 1 and self.op in _UNOP_MAPPING:
         fname = _UNOP_MAPPING[self.op]
-        line = f"  {fname}({my_name}, {str_args}, MPFR_RNDN);"
-    elif len(c_args) == 2 and self.op in _BINOP_MAPPING:
-        fname = _BINOP_MAPPING[self.op]
         if self.op == "lgamma":
             ignore = f"ignore_{len(lines)}"
             lines.append(f"  int {ignore};")
             line = f"  {fname}({my_name}, &{ignore}, {str_args}, MPFR_RNDN);"
         else:
             line = f"  {fname}({my_name}, {str_args}, MPFR_RNDN);"
+    elif len(c_args) == 2 and self.op in _BINOP_MAPPING:
+        fname = _BINOP_MAPPING[self.op]
+        line = f"  {fname}({my_name}, {str_args}, MPFR_RNDN);"
     elif len(c_args) == 2 and self.op in _COMP_MAPPING:
         fname = _COMP_MAPPING[self.op]
         line = f"  int {my_name} = {fname}({str_args})"
