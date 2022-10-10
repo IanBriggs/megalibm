@@ -34,6 +34,7 @@ one_arg = {
     expm1: mkone("expm1"),
     fabs: mkone("fabs"),
     inv: mkone("inv"),
+    tgamma: mkone("tgamma"),
     lgamma: mkone("lgamma"),
     log1p: mkone("log1p"),
     log10: mkone("log10"),
