@@ -4,6 +4,7 @@ from utils import add_method
 
 _CONST_MAPPING = {
     "PI": "pi",
+    "PI_2": "(pi/2)"
 }
 
 
