@@ -97,3 +97,6 @@ class fp64(NumericType):
 
     def c_type(self):
         return "double"
+
+    def c_pow(self):
+        return "pow"

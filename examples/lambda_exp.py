@@ -40,6 +40,8 @@ logger("  Type: {}", my_exp.out_type)
 gen_sig, gen_src = lambdas.generate_c_code(my_exp, "my_exp")
 logger(gen_sig)
 
+gen_src = ["#include <math.h>", "#include <assert.h>\n\n"] + gen_src
+
 logger.blog("C function", "\n".join(gen_src))
 
 type = lambdas.types.Impl(function, domain)
