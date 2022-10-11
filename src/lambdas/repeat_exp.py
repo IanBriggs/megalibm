@@ -53,21 +53,17 @@ class RepeatExp(types.Transform):
                                          [out_red, k],
                                          our_in_type.domain.sup)
 
-        k1 = self.gensym("k")
+        k_1 = self.gensym("k")
         power = lego_blocks.Pow(numeric_types.fp64(),
-                                 ["2", k],
-                                 [k1])
+                                 [(fpcore.ast.Number("2")).to_libm_c(), k],
+                                 [k_1])
 
-        out_red1 = self.gensym("out")
-        out_red2 = so_far[0].out_names[0]
+        out_name = self.gensym("out")
+        in_red = so_far[0].out_names[0]
         mult = lego_blocks.Multiply(numeric_types.fp64(),
-                                     [out_red2, k1],
-                                     [out_red1])
-
-
-
-
-
+                                     [in_red, k_1],
+                                     [out_name])
+        
         return [add] + so_far + [power] + [mult]
 
     @classmethod
