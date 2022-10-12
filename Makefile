@@ -29,6 +29,8 @@ bin/nightly.sh: build
 
 .PHONY: nightly
 nightly: bin/nightly.sh
+	rm requirements/done requirements/snake_egg/done
+	make requirements
 	$<
 
 requirements/done: requirements/build.sh
