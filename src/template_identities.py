@@ -9,6 +9,8 @@ from snake_egg import Rewrite
 import snake_egg_rules
 from utils import Logger, Timer
 
+from fpcore.ast import Number, Variable
+
 logger = Logger(Logger.LOW, color=Logger.blue, def_color=Logger.cyan)
 timer = Timer()
 
@@ -21,21 +23,17 @@ ITERS = [
     5,  # Iters for generator dedup
 ]
 
-p = snake_egg.vars("p")
+period, inflection = snake_egg.vars("period inflection")
 
-mirror_right = namedtuple("mirror_right", "p")
-mirror_left = namedtuple("mirror_left", "p")
-negate_right = namedtuple("negate_right", "p")
-negate_left = namedtuple("negate_left", "p")
-periodic = namedtuple("periodic", "p")
-exp_recons = namedtuple("exp_recons", "p")
+mirror = namedtuple("mirror", "inflection")
+negate = namedtuple("negate", "inflection")
+periodic = namedtuple("periodic", "period")
+exp_recons = namedtuple("exp_recons", "period")
 raw_template_rules = [
-    ["capture-mirror-r",  thefunc(add(mul(2, p), "x")),      mirror_right(p)],
-    ["capture-mirror-l",  thefunc(sub(p, "x")),              mirror_left(p)],
-    ["capture-negate-r",  neg(thefunc(add(mul(2, p), "x"))), negate_right(p)],
-    ["capture-negate-l",  neg(thefunc(sub(p, "x"))),         negate_left(p)],
-    ["capture-periodic",  thefunc(add(p, "x")),              periodic(p)],
-    ["capture-exp-recon", div(thefunc(add(p, "x")), 2),      exp_recons(p)],
+     ["capture-mirror",    thefunc(sub(inflection, "x")),      mirror(inflection)],
+     ["capture-negate",    neg(thefunc(sub(inflection, "x"))), negate(inflection)],
+     ["capture-periodic",  thefunc(add(period, "x")),          periodic(period)],
+     ["capture-exp-recon", div(thefunc(add(period, "x")), 2),  exp_recons(period)],
 ]
 template_rules = list()
 for l in raw_template_rules:
@@ -45,8 +43,6 @@ for l in raw_template_rules:
     template_rules.append(Rewrite(frm, to, name))
 
 raw_compound_template_rules = [
-    ["neg-mirror-to_negate-l", neg(mirror_left(p)), negate_left(p)],
-    ["neg-mirror-to_negate-r", neg(mirror_right(p)), negate_right(p)],
 ]
 compound_template_rules = list()
 for l in raw_compound_template_rules:
@@ -167,7 +163,7 @@ def filter_keep_thefunc_and_templates(exprs):
     new_exprs = list()
     for expr in exprs:
         exstr = str(snake_egg_rules.egg_to_fpcore(expr))
-        if all(s not in exstr for s in {"thefunc", "mirror_right", "mirror_left", "negate_right", "negate_left", "periodic", "exp_recons"}):
+        if all(s not in exstr for s in {"thefunc", "mirror", "negate", "periodic", "exp_recons"}):
             logger.llog(
                 Logger.HIGH, "missing \"thefunc\" and templates: {}", exstr)
             continue
@@ -199,6 +195,7 @@ def extract_identities(func):
     # exprs = filter_defs_div(exprs, func, ITERS[4])
 
     exprs = [snake_egg_rules.egg_to_fpcore(expr) for expr in exprs]
+    exprs = [expr.substitute(periodic(Number("0")), thefunc(Variable("x"))) for expr in exprs]
     # exprs = dedup_generators(exprs, ITERS[5])
 
     lines = [str(expr) for expr in exprs]

@@ -44,7 +44,7 @@ tan       = nt("tan",        "x")
 tanh      = nt("tanh",       "x")
 
 atan2     = nt("atan2",      "x y") # x != 0 && y != 0
-pow       = nt("pow",        "x y") # (x < 0 && (int(y) == y || something something odd den)) || (x == 0 && 0 <= y) || (0 < x)
+# pow moved to the end
 hypot     = nt("hypot",      "x y") # 0 <= x && 0 <= y
 remainder = nt("remainder",  "x y") # y != 0
 
@@ -69,3 +69,16 @@ fmax      = nt("fmax",       "x y")
 fmin      = nt("fmin",       "x y")
 fmod      = nt("fmod",       "x y") # y != 0
 
+
+
+pow       = nt("pow",        "x y")
+# note: y == r/s means y is rational, r/s is lowest terms
+# note: irr(y) means y is irrational
+# (y >= 0 && int(y) == y) ||
+# (y < 0 && int(y) == y && x != 0) ||
+# (y == r/s && even(s) && y > 0 && x >= 0) ||
+# (y == r/s && even(s) && y < 0 && x > 0) ||
+# (y == r/s && odd(s) && y > 0) ||
+# (y == r/s && odd(s) && y < 0 && x != 0) ||
+# (irr(y) && y > 0 && x >= 0) ||
+# (irr(y) && y < 0 && x > 0)

@@ -1,5 +1,6 @@
 
 
+from operator import attrgetter
 from snake_egg_rules.operations import *
 import fpcore.ast as ast
 
@@ -98,10 +99,10 @@ def egg_to_fpcore(expr):
         return zero_arg[expr]()
 
     if T not in one_arg and T not in two_arg and T not in three_arg:
-        p = egg_to_fpcore(expr.p)
+        arg = egg_to_fpcore(expr[0])
         s = str(expr)
         op = s[:s.index("(")]
-        return ast.Operation(op, p)
+        return ast.Operation(op, arg)
 
     x = egg_to_fpcore(expr.x)
     if T in one_arg:
