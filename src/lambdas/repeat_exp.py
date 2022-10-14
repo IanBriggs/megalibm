@@ -53,18 +53,13 @@ class RepeatExp(types.Transform):
                                          [out_red, k],
                                          our_in_type.domain.sup)
 
-        k_1 = self.gensym("k")
-        power = lego_blocks.Pow(numeric_types.fp64(),
-                                 [(fpcore.ast.Number("2")).to_libm_c(), k],
-                                 [k_1])
-
         out_name = self.gensym("out")
         in_red = so_far[0].out_names[0]
-        mult = lego_blocks.Multiply(numeric_types.fp64(),
-                                     [in_red, k_1],
+        ldexp = lego_blocks.Ldexp(numeric_types.fp64(),
+                                     [in_red, k],
                                      [out_name])
-        
-        return [add] + so_far + [power] + [mult]
+                                     
+        return [add] + so_far + [ldexp]
 
     @classmethod
     def generate_hole(cls, out_type, egraph):
