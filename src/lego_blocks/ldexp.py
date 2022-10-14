@@ -11,12 +11,12 @@ class Ldexp(lego_blocks.LegoBlock):
         fmt = {
             "out": self.out_names[0],
             "type": self.numeric_type.c_type(),
-            "c_pow": self.numeric_type.c_pow(),
-            "base": (fpcore.ast.Number("2")).to_libm_c(),
+            "c_ldexp": self.numeric_type.c_ldexp(),
         }
-        fmt["power"] = "{}(({}){}, ({}){})".format(fmt["c_pow"], fmt["type"], fmt["base"], fmt["type"], self.in_names[1]) 
-        fmt["mantissa"] = "({}){}".format(fmt["type"], self.in_names[0])
+        fmt["ldexp"] = "{}({}, {})".format(fmt["c_ldexp"], self.in_names[0], self.in_names[1])
+
         lines = [
-            "{type} {out} = {mantissa}*{power};".format(**fmt),
+            "{type} {out} = {ldexp};".format(**fmt),
         ]
+        
         return lines

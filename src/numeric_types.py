@@ -100,3 +100,6 @@ class fp64(NumericType):
 
     def c_pow(self):
         return "pow"
+
+    def c_ldexp(self):
+        return "ldexp"
