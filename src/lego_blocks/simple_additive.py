@@ -26,11 +26,13 @@ class SimpleAdditive(lego_blocks.LegoBlock):
         }
         inv_period = fpcore.ast.Operation(
             "/", fpcore.ast.Number("1"), self.period)
+        inv_period_value = float(inv_period.eval(assignment={}))
+        preiod_value = float(self.period.eval(assignment={}))
         fmt["cast_in"] = "(({}){})".format(fmt["type"], self.in_names[0])
         fmt["cast_period"] = "(({}){})".format(
-            fmt["type"], self.period.to_libm_c())
+            fmt["type"], preiod_value)
         fmt["cast_inv_period"] = "(({}){})".format(
-            fmt["type"], inv_period.to_libm_c())
+            fmt["type"], inv_period_value)
 
         lines = [
             "int {k} = (int) floor({cast_in}*{cast_inv_period});".format(**fmt),

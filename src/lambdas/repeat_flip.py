@@ -62,7 +62,7 @@ class RepeatFlip(types.Transform):
         out_case = so_far[0].in_names[0]
         cases = {
             0: in_case,
-            1: "{}-{}".format(our_in_type.domain.sup.to_libm_c(), in_case),
+            1: "{}-{}".format(float(our_in_type.domain.sup.eval({})), in_case),
         }
         case = lego_blocks.Case(numeric_types.fp64(), [
                                 in_case, k], [out_case], 2, cases)

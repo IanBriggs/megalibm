@@ -55,10 +55,10 @@ class RepeatNegate(types.Transform):
         ifless_in = lego_blocks.IfLess(numeric_types.fp64(),
                                        [in_name],
                                        [out_red],
-                                       our_in_type.domain.sup.to_libm_c(),
+                                       float(our_in_type.domain.sup.eval({})),
                                        in_name,
-                                       "{} - {}".format((our_in_type.domain.sup *
-                                                         fpcore.ast.Number("2")).to_libm_c(), in_name),
+                                       "{} - {}".format(float((our_in_type.domain.sup *
+                                                         fpcore.ast.Number("2")).eval({})), in_name),
                                        )
 
         in_case = so_far[-1].out_names[0]
@@ -67,7 +67,7 @@ class RepeatNegate(types.Transform):
         ifless_out = lego_blocks.IfLess(numeric_types.fp64(),
                                         [in_name],
                                         [out_case],
-                                        our_in_type.domain.sup.to_libm_c(),
+                                        float(our_in_type.domain.sup.eval({})),
                                         in_case,
                                         "-" + in_case,
                                         )
