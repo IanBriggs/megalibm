@@ -30,6 +30,7 @@
         "thefunc",
         "TRIOP",
         "uadd",
-        "UNOP"
+        "UNOP",
+        "xrealloc"
     ]
 }

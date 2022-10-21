@@ -66,3 +66,7 @@ def assemble_error_main(func_name, func_body, mpfr_func, other_funcs,
         "  return 0;",
         "}"])
     return lines
+
+def assemble_timing_main(func_name, func_body, other_funcs, header_fname, domains):
+    # TODO: Yash
+    pass
