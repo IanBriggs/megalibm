@@ -1,17 +1,12 @@
-
-
-from fpcore.ast import ASTNode, Atom, Operation, FPCore
-from utils import add_method, Logger
-
-
-logger = Logger(level=Logger.EXTRA)
+from fpcore.ast import ASTNode, Atom, FPCore, Operation
+from utils import add_method
 
 
 @add_method(ASTNode)
 def __mul__(self, *args, **kwargs):
     # Make sure calling __mul__ leads to an error if not overridden
     class_name = type(self).__name__
-    msg = "__mul__ not implemented for class {}".format(class_name)
+    msg = f"__mul__ not implemented for class '{class_name}'"
     raise NotImplementedError(msg)
 
 

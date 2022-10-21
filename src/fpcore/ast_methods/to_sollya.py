@@ -1,17 +1,18 @@
+from fpcore.ast import ASTNode, Atom, Constant, FPCore, Operation
+from utils import add_method
 
 
-from fpcore.ast import ASTNode, Atom, Constant, Operation, FPCore
-from utils import add_method, Logger
-
-
-logger = Logger(level=Logger.EXTRA)
+_CONST_MAPPING = {
+    "PI": "pi",
+    "PI_2": "(pi/2)"
+}
 
 
 @add_method(ASTNode)
 def to_sollya(self, *args, **kwargs):
     # Make sure calling to_sollya leads to an error if not overridden
     class_name = type(self).__name__
-    msg = "to_sollya not implemented for class {}".format(class_name)
+    msg = f"to_sollya not implemented for class '{class_name}'"
     raise NotImplementedError(msg)
 
 
@@ -22,10 +23,10 @@ def to_sollya(self):
 
 @add_method(Constant)
 def to_sollya(self):
-    mapping = {
-        "PI": "pi"
-    }
-    return mapping[self.source]
+    try:
+        return _CONST_MAPPING[self.source]
+    except KeyError:
+        raise NotImplementedError(f"Unknown constant '{self.source}'")
 
 
 @add_method(Operation)

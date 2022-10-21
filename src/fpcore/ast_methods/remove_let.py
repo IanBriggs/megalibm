@@ -1,17 +1,13 @@
-
-
-from fpcore.ast import (ASTNode, Atom, FPCore, Let, LetStar, Operation,
-                        Variable)
-from utils import add_method, Logger
-
 import copy
 
-logger = Logger(level=Logger.EXTRA)
+from fpcore.ast import ASTNode, Atom, FPCore, Let, LetStar, Operation, Variable
+from utils import add_method
 
 
 class FPCoreNameError(Exception):
+    """FPCore doesn't define a variable"""
+
     def __init__(self, name):
-        logger.error("No definition for variable: {}", name)
         self.name = name
 
 
@@ -19,7 +15,7 @@ class FPCoreNameError(Exception):
 def remove_let(self, *args, **kwargs):
     # Make sure calling remove_let leads to an error if not overridden
     class_name = type(self).__name__
-    msg = "remove_let not implemented for class {}".format(class_name)
+    msg = f"remove_let not implemented for class '{class_name}'"
     raise NotImplementedError(msg)
 
 
@@ -30,6 +26,7 @@ def remove_let(self, environment_stack):
 
 @add_method(Variable)
 def remove_let(self, environment_stack):
+    # Lookup the variable starting with the innermost scope
     for environment in reversed(environment_stack[1:]):
         if self.source in environment:
             return copy.deepcopy(environment[self.source])
@@ -46,16 +43,20 @@ def remove_let(self, environment_stack):
 
 @add_method(Let)
 def remove_let(self, environment_stack):
+    # let gives us a new scope and we can map all the bindings at the same time
     new_environment = {str(b.name): b.value.remove_let(environment_stack)
                        for b in self.bindings}
     environment_stack.append(new_environment)
+
     expr = self.body.remove_let(environment_stack)
     environment_stack.pop()
+
     return expr
 
 
 @add_method(LetStar)
 def remove_let(self, environment_stack):
+    # let* gives us a new scope for each new binding
     for b in self.bindings:
         new_environment = {str(b.name): b.value.remove_let(environment_stack)}
         environment_stack.append(new_environment)
@@ -74,35 +75,3 @@ def remove_let(self):
     new_body = self.body.remove_let(environment_stack)
     self.body = new_body
     assert (len(environment_stack) == 1)
-
-
-def main(argv):
-    logger.set_log_level(Logger.EXTRA)
-
-    if len(argv) == 1:
-        text = sys.stdin.read()
-    elif len(argv) == 2:
-        with open(argv[1], "r") as f:
-            text = f.read()
-    if text.strip() == "":
-        text = "(FPCore (x) :pre (<= 1/100 x 1/2) (/ (- (exp x) 1) x))"
-
-    logger.blog("Input text", text)
-
-    parsed = parse(text)[0]
-    parsed.remove_let()
-
-    logger.blog("Removed lets", parsed)
-
-
-if __name__ == "__main__":
-    from fpcore.parser import parse
-    import sys
-
-    retcode = 0
-    try:
-        retcode = main(sys.argv)
-    except KeyboardInterrupt:
-        print("Goodbye")
-
-    sys.exit(retcode)

@@ -16,30 +16,30 @@ mkdir "${THIS_NIGHTLY_LOCATION}"
 
 # Make temporary splash page for two nightlies
 cd "${THIS_NIGHTLY_LOCATION}"
-# cat <<EOF >index.html
-# <!doctype html>
-# <meta charset="utf-8" />
-# <title>Megalibm Results for $(date +%Y-%m-%d)</title>
-# <h1>TEMPORARY SPLIT NIGHTLY</h1>
-# <a href="identities.html">Identity generation nightly</a><br>
-# <a href="generated/index.html">Function generation nightly</a>
-# EOF
-
 cat <<EOF >index.html
 <!doctype html>
-<head>
-  <meta http-equiv="refresh" content="5; URL=generated/index.html" />
-</head>
-<body>
-  <p>If you are not redirected in five seconds, <a href="generated/index.html">click here</a>.</p>
-</body>
+<meta charset="utf-8" />
+<title>Megalibm Results for $(date +%Y-%m-%d)</title>
+<h1>TEMPORARY SPLIT NIGHTLY</h1>
+<a href="identities.html">Identity generation nightly</a><br>
+<a href="generated/index.html">Function generation nightly</a>
 EOF
 
+# cat <<EOF >index.html
+# <!doctype html>
+# <head>
+#   <meta http-equiv="refresh" content="5; URL=generated/index.html" />
+# </head>
+# <body>
+#   <p>If you are not redirected in five seconds, <a href="generated/index.html">click here</a>.</p>
+# </body>
+# EOF
+
 # Run the identities nightly
-# /usr/bin/time -v "${SCRIPT_LOCATION}"/megalibm_identities "${GIT_LOCATION}/benchmarks/"
+time "${SCRIPT_LOCATION}"/megalibm_template_identities "${GIT_LOCATION}/benchmarks/"
 
 # Run the generation nightly, this is more envolved
-/usr/bin/time -v "${SCRIPT_LOCATION}"/megalibm_generate "${GIT_LOCATION}/benchmarks/"
+time "${SCRIPT_LOCATION}"/megalibm_generate "${GIT_LOCATION}/benchmarks/"
 
 rm -rf "${GIT_LOCATION}/measurement/error/generated"
 mv "${THIS_NIGHTLY_LOCATION}/generated/" "${GIT_LOCATION}/measurement/error/"

@@ -1,17 +1,12 @@
-
-
-from fpcore.ast import ASTNode, Atom, Operation, FPCore, Variable
-from utils import add_method, Logger
-
-
-logger = Logger(level=Logger.EXTRA)
+from fpcore.ast import ASTNode, Atom, FPCore, Operation, Variable
+from utils import add_method
 
 
 @add_method(ASTNode)
 def cross(self, *args, **kwargs):
     # Make sure calling cross leads to an error if not overridden
     class_name = type(self).__name__
-    msg = "cross not implemented for class {}".format(class_name)
+    msg = f"cross not implemented for class '{class_name}'"
     raise NotImplementedError(msg)
 
 
