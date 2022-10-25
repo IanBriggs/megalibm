@@ -6,7 +6,7 @@ CFLAGS += -Wno-unused-variable
 CFLAGS += -Iinclude
 
 GEN_DIRS = $(wildcard generated/*)
-BINS = $(foreach g,$(GEN_DIRS),${g}/main)
+BINS = $(foreach g,$(GEN_DIRS),${g}/timing_main)
 INTER = $(foreach g,$(GEN_DIRS),${g}/funcs.o)
 OBJS = obj/table_generation.o obj/xmalloc.o
 
@@ -28,20 +28,20 @@ run: ${TIMING_DATAS}
 .PHONY: intermediates
 intermediates: ${OBJS} ${INTER}
 
-generated/%/timing_data_0.json: generated/%/main
+generated/%/timing_data_0.json: generated/%/timing_main
 	./$< 0 > $@
 
-generated/%/timing_data_1.json: generated/%/main
+generated/%/timing_data_1.json: generated/%/timing_main
 	./$< 1 > $@
 
-generated/%/timing_data_2.json: generated/%/main
+generated/%/timing_data_2.json: generated/%/timing_main
 	./$< 2 > $@
 
-generated/%/timing_data_3.json: generated/%/main
+generated/%/timing_data_3.json: generated/%/timing_main
 	./$< 3 > $@
 
 
-generated/%/main: generated/%/main.c generated/%/funcs.o ${OBJS}
+generated/%/timing_main: generated/%/timing_main.c generated/%/funcs.o ${OBJS}
 	${CC} ${CFLAGS} -Igenerated/$* $^ -lmpfr -lgmp -lm -o $@
 
 generated/%/funcs.o: generated/%/funcs.c generated/%/funcs.h
