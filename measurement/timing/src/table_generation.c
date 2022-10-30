@@ -6,6 +6,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 
 static void
@@ -21,21 +22,50 @@ fill_inputs(double low, double high, size_t samples, double *inputs)
 }
 
 
-static void
-time_function_using_inputs(unop_fp64 f, size_t samples, double *inputs)
+static double time_function_using_inputs(unop_fp64 f, size_t samples, double *inputs, size_t iters)
 {
-  // TODO: Yash
+  clock_t start, end;
+  double cpu_time_used, avg_time_per_sample;
+
+  start = clock();
+  for (size_t iter=0; iter < iters; iter++)
+  {
+    for (size_t i = 0; i < samples; i++)
+    {
+      double value = f(inputs[i]);
+    }
+  }
+  end = clock();
+  cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+  avg_time_per_sample = (double) (cpu_time_used / (iters * samples));
+  return avg_time_per_sample;
 }
 
 double*
 time_functions(double low, double high,
-                       size_t func_count, entry *funcs)
+                       size_t func_count, entry *funcs, size_t samples, size_t iters)
 {
   double* function_times = (double*) xmalloc(sizeof(double)*func_count);
 
-  // TODO: Yash
+  double *inputs = (double *)xmalloc(sizeof(double) * samples);
+  fill_inputs(low, high, samples, inputs);
+
+
+  for(size_t fidx = 0; fidx < func_count; fidx++)
+  {
+    unop_fp64 f = funcs[fidx].func;
+    function_times[fidx] = time_function_using_inputs(f, samples, inputs, iters); 
+  }
+
+  xfree(inputs);
 
   return function_times;
+}
+
+void free_memory(double * function_times) 
+{
+  assert(function_times != NULL);
+  xfree(function_times);
 }
 
 void
@@ -43,5 +73,25 @@ print_json(size_t func_count, entry *funcs,
                 double *times,
                 char *func_name, char *func_body)
 {
-  // TODO: Yash
+  printf("{\n");
+
+  // Name and body
+  printf("  \"name\": \"%s\",\n", func_name);
+  printf("  \"body\": \"%s\",\n", func_body);
+
+  // Dict from function name to a timing
+  printf("  \"functions\": {\n");
+  for (size_t i = 0; i < func_count; i++)
+  {
+    printf("    \"%s\": {\n", funcs[i].name);
+    printf("      \"avg_time_per_sample\": %1.8e", times[i]);
+    printf("\n    }");
+    if (i != func_count-1)
+    {
+      printf(",");
+    }
+    printf("\n");
+  }
+  printf("  }\n");
+  printf("}\n");
 }
