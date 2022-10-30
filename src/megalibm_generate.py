@@ -291,7 +291,7 @@ def generate_all_code(function, domain):
         f.write("\n".join(main_lines))
 
     # Timing measurement
-    main_lines = assemble_error_main(name, func_body,
+    main_lines = assemble_timing_main(name, func_body,
                                      [libm_funcname] + gen_funcnames,
                                      header_fname, domains)
     main_fname = "timing_main.c"

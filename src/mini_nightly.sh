@@ -35,13 +35,12 @@ rm -rf "${GIT_LOCATION}/measurement/error/generated"
 mv "${THIS_NIGHTLY_LOCATION}/generated/" "${GIT_LOCATION}/measurement/error/"
 cd "${GIT_LOCATION}/measurement/error/"
 make -j6 build
-make -j6 run
-./scripts/plot_error.py generated
-mv generated "${THIS_NIGHTLY_LOCATION}"
+# make -j6 run
+# ./scripts/plot_error.py generated
+# rm -r "${GIT_LOCATION}/measurement/timing/generated"
+mv generated "${GIT_LOCATION}/measurement/timing/"
 
 # Timing
-rm -rf "${GIT_LOCATION}/measurement/timing/generated"
-mv "${GIT_LOCATION}/measurement/error/" "${GIT_LOCATION}/measurement/timing/"
 cd "${GIT_LOCATION}/measurement/timing/"
 make -j6 build
 make -j1 run
