@@ -6,7 +6,9 @@ requirements/log.txt
 requirements/rust/
 requirements/snake_egg/
 measurement/error/generated/
+measurement/timing/generated/
 nightlies/
 data/
 obj/
 .DS_Store
+mlibm/
