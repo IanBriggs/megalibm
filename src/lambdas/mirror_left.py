@@ -82,8 +82,8 @@ class MirrorLeft(types.Transform):
         il = lego_blocks.IfLess(numeric_types.fp64(),
                                 [in_name],
                                 [out_name],
-                                "({} - {})".format(float_bound, in_name),
                                 float(float_bound),
+                                "({} - {})".format(float_bound, in_name),
                                 in_name)
 
         return [il] + so_far
@@ -95,7 +95,6 @@ class MirrorLeft(types.Transform):
         # where (func) is mirrored at point (low+high)/2
         if type(out_type) != types.Impl:
             return list()
-
 
         # For each mirror point we check to see if our out domain contains it.
         # Then we create the required in domain.
@@ -138,9 +137,9 @@ class MirrorLeft(types.Transform):
 
             # check for [-inf, inf]
             if (math.isinf(float(out_domain.inf))
-            and math.copysign(1.0, float(out_domain.inf)) == -1.0
-            and math.isinf(float(out_domain.sup))
-            and math.copysign(1.0, float(out_domain.sup)) == 1.0):
+                and math.copysign(1.0, float(out_domain.inf)) == -1.0
+                and math.isinf(float(out_domain.sup))
+                    and math.copysign(1.0, float(out_domain.sup)) == 1.0):
                 new_holes.append(MirrorLeft(lambdas.Hole(in_type)))
                 continue
 
