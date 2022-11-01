@@ -18,5 +18,5 @@ class Ldexp(lego_blocks.LegoBlock):
         lines = [
             "{type} {out} = {ldexp};".format(**fmt),
         ]
-        
+
         return lines
