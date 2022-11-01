@@ -1,6 +1,4 @@
 
-import numeric_types
-from interval import Interval
 from lambdas import types
 
 

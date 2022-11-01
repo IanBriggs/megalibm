@@ -1,5 +1,6 @@
 
 
+from fpcore.ast import FPCore
 from interval import Interval
 
 
@@ -64,7 +65,15 @@ class Node():
     def __init__(self):
         raise NotImplementedError()
 
-    def type_check_forawrd(self):
+    def find_lambdas(self, pred, _found=None):
+        # look for all things that make `pred` True
+        raise NotImplementedError()
+
+    def replace_lambda(self, search, replace):
+        # replace all instances of `search` with `replace`
+        raise NotImplementedError()
+
+    def type_check_forward(self):
         # check that in_node.out_type matches requirements and set this
         # out_type
         raise NotImplementedError()
@@ -91,10 +100,26 @@ class Node():
 
 class Source(Node):
 
-    def __init__(self, function, domain, *args):
+    def __init__(self, function: FPCore, domain: Interval):
         self.function = function
         self.domain = domain
-        self.type_check()
+        #self.type_check()
+
+    def find_lambdas(self, pred, _found=None):
+        # Setup default args
+        if _found is None:
+            _found = set()
+
+        # Mark this node
+        if pred(self):
+            _found.add(self)
+
+        return _found
+
+    def replace_lambda(self, search, replace):
+        if self == search:
+            return replace
+        return self.copy()
 
     def __repr__(self):
         class_name = type(self).__name__
@@ -103,26 +128,45 @@ class Source(Node):
                                    repr(self.domain))
 
     def type_check(self):
-        assert (type(self.function) == str)
+        assert (type(self.function) == FPCore)
         assert (type(self.domain) == Interval)
 
 
 class Transform(Node):
 
-    def __init__(self, in_node, *args):
+    def __init__(self, in_node: Node):
         self.in_node = in_node
-        self.type_check()
+        #self.type_check()
+
+    def find_lambdas(self, pred, _found=None):
+        # Setup default args
+        if _found is None:
+            _found = set()
+
+        # Recurse
+        self.in_node.find_lambdas(pred, _found)
+
+        # Mark this node
+        if pred(self):
+            _found.add(self)
+
+        return _found
+
+    def replace_lambda(self, search, replace):
+        if self == search:
+            return replace
+        new_in_node = self.in_node.replace_lambda(search, replace)
+        return self.__class__(new_in_node)
 
     @classmethod
-    def generate_hole(cls, out_type, egraph):
+    def generate_hole(cls, out_type):
         # Given an out_type, return possible in types that this Transform
         # could use to reach that out_type
         raise NotImplementedError()
 
     def __repr__(self):
         class_name = type(self).__name__
-        return "{}({})".format(class_name,
-                               repr(self.in_node))
+        return "{}({})".format(class_name, repr(self.in_node))
 
     def type_check(self):
         pass
