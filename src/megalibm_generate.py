@@ -184,27 +184,27 @@ def generate_all_code(function, domain):
 
     gen_sigs = list()
     gen_srcs = list()
-    gen_funcnames = list()
+    gen_func_names = list()
     for i, lam in enumerate(my_lambdas):
         try:
-            funcname = f"my_{name}_{i}"
-            sig, src = lambdas.generate_c_code(lam, funcname)
+            func_name = f"my_{name}_{i}"
+            sig, src = lambdas.generate_c_code(lam, func_name)
             logger.blog("C function", "\n".join(src))
             gen_sigs.append(sig)
             gen_srcs.append(src)
-            gen_funcnames.append(funcname)
+            gen_func_names.append(func_name)
         except cmd_sollya.FailedGenError:
             logger("Unable to generate polynomial, skipping")
 
-    if len(gen_funcnames) == 0:
+    if len(gen_func_names) == 0:
         return False
 
-    libm_funcname = f"libm_{name}"
-    libm_sig, libm_src = lambdas.generate_libm_c_code(target, libm_funcname)
+    libm_func_name = f"libm_{name}"
+    libm_sig, libm_src = lambdas.generate_libm_c_code(target, libm_func_name)
     logger.blog("C libm function", "\n".join(libm_src))
 
-    mpfr_funcname = f"mpfr_{name}"
-    mpfr_sig, mpfr_src = lambdas.generate_mpfr_c_code(target, mpfr_funcname)
+    mpfr_func_name = f"mpfr_{name}"
+    mpfr_sig, mpfr_src = lambdas.generate_mpfr_c_code(target, mpfr_func_name)
     logger.blog("C mpfr function", "\n".join(mpfr_src))
 
     start = os.getcwd()
@@ -281,8 +281,8 @@ def generate_all_code(function, domain):
 
     func_body = function.to_html()
     main_lines = assemble_error_main(name, func_body,
-                                     mpfr_funcname,
-                                     [libm_funcname] + gen_funcnames,
+                                     mpfr_func_name,
+                                     [libm_func_name] + gen_func_names,
                                      header_fname, domains)
     main_fname = "main.c"
     with open(main_fname, "w") as f:

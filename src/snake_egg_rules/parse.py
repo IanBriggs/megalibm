@@ -13,57 +13,57 @@ zero_arg = {
 }
 
 
-def mkone(operation):
+def mk_one(operation):
     return lambda x: ast.Operation(operation, x)
 
 
 one_arg = {
-    thefunc: mkone("thefunc"),
-    acos: mkone("acos"),
-    acosh: mkone("acosh"),
-    asin: mkone("asin"),
-    asinh: mkone("asinh"),
-    atan: mkone("atan"),
-    atanh: mkone("atanh"),
-    cbrt: mkone("cbrt"),
-    cos: mkone("cos"),
-    cosh: mkone("cosh"),
-    erf: mkone("erf"),
-    erfc: mkone("erfc"),
-    exp: mkone("exp"),
-    exp2: mkone("exp"),
-    expm1: mkone("expm1"),
-    fabs: mkone("fabs"),
-    inv: mkone("inv"),
-    tgamma: mkone("tgamma"),
-    lgamma: mkone("lgamma"),
-    log1p: mkone("log1p"),
-    log10: mkone("log10"),
-    log: mkone("log"),
-    log2: mkone("log2"),
-    neg: mkone("-"),
-    sin: mkone("sin"),
-    sinh: mkone("sinh"),
-    sqrt: mkone("sqrt"),
-    tan: mkone("tan"),
-    tanh: mkone("tanh"),
+    thefunc: mk_one("thefunc"),
+    acos: mk_one("acos"),
+    acosh: mk_one("acosh"),
+    asin: mk_one("asin"),
+    asinh: mk_one("asinh"),
+    atan: mk_one("atan"),
+    atanh: mk_one("atanh"),
+    cbrt: mk_one("cbrt"),
+    cos: mk_one("cos"),
+    cosh: mk_one("cosh"),
+    erf: mk_one("erf"),
+    erfc: mk_one("erfc"),
+    exp: mk_one("exp"),
+    exp2: mk_one("exp"),
+    expm1: mk_one("expm1"),
+    fabs: mk_one("fabs"),
+    inv: mk_one("inv"),
+    tgamma: mk_one("tgamma"),
+    lgamma: mk_one("lgamma"),
+    log1p: mk_one("log1p"),
+    log10: mk_one("log10"),
+    log: mk_one("log"),
+    log2: mk_one("log2"),
+    neg: mk_one("-"),
+    sin: mk_one("sin"),
+    sinh: mk_one("sinh"),
+    sqrt: mk_one("sqrt"),
+    tan: mk_one("tan"),
+    tanh: mk_one("tanh"),
 }
 
 
-def mktwo(operation):
+def mk_two(operation):
     return lambda a, b: ast.Operation(operation, a, b)
 
 
 two_arg = {
-    add: mktwo("+"),
-    atan2: mktwo("atan2"),
-    div: mktwo("/"),
-    fmod: mktwo("fmod"),
-    hypot: mktwo("hypot"),
-    mul: mktwo("*"),
-    pow: mktwo("pow"),
-    remainder: mktwo("remainder"),
-    sub: mktwo("-"),
+    add: mk_two("+"),
+    atan2: mk_two("atan2"),
+    div: mk_two("/"),
+    fmod: mk_two("fmod"),
+    hypot: mk_two("hypot"),
+    mul: mk_two("*"),
+    pow: mk_two("pow"),
+    remainder: mk_two("remainder"),
+    sub: mk_two("-"),
 }
 
 three_arg = {

@@ -1,5 +1,6 @@
 
-
+import snake_egg
+import snake_egg_rules
 from utils import Logger, Timer
 
 logger = Logger(Logger.LOW, color=Logger.blue)
@@ -88,7 +89,7 @@ def smoke_check_rules(raw_rules, iter_limit=10):
     my_timer = Timer()
     print("{:40}\t{:7}\t{:5}\t{}".format(
         "Expression", "EqZero", "Time", "Iters"))
-    eqzero_count = 0
+    eq_zero_count = 0
     for raw_rule in raw_rules:
         name, frm, to = raw_rule
         frm = egg_rule_to_expr(frm)
@@ -104,7 +105,7 @@ def smoke_check_rules(raw_rules, iter_limit=10):
         my_timer.start()
         egraph = snake_egg.EGraph(snake_egg_rules.eval)
         egraph.add(frm)
-        eqzero = False
+        eq_zero = False
         i = 0
         for i in range(1, iter_limit+1):
             egraph.run(rules,
@@ -112,13 +113,13 @@ def smoke_check_rules(raw_rules, iter_limit=10):
                        node_limit=2**34,
                        time_limit=60)
             if egraph.equiv(frm, 0):
-                eqzero = True
+                eq_zero = True
                 break
         elapsed = my_timer.stop()
 
-        print(f"{frm_str:40}\t{str(eqzero):7}\t{elapsed:.4f}\t{i}")
+        print(f"{frm_str:40}\t{str(eq_zero):7}\t{elapsed:.4f}\t{i}")
 
-        if eqzero:
+        if eq_zero:
             egraph = snake_egg.EGraph()
             egraph.enable_explanations()
             egraph.add(frm)
@@ -130,6 +131,6 @@ def smoke_check_rules(raw_rules, iter_limit=10):
             explanation = egraph.explain_equiv(frm, 0)
             print(explanation)
 
-        eqzero_count += int(eqzero)
+        eq_zero_count += int(eq_zero)
 
-    print(f"EqZero {eqzero_count} of {len(raw_rules)} rules")
+    print(f"EqZero {eq_zero_count} of {len(raw_rules)} rules")
