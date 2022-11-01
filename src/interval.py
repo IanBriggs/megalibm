@@ -1,5 +1,6 @@
 
 
+import math
 import fpcore
 
 from utils.logging import Logger
@@ -55,6 +56,13 @@ class Interval():
             return self.sup
         assert False, "TODO: better interval indexing"
 
+    def width(self):
+        return self.sup - self.inf
+
+    def contains(self, point):
+        f_point = float(point)
+        return float(self.inf) <= f_point and f_point <= float(self.sup)
+
     def shift(self, k):
         diff = self.sup - self.inf
         shift_by = k*diff
@@ -69,10 +77,11 @@ class Interval():
 
         inf = self.inf
         lower = edge - self.inf
-        k = floor(lower/p)
+        k = math.floor(lower/p)
         sup = edge - k*p
         sup = min(sup, self.sup)
         assert (0.0 <= sup-inf and sup-inf <= p)
+        periods = list()
         if sup-inf != 0:
             periods.append(Interval(inf, sup))
 
