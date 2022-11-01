@@ -26,14 +26,10 @@ ITERS = [
 period, inflection = snake_egg.vars("period inflection")
 
 mirror = namedtuple("mirror", "inflection")
-negate = namedtuple("negate", "inflection")
 periodic = namedtuple("periodic", "period")
-exp_recons = namedtuple("exp_recons", "period")
 raw_template_rules = [
      ["capture-mirror",    thefunc(sub(inflection, "x")),      mirror(inflection)],
-     ["capture-negate",    neg(thefunc(sub(inflection, "x"))), negate(inflection)],
      ["capture-periodic",  thefunc(add(period, "x")),          periodic(period)],
-     ["capture-exp-recon", div(thefunc(add(period, "x")), 2),  exp_recons(period)],
 ]
 template_rules = list()
 for l in raw_template_rules:
@@ -41,15 +37,6 @@ for l in raw_template_rules:
     frm = l[1]
     to = l[2]
     template_rules.append(Rewrite(frm, to, name))
-
-raw_compound_template_rules = [
-]
-compound_template_rules = list()
-for l in raw_compound_template_rules:
-    name = l[0]
-    frm = l[1]
-    to = l[2]
-    compound_template_rules.append(Rewrite(frm, to, name))
 
 
 def generate_all_identities(func, max_iters):
@@ -123,7 +110,7 @@ def filter_dedup(exprs, max_iters, use_simple):
         egraph.add(expr)
 
     # Run with standard mathematical rules
-    egraph.run(snake_egg_rules.rules+template_rules+compound_template_rules,
+    egraph.run(snake_egg_rules.rules+template_rules,
                iter_limit=max_iters,
                time_limit=600,
                node_limit=100_000,
@@ -162,10 +149,10 @@ def filter_keep_thefunc_and_templates(exprs):
 
     new_exprs = list()
     for expr in exprs:
-        exstr = str(snake_egg_rules.egg_to_fpcore(expr))
-        if all(s not in exstr for s in {"thefunc", "mirror", "negate", "periodic", "exp_recons"}):
+        expr_str = str(snake_egg_rules.egg_to_fpcore(expr))
+        if all(s not in expr_str for s in {"thefunc", "mirror", "negate", "periodic", "exp_recons"}):
             logger.llog(
-                Logger.HIGH, "missing \"thefunc\" and templates: {}", exstr)
+                Logger.HIGH, "missing \"thefunc\" and templates: {}", expr_str)
             continue
         new_exprs.append(expr)
 
@@ -205,4 +192,4 @@ def extract_identities(func):
     logger.blog("After filtering",
                 "  " + "\n  ".join(lines))
 
-    return lines
+    return exprs
