@@ -68,7 +68,7 @@ class Periodic(types.Transform):
         add = lego_blocks.SimpleAdditive(numeric_types.fp64(),
                                          [in_name],
                                          [out_name, k],
-                                         self.in_node.domain.sup,
+                                         self.in_node.domain.inf,
                                          self.period)
 
         return [add] + so_far
