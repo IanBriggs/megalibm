@@ -32,7 +32,7 @@ class Result():
     default_config = {
         "prec": 128,
         "analysis_bound": 2**-20,
-        "minmize_target": "relative",
+        "minimize_target": "relative",
     }
 
     def __init__(self, func, domain, monomials, numeric_type,
@@ -48,7 +48,7 @@ class Result():
         self.returncode = None
 
         timer.start()
-        # Defauult query
+        # Default query
         self._generate_query()
         have_res = self._try_cache()
         if not have_res:
@@ -67,7 +67,7 @@ class Result():
 
         # Try slightly asymmetric
         if not have_res:
-            logger("Sollya call failed, retrying with symetric mirrored domain")
+            logger("Sollya call failed, retrying with symmetric mirrored domain")
             diff = domain.sup - domain.inf
             new_domain = Interval(domain.inf - diff,
                                   domain.sup + fpcore.ast.Number("0.00390625"))
@@ -144,10 +144,10 @@ class Result():
 
     def _run(self):
         query_name = "query.sollya"
-        with tempfile.TemporaryDirectory("w") as mydir:
+        with tempfile.TemporaryDirectory("w") as my_dir:
 
             # Write out the query
-            with open(path.join(mydir, query_name), "w") as f:
+            with open(path.join(my_dir, query_name), "w") as f:
                 f.write(self.query)
                 f.flush()
 
@@ -160,7 +160,7 @@ class Result():
             with subprocess.Popen(shlex.split(run_command),
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
-                                  cwd=mydir) as p:
+                                  cwd=my_dir) as p:
 
                 # Make sure that the run is complete and grab output
                 # todo: should there be a timeout?
@@ -181,10 +181,37 @@ class Result():
         self._replace_repeats_stderr(warning_0)
         warning_1 = "Warning: degenerated system in a non Haar context. The algorithm may be incorrect.\n"
         self._replace_repeats_stderr(warning_1)
+        warning_2_part_0 = "Warning: the evaluation of the given function"
+        warning_2_part_1 = "This (possibly maximum) point will be excluded from the infnorm result."
+        self._replace_starting_stderr(warning_2_part_0, warning_2_part_1)
+
+    def _replace_starting_stderr(self, start_1, start_2):
+        count_1 = self.stderr.count(start_1)
+        count_2 = self.stderr.count(start_2)
+        assert count_1 == count_2
+        if count_1 in {0, 1}:
+            return
+        new_error_lines = list()
+        seen_part_0 = False
+        seen_part_1 = False
+        for line in self.stderr.splitlines():
+            if line.startswith(start_1):
+                if not seen_part_0:
+                    new_error_lines.append(line)
+                    seen_part_0 = True
+                continue
+            if line.startswith(start_2):
+                if not seen_part_1:
+                    new_error_lines.append(line)
+                    new_error_lines.append(f"(repeated {count_1} times)\n")
+                    seen_part_1 = True
+                continue
+            new_error_lines.append(line)
+        self.stderr = "\n".join(new_error_lines)
 
     def _replace_repeats_stderr(self, warning):
         count = self.stderr.count(warning)
-        if count == 0:
+        if count in {0, 1}:
             return
         find = count * warning
         join = "" if warning.endswith("\n") else "\n"
@@ -198,30 +225,3 @@ class Result():
             if coef == "NaN":
                 raise json.JSONDecodeError("Sollya made NaN", "stdin", -1)
         self.coefficients = data["coefficients"]
-
-
-def main(argv):
-    logger.set_log_level(Logger.EXTRA)
-
-    dom = Domain(0, 1.5707963267948966)
-    dom.add_denormal(0, 2**-126)
-    dom.add_normal(2**-126, 1.5707963267948966)
-
-    res = SollyaResult("sin(x)", dom, [1, 3, 5, 7], FP64())
-
-    logger("Execution time: {}".format(timer.elapsed()))
-
-
-if __name__ == "__main__":
-    from domain import Domain
-    from numeric_types.fp64 import FP64
-
-    import sys
-
-    retcode = 0
-    try:
-        retcode = main(sys.argv)
-    except KeyboardInterrupt:
-        print("\nBye")
-
-    sys.exit(retcode)
