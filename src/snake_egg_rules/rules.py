@@ -10,7 +10,7 @@ x, y, z, a, b, c, d = vars("x y z a b c d")
 # We want only rules that are always true and safe.
 #
 # True rules are always equal.
-# For insance sqrt(x*x) -> x works when x >= 0, but is not equal when x < 0.
+# For instance sqrt(x*x) -> x works when x >= 0, but is not equal when x < 0.
 #
 # Safe rules mean that a valid domain on the left hand side is also valid on
 # the right hand side.
@@ -73,7 +73,7 @@ raw_rules = [
   ["distribute-lft1-in",    add(mul(b, a), a),          mul(add(b, 1), a)],
   ["distribute-rgt1-in",    add(a, mul(c, a)),          mul(add(c, 1), a)],
 
-  # Safe Distributiviity
+  # Safe Distributivity
   # distributivity-fp-safe (arithmetic simplify fp-safe)
   ["distribute-lft-neg-in",   neg(mul(a, b)),       mul(neg(a), b)],
   ["distribute-rgt-neg-in",   neg(mul(a, b)),       mul(a, neg(b))],
@@ -91,11 +91,11 @@ raw_rules = [
   # Difference of squares
   # difference-of-squares-canonicalize (polynomials simplify)
   ["swap-sqr",               mul(mul(a, b), mul(a, b)),  mul(mul(a, a), mul(b, b))],
-  ["unswap-sqr",             mul(mul(a, a), mul(b, b)),  mul(mul(a, b), mul(a, b))],
+  ["un-swap-sqr",            mul(mul(a, a), mul(b, b)),  mul(mul(a, b), mul(a, b))],
   ["difference-of-squares",  sub(mul(a, a), mul(b, b)),  mul(add(a, b), sub(a, b))],
   ["difference-of-sqr-1",    sub(mul(a, a), 1),          mul(add(a, 1), sub(a, 1))],
   ["difference-of-sqr--1",   add(mul(a, a), neg(1)),     mul(add(a, 1), sub(a, 1))],
-  #unknowen ["sqr-pow",      pow(a, b),                  mul(pow(a, div(b, 2)), pow(a, div(b, 2)))],  #pow #div ???
+  #unknown ["sqr-pow",      pow(a, b),                  mul(pow(a, div(b, 2)), pow(a, div(b, 2)))],  #pow #div ???
   ["pow-sqr",                mul(pow(a, b), pow(a, b)),  pow(a, mul(2, b))],
 
   # difference-of-squares-flip (polynomials)
@@ -381,7 +381,7 @@ raw_rules = [
   #unsafe ["tan-hang-p",  tan(div(add(a, b), 2)),                            div(add(sin(a), sin(b)), add(cos(a), cos(b)))],                 #div 2 != 0 -/-> cos(a)+cos(b) != 0
   #unsafe ["tan-hang-m",  tan(div(sub(a, b), 2)),                            div(sub(sin(a), sin(b)), add(cos(a), cos(b)))],                 #div 2 != 0 -/-> cos(a)+cos(b) != 0
 
-  # trig-expand-fp-safe (trignometry fp-safe)
+  # trig-expand-fp-safe (trigonometry fp-safe)
   ["sqr-sin-b",  mul(sin(x), sin(x)),  sub(1, mul(cos(x), cos(x)))],
   ["sqr-cos-b",  mul(cos(x), cos(x)),  sub(1, mul(sin(x), sin(x)))],
 
@@ -398,7 +398,7 @@ raw_rules = [
   #false ["asin-sin-s",  asin(sin(x)),  x],  #asin counterexample x=2, asin(sin(x))~=1.14
   #false ["acos-cos-s",  acos(cos(x)),  x],  #acos counterexample x=4, acos(c0s(x))~=2.28
 
-  # atrig-expand (trigonometry)
+  # a trig-expand (trigonometry)
   #unknown ["cos-asin",  cos(asin(x)),  sqrt(sub(1, mul(x, x)))],           #asin #sqrt ???
   #unknown ["tan-asin",  tan(asin(x)),  div(x, sqrt(sub(1, mul(x, x))))],   #asin #sqrt #div ???
   #unknown ["sin-acos",  sin(acos(x)),  sqrt(sub(1, mul(x, x)))],           #acos #sqrt ???
@@ -412,7 +412,7 @@ raw_rules = [
   ["atan-neg",           atan(neg(x)),  neg(atan(x))],
 
   # Hyperbolic trigonometric functions
-  # htrig-reduce (hyperbolic simplify)
+  # h trig-reduce (hyperbolic simplify)
   ["sinh-def",     sinh(x),                                            div(sub(exp(x), exp(neg(x))), 2)],                         #div () ---> 2 != 0
   ["cosh-def",     cosh(x),                                            div(add(exp(x), exp(neg(x))), 2)],                         #div () ---> 2 != 0
   ["tanh-def-a",   tanh(x),                                            div(sub(exp(x), exp(neg(x))), add(exp(x), exp(neg(x))))],  #div () ---> exp(x)+exp(-x) != 0
@@ -422,7 +422,7 @@ raw_rules = [
   ["sinh-+-cosh",  add(cosh(x), sinh(x)),                              exp(x)],
   ["sinh---cosh",  sub(cosh(x), sinh(x)),                              exp(neg(x))],
 
-  # htrig-expand (hyperbolic)
+  # h trig-expand (hyperbolic)
   ["sinh-undef",         sub(exp(x), exp(neg(x))),                                 mul(2, sinh(x))],
   ["cosh-undef",         add(exp(x), exp(neg(x))),                                 mul(2, cosh(x))],
   ["tanh-undef",         div(sub(exp(x), exp(neg(x))), add(exp(x), exp(neg(x)))),  tanh(x)],                                                        #div exp(x)+exp(-x) != 0 ---> ()
@@ -436,20 +436,20 @@ raw_rules = [
   #unsafe ["sinh-1/2",   sinh(div(x, 2)),                                          div(sinh(x), sqrt(mul(2, add(cosh(x), 1))))],                    #sqrt #div 2 != 0 -/->  2*(cosh(x)+1) >= 0 && sqrt(2*(cosh(x)+1)) != 0
   #unsafe ["tanh-sum",   tanh(add(x, y)),                                          div(add(tanh(x), tanh(y)), add(1, mul(tanh(x), tanh(y))))],      #div () -/-> 1+tanh(x)*tanh(y) != 0
   ["tanh-2",             tanh(mul(2, x)),                                          div(mul(2, tanh(x)), add(1, mul(tanh(x), tanh(x))))],            #div () ---> 1+tanh(x)*tanh(x) != 0
-  #unsafe ["tanh-1/2",   tanh(div(x, 2)),                                          div(sinh(x), add(cosh(x), 1))],                                  #div () -/-> cish(x)+1 != 0
+  #unsafe ["tanh-1/2",   tanh(div(x, 2)),                                          div(sinh(x), add(cosh(x), 1))],                                  #div () -/-> cosh(x)+1 != 0
   #unsafe ["tanh-1/2*",  tanh(div(x, 2)),                                          div(sub(cosh(x), 1), sinh(x))],                                  #div () -/-> sinh(x) != 0
   ["sum-sinh",           add(sinh(x), sinh(y)),                                    mul(2, mul(sinh(div(add(x, y), 2)), cosh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
   ["sum-cosh",           add(cosh(x), cosh(y)),                                    mul(2, mul(cosh(div(add(x, y), 2)), cosh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
   ["diff-sinh",          sub(sinh(x), sinh(y)),                                    mul(2, mul(cosh(div(add(x, y), 2)), sinh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
   ["diff-cosh",          sub(cosh(x), cosh(y)),                                    mul(2, mul(sinh(div(add(x, y), 2)), sinh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
 
-  # htrig-expand-fp-safe (hyperbolic fp-safe)
+  # h trig-expand-fp-safe (hyperbolic fp-safe)
   ["sinh-neg",  sinh(neg(x)),  neg(sinh(x))],
   ["sinh-0",    sinh(0),       0],
   ["cosh-neg",  cosh(neg(x)),  cosh(x)],
   ["cosh-0",    cosh(0),       1],
 
-  # ahtrig-expand (hyperbolic)
+  # ah trig-expand (hyperbolic)
   #unknown ["asinh-def",   asinh(x),                          log(add(x, sqrt(add(mul(x, x), 1))))],    #log #sqrt ???
   #unknown ["acosh-def",   acosh(x),                          log(add(x, sqrt(sub(mul(x, x), 1))))],    #acosh #log #sqrt ???
   #unknown ["atanh-def",   atanh(x),                          div(log(div(add(1, x), sub(1, x))), 2)],  #atanh #log #div ???
@@ -475,14 +475,14 @@ raw_rules = [
   #unknown ["hypot-1-def",  sqrt(add(1, mul(y, y))),          hypot(1, y)],  #hypot #sqrt ???
   #bad ["fma-def",          add(mul(x, y), z),                fma(x, y, z)],
   #bad ["fma-neg",          sub(mul(x, y), z),                fma(x, y, neg(z))],
-  #bad ["fma-udef",         fma(x, y, z),                     add(mul(x, y), z)],
+  #bad ["fma-undef",         fma(x, y, z),                     add(mul(x, y), z)],
 
   # special-numerical-expand (numerics)
-  #unknown ["expm1-udef",     expm1(x),     sub(exp(x), 1)],                   #expm1 ???
-  #unknown ["log1p-udef",     log1p(x),     log(add(1, x))],                   #log1p #log ???
+  #unknown ["expm1-undef",     expm1(x),     sub(exp(x), 1)],                   #expm1 ???
+  #unknown ["log1p-undef",     log1p(x),     log(add(1, x))],                   #log1p #log ???
   #unknown ["log1p-expm1-u",  x,            log1p(expm1(x))],                  #expm1 #log1p ???
   #unknown ["expm1-log1p-u",  x,            expm1(log1p(x))],                  #expm1 #log1p ???
-  #unknown ["hypot-udef",     hypot(x, y),  sqrt(add(mul(x, x), mul(y, y)))],  #hypot #sqrt ???
+  #unknown ["hypot-undef",     hypot(x, y),  sqrt(add(mul(x, x), mul(y, y)))],  #hypot #sqrt ???
 
   # numerics-papers (numerics)
   #              "Further Analysis of Kahan's Algorithm for
@@ -519,7 +519,7 @@ raw_rules = [
   # new rules
   ["add-double-neg",  a,            neg(neg(a))],
   ["rev-sin-+PI",     neg(sin(x)),  sin(add(x, CONST_PI()))],
-  ["revsin-+PI/2",    cos(x),       sin(add(x, div(CONST_PI(), 2)))],  #div () ---> 2 != 0
+  ["rev-sin-+PI/2",    cos(x),       sin(add(x, div(CONST_PI(), 2)))],  #div () ---> 2 != 0
 ]
 
 rules = list()

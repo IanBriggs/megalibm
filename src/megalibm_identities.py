@@ -163,7 +163,7 @@ def main(argv):
 
     args = parse_arguments(argv)
 
-    # Read all the files, each file may have mutiple functions
+    # Read all the files, each file may have multiple functions
     work_items = list()
     for fname in args.fnames:
         with open(fname, "r") as f:
@@ -203,7 +203,7 @@ def main(argv):
     tups.sort(key=lambda t: t[1], reverse=True)
     tups.sort(key=lambda t: t[0], reverse=True)
 
-    logger.blog(f"All identites",
+    logger.blog(f"All identities",
                 "Count\tExpr\n" + "\n".join(f"{c}\t{e}"
                                             for c, e in tups))
 

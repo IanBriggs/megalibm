@@ -92,6 +92,8 @@ def eval(self, assignment):
 
 @add_method(Variable)
 def eval(self, assignment):
+    if self.source not in assignment:
+        raise NameError("{} not in evaluation environment".format(self.source))
     return mpmath.mpf(assignment[self.source])
 
 

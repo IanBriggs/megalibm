@@ -46,8 +46,8 @@ class Timer():
         squares = [d**2 for d in diffs]
         sum_of_squares = sum(squares)
         mean_of_squares = sum_of_squares / len(squares)
-        sqroot = math.sqrt(mean_of_squares)
-        return sqroot
+        sq_root = math.sqrt(mean_of_squares)
+        return sq_root
 
     def minimum(self):
         assert (self._start is None)

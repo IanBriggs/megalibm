@@ -9,65 +9,52 @@ logger = Logger(color=Logger.green, level=Logger.LOW)
 
 def synthesize(target, fuel=10):
     transforms = [
-        lambdas.DoubleAngle,
-        lambdas.RepeatFlip,
-        lambdas.RepeatNegate,
-        lambdas.RepeatInf,
-        lambdas.FlipAboutZeroX,
-        lambdas.MirrorAboutZeroX,
-        lambdas.MakeTuple,
-        lambdas.First,
-        lambdas.Second,
-        # lambdas.PuntToLibm,
-        # lambdas.General,
+        lambdas.MirrorLeft,
+        lambdas.MirrorRight,
+        lambdas.MinimaxPolynomial,
         lambdas.Horner,
-        lambdas.EvenPolynomial,
-        lambdas.OddPolynomial,
+        lambdas.Periodic
     ]
 
-    # Setup the egg system
-    egraph = snake_egg.EGraph(snake_egg_rules.eval)
-    body = target.function.to_snake_egg(to_rule=False)
-    egraph.add(body)
-
-    # Run for a while
-    # TODO: How long? Which scheduler?
-    egraph.run(snake_egg_rules.rules,
-               iter_limit=10,
-               time_limit=600,
-               node_limit=100_000,
-               use_simple_scheduler=False)
-
-    # Each list item is a tuple of what lambda calls
+    # Each list item is a lambda expression with Hole elements
     completed = list()
-    old_partials = [(list(), lambdas.Hole(target))]
+    old_partials = [lambdas.Hole(target)]
     for i in range(fuel):
         new_partials = list()
-        for so_far, p in old_partials:
+        for partial in old_partials:
+            logger("Finishing partial impl: {}", partial)
+            holes = partial.find_lambdas(lambda l: type(l) == lambdas.Hole)
+
+            # The expression had no holes,
+            if len(holes) == 0:
+                completed.append(partial)
+                continue
+
+            # One hole
+            found_at_least_one = False
+            assert len(holes) == 1
+            hole = holes.pop()
+
+            # See if any lambdas can create this hole
             for t in transforms:
-                logger("trying: {}", t)
-                new_holes = t.generate_hole(p.out_type, egraph)
-                for n in new_holes:
-                    if type(n) == tuple:
-                        logger("found match, complete type")
-                        completed.append(so_far + [t, n])
-                        continue
-                    logger("found match, new hole: {}", n)
-                    new_so_far = so_far + [t]
-                    new_partials.append((new_so_far, n))
+                logger("  trying: {}", t.__name__)
+                hole_fillers = t.generate_hole(hole.out_type)
+                for hf in hole_fillers:
+                    found_at_least_one = True
+                    filled = partial.replace_lambda(hole, hf)
+                    logger("    filled: {}", filled)
+                    new_partials.append(filled)
+
+            # Complain
+            if not found_at_least_one:
+                logger.warning("Unable to fill hole!")
         old_partials = new_partials
-        logger(old_partials)
+
 
     my_lambdas = list()
     for c in completed:
-        logger("Start synth on: {}", c)
-        args = c[-1]
-        c.reverse()
-        passes = c[1:]
-        lam = passes[0](*args)
-        for t in passes[1:]:
-            lam = t(lam)
-        logger("Finished synth")
-        my_lambdas.append(lam)
+        logger("Type check on: {}", c)
+        c.type_check()
+        my_lambdas.append(c)
 
     return my_lambdas

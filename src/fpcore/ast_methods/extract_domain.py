@@ -29,7 +29,7 @@ class DomainError(Exception):
 
 def normalize_comparison(comp):
     """
-    Given an n-arry comparison return a list of comparisons which all use
+    Given an n-arity comparison return a list of comparisons which all use
     "<=" and only have two arguments
     """
 

@@ -101,9 +101,9 @@ def filter_keep_thefunc(exprs):
 
     new_exprs = list()
     for expr in exprs:
-        exstr = str(snake_egg_rules.egg_to_fpcore(expr))
-        if "thefunc" not in exstr:
-            logger.llog(Logger.HIGH, "missing \"thefunc\": {}", exstr)
+        expr_str = str(snake_egg_rules.egg_to_fpcore(expr))
+        if "thefunc" not in expr_str:
+            logger.llog(Logger.HIGH, "missing \"thefunc\": {}", expr_str)
             continue
         new_exprs.append(expr)
 
@@ -120,10 +120,10 @@ def filter_reject_thefunc_of_x(exprs):
 
     new_exprs = list()
     for expr in exprs:
-        exstr = str(snake_egg_rules.egg_to_fpcore(expr))
-        exstr.replace("(thefunc x)", "")
-        if "thefunc" not in exstr:
-            logger.llog(Logger.HIGH, "only has \"thefunc(x)\": {}", exstr)
+        expr_str = str(snake_egg_rules.egg_to_fpcore(expr))
+        expr_str.replace("(thefunc x)", "")
+        if "thefunc" not in expr_str:
+            logger.llog(Logger.HIGH, "only has \"thefunc(x)\": {}", expr_str)
             continue
         new_exprs.append(expr)
 
@@ -309,7 +309,7 @@ def dedup_generators(identities, iters):
     timer.start()
 
     query = [
-        "(define-fun btoi ((b Bool)) Int",
+        "(define-fun bool_to_int ((b Bool)) Int",
         "  (ite b 1 0))",
     ]
 
@@ -379,7 +379,7 @@ def dedup_generators(identities, iters):
     query.append("(declare-const cost Int)")
 
     line = "(assert (= cost (+ "
-    line += " ".join([f"(btoi core_I_{I})" for I in
+    line += " ".join([f"(bool_to_int core_I_{I})" for I in
                       range(len(identities))]) + ")))"
     query.append(line)
 

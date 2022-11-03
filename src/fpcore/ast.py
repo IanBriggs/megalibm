@@ -60,7 +60,7 @@ class Expr(ASTNode):
         if len(self.properties) == 0:
             return format_repr
         props = list_to_repr(self.properties)
-        prop_repr = ".add_properites([{}])".format(props)
+        prop_repr = ".add_properties([{}])".format(props)
         return format_repr + prop_repr
 
 
@@ -86,23 +86,23 @@ class Constant(Atom):
 class Variable(Atom):
     def __init__(self, source):
         super().__init__(source)
-        self.dimention = None
+        self.dimension = None
 
-    def set_dimention(self, *dimention):
-        self.dimention = dimention
+    def set_dimension(self, *dimension):
+        self.dimension = dimension
         return self
 
     def __str__(self):
-        if self.dimention is None:
+        if self.dimension is None:
             return super().__str__()
-        this_str = "({} {})".format(self.source, list_to_str(self.dimention))
+        this_str = "({} {})".format(self.source, list_to_str(self.dimension))
         return super(Expr).__str__().format(this_str)
 
     def __repr__(self):
-        if self.dimention is None:
+        if self.dimension is None:
             return super().__repr__()
-        dims = list_to_repr(self.dimention)
-        dims_repr = ".set_dimention({})".format(list_to_str(self.dimention))
+        dims = list_to_repr(self.dimension)
+        dims_repr = ".set_dimension({})".format(list_to_str(self.dimension))
         return super(Expr).__repr__().format(self.source) + dims_repr
 
 # +---------------------------------------------------------------------------+

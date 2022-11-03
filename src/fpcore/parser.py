@@ -53,7 +53,7 @@ class FPCoreParser(Parser):
     #     | <number>
     @_("variable",
        "number")
-    def dimention(self, p):
+    def dimension(self, p):
         return p[0]
 
     # argument :=
@@ -63,17 +63,17 @@ class FPCoreParser(Parser):
         return p[0]
 
     #     | ( <variable> <dimension>+ )
-    @_("LP variable dimention { dimention } RP")
+    @_("LP variable dimension { dimension } RP")
     def argument(self, p):
-        return p.variable.set_dimention((p.dimention0, *p.dimention1))
+        return p.variable.set_dimension((p.dimension0, *p.dimension1))
 
     #     | ( ! <property>* <variable> <dimension>* )
-    @_("LP BANG { property } variable { dimention } RP")
+    @_("LP BANG { property } variable { dimension } RP")
     def argument(self, p):
         if len(p.property) > 0:
             p.variable.add_properties(p.property)
-        if len(p.dimention) > 0:
-            p.variable.set_dimention(p.dimention)
+        if len(p.dimension) > 0:
+            p.variable.set_dimension(p.dimension)
         return p.variable
 
     # expr :=

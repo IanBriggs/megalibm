@@ -17,5 +17,5 @@ class Error():
     def add_relative_error(self, domain, value):
         self.errors["relative"][domain] = value
 
-    def add_absolute_error(self, domain):
+    def add_absolute_error(self, domain, value):
         self.errors["absolute"][domain] = value

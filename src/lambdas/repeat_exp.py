@@ -2,19 +2,12 @@
 
 import lego_blocks
 import numeric_types
-import fpcore
 import interval
 import lambdas
-import snake_egg_rules
 
 from interval import Interval
 from lambdas import types
 from utils import Logger
-
-# from wolframclient.evaluation import WolframLanguageSession
-# from wolframclient.language import wl, wlexpr
-
-from math import pi
 
 
 logger = Logger(level=Logger.HIGH)
@@ -56,9 +49,9 @@ class RepeatExp(types.Transform):
         out_name = self.gensym("out")
         in_red = so_far[0].out_names[0]
         ldexp = lego_blocks.Ldexp(numeric_types.fp64(),
-                                     [in_red, k],
-                                     [out_name])
-                                     
+                                  [in_red, k],
+                                  [out_name])
+
         return [add] + so_far + [ldexp]
 
     @classmethod

@@ -5,6 +5,12 @@ CFLAGS ?= -Wall -Wextra -Wconversion -O3 -mtune=native -fno-builtin -DNDEBUG
 CFLAGS += -Wno-unused-variable
 CFLAGS += -Iinclude
 
+ifeq (, $(shell which brew))
+else
+export C_INCLUDE_PATH := /opt/homebrew/include:${C_INCLUDE_PATH}
+export LIBRARY_PATH := /opt/homebrew/lib:${LIBRARY_PATH}
+endif
+
 GEN_DIRS = $(wildcard generated/*)
 BINS = $(foreach g,$(GEN_DIRS),${g}/main)
 INTER = $(foreach g,$(GEN_DIRS),${g}/funcs.o)
