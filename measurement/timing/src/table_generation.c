@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define MULT_ROUNDING_FACTOR 1e9
 
 static void
 fill_inputs(double low, double high, size_t samples, double *inputs)
@@ -37,7 +38,7 @@ static double time_function_using_inputs(unop_fp64 f, size_t samples, double *in
   }
   end = clock();
   cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-  avg_time_per_sample = (double) (cpu_time_used / (iters * samples));
+  avg_time_per_sample = (double) (cpu_time_used / (iters * samples) * MULT_ROUNDING_FACTOR);
   return avg_time_per_sample;
 }
 

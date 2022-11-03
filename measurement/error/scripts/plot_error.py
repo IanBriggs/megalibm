@@ -419,7 +419,7 @@ def make_main_webpage(benchmarks_data):
         ])
         for domain in data:
             lines.append(
-                "      <th align='right'>Domain </th><th align='left'>[{}, {}]</th>".format(domain[0], domain[1]))
+                "      <th style='padding-left: 10px;' align='right'>Domain </th><th></th><th align='left'>[{}, {}]</th>".format(domain[0], domain[1]))
 
         lines.extend([
             "    </tr>",
@@ -427,7 +427,7 @@ def make_main_webpage(benchmarks_data):
             "      <th></th>",
         ])
         for domain in data:
-            lines.append("      <th>abs</th><th>rel</th>")
+            lines.append("      <th>time</th><th>abs</th><th>rel</th>")
 
         lines.append("    </tr>")
 
@@ -442,18 +442,32 @@ def make_main_webpage(benchmarks_data):
                 "      <td>{}</td>".format(fname),
             ])
             for domain in data:
+                time_color, abs_color, rel_color = "black", "black", "black"
+
+                time_libm_metric = data[domain]["data"][libm_name]["time_metric"]
                 time_metric = data[domain]["data"][fname]["time_metric"]
+                if time_metric < time_libm_metric:
+                    time_color = "green"
+                elif time_metric > time_libm_metric:
+                    time_color = "red"
                 lines.append(
-                    "      <td style='color:green;'>{:0.4e}</td>".format(time_metric))
+                    "      <td style='color:{};padding-left: 15px;'>{:0.2f}</td>".format(time_color, time_metric))
+
                 abs_libm_metric = data[domain]["data"][libm_name]["abs_metric"]
                 abs_metric = data[domain]["data"][fname]["abs_metric"]
-                abs_color = "green" if abs_metric < abs_libm_metric else "red"
+                if abs_metric < abs_libm_metric:
+                    abs_color = "green"
+                elif abs_metric > abs_libm_metric:
+                    abs_color = "red"
                 lines.append(
                     "      <td style='color:{};'>{:0.4e}</td>".format(abs_color, abs_metric))
 
                 rel_libm_metric = data[domain]["data"][libm_name]["rel_metric"]
                 rel_metric = data[domain]["data"][fname]["rel_metric"]
-                rel_color = "green" if rel_metric < rel_libm_metric else "red"
+                if rel_metric < rel_libm_metric:
+                    rel_color = "green"
+                elif rel_metric > rel_libm_metric:
+                    rel_color = "red"         
                 lines.append(
                     "      <td style='color:{};'>{:0.4e}</td>".format(rel_color, rel_metric))
             lines.append("    </tr>")
