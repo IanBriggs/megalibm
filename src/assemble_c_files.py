@@ -66,3 +66,49 @@ def assemble_error_main(func_name, func_body, mpfr_func, other_funcs,
         "  return 0;",
         "}"])
     return lines
+
+def assemble_timing_main(func_name, func_body, other_funcs, header_fname, domains):
+    lines = ["#include \"table_generation.h\"",
+             "#include \"xmalloc.h\"",
+             "#include \"{}\"".format(header_fname),
+             "#include <math.h>",
+             "#include <stdlib.h>",
+             "#include <stdio.h>",
+             '#include <time.h>',
+             "",
+             "#define ENTRY_COUNT ({})".format(len(other_funcs)),
+             "entry ENTRIES[ENTRY_COUNT] = {"]
+    for func in other_funcs:
+        lines.append("  {{{}, \"{}\"}},".format(func, func))
+
+    lines.extend(["};",
+                  "",
+                  "int main(int argc, char** argv)",
+                  "{",
+                  "  long int choice = 0;",
+                  "  if (argc == 2) {",
+                  "    choice = strtol(argv[1], NULL, 10);",
+                  "  }",
+                  "  double low,high;",
+                  "  switch (choice) {"])
+    for i, (low, high) in enumerate(domains):
+        lines.extend(["  case {}:".format(i),
+                      "    low = {};".format(low),
+                      "    high = {};".format(high),
+                      "    break;"])
+    func_body = func_body.replace("\n", "\\\\n").replace('"', '\\\\\\"')
+    lines.extend([
+        "  default:",
+        "    printf(\"Option not available\\n\");"
+        "    exit(1);",
+        "  }",
+        "  size_t samples = ((size_t) 1) << 10;",
+        "  size_t iters = 10000;",
+        "  double* timings = time_functions(low, high, ENTRY_COUNT, ENTRIES, samples, iters);",
+        "  print_json(ENTRY_COUNT, ENTRIES, timings, \"{}\", \"{}\");".format(
+            func_name, func_body),
+        "  free_memory(timings);" ,
+        "  mpfr_free_cache();",
+        "  return 0;",
+        "}"])
+    return lines

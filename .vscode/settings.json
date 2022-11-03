@@ -59,6 +59,7 @@
         "unprod",
         "unsub",
         "warnonstderr",
-        "xmalloc"
+        "xmalloc",
+        "xrealloc"
     ]
 }

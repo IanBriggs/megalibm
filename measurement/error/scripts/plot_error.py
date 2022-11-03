@@ -39,10 +39,14 @@ def benchmark_to_webdata(dirname):
     name = None
     body = None
     benchmark_data = dict()
-    json_files = glob.glob("{}/*.json".format(dirname))
-    for file in sorted(json_files):
+    json_files = glob.glob("{}/data*.json".format(dirname))
+    timing_files = glob.glob("{}/timing*.json".format(dirname))
+    for file, timing_file in (zip(sorted(json_files), sorted(timing_files))):
         with open(file, "r") as f:
             json_data = json.load(f)
+
+        with open(timing_file, "r") as f:
+            timing_data = json.load(f)
 
         # check that names match
         if name is None:
@@ -79,6 +83,9 @@ def benchmark_to_webdata(dirname):
             func_data["abs_metric"] = abs_metric - 1.0
             func_data["rel_metric"] = rel_metric - 1.0
             funcs_data[func] = func_data
+
+        for func in timing_data["functions"]:
+            funcs_data[func]["time_metric"] = timing_data["functions"][func]["avg_time_per_sample"]
 
         # add this to the collection
         benchmark_data[(low, high)] = {
@@ -412,7 +419,7 @@ def make_main_webpage(benchmarks_data):
         ])
         for domain in data:
             lines.append(
-                "      <th align='right'>Domain </th><th align='left'>[{}, {}]</th>".format(domain[0], domain[1]))
+                "      <th style='padding-left: 10px;' align='right'>Domain </th><th></th><th align='left'>[{}, {}]</th>".format(domain[0], domain[1]))
 
         lines.extend([
             "    </tr>",
@@ -420,7 +427,7 @@ def make_main_webpage(benchmarks_data):
             "      <th></th>",
         ])
         for domain in data:
-            lines.append("      <th>abs</th><th>rel</th>")
+            lines.append("      <th>time</th><th>abs</th><th>rel</th>")
 
         lines.append("    </tr>")
 
@@ -435,15 +442,32 @@ def make_main_webpage(benchmarks_data):
                 "      <td>{}</td>".format(fname),
             ])
             for domain in data:
+                time_color, abs_color, rel_color = "black", "black", "black"
+
+                time_libm_metric = data[domain]["data"][libm_name]["time_metric"]
+                time_metric = data[domain]["data"][fname]["time_metric"]
+                if time_metric < time_libm_metric:
+                    time_color = "green"
+                elif time_metric > time_libm_metric:
+                    time_color = "red"
+                lines.append(
+                    "      <td style='color:{};padding-left: 15px;'>{:0.2f}</td>".format(time_color, time_metric))
+
                 abs_libm_metric = data[domain]["data"][libm_name]["abs_metric"]
                 abs_metric = data[domain]["data"][fname]["abs_metric"]
-                abs_color = "green" if abs_metric < abs_libm_metric else "red"
+                if abs_metric < abs_libm_metric:
+                    abs_color = "green"
+                elif abs_metric > abs_libm_metric:
+                    abs_color = "red"
                 lines.append(
                     "      <td style='color:{};'>{:0.4e}</td>".format(abs_color, abs_metric))
 
                 rel_libm_metric = data[domain]["data"][libm_name]["rel_metric"]
                 rel_metric = data[domain]["data"][fname]["rel_metric"]
-                rel_color = "green" if rel_metric < rel_libm_metric else "red"
+                if rel_metric < rel_libm_metric:
+                    rel_color = "green"
+                elif rel_metric > rel_libm_metric:
+                    rel_color = "red"         
                 lines.append(
                     "      <td style='color:{};'>{:0.4e}</td>".format(rel_color, rel_metric))
             lines.append("    </tr>")

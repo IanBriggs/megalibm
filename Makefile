@@ -28,6 +28,17 @@ nightly: bin/nightly.sh
 	make requirements
 	$<
 
+bin/mini_nightly.sh: build
+	$(RM) $@
+	cd bin && ln -s ../src/mini_nightly.sh mini_nightly.sh
+	chmod +x $@
+
+.PHONY: mini_nightly
+mini_nightly: bin/mini_nightly.sh
+	rm requirements/done requirements/snake_egg/done
+	make requirements
+	$<
+
 requirements/done: requirements/build.sh
 	$<
 

@@ -41,8 +41,16 @@ EOF
 # Run the generation nightly, this is more envolved
 time "${SCRIPT_LOCATION}"/megalibm_generate "${GIT_LOCATION}/benchmarks/"
 
+#Time functions
+rm -rf "${GIT_LOCATION}/measurement/timing/generated"
+mv "${THIS_NIGHTLY_LOCATION}/generated/" "${GIT_LOCATION}/measurement/timing/"
+cd "${GIT_LOCATION}/measurement/timing/"
+make -j6 build
+make -j1 run
+
+#Error measurement
 rm -rf "${GIT_LOCATION}/measurement/error/generated"
-mv "${THIS_NIGHTLY_LOCATION}/generated/" "${GIT_LOCATION}/measurement/error/"
+mv "${GIT_LOCATION}/measurement/timing/generated" "${GIT_LOCATION}/measurement/error/"
 cd "${GIT_LOCATION}/measurement/error/"
 make -j6 build
 make -j6 run
