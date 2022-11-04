@@ -292,7 +292,7 @@ def generate_all_code(function, domain):
 
     # Timing measurement
     main_lines = assemble_timing_main(name, func_body,
-                                     [libm_funcname] + gen_funcnames,
+                                     [libm_func_name] + gen_func_names,
                                      header_fname, domains)
     main_fname = "timing_main.c"
     with open(main_fname, "w") as f:
