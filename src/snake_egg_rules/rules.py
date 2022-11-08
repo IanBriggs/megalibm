@@ -124,13 +124,13 @@ raw_rules = [
   ["*-lft-identity",     mul(1, a),    a],
   ["*-rgt-identity",     mul(a, 1),    a],
   ["/-rgt-identity",     div(a, 1),    a],  #div 1 != 0 ---> ()
-  ["mul-1-neg",          mul(-1, a),   neg(a)],
+  ["mul-1-neg",          mul(neg(1), a),   neg(a)],
 
   # nan-transform-fp-safe (arithmetic simplify fp-safe)
   ["sub-neg",    sub(a, b),       add(a, neg(b))],
   ["unsub-neg",  add(a, neg(b)),  sub(a, b)],
   ["neg-sub0",   neg(b),          sub(0, b)],
-  ["neg-mul-1",  neg(a),          mul(-1, a)],
+  ["neg-mul-1",  neg(a),          mul(neg(1), a)],
 
   # id-transform (arithmetic)
   ["div-inv",            div(a, b),          mul(a, div(1, b))],  #div b != 0 ---> b != 0
@@ -331,7 +331,7 @@ raw_rules = [
   ["tan-PI/3",     tan(div(CONST_PI(), 3)),                        sqrt(3)],                 #sqrt #div 3 != 0 ---> 3 >= 0
   ["tan-PI",       tan(CONST_PI()),                                0],
   ["tan-+PI",      tan(add(x, CONST_PI())),                        tan(x)],
-  #["tan-+PI/2",   tan(add(x, div(CONST_PI(), 2))),                div(-1, tan(x))],         #div 2 != 0 -/-> tan(x) != 0
+  #["tan-+PI/2",   tan(add(x, div(CONST_PI(), 2))),                div(neg(1), tan(x))],         #div 2 != 0 -/-> tan(x) != 0
   ["hang-0p-tan",  div(sin(a), add(1, cos(a))),                    tan(div(a, 2))],          #div 1+cos(a) != 0 ---> 2 != 0
   ["hang-0m-tan",  div(neg(sin(a)), add(1, cos(a))),               tan(div(neg(a), 2))],     #div 1+cos(a) != 0 ---> 2 != 0
   ["hang-p0-tan",  div(sub(1, cos(a)), sin(a)),                    tan(div(a, 2))],          #div sin(a) != 0 ---> 2 != 0
@@ -368,7 +368,7 @@ raw_rules = [
   ["sqr-sin-a",           mul(sin(x), sin(x)),                               sub(div(1, 2), mul(div(1, 2), cos(mul(2, x))))],                #div () ---> 2 != 0
   ["sqr-cos-a",           mul(cos(x), cos(x)),                               add(div(1, 2), mul(div(1, 2), cos(mul(2, x))))],                #div () ---> 2 != 0
   ["diff-sin",            sub(sin(x), sin(y)),                               mul(2, mul(sin(div(sub(x, y), 2)), cos(div(add(x, y), 2))))],   #div () ---> 2 != 0
-  ["diff-cos",            sub(cos(x), cos(y)),                               mul(-2, mul(sin(div(sub(x, y), 2)), sin(div(add(x, y), 2))))],  #div () ---> 2 != 0
+  ["diff-cos",            sub(cos(x), cos(y)),                               mul(neg(2), mul(sin(div(sub(x, y), 2)), sin(div(add(x, y), 2))))],  #div () ---> 2 != 0
   ["sum-sin",             add(sin(x), sin(y)),                               mul(2, mul(sin(div(add(x, y), 2)), cos(div(sub(x, y), 2))))],   #div () ---> 2 != 0
   ["sum-cos",             add(cos(x), cos(y)),                               mul(2, mul(cos(div(add(x, y), 2)), cos(div(sub(x, y), 2))))],   #div () ---> 2 != 0
   ["cos-mult",            mul(cos(x), cos(y)),                               div(add(cos(add(x, y)), cos(sub(x, y))), 2)],                   #div () ---> 2 != 0
@@ -417,7 +417,7 @@ raw_rules = [
   ["cosh-def",     cosh(x),                                            div(add(exp(x), exp(neg(x))), 2)],                         #div () ---> 2 != 0
   ["tanh-def-a",   tanh(x),                                            div(sub(exp(x), exp(neg(x))), add(exp(x), exp(neg(x))))],  #div () ---> exp(x)+exp(-x) != 0
   ["tanh-def-b",   tanh(x),                                            div(sub(exp(mul(2, x)), 1), add(exp(mul(2, x)), 1))],      #div () ---> exp(2*x)+1 != 0
-  ["tanh-def-c",   tanh(x),                                            div(sub(1, exp(mul(-2, x))), add(1, exp(mul(-2, x))))],    #div () ---> 1+exp(-2*x) != 0
+  ["tanh-def-c",   tanh(x),                                            div(sub(1, exp(mul(neg(2), x))), add(1, exp(mul(neg(2), x))))],    #div () ---> 1+exp(-2*x) != 0
   ["sinh-cosh",    sub(mul(cosh(x), cosh(x)), mul(sinh(x), sinh(x))),  1],
   ["sinh-+-cosh",  add(cosh(x), sinh(x)),                              exp(x)],
   ["sinh---cosh",  sub(cosh(x), sinh(x)),                              exp(neg(x))],
@@ -517,9 +517,11 @@ raw_rules = [
   ["erfc-erf",  erf(x),       sub(1, erfc(x))],
 
   # new rules
-  ["add-double-neg",  a,            neg(neg(a))],
-  ["rev-sin-+PI",     neg(sin(x)),  sin(add(x, CONST_PI()))],
-  ["rev-sin-+PI/2",    cos(x),       sin(add(x, div(CONST_PI(), 2)))],  #div () ---> 2 != 0
+  ["add-double-neg",  a,                  neg(neg(a))],
+  ["rev-sin-+PI",     neg(sin(x)),        sin(add(x, CONST_PI()))],
+  ["rev-sin-+PI/2",   cos(x),             sin(add(x, div(CONST_PI(), 2)))],  #div () ---> 2 != 0
+  #["div-factor",      div(mul(a, b), a),  b],
+  #["neg-div-factor",  div(neg(mul(a, b)), a),  neg(b)],
 ]
 
 rules = list()

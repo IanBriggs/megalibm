@@ -7,19 +7,19 @@ logger = Logger(level=Logger.EXTRA)
 
 
 class NoPreError(Exception):
-    """FPCore doesn't have a ':pre' property"""
+    """ FPCore doesn't have a ':pre' property """
     pass
 
 
 class BadPreError(Exception):
-    """FPCore's ':pre' property is not useful for domain extraction"""
+    """ FPCore's ':pre' property is not useful for domain extraction """
 
     def __init__(self, pre):
         self.pre = pre
 
 
 class DomainError(Exception):
-    """FPCore's ':pre' property doesn't define an upper and lower bound"""
+    """ FPCore's ':pre' property doesn't define an upper and lower bound """
 
     def __init__(self, low, high, name):
         self.low = low
@@ -56,7 +56,7 @@ def normalize_comparison(comp):
 
 
 def get_domains(precondition_list, arguments):
-    """Search preconditions for variable domains"""
+    """ Search preconditions for variable domains """
 
     string_arguments = {a.source for a in arguments}
     lower_domains = {s: None for s in string_arguments}
@@ -126,6 +126,7 @@ def properties_to_argument_domains(arguments, properties):
     if pre.value.op == "and":
         property_list = list(pre.value.args)
     elif pre.value.op == "or":
+        # TODO: we only look an the first part of an or
         property_list = [pre.value.args[0]]
     else:
         property_list = [pre.value]

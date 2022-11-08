@@ -95,7 +95,6 @@ class MirrorRight(types.Transform):
         if type(out_type) != types.Impl:
             return list()
 
-
         # For each mirror point we check to see if our out domain contains it.
         # Then we create the required in domain.
         # This is then used to calculate the actual out domain that would be
@@ -137,9 +136,9 @@ class MirrorRight(types.Transform):
 
             # check for [-inf, inf]
             if (math.isinf(float(out_domain.inf))
-            and math.copysign(1.0, float(out_domain.inf)) == -1.0
-            and math.isinf(float(out_domain.sup))
-            and math.copysign(1.0, float(out_domain.sup)) == 1.0):
+                and math.copysign(1.0, float(out_domain.inf)) == -1.0
+                and math.isinf(float(out_domain.sup))
+                    and math.copysign(1.0, float(out_domain.sup)) == 1.0):
                 new_holes.append(MirrorRight(lambdas.Hole(in_type)))
                 continue
 
@@ -155,7 +154,6 @@ class MirrorRight(types.Transform):
             # too small
             if float(m) < float(out_domain.sup):
                 continue
-
 
             # needs narrowing
             new_holes.append(MirrorRight(lambdas.Hole(in_type), out_domain))

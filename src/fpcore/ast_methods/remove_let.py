@@ -5,7 +5,7 @@ from utils import add_method
 
 
 class FPCoreNameError(Exception):
-    """FPCore doesn't define a variable"""
+    """ variable is never defined in the FPCore """
 
     def __init__(self, name):
         self.name = name

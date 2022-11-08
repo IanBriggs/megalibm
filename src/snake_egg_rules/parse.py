@@ -1,11 +1,12 @@
-
-
-from operator import attrgetter
-from snake_egg_rules.operations import *
-import fpcore.ast as ast
-
 import fractions
 
+import fpcore.ast as ast
+
+from snake_egg_rules.operations import *
+from utils.logging import Logger
+
+
+logger = Logger()
 
 zero_arg = {
     CONST_PI: lambda: ast.Constant("PI"),
@@ -78,12 +79,15 @@ def egg_to_fpcore(expr):
         return ast.Variable(expr)
 
     if T == int:
+        assert expr >= 0
         return ast.Number(str(expr))
 
     if T == float:
+        assert expr >= 0
         return ast.Number(str(expr))
 
     if T == fractions.Fraction:
+        assert expr >= 0
         if expr.denominator == 1:
             return ast.Number(str(expr.numerator))
         return ast.Operation("/",
@@ -99,6 +103,7 @@ def egg_to_fpcore(expr):
         return zero_arg[expr]()
 
     if T not in one_arg and T not in two_arg and T not in three_arg:
+        logger.warning("Unknown type for egg '{}'", T)
         arg = egg_to_fpcore(expr[0])
         s = str(expr)
         op = s[:s.index("(")]

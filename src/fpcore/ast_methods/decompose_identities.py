@@ -1,9 +1,49 @@
-from fpcore.ast import ASTNode, Atom, FPCore, Operation, Variable
+import template_identities
+from fpcore.ast import ASTNode, FPCore, Operation, Variable
 from utils import Logger, add_method
 
-import template_identities
-
 logger = Logger()
+
+
+def split_s_and_t(iden):
+    """
+    Returns None if there is not exactly one template in the identity that has
+      a constant argument.
+    Otherwise returns a tuple with:
+      1. an expression for s (the reconstruction)
+      2. the name of the t template
+      3. the arg of the template
+    """
+    templates = set()
+    extract_templates(iden, templates)
+
+    # We only care if there is exactly one template
+    if len(templates) != 1:
+        return None
+    template = templates.pop()
+
+    # s is just the whole identity with the template replaced with x
+    s = iden.substitute(template, Variable("x"))
+    t_name = template.op
+    t_arg = template.args[0].simplify()
+
+    # We also only care when the template argument is constant
+    if not t_arg.is_constant():
+        return None
+
+    return s, t_name, t_arg
+
+
+def extract_templates(iden, templates: set):
+    """
+    Fill the templates sets with all sub expressions that start with a template
+    """
+    if type(iden) != Operation:
+        return
+    if iden.op in {"mirror", "periodic"}:
+        templates.add(iden)
+    for arg in iden.args:
+        extract_templates(arg, templates)
 
 
 @add_method(ASTNode)
@@ -18,7 +58,9 @@ def decompose_identities(self, *args, **kwargs):
 def decompose_identities(self):
     """
     Returns a dict that maps template names to a tuple of s expression and the
-      float argument to the template
+      constant argument to the template.
+    So if f(x) = s(f(t(x))) and we name t(x) as <template>(t_arg),
+      then we get a dict from <template> names to a set of (s, t_arg) tuples.
     """
     if not hasattr(self, "_decomposed_identities"):
         identities = template_identities.extract_identities(self)
@@ -34,35 +76,3 @@ def decompose_identities(self):
             s, t_name, t_arg = opt
             self._decomposed_identities[t_name].add((s, t_arg))
     return self._decomposed_identities
-
-
-def split_s_and_t(iden):
-    """
-    Returns None if there is not exactly one template in the identity that has
-      a constant argument.
-    Otherwise returns a tuple with:
-      1. an expression for s (the reconstruction)
-      2. the name of the t template
-      3. the arg of the template as a float
-    """
-    templates = set()
-    extract_templates(iden, templates)
-    if len(templates) != 1:
-        return None
-    temp = templates.pop()
-    s = iden.substitute(temp, Variable("x"))
-    t_name = temp.op
-    t_arg = temp.args[0]
-    if not t_arg.is_constant():
-        return None
-    return s, t_name, t_arg
-
-
-def extract_templates(iden, templates):
-    """ Return a list of all suppressions that start with a template """
-    if type(iden) != Operation:
-        return
-    if iden.op in {"mirror", "periodic"}:
-        templates.add(iden)
-    for arg in iden.args:
-        extract_templates(arg, templates)

@@ -1,4 +1,4 @@
-from fpcore.ast import ASTNode, Atom, FPCore, Number, Operation
+from fpcore.ast import ASTNode, Atom, FPCore, Operation
 from fpcore.ast_methods.truediv import typecase_and_divide
 from utils import add_method
 

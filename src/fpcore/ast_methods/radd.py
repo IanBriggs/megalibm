@@ -1,5 +1,5 @@
-from fpcore.ast import ASTNode, Atom, FPCore, Number, Operation
-from fpcore.ast_methods.add import typecase_and_add
+from fpcore.ast import ASTNode, Atom, FPCore, Operation
+from fpcore.ast_methods.add import typecast_and_add
 from utils import add_method
 
 
@@ -13,12 +13,12 @@ def __radd__(self, *args, **kwargs):
 
 @add_method(Atom)
 def __radd__(self, other):
-    return typecase_and_add(other, self)
+    return typecast_and_add(other, self)
 
 
 @add_method(Operation)
 def __radd__(self, other):
-    return typecase_and_add(other, self)
+    return typecast_and_add(other, self)
 
 
 @add_method(FPCore)
@@ -26,4 +26,4 @@ def __radd__(self, other):
     return FPCore(self.name,
                   self.arguments,
                   self.properties,
-                  typecase_and_add(other, self))
+                  typecast_and_add(other, self))

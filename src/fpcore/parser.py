@@ -135,7 +135,10 @@ class FPCoreParser(Parser):
     #     | {decnum}
     @_("DECNUM")
     def number(self, p):
-        return ast.Number(p[0])
+        source = p[0]
+        if source[0] == "-":
+            return ast.Operation("-", source[1:])
+        return ast.Number(source)
         # return ast.Decnum(p[0])
 
     #     | {hexnum}

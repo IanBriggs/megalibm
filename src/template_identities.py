@@ -25,8 +25,6 @@ ITERS = [
 
 period, inflection = snake_egg.vars("period inflection")
 
-mirror = namedtuple("mirror", "inflection")
-periodic = namedtuple("periodic", "period")
 raw_template_rules = [
      ["capture-mirror",    thefunc(sub(inflection, "x")),      mirror(inflection)],
      ["capture-periodic",  thefunc(add(period, "x")),          periodic(period)],

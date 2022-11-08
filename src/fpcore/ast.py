@@ -111,7 +111,9 @@ class Variable(Atom):
 
 
 class Number(Atom):
-    pass
+    def __init__(self, source):
+        assert source[0] != "-"
+        super().__init__(source)
 
 
 class Rational(Number):

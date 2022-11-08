@@ -1,8 +1,4 @@
-
-
-from cmath import isinf
 import math
-from fpcore.ast import FPCore
 import lego_blocks
 import numeric_types
 import lambdas

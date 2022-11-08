@@ -22,6 +22,7 @@ from .ast_methods import (
     rmul,
     rsub,
     rtruediv,
+    simplify,
     sub,
     substitute,
     to_html,

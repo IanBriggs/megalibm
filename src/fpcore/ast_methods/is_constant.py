@@ -1,4 +1,4 @@
-from fpcore.ast import ASTNode, Atom, Constant, FPCore, Number, Operation, Variable
+from fpcore.ast import ASTNode, Atom, FPCore, Operation, Variable
 from utils import add_method
 
 
