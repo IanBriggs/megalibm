@@ -125,7 +125,7 @@ def write_identity_webpage(filename, identities):
         "</tr>",
     ]
 
-    identities = [(expr, count) for expr, count in identities.items()]
+    identities = [(str(expr), count) for expr, count in identities.items()]
     identities.sort(key=lambda t: t[0])
     identities.sort(key=lambda t: -t[1])
 
@@ -199,7 +199,7 @@ def main(argv):
         for i in ids:
             counts[i] = counts.get(i, 0) + 1
 
-    tups = [(c, e) for e, c in counts.items()]
+    tups = [(c, str(e)) for e, c in counts.items()]
     tups.sort(key=lambda t: t[1], reverse=True)
     tups.sort(key=lambda t: t[0], reverse=True)
 

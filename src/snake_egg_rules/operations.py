@@ -6,8 +6,8 @@ from collections import namedtuple
 nt = namedtuple
 
 thefunc   = nt("thefunc",    "x")
-mirror    = nt("mirror",     "x")
-periodic  = nt("periodic",   "x")
+mirror    = nt("mirror",     "inflection")
+periodic  = nt("periodic",   "period")
 
 CONST_PI  = nt("CONST_PI",   "")
 CONST_E   = nt("CONST_E",    "")

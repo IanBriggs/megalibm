@@ -20,6 +20,8 @@ def mk_one(operation):
 
 one_arg = {
     thefunc: mk_one("thefunc"),
+    mirror: mk_one("mirror"),
+    periodic: mk_one("periodic"),
     acos: mk_one("acos"),
     acosh: mk_one("acosh"),
     asin: mk_one("asin"),
@@ -108,6 +110,12 @@ def egg_to_fpcore(expr):
         s = str(expr)
         op = s[:s.index("(")]
         return ast.Operation(op, arg)
+
+    if T == mirror:
+        return ast.Operation("mirror", egg_to_fpcore(expr.inflection))
+
+    if T == periodic:
+        return ast.Operation("periodic", egg_to_fpcore(expr.period))
 
     x = egg_to_fpcore(expr.x)
     if T in one_arg:
