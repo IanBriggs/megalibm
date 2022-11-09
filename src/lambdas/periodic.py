@@ -6,6 +6,8 @@ import numeric_types
 import interval
 import lambdas
 
+import snake_egg
+
 from interval import Interval
 from lambdas import types
 from utils import Logger
@@ -71,7 +73,9 @@ class Periodic(types.Transform):
                                          self.in_node.domain.inf,
                                          self.period)
 
-        return [add] + so_far
+        e0 = snake_egg.egraph()
+
+        return [add] + so_far + [recons]
 
     @classmethod
     def generate_hole(cls, out_type):

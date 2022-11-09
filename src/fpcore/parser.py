@@ -137,7 +137,7 @@ class FPCoreParser(Parser):
     def number(self, p):
         source = p[0]
         if source[0] == "-":
-            return ast.Operation("-", source[1:])
+            return ast.Operation("-", ast.Number(source[1:]))
         return ast.Number(source)
         # return ast.Decnum(p[0])
 

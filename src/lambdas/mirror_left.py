@@ -10,7 +10,7 @@ from utils import Logger
 
 from lambdas.lambda_utils import find_mirrors, has_mirror_at
 
-logger = Logger(level=Logger.HIGH)
+logger = Logger(level=Logger.HIGH, color=Logger.cyan)
 
 
 class MirrorLeft(types.Transform):
@@ -40,18 +40,19 @@ class MirrorLeft(types.Transform):
         assert type(our_in_type) == types.Impl
 
         func = our_in_type.function
-        float_sup = float(our_in_type.domain.inf)
+        float_inf = float(our_in_type.domain.inf)
 
         # Its an error if the identity is not present
-        if not has_mirror_at(func, float_sup):
+        if not has_mirror_at(func, float_inf):
             msg = "MirrorLeft requires that '{}' is mirrored about x={}"
-            raise TypeError(msg.format(self.function, float_sup))
+            raise TypeError(msg.format(self.function, float_inf))
 
         # Create out type
         width = our_in_type.domain.sup - our_in_type.domain.inf
-        next_domain = Interval(our_in_type.domain.inf,
-                               our_in_type.domain.sup + width)
+        next_domain = Interval(our_in_type.domain.inf - width,
+                               our_in_type.domain.sup)
         if self.narrow_to is not None:
+            logger.log("Narrowing from [{}, {}] to [{}, {}]", next_domain.inf, next_domain.sup, self.narrow_to.inf, self.narrow_to.sup)
             # TODO: assert to exception
             assert next_domain.contains(self.narrow_to.inf)
             assert next_domain.contains(self.narrow_to.sup)
@@ -140,7 +141,7 @@ class MirrorLeft(types.Transform):
                 continue
 
             # check for three cases
-            low = 2*m - out_domain.sup
+            low = 2*m - in_domain.sup
 
             # TODO: epsilon comparison
             # match

@@ -6,7 +6,7 @@ import fpcore
 from utils.logging import Logger
 
 
-logger = Logger()
+logger = Logger(level=Logger.MEDIUM)
 
 
 def parse_bound(string):
@@ -60,6 +60,7 @@ class Interval():
         return self.sup - self.inf
 
     def contains(self, point):
+        logger.log("Testing if {} is in [{}, {}]", point, self.inf, self.sup)
         f_point = float(point)
         return float(self.inf) <= f_point and f_point <= float(self.sup)
 
