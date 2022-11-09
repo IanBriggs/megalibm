@@ -522,6 +522,7 @@ raw_rules = [
   ["rev-sin-+PI/2",   cos(x),             sin(add(x, div(CONST_PI(), 2)))],  #div () ---> 2 != 0
   #["div-factor",      div(mul(a, b), a),  b],
   #["neg-div-factor",  div(neg(mul(a, b)), a),  neg(b)],
+  ["inject_2pi", x, sub(add(x, mul(2, CONST_PI())), mul(2, CONST_PI()))],
 ]
 
 rules = list()

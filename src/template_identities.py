@@ -173,9 +173,8 @@ def extract_identities(func):
     while len(exprs) < old_len:
         old_len = len(exprs)
         exprs = filter_dedup(
-            exprs, ITERS[1], True)
+            exprs, ITERS[1], False)
 
-    exprs = filter_dedup(exprs, ITERS[2], True)
     # exprs = filter_defs_sub(exprs, func, ITERS[3])
     # exprs = filter_defs_div(exprs, func, ITERS[4])
 
