@@ -73,8 +73,6 @@ class Periodic(types.Transform):
                                          self.in_node.domain.inf,
                                          self.period)
 
-        e0 = snake_egg.egraph()
-
         return [add] + so_far + [recons]
 
     @classmethod
