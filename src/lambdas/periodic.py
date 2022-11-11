@@ -73,7 +73,7 @@ class Periodic(types.Transform):
                                          self.in_node.domain.inf,
                                          self.period)
 
-        return [add] + so_far + [recons]
+        return [add] + so_far
 
     @classmethod
     def generate_hole(cls, out_type):
