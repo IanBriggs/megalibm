@@ -34,7 +34,7 @@ def parse_arguments(argv):
     parser = argparse.ArgumentParser(description='Default script description')
     parser.add_argument("-v", "--verbosity",
                         nargs="?",
-                        default="high",  # "low",
+                        default="medium",
                         const="medium",
                         choices=list(Logger.CONSTANT_DICT),
                         help="Set output verbosity")

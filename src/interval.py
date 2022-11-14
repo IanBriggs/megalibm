@@ -6,7 +6,7 @@ import fpcore
 from utils.logging import Logger
 
 
-logger = Logger(level=Logger.MEDIUM)
+logger = Logger(level=Logger.EXTRA)
 
 
 def parse_bound(string):

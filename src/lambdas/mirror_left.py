@@ -9,14 +9,14 @@ from interval import Interval
 from lambdas import types
 from utils import Logger
 
-from lambdas.lambda_utils import get_mirror_points, get_mirrors_at
+from lambdas.lambda_utils import get_mirrors, get_mirrors_at
 
 logger = Logger(level=Logger.HIGH, color=Logger.cyan)
 
 
 class MirrorLeft(types.Transform):
 
-    def __init__(self, in_node: types.Node):
+    def __init__(self, in_node: types.Node, s_expr=None):
         """
         Double the domain of a function implementation by mirroring on the
           left edge.
@@ -24,6 +24,7 @@ class MirrorLeft(types.Transform):
         in_node: An implementation valid on a domain that is symmetric on the
                  left edge of the domain.
         """
+        self.s_expr = s_expr
         super().__init__(in_node)
 
     def replace_lambda(self, search, replace):
@@ -36,6 +37,7 @@ class MirrorLeft(types.Transform):
         """ Check that (mirror domain.inf) is an identity """
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
+
         # TODO: Turn assert into exception
         assert type(our_in_type) == types.Impl
 
@@ -45,13 +47,13 @@ class MirrorLeft(types.Transform):
         # Its an error if the identity is not present
         s_exprs = get_mirrors_at(func, float_inf)
 
-        # TODO: Turn assert into exception
-        if len(s_exprs) not in {0, 1}:
-            for s_expr in s_exprs:
-                logger.error("{}", s_expr)
-            assert(False)
+        found_s = False
+        for s_expr in s_exprs:
+            if s_expr == self.s_expr:
+                found_s = True
+                break
 
-        if len(s_exprs) == 0:
+        if not found_s:
             msg = "MirrorLeft requires that '{}' is mirrored about x={}"
             raise TypeError(msg.format(self.function, float_inf))
 
@@ -62,7 +64,6 @@ class MirrorLeft(types.Transform):
 
         # Remember the mirror point
         self.mirror_point = our_in_type.domain.inf
-        self.s_expr = s_exprs.pop()
         self.domain = next_domain
         self.out_type = types.Impl(our_in_type.function, next_domain)
 
@@ -160,10 +161,10 @@ class MirrorLeft(types.Transform):
 
 
         out_domain = out_type.domain
-        points = get_mirror_points(out_type.function)
+        mirrors = get_mirrors(out_type.function)
         new_holes = list()
-        for point in points:
-            if not out_domain.contains(point):
+        for point, s_expr in mirrors:
+            if not point.is_constant() or not out_domain.contains(point):
                 continue
             in_domain = Interval(point, out_domain.sup)
             in_type = types.Impl(out_type.function, in_domain)
@@ -173,7 +174,7 @@ class MirrorLeft(types.Transform):
                 and math.copysign(1.0, float(out_domain.inf)) == -1.0
                 and math.isinf(float(out_domain.sup))
                     and math.copysign(1.0, float(out_domain.sup)) == 1.0):
-                new_holes.append(MirrorLeft(lambdas.Hole(in_type)))
+                new_holes.append(MirrorLeft(lambdas.Hole(in_type), s_expr))
                 continue
 
             # check for four cases
@@ -183,7 +184,7 @@ class MirrorLeft(types.Transform):
             # TODO: epsilon comparison
             # match
             if abs(float(real_out_domain.inf - out_domain.inf)) < 1e-16:
-                new_holes.append(MirrorLeft(lambdas.Hole(in_type)))
+                new_holes.append(MirrorLeft(lambdas.Hole(in_type), s_expr))
                 continue
 
             # too small
@@ -196,6 +197,6 @@ class MirrorLeft(types.Transform):
 
             # needs narrowing
             new_holes.append(
-                Narrow(MirrorLeft(lambdas.Hole(in_type)), out_domain))
+                Narrow(MirrorLeft(lambdas.Hole(in_type), s_expr), out_domain))
 
         return new_holes

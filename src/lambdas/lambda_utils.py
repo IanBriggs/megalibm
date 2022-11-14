@@ -34,12 +34,11 @@ def has_period(func: FPCore, period):
     return False
 
 
-def get_mirror_points(func: FPCore):
+def get_mirrors(func: FPCore):
     # Get all mirror identities
     decomposed_identities = func.decompose_identities()
     mirrors = decomposed_identities["mirror"]
-    points = {t_arg for s, t_arg in mirrors}
-    return points
+    return mirrors
 
 
 def find_periods(func: FPCore):
