@@ -1,6 +1,6 @@
 
 import numeric_types
-from fpcore.ast import FPCore, Variable
+from fpcore.ast import FPCore, Operation, Variable
 
 
 def has_mirror_at(func: FPCore, point):
@@ -10,14 +10,13 @@ def has_mirror_at(func: FPCore, point):
 
     # See if (mirror point) is present
     f_point = float(point)
+    s_exprs = list()
     for s, t_arg in mirrors:
         # TODO: epsilon cmp is not proper here
-        if s == Variable("x") and abs(float(t_arg) - f_point) < 1e-16:
-            return True
+        if abs(float(t_arg) - f_point) < 1e-16:
+            s_exprs.append(s)
 
-    # Didn't find it
-    return False
-
+    return s_exprs
 
 def has_period(func: FPCore, period):
     # Get all period identities
@@ -39,16 +38,14 @@ def find_mirrors(func: FPCore):
     # Get all mirror identities
     decomposed_identities = func.decompose_identities()
     mirrors = decomposed_identities["mirror"]
-    no_reconstruction = {t_arg for s, t_arg in mirrors if s == Variable("x")}
-    return no_reconstruction
+    return mirrors
 
 
 def find_periods(func: FPCore):
     # Get all period identities
     decomposed_identities = func.decompose_identities()
     periods = decomposed_identities["periodic"]
-    no_reconstruction = {t_arg for s, t_arg in periods if s == Variable("x")}
-    return no_reconstruction
+    return periods
 
 
 def generate_c_code(lam, name):

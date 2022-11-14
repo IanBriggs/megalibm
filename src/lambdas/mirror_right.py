@@ -1,5 +1,7 @@
 
 import math
+from fpcore.ast import Variable
+from lambdas.narrow import Narrow
 import lego_blocks
 import numeric_types
 import lambdas
@@ -17,7 +19,7 @@ logger = Logger(level=Logger.HIGH)
 
 class MirrorRight(types.Transform):
 
-    def __init__(self, in_node: types.Node, narrow_to=None):
+    def __init__(self, in_node: types.Node):
         """
         Double the domain of a function implementation by mirroring on the
           right edge.
@@ -25,14 +27,13 @@ class MirrorRight(types.Transform):
         in_node: An implementation valid on a domain that is symmetric on the
                  right edge of the domain.
         """
-        self.narrow_to = narrow_to
         super().__init__(in_node)
 
     def replace_lambda(self, search, replace):
         if self == search:
             return replace
         new_in_node = self.in_node.replace_lambda(search, replace)
-        return MirrorRight(new_in_node, narrow_to=self.narrow_to)
+        return MirrorRight(new_in_node)
 
     def type_check(self):
         """ Check that (mirror domain.sup) is an identity """
@@ -45,7 +46,8 @@ class MirrorRight(types.Transform):
         float_sup = float(our_in_type.domain.sup)
 
         # Its an error if the identity is not present
-        if not has_mirror_at(func, float_sup):
+        s_exprs = has_mirror_at(func, float_sup)
+        if Variable("x") not in s_exprs:
             msg = "MirrorRight requires that '{}' is mirrored about x={}"
             raise TypeError(msg.format(self.function, float_sup))
 
@@ -53,11 +55,6 @@ class MirrorRight(types.Transform):
         width = our_in_type.domain.sup - our_in_type.domain.inf
         next_domain = Interval(our_in_type.domain.inf,
                                our_in_type.domain.sup + width)
-        if self.narrow_to is not None:
-            # TODO: assert to exception
-            assert next_domain.contains(self.narrow_to.inf)
-            assert next_domain.contains(self.narrow_to.sup)
-            next_domain = self.narrow_to
 
         # Remember the mirror point
         self.mirror_point = our_in_type.domain.sup
@@ -127,6 +124,7 @@ class MirrorRight(types.Transform):
         # real out domain: <-----[################|################]->
         out_domain = out_type.domain
         mirrors = find_mirrors(out_type.function)
+        mirrors = {t_arg for s, t_arg in mirrors if s == Variable("x")}
         new_holes = list()
         for m in mirrors:
             if not out_domain.contains(m):
@@ -156,6 +154,7 @@ class MirrorRight(types.Transform):
                 continue
 
             # needs narrowing
-            new_holes.append(MirrorRight(lambdas.Hole(in_type), out_domain))
+            new_holes.append(
+                Narrow(MirrorRight(lambdas.Hole(in_type)), out_domain))
 
         return new_holes

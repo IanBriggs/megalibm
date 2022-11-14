@@ -56,7 +56,7 @@ def generate_all_identities(func, max_iters):
     egraph.run(snake_egg_rules.rules,
                iter_limit=max_iters,
                time_limit=600,
-               node_limit=100_000,
+               node_limit=10_000,
                use_simple_scheduler=False)
 
     # Run with undef rule
@@ -160,6 +160,102 @@ def filter_keep_thefunc_and_templates(exprs):
 
     return new_exprs
 
+def filter_defs_sub(exprs, func, max_iters):
+    timer = Timer()
+    timer.start()
+
+    # We can have exprs for the form
+    #  I(x) = 2*<body> - f(x)
+    # where <body> is the body of f(x).
+    # So if we:
+    #  1. Add I(x)-f(x) and 0 to a new egraph
+    #  2. Union the two
+    #  3. Run with rules that do not define f(x)
+    #  4. Check if <body> - f(x) is in the egraph and it equals 0
+    # Then we know that I(x) doe not give us new information
+    var = func.arguments[0].source
+    fx = snake_egg_rules.thefunc(var)
+    sub = snake_egg_rules.sub
+    body_sub_fx = sub(func.to_snake_egg(to_rule=False), fx)
+
+    new_exprs = list()
+    for Ix in exprs:
+        egraph = snake_egg.EGraph(snake_egg_rules.eval)
+        Ix_sub_fx = sub(Ix, fx)
+        egraph.add(Ix_sub_fx)
+        egraph.add(0)
+        egraph.union(Ix_sub_fx, 0)
+        egraph.rebuild()
+        egraph.run(snake_egg_rules.rules,
+                   iter_limit=max_iters,
+                   time_limit=600,
+                   node_limit=100_000,
+                   use_simple_scheduler=True)
+        if egraph.equiv(0, body_sub_fx):
+            logger.llog(Logger.HIGH, "definition identity sub: {}", Ix)
+            continue
+        new_exprs.append(Ix)
+
+    elapsed = timer.stop()
+    logger.dlog("{} to {} identities in {:4f} seconds",
+                len(exprs), len(new_exprs), elapsed)
+
+    return new_exprs
+
+
+def filter_defs_div(exprs, func, max_iters):
+    timer = Timer()
+    timer.start()
+
+    # We can have exprs for the form
+    #  I(x) = 2*<body> - f(x)
+    # where <body> is the body of f(x).
+    # So if we:
+    #  1. Add I(x)/f(x) and 1 to a new egraph
+    #  2. Union the two
+    #  3. Run with rules that do not define f(x)
+    #  4. Check if <body> / f(x) is in the egraph and it equals 1
+    # Then we know that I(x) doe not give us new information
+    var = func.arguments[0].source
+    fx = snake_egg_rules.thefunc(var)
+    div = snake_egg_rules.div
+    body_div_fx = div(func.to_snake_egg(to_rule=False), fx)
+
+    new_exprs = list()
+    for Ix in exprs:
+        egraph = snake_egg.EGraph(snake_egg_rules.eval)
+        Ix_div_fx = div(Ix, fx)
+        egraph.add(Ix_div_fx)
+        egraph.add(1)
+        egraph.union(Ix_div_fx, 1)
+        egraph.rebuild()
+        egraph.run(snake_egg_rules.rules,
+                   iter_limit=max_iters,
+                   time_limit=600,
+                   node_limit=100_000,
+                   use_simple_scheduler=True)
+        if egraph.equiv(1, body_div_fx):
+            logger.llog(Logger.HIGH, "definition identity div: {}", Ix)
+            continue
+        new_exprs.append(Ix)
+
+    elapsed = timer.stop()
+    logger.dlog("{} to {} identities in {:4f} seconds",
+                len(exprs), len(new_exprs), elapsed)
+
+    return new_exprs
+
+
+def expr_size(expr, _cache=dict()):
+    if expr in _cache:
+        return _cache[expr]
+
+    size = 1
+    if isinstance(expr, tuple):
+        size += sum(expr_size(arg) for arg in expr)
+
+    _cache[expr] = size
+    return size
 
 def extract_identities(func):
     logger.dlog("Name: {}", func.get_any_name())
@@ -175,8 +271,8 @@ def extract_identities(func):
         exprs = filter_dedup(
             exprs, ITERS[1], False)
 
-    # exprs = filter_defs_sub(exprs, func, ITERS[3])
-    # exprs = filter_defs_div(exprs, func, ITERS[4])
+    exprs = filter_defs_sub(exprs, func, ITERS[3])
+    exprs = filter_defs_div(exprs, func, ITERS[4])
 
     exprs = [snake_egg_rules.egg_to_fpcore(expr) for expr in exprs]
     exprs = [expr.substitute(periodic(Number("0")), thefunc(Variable("x"))) for expr in exprs]

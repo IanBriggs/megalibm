@@ -91,6 +91,7 @@ class Periodic(types.Transform):
 
         # Get periods and try both [0, period] and [-period/2, period/2]
         periods = find_periods(out_type.function)
+        periods = {t_arg for s, t_arg in periods if s == Variable("x")}
         new_holes = list()
         for p in periods:
             if float(p) == 0.0:

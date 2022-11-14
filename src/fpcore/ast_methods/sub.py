@@ -2,15 +2,6 @@ from fpcore.ast import ASTNode, Atom, FPCore, Number, Operation
 from utils import add_method
 
 
-@add_method(ASTNode)
-def __sub__(self, *args, **kwargs):
-    # Make sure calling __sub__ leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"__sub__ not implemented for class '{class_name}'".format(
-        class_name)
-    raise NotImplementedError(msg)
-
-
 def typecase_and_sub(a, b):
     # Extract body expressions of FPCores
     if type(a) == FPCore:
@@ -26,14 +17,23 @@ def typecase_and_sub(a, b):
 
     # Error if no AST Nodes
     if not issubclass(type(a), ASTNode):
-        msg = "FPCore does not support subtraction by '{}'"
-        raise TypeError(msg.format(type(a)))
+        msg = "FPCore does not support addition by type '{}' (value = {})"
+        raise TypeError(msg.format(type(a), a))
     if not issubclass(type(b), ASTNode):
-        msg = "FPCore does not support subtraction by '{}'"
-        raise TypeError(msg.format(type(b)))
+        msg = "FPCore does not support addition by type '{}' (value = {})"
+        raise TypeError(msg.format(type(b), a))
 
     # Make the new node
     return Operation("-", a, b)
+
+
+@add_method(ASTNode)
+def __sub__(self, *args, **kwargs):
+    # Make sure calling __sub__ leads to an error if not overridden
+    class_name = type(self).__name__
+    msg = f"__sub__ not implemented for class '{class_name}'".format(
+        class_name)
+    raise NotImplementedError(msg)
 
 
 @add_method(Atom)
