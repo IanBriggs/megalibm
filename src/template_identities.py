@@ -56,21 +56,21 @@ def generate_all_identities(func, max_iters):
     egraph.run(snake_egg_rules.rules,
                iter_limit=max_iters,
                time_limit=600,
-               node_limit=100_000,
+               node_limit=10_000,
                use_simple_scheduler=False)
 
     # Run with undef rule
     egraph.run([rewrite_body_to_func],
                iter_limit=max_iters,
                time_limit=600,
-               node_limit=100_000 + 10_000,
+               node_limit=10_000 + 10_000,
                use_simple_scheduler=True)
 
     # Run with template rules
     egraph.run(template_rules,
                iter_limit=max_iters,
                time_limit=600,
-               node_limit=100_000 + 10_000 + 10_000,
+               node_limit=10_000 + 10_000 + 10_000,
                use_simple_scheduler=True)
 
     # Extract and sort the identities
