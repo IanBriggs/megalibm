@@ -9,6 +9,7 @@ _CONST_MAPPING = {
     "E": operations.CONST_E,
     "INFINITY": operations.CONST_INFINITY,
     "PI": operations.CONST_PI,
+    "PI_2": (operations.add, operations.CONST_PI, operations.CONST_PI),
 }
 
 _UNOP_MAPPING = {
