@@ -38,18 +38,27 @@ def synthesize(target, fuel=10):
 
             # See if any lambdas can create this hole
             for t in transforms:
-                logger("  trying: {}", t.__name__)
+                #logger("  trying: {}", t.__name__)
                 hole_fillers = t.generate_hole(hole.out_type)
                 for hf in hole_fillers:
                     found_at_least_one = True
                     filled = partial.replace_lambda(hole, hf)
-                    logger("    filled: {}", filled)
+                    logger("    filled: {}", str(filled))
                     new_partials.append(filled)
 
             # Complain
             if not found_at_least_one:
                 logger.warning("Unable to fill hole!")
+
+        # Update list
         old_partials = new_partials
+
+        # Early out
+        if len(old_partials) == 0:
+            break
+
+        if i == fuel-1:
+            logger.warning("Ran out of fuel!")
 
 
     my_lambdas = list()

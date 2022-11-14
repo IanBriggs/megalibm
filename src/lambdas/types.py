@@ -13,7 +13,7 @@ class Poly():
         self.domain = domain
 
     def __str__(self):
-        return "Poly<{},[{},{}]>".format(self.function,
+        return "(Poly {} [{} {}])".format(str(self.function),
                                          self.domain.inf,
                                          self.domain.sup)
 
@@ -29,7 +29,7 @@ class Impl():
         self.domain = domain
 
     def __str__(self):
-        return "Impl<{},[{},{}]>".format(self.function,
+        return "(Impl {} [{}, {}])".format(str(self.function),
                                          self.domain.inf,
                                          self.domain.sup)
 
@@ -37,18 +37,6 @@ class Impl():
         return "Impl({}, {})".format(repr(self.function),
                                      repr(self.domain))
 
-
-class Tuple():
-
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
-
-    def __str__(self):
-        return "Tuple({},{})".format(self.a, self.b)
-
-    def __repr__(self):
-        return str(self)
 
 
 # lambda object types
@@ -121,6 +109,12 @@ class Source(Node):
             return replace
         return self.copy()
 
+    def __str__(self):
+        class_name = type(self).__name__
+        return "({} {} {})".format(class_name,
+                                   str(self.function),
+                                   str(self.domain))
+
     def __repr__(self):
         class_name = type(self).__name__
         return "{}({}, {})".format(class_name,
@@ -163,6 +157,10 @@ class Transform(Node):
         # Given an out_type, return possible in types that this Transform
         # could use to reach that out_type
         raise NotImplementedError()
+
+    def __str__(self):
+        class_name = type(self).__name__
+        return "({} {})".format(class_name, str(self.in_node))
 
     def __repr__(self):
         class_name = type(self).__name__

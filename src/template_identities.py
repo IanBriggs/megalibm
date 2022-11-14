@@ -63,14 +63,14 @@ def generate_all_identities(func, max_iters):
     egraph.run([rewrite_body_to_func],
                iter_limit=max_iters,
                time_limit=600,
-               node_limit=100_000 + 10_000,
+               node_limit=10_000 + 10_000,
                use_simple_scheduler=True)
 
     # Run with template rules
     egraph.run(template_rules,
                iter_limit=max_iters,
                time_limit=600,
-               node_limit=100_000 + 10_000 + 10_000,
+               node_limit=10_000 + 10_000 + 10_000,
                use_simple_scheduler=True)
 
     # Extract and sort the identities
@@ -111,7 +111,7 @@ def filter_dedup(exprs, max_iters, use_simple):
     egraph.run(snake_egg_rules.rules+template_rules,
                iter_limit=max_iters,
                time_limit=600,
-               node_limit=100_000,
+               node_limit=10_000,
                use_simple_scheduler=use_simple)
     expr_ids = {expr: str(egraph.add(expr)) for expr in exprs}
 

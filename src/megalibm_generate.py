@@ -194,7 +194,7 @@ def generate_all_code(function, domain):
             gen_srcs.append(src)
             gen_func_names.append(func_name)
         except cmd_sollya.FailedGenError:
-            logger("Unable to generate polynomial, skipping")
+            logger.warning("Unable to generate polynomial, skipping")
 
     if len(gen_func_names) == 0:
         return False

@@ -25,6 +25,12 @@ class MinimaxPolynomial(types.Source):
         self.terms = terms
         super().__init__(function, domain)
 
+    def __str__(self):
+        body = self.function.body
+        inf = self.domain.inf
+        sup = self.domain.sup
+        return f"(MinimaxPolynomial {body} [{inf} {sup}])"
+
     def __repr__(self):
         return "MinimaxPolynomial({}, {}, {})".format(repr(self.function),
                                                       repr(self.domain),
