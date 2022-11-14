@@ -3,7 +3,7 @@ import numeric_types
 from fpcore.ast import FPCore, Operation, Variable
 
 
-def has_mirror_at(func: FPCore, point):
+def get_mirrors_at(func: FPCore, point):
     # Get all mirror identities
     decomposed_identities = func.decompose_identities()
     mirrors = decomposed_identities["mirror"]
@@ -34,11 +34,12 @@ def has_period(func: FPCore, period):
     return False
 
 
-def find_mirrors(func: FPCore):
+def get_mirror_points(func: FPCore):
     # Get all mirror identities
     decomposed_identities = func.decompose_identities()
     mirrors = decomposed_identities["mirror"]
-    return mirrors
+    points = {t_arg for s, t_arg in mirrors}
+    return points
 
 
 def find_periods(func: FPCore):

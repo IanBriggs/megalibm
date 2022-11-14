@@ -9,7 +9,7 @@ from interval import Interval
 from lambdas import types
 from utils import Logger
 
-from lambdas.lambda_utils import find_mirrors, has_mirror_at
+from lambdas.lambda_utils import get_mirror_points, get_mirrors_at
 
 logger = Logger(level=Logger.HIGH, color=Logger.cyan)
 
@@ -43,7 +43,15 @@ class MirrorLeft(types.Transform):
         float_inf = float(our_in_type.domain.inf)
 
         # Its an error if the identity is not present
-        if not has_mirror_at(func, float_inf):
+        s_exprs = get_mirrors_at(func, float_inf)
+
+        # TODO: Turn assert into exception
+        if len(s_exprs) not in {0, 1}:
+            for s_expr in s_exprs:
+                logger.error("{}", s_expr)
+            assert(False)
+
+        if len(s_exprs) == 0:
             msg = "MirrorLeft requires that '{}' is mirrored about x={}"
             raise TypeError(msg.format(self.function, float_inf))
 
@@ -54,30 +62,54 @@ class MirrorLeft(types.Transform):
 
         # Remember the mirror point
         self.mirror_point = our_in_type.domain.inf
+        self.s_expr = s_exprs.pop()
         self.domain = next_domain
         self.out_type = types.Impl(our_in_type.function, next_domain)
 
     def generate(self):
         # in = ...
         # if in < mirror_point:
-        #   out = mirror_point - in
-        # else:
         #   out = in
+        # else:
+        #   out = mirror_point - in
         # ...
+                # inner = ...
+        # if in < mirror_point:
+        #   recons = s(inner)
+        # else:
+        #   recons = inner
+
+        # Generate the inner code first
         so_far = super().generate()
+
+        # Reduction
         in_name = self.gensym("in")
-        out_name = so_far[0].in_names[0]
+        reduced_name = so_far[0].in_names[0]
 
-        float_bound = float(self.mirror_point)
+        bound = self.mirror_point
 
-        il = lego_blocks.IfLess(numeric_types.fp64(),
+        il_reduce = lego_blocks.IfLess(numeric_types.fp64(),
                                 [in_name],
-                                [out_name],
-                                float(float_bound),
-                                "({} - {})".format(float_bound, in_name),
-                                in_name)
+                                [reduced_name],
+                                float(bound),
+                                in_name,
+                                "({} - {})".format(bound, in_name))
 
-        return [il] + so_far
+        # Reconstruction
+        inner_name = so_far[-1].out_names[0]
+        recons_name = self.gensym("recons")
+        s_expr = self.s_expr.copy()
+        s_expr.substitute(Variable("x"), Variable(inner_name))
+        s_str = s_expr.to_libm_c()
+
+        il_recons = lego_blocks.IfLess(numeric_types.fp64(),
+                                       [inner_name],
+                                       [recons_name],
+                                       float(bound),
+                                       inner_name,
+                                       s_str)
+
+        return [il_reduce] + so_far + [il_recons]
 
     @classmethod
     def generate_hole(cls, out_type):
@@ -98,6 +130,12 @@ class MirrorLeft(types.Transform):
         # There is a special case for infinite domains since all mirror points
         #   are valid, and infinities can screw up calculations.
         #
+        # Eg in this case the mirror point is exactly where it needs to be
+        # out domain:      <-----[#############################]----->
+        # mirror point:                         |
+        # in domain:       <--------------------[##############]----->
+        # real out domain: <-----[##############|##############]----->
+        #
         # Eg in this case the mirror point is too far to the right to achieve
         #   the full output by mirror
         # out domain:      <-----[#############################]----->
@@ -105,11 +143,12 @@ class MirrorLeft(types.Transform):
         # in domain:       <-------------------------[#########]----->
         # real out domain: <---------------[#########|#########]----->
         #
-        # Eg in this case the mirror point is exactly where it needs to be
+        # Eg in this case the mirror point means we don't gain anything from
+        #   this transformation, so don't generate it
         # out domain:      <-----[#############################]----->
-        # mirror point:                         |
-        # in domain:       <--------------------[##############]----->
-        # real out domain: <-----[##############|##############]----->
+        # mirror point:          |
+        # in domain:       <-----[#############################]----->
+        # real out domain: <#####|#############################]----->
         #
         # Eg in this case the mirror point pushes the out to be too wide and
         #   require narrowing
@@ -117,14 +156,16 @@ class MirrorLeft(types.Transform):
         # mirror point:                       |
         # in domain:       <------------------[################]----->
         # real out domain: <-[################|################]----->
+        #
+
+
         out_domain = out_type.domain
-        mirrors = find_mirrors(out_type.function)
-        mirrors = {t_arg for s, t_arg in mirrors if s == Variable("x")}
+        points = get_mirror_points(out_type.function)
         new_holes = list()
-        for m in mirrors:
-            if not out_domain.contains(m):
+        for point in points:
+            if not out_domain.contains(point):
                 continue
-            in_domain = Interval(m, out_domain.sup)
+            in_domain = Interval(point, out_domain.sup)
             in_type = types.Impl(out_type.function, in_domain)
 
             # check for [-inf, inf]
@@ -135,17 +176,22 @@ class MirrorLeft(types.Transform):
                 new_holes.append(MirrorLeft(lambdas.Hole(in_type)))
                 continue
 
-            # check for three cases
-            low = 2*m - in_domain.sup
+            # check for four cases
+            real_out_domain = Interval(in_domain.inf - in_domain.width(),
+                                       in_domain.sup)
 
             # TODO: epsilon comparison
             # match
-            if abs(float(low - out_domain.inf)) < 1e-16:
+            if abs(float(real_out_domain.inf - out_domain.inf)) < 1e-16:
                 new_holes.append(MirrorLeft(lambdas.Hole(in_type)))
                 continue
 
             # too small
-            if float(out_domain.inf) < float(low):
+            if float(out_domain.inf) < float(real_out_domain.inf):
+                continue
+
+            # won't gain anything
+            if abs(float(in_domain.inf - out_domain.inf)) < 1e-16:
                 continue
 
             # needs narrowing

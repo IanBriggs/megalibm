@@ -523,6 +523,7 @@ raw_rules = [
   #["div-factor",      div(mul(a, b), a),  b],
   #["neg-div-factor",  div(neg(mul(a, b)), a),  neg(b)],
   ["inject_2pi", x, sub(add(x, mul(2, CONST_PI())), mul(2, CONST_PI()))],
+  ["fraction_cancelation", add(sub(div(x, 2), x), div(x, 2)), 0 ],
 ]
 
 rules = list()
