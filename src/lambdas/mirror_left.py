@@ -166,7 +166,9 @@ class MirrorLeft(types.Transform):
         mirrors = get_mirrors(out_type.function)
         new_holes = list()
         for s_expr, point in mirrors:
-            if not point.is_constant() or not out_domain.contains(point):
+            if (not point.is_constant()
+                or not out_domain.contains(point)
+                    or s_expr.contains_op("thefunc")):
                 continue
             in_domain = Interval(point, out_domain.sup)
             in_type = types.Impl(out_type.function, in_domain)

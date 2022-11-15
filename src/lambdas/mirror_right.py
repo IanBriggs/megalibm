@@ -117,7 +117,6 @@ class MirrorRight(types.Transform):
                                        s_str,
                                        inner_name)
 
-
         return [il_reduce] + so_far + [il_recons]
 
     @classmethod
@@ -172,7 +171,9 @@ class MirrorRight(types.Transform):
         mirrors = get_mirrors(out_type.function)
         new_holes = list()
         for s_expr, point in mirrors:
-            if not point.is_constant() or not out_domain.contains(point):
+            if (not point.is_constant()
+                or not out_domain.contains(point)
+                    or s_expr.contains_op("thefunc")):
                 continue
             in_domain = Interval(out_domain.inf, point)
             in_type = types.Impl(out_type.function, in_domain)
@@ -182,7 +183,8 @@ class MirrorRight(types.Transform):
                 and math.copysign(1.0, float(out_domain.inf)) == -1.0
                 and math.isinf(float(out_domain.sup))
                     and math.copysign(1.0, float(out_domain.sup)) == 1.0):
-                new_holes.append(MirrorRight(lambdas.Hole(in_type), s_expr=s_expr))
+                new_holes.append(MirrorRight(
+                    lambdas.Hole(in_type), s_expr=s_expr))
                 continue
 
             # check for four cases
@@ -192,7 +194,8 @@ class MirrorRight(types.Transform):
             # TODO: epsilon comparison
             # match
             if abs(float(real_out_domain.sup - out_domain.sup)) < 1e-16:
-                new_holes.append(MirrorRight(lambdas.Hole(in_type), s_expr=s_expr))
+                new_holes.append(MirrorRight(
+                    lambdas.Hole(in_type), s_expr=s_expr))
                 continue
 
             # too small
