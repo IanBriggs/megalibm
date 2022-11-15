@@ -107,8 +107,7 @@ class MirrorRight(types.Transform):
         # Reconstruction
         inner_name = so_far[-1].out_names[0]
         recons_name = self.gensym("recons")
-        s_expr = self.s_expr.copy()
-        s_expr.substitute(Variable("x"), Variable(inner_name))
+        s_expr = self.s_expr.substitute(Variable("x"), Variable(inner_name))
         s_str = s_expr.to_libm_c()
 
         il_recons = lego_blocks.IfLess(numeric_types.fp64(),
@@ -183,7 +182,7 @@ class MirrorRight(types.Transform):
                 and math.copysign(1.0, float(out_domain.inf)) == -1.0
                 and math.isinf(float(out_domain.sup))
                     and math.copysign(1.0, float(out_domain.sup)) == 1.0):
-                new_holes.append(MirrorRight(lambdas.Hole(in_type), s_expr))
+                new_holes.append(MirrorRight(lambdas.Hole(in_type), s_expr=s_expr))
                 continue
 
             # check for four cases
@@ -193,7 +192,7 @@ class MirrorRight(types.Transform):
             # TODO: epsilon comparison
             # match
             if abs(float(real_out_domain.sup - out_domain.sup)) < 1e-16:
-                new_holes.append(MirrorRight(lambdas.Hole(in_type), s_expr))
+                new_holes.append(MirrorRight(lambdas.Hole(in_type), s_expr=s_expr))
                 continue
 
             # too small
@@ -206,6 +205,6 @@ class MirrorRight(types.Transform):
 
             # needs narrowing
             new_holes.append(
-                Narrow(MirrorRight(lambdas.Hole(in_type), s_expr), out_domain))
+                Narrow(MirrorRight(lambdas.Hole(in_type), s_expr=s_expr), out_domain))
 
         return new_holes

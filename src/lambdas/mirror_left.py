@@ -53,10 +53,7 @@ class MirrorLeft(types.Transform):
 
         found_s = False
         for s_expr in s_exprs:
-            print(s_expr)
-            print(self.s_expr)
             if s_expr == self.s_expr:
-                print("sdfgsdfgsdfgsdfgsdfg")
                 found_s = True
                 break
 
@@ -106,8 +103,7 @@ class MirrorLeft(types.Transform):
         # Reconstruction
         inner_name = so_far[-1].out_names[0]
         recons_name = self.gensym("recons")
-        s_expr = self.s_expr.copy()
-        s_expr.substitute(Variable("x"), Variable(inner_name))
+        s_expr = self.s_expr.substitute(Variable("x"), Variable(inner_name))
         s_str = s_expr.to_libm_c()
 
         il_recons = lego_blocks.IfLess(numeric_types.fp64(),
@@ -170,7 +166,6 @@ class MirrorLeft(types.Transform):
         mirrors = get_mirrors(out_type.function)
         new_holes = list()
         for s_expr, point in mirrors:
-            logger("Possible mirror at: {} (s = {}", point, s_expr)
             if not point.is_constant() or not out_domain.contains(point):
                 continue
             in_domain = Interval(point, out_domain.sup)
