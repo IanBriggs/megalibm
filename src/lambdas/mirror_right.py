@@ -19,7 +19,7 @@ logger = Logger(level=Logger.HIGH)
 
 class MirrorRight(types.Transform):
 
-    def __init__(self, in_node: types.Node, s_expr=None):
+    def __init__(self, in_node: types.Node, s_expr):
         """
         Double the domain of a function implementation by mirroring on the
           right edge.
@@ -30,11 +30,15 @@ class MirrorRight(types.Transform):
         self.s_expr = s_expr
         super().__init__(in_node)
 
+    def __str__(self):
+        inner = str(self.in_node)
+        return f"(MirrorRight {inner} {self.s_expr})"
+
     def replace_lambda(self, search, replace):
         if self == search:
             return replace
         new_in_node = self.in_node.replace_lambda(search, replace)
-        return MirrorRight(new_in_node)
+        return MirrorRight(new_in_node, self.s_expr)
 
     def type_check(self):
         """ Check that '<s_expr> (mirror domain.sup)' is an identity """
@@ -168,7 +172,7 @@ class MirrorRight(types.Transform):
         out_domain = out_type.domain
         mirrors = get_mirrors(out_type.function)
         new_holes = list()
-        for point, s_expr in mirrors:
+        for s_expr, point in mirrors:
             if not point.is_constant() or not out_domain.contains(point):
                 continue
             in_domain = Interval(out_domain.inf, point)

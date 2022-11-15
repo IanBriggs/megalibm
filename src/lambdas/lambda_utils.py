@@ -13,7 +13,7 @@ def get_mirrors_at(func: FPCore, point):
     s_exprs = list()
     for s, t_arg in mirrors:
         # TODO: epsilon cmp is not proper here
-        if abs(float(t_arg) - f_point) < 1e-16:
+        if t_arg.is_constant() and abs(float(t_arg) - f_point) < 1e-16:
             s_exprs.append(s)
 
     return s_exprs

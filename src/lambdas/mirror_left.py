@@ -16,7 +16,7 @@ logger = Logger(level=Logger.HIGH, color=Logger.cyan)
 
 class MirrorLeft(types.Transform):
 
-    def __init__(self, in_node: types.Node, s_expr=None):
+    def __init__(self, in_node: types.Node, s_expr):
         """
         Double the domain of a function implementation by mirroring on the
           left edge.
@@ -27,11 +27,15 @@ class MirrorLeft(types.Transform):
         self.s_expr = s_expr
         super().__init__(in_node)
 
+    def __str__(self):
+        inner = str(self.in_node)
+        return f"(MirrorLeft {inner} {self.s_expr})"
+
     def replace_lambda(self, search, replace):
         if self == search:
             return replace
         new_in_node = self.in_node.replace_lambda(search, replace)
-        return MirrorLeft(new_in_node)
+        return MirrorLeft(new_in_node, self.s_expr)
 
     def type_check(self):
         """ Check that (mirror domain.inf) is an identity """
@@ -49,13 +53,16 @@ class MirrorLeft(types.Transform):
 
         found_s = False
         for s_expr in s_exprs:
+            print(s_expr)
+            print(self.s_expr)
             if s_expr == self.s_expr:
+                print("sdfgsdfgsdfgsdfgsdfg")
                 found_s = True
                 break
 
         if not found_s:
             msg = "MirrorLeft requires that '{}' is mirrored about x={}"
-            raise TypeError(msg.format(self.function, float_inf))
+            raise TypeError(msg.format(func, float_inf))
 
         # Create out type
         width = our_in_type.domain.sup - our_in_type.domain.inf
@@ -74,7 +81,7 @@ class MirrorLeft(types.Transform):
         # else:
         #   out = mirror_point - in
         # ...
-                # inner = ...
+        # inner = ...
         # if in < mirror_point:
         #   recons = s(inner)
         # else:
@@ -90,11 +97,11 @@ class MirrorLeft(types.Transform):
         bound = self.mirror_point
 
         il_reduce = lego_blocks.IfLess(numeric_types.fp64(),
-                                [in_name],
-                                [reduced_name],
-                                float(bound),
-                                in_name,
-                                "({} - {})".format(bound, in_name))
+                                       [in_name],
+                                       [reduced_name],
+                                       float(bound),
+                                       in_name,
+                                       "({} - {})".format(bound, in_name))
 
         # Reconstruction
         inner_name = so_far[-1].out_names[0]
@@ -159,11 +166,11 @@ class MirrorLeft(types.Transform):
         # real out domain: <-[################|################]----->
         #
 
-
         out_domain = out_type.domain
         mirrors = get_mirrors(out_type.function)
         new_holes = list()
-        for point, s_expr in mirrors:
+        for s_expr, point in mirrors:
+            logger("Possible mirror at: {} (s = {}", point, s_expr)
             if not point.is_constant() or not out_domain.contains(point):
                 continue
             in_domain = Interval(point, out_domain.sup)
@@ -174,7 +181,8 @@ class MirrorLeft(types.Transform):
                 and math.copysign(1.0, float(out_domain.inf)) == -1.0
                 and math.isinf(float(out_domain.sup))
                     and math.copysign(1.0, float(out_domain.sup)) == 1.0):
-                new_holes.append(MirrorLeft(lambdas.Hole(in_type), s_expr))
+                new_holes.append(MirrorLeft(
+                    lambdas.Hole(in_type), s_expr=s_expr))
                 continue
 
             # check for four cases
@@ -184,7 +192,8 @@ class MirrorLeft(types.Transform):
             # TODO: epsilon comparison
             # match
             if abs(float(real_out_domain.inf - out_domain.inf)) < 1e-16:
-                new_holes.append(MirrorLeft(lambdas.Hole(in_type), s_expr))
+                new_holes.append(MirrorLeft(
+                    lambdas.Hole(in_type), s_expr=s_expr))
                 continue
 
             # too small
@@ -197,6 +206,7 @@ class MirrorLeft(types.Transform):
 
             # needs narrowing
             new_holes.append(
-                Narrow(MirrorLeft(lambdas.Hole(in_type), s_expr), out_domain))
+                Narrow(MirrorLeft(lambdas.Hole(in_type), s_expr=s_expr),
+                       out_domain))
 
         return new_holes
