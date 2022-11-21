@@ -56,28 +56,8 @@ echo "export RUSTUP_HOME=\"${RUST_HOME}\"" >>"${DEBUG_ENV}"
 echo "export CARGO_HOME=\"${RUST_HOME}/cargo\"" >>"${DEBUG_ENV}"
 echo "export PATH=\"${CARGO_HOME}/bin:\$PATH"\" >>"${DEBUG_ENV}"
 
-# # egg
-# echo "Installing egg"
-# EGG_HOME="${SCRIPT_LOCATION}/egg"
-# DONE_EGG_MARKER="${EGG_HOME}/done"
-# if [ -f "${DONE_EGG_MARKER}" ]; then
-#     echo "  egg already installed"
-# else
-#     cd "${SCRIPT_LOCATION}"
-
-#     echo "  Cleaning build location"
-#     rm -rf egg
-
-#     echo "  Cloning egg"
-#     git clone https://github.com/egraphs-good/egg.git >> "${LOG}" 2>&1
-
-#     echo "  Building egg"
-#     cd egg
-#     make >> "${LOG}" 2>&1
-
-#     echo "  Done"
-#     touch "${DONE_EGG_MARKER}"
-# fi
+# python libraries
+python3 -m pip install --upgrade maturin mpmath sly
 
 # snake_egg
 echo "Installing snake_egg (IanBriggs fork)"
