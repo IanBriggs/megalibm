@@ -57,7 +57,7 @@ echo "export CARGO_HOME=\"${RUST_HOME}/cargo\"" >>"${DEBUG_ENV}"
 echo "export PATH=\"${CARGO_HOME}/bin:\$PATH"\" >>"${DEBUG_ENV}"
 
 # python libraries
-python3 -m pip install --upgrade maturin mpmath sly matplotlib
+python3 -m pip install --upgrade maturin mpmath sly matplotlib z3-solver
 
 # snake_egg
 echo "Installing snake_egg (IanBriggs fork)"

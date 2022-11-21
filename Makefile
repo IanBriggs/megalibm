@@ -25,6 +25,7 @@ bin/nightly.sh: build
 
 .PHONY: nightly
 nightly: bin/nightly.sh
+	rm requirements/done # force a rebuild for now
 	make requirements
 	$<
 
