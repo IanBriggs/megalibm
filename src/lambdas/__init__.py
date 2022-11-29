@@ -6,6 +6,7 @@ from .general import General
 from .horner import Horner
 
 from .periodic import Periodic
+from .inductive_reconstruction import InductiveRecons
 from .repeat_exp import RepeatExp
 
 from .mirror_right import MirrorRight

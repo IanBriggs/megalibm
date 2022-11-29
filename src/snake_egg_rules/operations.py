@@ -8,6 +8,7 @@ nt = namedtuple
 thefunc   = nt("thefunc",    "x")
 mirror    = nt("mirror",     "inflection")
 periodic  = nt("periodic",   "period")
+recons    = nt("recons", "k")
 
 CONST_PI  = nt("CONST_PI",   "")
 CONST_E   = nt("CONST_E",    "")
