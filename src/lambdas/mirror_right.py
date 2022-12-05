@@ -95,7 +95,7 @@ class MirrorRight(types.Transform):
         reduced_name = so_far[0].in_names[0]
 
         bound = self.mirror_point
-        two_bound = float(2*bound)
+        two_bound = float(2 * bound)
 
         il_reduce = lego_blocks.IfLess(numeric_types.fp64(),
                                        [in_name],

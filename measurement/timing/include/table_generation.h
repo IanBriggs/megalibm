@@ -15,7 +15,7 @@ typedef struct
 } entry;
 
 // Returns how long it takes to run each function on the domain
-double* time_functions(double low, double high,
+double *time_functions(double low, double high,
                        size_t func_count, entry *funcs, size_t samples, size_t iters);
 
 void print_json(size_t func_count, entry *funcs,

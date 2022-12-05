@@ -707,10 +707,10 @@ def main(argv):
         f.write(css)
 
 if __name__ == "__main__":
-    retcode = 0
+    return_code = 0
     try:
-        retcode = main(sys.argv)
+        return_code = main(sys.argv)
     except KeyboardInterrupt:
         print("Goodbye")
 
-    sys.exit(retcode)
+    sys.exit(return_code)

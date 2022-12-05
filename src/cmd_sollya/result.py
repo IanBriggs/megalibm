@@ -30,7 +30,7 @@ class FailedGenError(Exception):
 class Result():
 
     default_config = {
-        "prec": 128,
+        "precision": 128,
         "analysis_bound": 2**-20,
         "minimize_target": "relative",
     }
@@ -130,7 +130,7 @@ class Result():
         monomials_str = ", ".join([str(m) for m in self.monomials])
         mid = (float(self.domain.inf) + float(self.domain.sup))/2
         lines = [
-            'prec = {}!;'.format(self.config["prec"]),
+            'prec = {}!;'.format(self.config["precision"]),
             'algo_analysis_bound = {};'.format(self.config["analysis_bound"]),
             'I = [{};{}];'.format(
                 self.domain.inf.to_sollya(), self.domain.sup.to_sollya()),
@@ -140,13 +140,13 @@ class Result():
             'p = remez(f, monomials, I);',
         ]
 
-        all_coef = ['coeff(p,{})'.format(m) for m in self.monomials]
-        fmt_coef = '@"\\", \\""@'.join(all_coef)
+        all_coeff = ['coeff(p,{})'.format(m) for m in self.monomials]
+        fmt_coeff = '@"\\", \\""@'.join(all_coeff)
 
         more_lines = [
             'display = hexadecimal!;',
             'print("{");',
-            'print("  \\"coefficients\\" : [\\""@{}@"\\"]");'.format(fmt_coef),
+            'print("  \\"coefficients\\" : [\\""@{}@"\\"]");'.format(fmt_coeff),
             'print("}");',
             'quit;'
         ]
@@ -234,7 +234,7 @@ class Result():
 
     def _parse_output(self):
         data = json.loads(self.stdout)
-        for coef in data["coefficients"]:
-            if coef == "NaN":
+        for coeff in data["coefficients"]:
+            if coeff == "NaN":
                 raise json.JSONDecodeError("Sollya made NaN", "stdin", -1)
         self.coefficients = data["coefficients"]

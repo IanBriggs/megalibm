@@ -39,12 +39,11 @@ error **generate_table(size_t region_count, double *regions, size_t samples,
 
 void free_table(size_t func_count, error **errorss);
 
-void print_json(char* func_name,
-                char* func_body,
-                size_t generator_count, char** generators,
+void print_json(char *func_name,
+                char *func_body,
+                size_t generator_count, char **generators,
                 size_t region_count, double *regions,
                 size_t func_count, entry *funcs,
                 error **errorss);
-
 
 #endif
