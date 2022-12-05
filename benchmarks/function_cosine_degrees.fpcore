@@ -4,4 +4,4 @@
   :name "function cosine degrees"
   :pre (< (- INFINITY) x INFINITY)
 
-  (cos (* x (/ pi 180)))
+  (cos (* x (/ PI 180))))

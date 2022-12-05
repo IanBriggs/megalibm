@@ -4,4 +4,4 @@
   :name "function sine degrees"
   :pre (< (- INFINITY) x INFINITY)
 
-  (sin (* x (/ pi 180)))
+  (sin (* x (/ PI 180))))
