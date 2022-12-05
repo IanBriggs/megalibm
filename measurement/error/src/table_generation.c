@@ -9,9 +9,48 @@
 
 static mpfr_t scratch;
 
+static void
+seperator_comma(size_t i, size_t bound)
+{
+  assert(i <= bound);
+
+  if (i != bound)
+  {
+    printf(",");
+  }
+  printf("\n");
+}
+
+typedef double (*field)(error);
+
+static void
+print_errors_list(char *name, size_t len, error *errors, field get)
+{
+  printf("      \"%s\": [\n", name);
+  for (size_t i = 0; i < len; i++)
+  {
+    printf("        %1.16e", get(errors[i]));
+    seperator_comma(i, len - 1);
+  }
+  printf("      ]");
+}
+
+static double get_val_max(error e) { return e.val_max; }
+static double get_val_avg(error e) { return e.val_avg; }
+static double get_val_min(error e) { return e.val_min; }
+static double get_abs_max(error e) { return e.abs_max; }
+static double get_abs_avg(error e) { return e.abs_avg; }
+static double get_abs_med(error e) { return e.abs_med; }
+static double get_rel_max(error e) { return e.rel_max; }
+static double get_rel_avg(error e) { return e.rel_avg; }
+static double get_rel_med(error e) { return e.rel_med; }
+
 static int
 qsort_cmp(const void *va, const void *vb)
 {
+  assert(va != NULL);
+  assert(vb != NULL);
+
   const double a = *(const double *)va;
   const double b = *(const double *)vb;
 
@@ -32,10 +71,17 @@ qsort_cmp(const void *va, const void *vb)
 static void
 fill_inputs(double low, double high, size_t samples, double *inputs)
 {
+  assert(isfinite(low));
+  assert(isfinite(high));
+  assert(low < high);
+  assert(samples > 0);
+  assert(inputs != NULL);
+
   double span = high - low;
 
   for (size_t i = 0; i < samples; i++)
   {
+    // TODO: this is a _really_ bad fp rng
     double dirty_rand = ((double)rand()) / ((double)RAND_MAX);
     inputs[i] = low + span * dirty_rand;
   }
@@ -46,6 +92,10 @@ fill_inputs(double low, double high, size_t samples, double *inputs)
 static void
 compare(mpfr_t expected, double actual, double *absolute, double *relative)
 {
+  assert(isfinite(actual));
+  assert(absolute != NULL);
+  assert(relative != NULL);
+
   mpfr_d_sub(scratch, actual, expected, MPFR_RNDN);
   *absolute = fabs(mpfr_get_d(scratch, MPFR_RNDN));
 
@@ -58,6 +108,13 @@ reference_on_region(size_t samples, mpfr_t *reals,
                     double *values, double *absolutes, double *relatives,
                     error *ferror)
 {
+  assert(samples > 0);
+  assert(reals != NULL);
+  assert(values != NULL);
+  assert(absolutes != NULL);
+  assert(relatives != NULL);
+  assert(ferror != NULL);
+
   for (size_t i = 0; i < samples; i++)
   {
     double actual = mpfr_get_d(reals[i], MPFR_RNDN);
@@ -97,6 +154,14 @@ run_on_region(unop_fp64 f, size_t samples, double *inputs, mpfr_t *reals,
               double *values, double *absolutes, double *relatives,
               error *ferror)
 {
+  assert(samples > 0);
+  assert(inputs != NULL);
+  assert(reals != NULL);
+  assert(values != NULL);
+  assert(absolutes != NULL);
+  assert(relatives != NULL);
+  assert(ferror != NULL);
+
   for (size_t i = 0; i < samples; i++)
   {
     double actual = f(inputs[i]);
@@ -200,10 +265,10 @@ generate_table(size_t region_count, double *regions, size_t samples,
     reference_on_region(samples, reals, values, absolutes, relatives,
                         &errorss[0][region]);
 
-    for (size_t fidx = 1; fidx <= func_count; fidx++)
+    for (size_t func_idx = 1; func_idx <= func_count; func_idx++)
     {
-      unop_fp64 f = funcs[fidx - 1].func;
-      error *ferror = &errorss[fidx][region];
+      unop_fp64 f = funcs[func_idx - 1].func;
+      error *ferror = &errorss[func_idx][region];
       run_on_region(f, samples, inputs, reals, values, absolutes, relatives,
                     ferror);
     }
@@ -240,15 +305,22 @@ void free_table(size_t func_count, error **errorss)
   xfree(errorss);
 }
 
-void print_json(size_t region_count, double *regions,
+void print_json(char *func_name,
+                char *func_body,
+                size_t generator_count, char **generators,
+                size_t region_count, double *regions,
                 size_t func_count, entry *funcs,
-                error **errorss,
-                char *func_name, char *func_body)
+                error **errorss)
 {
-  // Due to how picky JSON is with commas everything here has the form:
-  //  for thing in things[:-1]:
-  //    output thing + ,
-  //  output things[-1]
+  assert(func_name != NULL);
+  assert(func_body != NULL);
+  assert(generator_count > 0);
+  assert(generators != NULL);
+  assert(region_count > 0);
+  assert(regions != NULL);
+  assert(func_count > 0);
+  assert(funcs != NULL);
+  assert(errorss != NULL);
 
   printf("{\n");
 
@@ -256,18 +328,27 @@ void print_json(size_t region_count, double *regions,
   printf("  \"name\": \"%s\",\n", func_name);
   printf("  \"body\": \"%s\",\n", func_body);
 
-  // First a list of fenceposts for the region under test
-  printf("  \"regions\": [\n");
-  for (size_t i = 0; i < region_count; i++)
+  // Lambda expressions used to generate the generated funcs
+  printf("  \"generators\": [\n");
+  for (size_t i = 0; i < generator_count; i++)
   {
-    printf("    %1.16e,\n", regions[i]);
+    printf("    \"%s\"", generators[i]);
+    seperator_comma(i, generator_count - 1);
   }
-  printf("    %1.16e\n", regions[region_count]);
+  printf("  ],\n");
+
+  // A list of fenceposts for the region under test
+  printf("  \"regions\": [\n");
+  for (size_t i = 0; i < region_count + 1; i++)
+  {
+    printf("    %1.16e", regions[i]);
+    seperator_comma(i, region_count);
+  }
   printf("  ],\n");
 
   // Then a dict from function name to a dict from
   printf("  \"functions\": {\n");
-  for (size_t i = 0; i < func_count; i++)
+  for (size_t i = 0; i < func_count + 1; i++)
   {
     // The zero-th dataset is the reference (mpfr) values, others are named
     if (i == 0)
@@ -279,167 +360,33 @@ void print_json(size_t region_count, double *regions,
       printf("    \"%s\": {\n", funcs[i - 1].name);
     }
 
-    // First the maximum value seen per region
-    printf("      \"max_value\": [\n");
-    for (size_t j = 0; j < region_count - 1; j++)
-    {
-      printf("        %1.16e,\n", errorss[i][j].val_max);
-    }
-    printf("        %1.16e\n", errorss[i][region_count - 1].val_max);
-    printf("      ],\n");
+    // First the values seen per region
+    print_errors_list("max_value", region_count, errorss[i], get_val_max);
+    printf(",\n");
+    print_errors_list("avg_value", region_count, errorss[i], get_val_avg);
+    printf(",\n");
+    print_errors_list("min_value", region_count, errorss[i], get_val_min);
+    printf(",\n");
 
-    // Then the average value
-    printf("      \"avg_value\": [\n");
-    for (size_t j = 0; j < region_count - 1; j++)
-    {
-      printf("        %1.16e,\n", errorss[i][j].val_avg);
-    }
-    printf("        %1.16e\n", errorss[i][region_count - 1].val_avg);
-    printf("      ],\n");
+    // Then the absolute errors
+    print_errors_list("abs_max_errors", region_count, errorss[i], get_abs_max);
+    printf(",\n");
+    print_errors_list("abs_avg_errors", region_count, errorss[i], get_abs_avg);
+    printf(",\n");
+    print_errors_list("abs_med_errors", region_count, errorss[i], get_abs_med);
+    printf(",\n");
 
-    // Then the min vlue
-    printf("      \"min_value\": [\n");
-    for (size_t j = 0; j < region_count - 1; j++)
-    {
-      printf("        %1.16e,\n", errorss[i][j].val_min);
-    }
-    printf("        %1.16e\n", errorss[i][region_count - 1].val_min);
-    printf("      ],\n");
+    // Then the relative errors
+    print_errors_list("rel_max_errors", region_count, errorss[i], get_rel_max);
+    printf(",\n");
+    print_errors_list("rel_avg_errors", region_count, errorss[i], get_rel_avg);
+    printf(",\n");
+    print_errors_list("rel_med_errors", region_count, errorss[i], get_rel_med);
+    printf("\n");
 
-    // Then the maximum of the absolute error
-    printf("      \"abs_max_errors\": [\n");
-    for (size_t j = 0; j < region_count - 1; j++)
-    {
-      printf("        %1.16e,\n", errorss[i][j].abs_max);
-    }
-    printf("        %1.16e\n", errorss[i][region_count - 1].abs_max);
-    printf("      ],\n");
-
-    // Then the average of the absolute error
-    printf("      \"abs_avg_errors\": [\n");
-    for (size_t j = 0; j < region_count - 1; j++)
-    {
-      printf("        %1.16e,\n", errorss[i][j].abs_avg);
-    }
-    printf("        %1.16e\n", errorss[i][region_count - 1].abs_avg);
-    printf("      ],\n");
-
-    // Then the median of the absolute error
-    printf("      \"abs_med_errors\": [\n");
-    for (size_t j = 0; j < region_count - 1; j++)
-    {
-      printf("        %1.16e,\n", errorss[i][j].abs_med);
-    }
-    printf("        %1.16e\n", errorss[i][region_count - 1].abs_med);
-    printf("      ],\n");
-
-    // Then the maximum of the relative error
-    printf("      \"rel_max_errors\": [\n");
-    for (size_t j = 0; j < region_count - 1; j++)
-    {
-      printf("        %1.16e,\n", errorss[i][j].rel_max);
-    }
-    printf("        %1.16e\n", errorss[i][region_count - 1].rel_max);
-    printf("      ],\n");
-
-    // Then the average of the relative error
-    printf("      \"rel_avg_errors\": [\n");
-    for (size_t j = 0; j < region_count - 1; j++)
-    {
-      printf("        %1.16e,\n", errorss[i][j].rel_avg);
-    }
-    printf("        %1.16e\n", errorss[i][region_count - 1].rel_avg);
-    printf("      ],\n");
-
-    // Then the median of the relative error
-    printf("      \"rel_med_errors\": [\n");
-    for (size_t j = 0; j < region_count - 1; j++)
-    {
-      printf("        %1.16e,\n", errorss[i][j].rel_med);
-    }
-    printf("        %1.16e\n", errorss[i][region_count - 1].rel_med);
-    printf("      ]\n");
-
-    printf("    },\n");
+    printf("    }");
+    seperator_comma(i, func_count);
   }
-
-  printf("    \"%s\": {\n", funcs[func_count - 1].name);
-
-  printf("      \"max_value\": [\n");
-  for (size_t j = 0; j < region_count - 1; j++)
-  {
-    printf("        %1.16e,\n", errorss[func_count][j].val_max);
-  }
-  printf("        %1.16e\n", errorss[func_count][region_count - 1].val_max);
-  printf("      ],\n");
-
-  printf("      \"avg_value\": [\n");
-  for (size_t j = 0; j < region_count - 1; j++)
-  {
-    printf("        %1.16e,\n", errorss[func_count][j].val_avg);
-  }
-  printf("        %1.16e\n", errorss[func_count][region_count - 1].val_avg);
-  printf("      ],\n");
-
-  printf("      \"min_value\": [\n");
-  for (size_t j = 0; j < region_count - 1; j++)
-  {
-    printf("        %1.16e,\n", errorss[func_count][j].val_min);
-  }
-  printf("        %1.16e\n", errorss[func_count][region_count - 1].val_min);
-  printf("      ],\n");
-
-  printf("      \"abs_max_errors\": [\n");
-  for (size_t j = 0; j < region_count - 1; j++)
-  {
-    printf("        %1.16e,\n", errorss[func_count][j].abs_max);
-  }
-  printf("        %1.16e\n", errorss[func_count][region_count - 1].abs_max);
-  printf("      ],\n");
-
-  printf("      \"abs_avg_errors\": [\n");
-  for (size_t j = 0; j < region_count - 1; j++)
-  {
-    printf("        %1.16e,\n", errorss[func_count][j].abs_avg);
-  }
-  printf("        %1.16e\n", errorss[func_count][region_count - 1].abs_avg);
-  printf("      ],\n");
-
-  printf("      \"abs_med_errors\": [\n");
-  for (size_t j = 0; j < region_count - 1; j++)
-  {
-    printf("        %1.16e,\n", errorss[func_count][j].abs_med);
-  }
-  printf("        %1.16e\n", errorss[func_count][region_count - 1].abs_med);
-  printf("      ],\n");
-
-  printf("      \"rel_max_errors\": [\n");
-  for (size_t j = 0; j < region_count - 1; j++)
-  {
-    printf("        %1.16e,\n", errorss[func_count][j].rel_max);
-  }
-  printf("        %1.16e\n", errorss[func_count][region_count - 1].rel_max);
-  printf("      ],\n");
-
-  printf("      \"rel_avg_errors\": [\n");
-  for (size_t j = 0; j < region_count - 1; j++)
-  {
-    printf("        %1.16e,\n", errorss[func_count][j].rel_avg);
-  }
-  printf("        %1.16e\n", errorss[func_count][region_count - 1].rel_avg);
-  printf("      ],\n");
-
-  printf("      \"rel_med_errors\": [\n");
-  for (size_t j = 0; j < region_count - 1; j++)
-  {
-    printf("        %1.16e,\n", errorss[func_count][j].rel_med);
-  }
-  printf("        %1.16e\n", errorss[func_count][region_count - 1].rel_med);
-  printf("      ]\n");
-
-  printf("    }\n");
-
   printf("  }\n");
-
   printf("}\n");
 }
