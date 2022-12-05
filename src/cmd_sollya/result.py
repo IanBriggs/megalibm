@@ -56,7 +56,7 @@ class Result():
 
         # Try [inf - small, sup]
         if not have_res:
-            logger("Sollya call failed, retrying with symmetric mirrored domain")
+            logger.warning("Sollya call failed, trying [inf - small, sup] ")
             diff = domain.sup - domain.inf
             new_domain = Interval(domain.inf - fpcore.ast.Number("0.00390625"),
                                   domain.sup)
@@ -68,7 +68,7 @@ class Result():
 
         # Try [inf, sup + small]
         if not have_res:
-            logger("Sollya call failed, retrying with symmetric mirrored domain")
+            logger.warning("Sollya call failed, trying [inf, sup + small]")
             diff = domain.sup - domain.inf
             new_domain = Interval(domain.inf,
                                   domain.sup + fpcore.ast.Number("0.00390625"))
@@ -78,23 +78,11 @@ class Result():
         if not have_res:
             have_res = self._try_run()
 
-
-        # Try [inf - (sup-inf), sup]
+        # Try [inf-small, sup + small]
         if not have_res:
-            logger("Sollya call failed, retrying with mirrored domain")
+            logger.warning("Sollya call failed, trying [inf, sup + small]")
             diff = domain.sup - domain.inf
-            new_domain = Interval(domain.inf - diff, domain.sup)
-            self.domain = new_domain
-            self._generate_query()
-            have_res = self._try_cache()
-        if not have_res:
-            have_res = self._try_run()
-
-        # Try [inf - (sup-inf), sup+small]
-        if not have_res:
-            logger("Sollya call failed, retrying with symmetric mirrored domain")
-            diff = domain.sup - domain.inf
-            new_domain = Interval(domain.inf - diff,
+            new_domain = Interval(domain.inf - fpcore.ast.Number("0.00390625"),
                                   domain.sup + fpcore.ast.Number("0.00390625"))
             self.domain = new_domain
             self._generate_query()
