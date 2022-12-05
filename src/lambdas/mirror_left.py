@@ -29,7 +29,7 @@ class MirrorLeft(types.Transform):
 
     def __str__(self):
         inner = str(self.in_node)
-        return f"(MirrorLeft {inner} {self.s_expr})"
+        return f"(MirrorLeft {self.s_expr} {inner})"
 
     def replace_lambda(self, search, replace):
         if self == search:
@@ -97,8 +97,8 @@ class MirrorLeft(types.Transform):
                                        [in_name],
                                        [reduced_name],
                                        float(bound),
-                                       in_name,
-                                       "({} - {})".format(bound, in_name))
+                                       "({} - {})".format(float(bound), in_name),
+                                       in_name)
 
         # Reconstruction
         inner_name = so_far[-1].out_names[0]
@@ -107,11 +107,11 @@ class MirrorLeft(types.Transform):
         s_str = s_expr.to_libm_c()
 
         il_recons = lego_blocks.IfLess(numeric_types.fp64(),
-                                       [inner_name],
+                                       [in_name],
                                        [recons_name],
                                        float(bound),
-                                       inner_name,
-                                       s_str)
+                                       s_str,
+                                       inner_name)
 
         return [il_reduce] + so_far + [il_recons]
 
