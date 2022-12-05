@@ -1,62 +1,58 @@
 
 
+# Note: all these files should already be executable
+PY_SCRIPTS = src/megalibm_identities.py \
+			 src/megalibm_template_identities.py \
+			 src/megalibm_generate.py \
+			 src/make_website.py
+
+PY_BINS = $(foreach p,${PY_SCRIPTS},$(patsubst src/%.py,bin/%,$p))
+
+# Fill bin
 .PHONY: build
-build: bin/megalibm_identities bin/megalibm_template_identities bin/megalibm_generate
+build: ${PY_BINS}
 
+# Link python scripts into bin
+bin/%: src/%.py requirements/done | bin
+	cd bin && ln -sF ../src/$*.py $*
 
+# Create bin
+bin:
+	mkdir bin
+
+# Run nightly
+.PHONY: nightly
+nightly: bin/nightly.sh
+	$<
+
+# Link nightly script into bin
+bin/nightly.sh: src/nightly.sh build
+	cd bin && ln -sF ../src/nightly.sh nightly.sh
+
+# Build requirements
 .PHONY: requirements
 requirements: requirements/done
 
-bin/megalibm_identities: requirements/done | bin
-	$(RM) $@
-	cd bin && ln -s ../src/megalibm_identities.py megalibm_identities
-
-bin/megalibm_template_identities: requirements/done | bin
-	$(RM) $@
-	cd bin && ln -s ../src/megalibm_template_identities.py megalibm_template_identities
-
-bin/megalibm_generate: requirements/done | bin
-	$(RM) $@
-	cd bin && ln -s ../src/megalibm_generate.py megalibm_generate
-
-bin/nightly.sh: build
-	$(RM) $@
-	cd bin && ln -s ../src/nightly.sh nightly.sh
-
-.PHONY: nightly
-nightly: bin/nightly.sh
-	rm requirements/done # force a rebuild for now
-	make requirements
-	$<
-
-bin/mini_nightly.sh: build
-	$(RM) $@
-	cd bin && ln -s ../src/mini_nightly.sh mini_nightly.sh
-	chmod +x $@
-
-.PHONY: mini_nightly
-mini_nightly: bin/mini_nightly.sh
-	rm requirements/done requirements/snake_egg/done
-	make requirements
-	$<
-
+# Run requirements script
 requirements/done: requirements/build.sh
 	$<
 
+# Normal clean
 .PHONY: clean
 clean:
 	find . -type d -name "__pycache__" -exec ${RM} -r {} +
 	$(MAKE) -C measurement clean
 
+# Clean requirements
 .PHONY: clean-requirements
 clean-requirements: requirements/clean.sh
 	$<
 
+# Clean everything
 .PHONY: distclean
 distclean: clean clean-requirements
 	$(RM) -r bin
 	$(RM) -r nightlies
 	$(MAKE) -C measurement distclean
 
-bin:
-	mkdir bin
+
