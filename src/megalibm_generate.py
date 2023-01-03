@@ -78,6 +78,7 @@ def write_per_func_webpage(filename, func_to_identities):
     d = today.day
     lines = [
         "<!doctype html>",
+        "<meta charset=\"UTF-8\">",
         "<html>",
         "<head>",
         f"<title>Per Function Identities for {y}-{m}-{d}</title>",
