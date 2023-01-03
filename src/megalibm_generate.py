@@ -124,6 +124,7 @@ def write_identity_webpage(filename, identities):
     d = today.day
     lines = [
         "<!doctype html>",
+        "<meta charset=\"UTF-8\">",
         "<html>",
         "<head>",
         f"<title>Megalibm Identities for {y}-{m}-{d}</title>",
