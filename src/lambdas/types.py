@@ -90,7 +90,7 @@ class Source(Node):
 
     def __init__(self, function: FPCore, domain: Interval):
         self.function = function
-        self.domain = domain
+        self.domain = Interval(domain.inf.simplify(), domain.sup.simplify())
         #self.type_check()
 
     def find_lambdas(self, pred, _found=None):

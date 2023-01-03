@@ -12,15 +12,15 @@ export LIBRARY_PATH := /opt/homebrew/lib:${LIBRARY_PATH}
 endif
 
 GEN_DIRS = $(wildcard generated/*)
-BINS = $(foreach g,$(GEN_DIRS),${g}/main)
+BINS = $(foreach g,$(GEN_DIRS),${g}/error_main)
 INTER = $(foreach g,$(GEN_DIRS),${g}/funcs.o)
 OBJS = obj/table_generation.o obj/xmalloc.o
 
-DATA_0 = $(foreach g,$(GEN_DIRS),${g}/data_0.json)
-DATA_1 = $(foreach g,$(GEN_DIRS),${g}/data_1.json)
-DATA_2 = $(foreach g,$(GEN_DIRS),${g}/data_2.json)
-DATA_3 = $(foreach g,$(GEN_DIRS),${g}/data_3.json)
-DATAS = ${DATA_0} ${DATA_1} ${DATA_2} ${DATA_3}
+ERROR_DATA_0 = $(foreach g,$(GEN_DIRS),${g}/error_data_0.json)
+ERROR_DATA_1 = $(foreach g,$(GEN_DIRS),${g}/error_data_1.json)
+ERROR_DATA_2 = $(foreach g,$(GEN_DIRS),${g}/error_data_2.json)
+ERROR_DATA_3 = $(foreach g,$(GEN_DIRS),${g}/error_data_3.json)
+ERROR_DATAS = ${ERROR_DATA_0} ${ERROR_DATA_1} ${ERROR_DATA_2} ${ERROR_DATA_3}
 
 .PHONY: all
 all: build
@@ -29,25 +29,25 @@ all: build
 build: ${BINS}
 
 .PHONY: run
-run: ${DATAS}
+run: ${ERROR_DATAS}
 
 .PHONY: intermediates
 intermediates: ${OBJS} ${INTER}
 
-generated/%/data_0.json: generated/%/main
+generated/%/error_data_0.json: generated/%/error_main
 	./$< 0 > $@
 
-generated/%/data_1.json: generated/%/main
+generated/%/error_data_1.json: generated/%/error_main
 	./$< 1 > $@
 
-generated/%/data_2.json: generated/%/main
+generated/%/error_data_2.json: generated/%/error_main
 	./$< 2 > $@
 
-generated/%/data_3.json: generated/%/main
+generated/%/error_data_3.json: generated/%/error_main
 	./$< 3 > $@
 
 
-generated/%/main: generated/%/main.c generated/%/funcs.o ${OBJS}
+generated/%/error_main: generated/%/error_main.c generated/%/funcs.o ${OBJS}
 	${CC} ${CFLAGS} -Igenerated/$* $^ -lmpfr -lgmp -lm -o $@
 
 generated/%/funcs.o: generated/%/funcs.c generated/%/funcs.h
@@ -68,5 +68,5 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	$(RM) -r data
+	$(RM) -r error_data
 	$(RM) -r generated

@@ -22,7 +22,7 @@ x, y, z, a, b, c, d = vars("x y z a b c d")
 # Rules can be marked as:
 # * false: not always equal
 # * unsafe: not safe
-# * unknown: not fully analysed
+# * unknown: not fully analyzed
 # * bad: impedes megalibm
 # * skip: uses operations not used in megalibm
 #
@@ -523,7 +523,7 @@ raw_rules = [
   #["div-factor",      div(mul(a, b), a),  b],
   #["neg-div-factor",  div(neg(mul(a, b)), a),  neg(b)],
   ["inject_2pi", x, sub(add(x, mul(2, CONST_PI())), mul(2, CONST_PI()))],
-  ["fraction_cancelation", add(sub(div(x, 2), x), div(x, 2)), 0 ],
+  ["fraction_cancellation", add(sub(div(x, 2), x), div(x, 2)), 0 ],
 ]
 
 rules = list()

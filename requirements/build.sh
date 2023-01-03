@@ -28,13 +28,19 @@ function finish {
 }
 trap finish EXIT
 
+function in_path {
+    command -v "$1" &>/dev/null
+}
+
 # rust
 echo "Installing rust"
 RUST_HOME="${SCRIPT_LOCATION}/rust"
 DONE_RUST_MARKER="${RUST_HOME}/done"
 export RUSTUP_HOME="${RUST_HOME}"      # needed since rustup doesn't have --prefix
 export CARGO_HOME="${RUST_HOME}/cargo" # ditto
-if [ -f "${DONE_RUST_MARKER}" ]; then
+if in_path rustc && in_path cargo; then
+    echo "  rust already in env"
+elif [ -f "${DONE_RUST_MARKER}" ]; then
     echo "  rust already installed"
 else
     cd "${SCRIPT_LOCATION}"
@@ -57,7 +63,9 @@ echo "export CARGO_HOME=\"${RUST_HOME}/cargo\"" >>"${DEBUG_ENV}"
 echo "export PATH=\"${CARGO_HOME}/bin:\$PATH"\" >>"${DEBUG_ENV}"
 
 # python libraries
-python3 -m pip install --upgrade maturin mpmath sly matplotlib z3-solver
+echo "Installing python dependencies"
+python3 -m pip install --upgrade --quiet maturin mpmath sly matplotlib z3-solver
+echo "  Done"
 
 # snake_egg
 echo "Installing snake_egg (IanBriggs fork)"

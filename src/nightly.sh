@@ -3,66 +3,54 @@
 set -x
 set -e
 
+# Locations
 SCRIPT_DIR=$(dirname "${0}")
 SCRIPT_LOCATION=$(readlink -f "${SCRIPT_DIR}")
-
-check_date=$(date +%s)
 GIT_LOCATION=$(cd "${SCRIPT_LOCATION}" && cd .. && pwd)
 NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
-THIS_NIGHTLY_LOCATION=${NIGHTLIES_LOCATION}/${check_date}
 
+# Data
+NIGHTLY_TIMESTAMP=$(date +%s)
+CORES="$(getconf _NPROCESSORS_ONLN)"
+THIS_NIGHTLY_LOCATION=${NIGHTLIES_LOCATION}/${NIGHTLY_TIMESTAMP}
+
+# Make the final directory
 mkdir -p "${NIGHTLIES_LOCATION}"
 mkdir "${THIS_NIGHTLY_LOCATION}"
 
-# Make temporary splash page for two nightlies
-cd "${THIS_NIGHTLY_LOCATION}"
-# cat <<EOF >index.html
-# <!doctype html>
-# <meta charset="utf-8" />
-# <title>Megalibm Results for $(date +%Y-%m-%d)</title>
-# <h1>TEMPORARY SPLIT NIGHTLY</h1>
-# <a href="identities.html">Identity generation nightly</a><br>
-# <a href="generated/index.html">Function generation nightly</a>
-# EOF
-
-cat <<EOF >index.html
-<!doctype html>
-<head>
-  <meta http-equiv="refresh" content="5; URL=generated/index.html" />
-</head>
-<body>
-  <p>If you are not redirected in five seconds, <a href="generated/index.html">click here</a>.</p>
-</body>
-EOF
-
-# Run the identities nightly
-# time "${SCRIPT_LOCATION}"/megalibm_template_identities "${GIT_LOCATION}/benchmarks/"
-
-# Run the generation nightly, this is more envolved
-time "${SCRIPT_LOCATION}"/megalibm_generate "${GIT_LOCATION}/benchmarks/"
-
-#Time functions
+# Clean possible remenants
 rm -rf "${GIT_LOCATION}/measurement/timing/generated"
-mv "${THIS_NIGHTLY_LOCATION}/generated/" "${GIT_LOCATION}/measurement/timing/"
+rm -rf "${GIT_LOCATION}/measurement/error/generated"
+
+# Run the generation in the final directory
+cd "${THIS_NIGHTLY_LOCATION}"
+time "${SCRIPT_LOCATION}"/megalibm_generate "${GIT_LOCATION}/benchmarks"
+
+# Move generated to timing dir
+mv "${THIS_NIGHTLY_LOCATION}/generated" "${GIT_LOCATION}/measurement/timing/"
+
+# Time functions
 cd "${GIT_LOCATION}/measurement/timing/"
-make -j6 build
+make -j"${CORES}" build
 make -j1 run
 
-#Error measurement
-rm -rf "${GIT_LOCATION}/measurement/error/generated"
+# Move generated to error dir
 mv "${GIT_LOCATION}/measurement/timing/generated" "${GIT_LOCATION}/measurement/error/"
+
+# Error measurement
 cd "${GIT_LOCATION}/measurement/error/"
-make -j6 build
-make -j6 run
-./scripts/plot_error.py generated
-mv generated "${THIS_NIGHTLY_LOCATION}"
+make -j"${CORES}" build
+make -j"${CORES}" run
 
-# Gather output files
+# Move generated to final directory
+mv "${GIT_LOCATION}/measurement/error/generated" "${THIS_NIGHTLY_LOCATION}/generated/"
 
-if [ "$(hostname)" = "warfa" ] && [ "${USER}" != "ibriggs" ]; then
-    scp -r "${THIS_NIGHTLY_LOCATION}" uwplse.org:/var/www/megalibm/
-fi
+# Generate website
+cd "${THIS_NIGHTLY_LOCATION}"
+"${SCRIPT_LOCATION}"/make_website generated
 
-if command -v nightly-results &>/dev/null; then
-    nightly-results url https://megalibm.uwplse.org/"${check_date}/"
+# Copy data and send notification if on the nightly runner
+if [ "$(hostname)" = "nightly" ]; then
+  scp -r "${THIS_NIGHTLY_LOCATION}" uwplse.org:/var/www/megalibm/
+  nightly-results url https://megalibm.uwplse.org/"${NIGHTLY_TIMESTAMP}/"
 fi

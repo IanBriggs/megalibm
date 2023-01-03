@@ -318,12 +318,12 @@ def main(argv):
 if __name__ == "__main__":
     logger = Logger(color=Logger.cyan, def_color=Logger.green)
 
-    retcode = 130  # meaning "Script terminated by Control-C"
+    return_code = 130  # meaning "Script terminated by Control-C"
 
     try:
-        retcode = main(sys.argv)
+        return_code = main(sys.argv)
     except KeyboardInterrupt:
         print("")
         print("Goodbye")
 
-    sys.exit(retcode)
+    sys.exit(return_code)

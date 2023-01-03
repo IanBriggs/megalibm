@@ -1,6 +1,7 @@
 import lego_blocks
 import fpcore
 
+
 class Ldexp(lego_blocks.LegoBlock):
     def __init__(self, numeric_type, in_names, out_names):
         super().__init__(numeric_type, in_names, out_names)
@@ -13,7 +14,8 @@ class Ldexp(lego_blocks.LegoBlock):
             "type": self.numeric_type.c_type(),
             "c_ldexp": self.numeric_type.c_ldexp(),
         }
-        fmt["ldexp"] = "{}({}, {})".format(fmt["c_ldexp"], self.in_names[0], self.in_names[1])
+        fmt["ldexp"] = "{}({}, {})".format(
+            fmt["c_ldexp"], self.in_names[0], self.in_names[1])
 
         lines = [
             "{type} {out} = {ldexp};".format(**fmt),

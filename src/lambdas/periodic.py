@@ -32,6 +32,10 @@ class Periodic(types.Transform):
         self.period = period
         super().__init__(in_node)
 
+    def __str__(self):
+        inner = str(self.in_node)
+        return f"(periodic {self.period} {inner})"
+
     def replace_lambda(self, search, replace):
         if self == search:
             return replace
@@ -91,7 +95,8 @@ class Periodic(types.Transform):
 
         # Get periods and try both [0, period] and [-period/2, period/2]
         periods = find_periods(out_type.function)
-        periods = {t_arg for s, t_arg in periods if s == Variable("x")}
+        periods = [t_arg for s, t_arg in periods if s == Variable("x")]
+        periods.sort(key=float, reverse=True)
         new_holes = list()
         for p in periods:
             if float(p) == 0.0:
