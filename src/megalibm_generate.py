@@ -182,6 +182,7 @@ def generate_all_code(function, domain):
 
     my_lambdas = synthesize(target)
 
+    gen_lams = list()
     gen_sigs = list()
     gen_srcs = list()
     gen_func_names = list()
@@ -193,6 +194,7 @@ def generate_all_code(function, domain):
             gen_sigs.append(sig)
             gen_srcs.append(src)
             gen_func_names.append(func_name)
+            gen_lams.append(lam)
         except cmd_sollya.FailedGenError:
             logger.warning("Unable to generate polynomial, skipping")
 
@@ -281,12 +283,15 @@ def generate_all_code(function, domain):
 
     func_body = function.to_html()
 
+    generators = [str(lam) for lam in gen_lams]
+
     # Error measurement
     main_lines = assemble_error_main(name, func_body,
                                      mpfr_func_name,
                                      [libm_func_name] + gen_func_names,
+                                     generators,
                                      header_fname, domains)
-    main_fname = "main.c"
+    main_fname = "error_main.c"
     with open(main_fname, "w") as f:
         f.write("\n".join(main_lines))
 
@@ -365,9 +370,9 @@ if __name__ == "__main__":
     timer.start()
 
     try:
-        retcode = main(sys.argv)
+        return_code = main(sys.argv)
     except KeyboardInterrupt:
-        retcode = 130  # meaning "Script terminated by Control-C"
+        return_code = 130  # meaning "Script terminated by Control-C"
         print("")
         print("Goodbye")
 
@@ -375,4 +380,4 @@ if __name__ == "__main__":
 
     logger("Elapsed time: {:4f} sec", timer.elapsed())
 
-    sys.exit(retcode)
+    sys.exit(return_code)

@@ -23,13 +23,13 @@ class Narrow(types.Transform):
         inner = str(self.in_node)
         inf = self.narrow_to.inf
         sup = self.narrow_to.sup
-        return f"(Narrow {inner} [{inf} {sup}])"
+        return f"(Narrow [{inf}, {sup}] {inner})"
 
     def __repr__(self):
         body = repr(self.in_node)
         inf = self.narrow_to.inf
         sup = self.narrow_to.sup
-        return f"MinimaxPolynomial({inner}, [{inf}, {sup}])"
+        return f"Narrow([{inf}, {sup}], {body})"
 
 
     def replace_lambda(self, search, replace):

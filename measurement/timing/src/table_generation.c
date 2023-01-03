@@ -22,14 +22,13 @@ fill_inputs(double low, double high, size_t samples, double *inputs)
   }
 }
 
-
 static double time_function_using_inputs(unop_fp64 f, size_t samples, double *inputs, size_t iters)
 {
   clock_t start, end;
   double cpu_time_used, avg_time_per_sample;
 
   start = clock();
-  for (size_t iter=0; iter < iters; iter++)
+  for (size_t iter = 0; iter < iters; iter++)
   {
     for (size_t i = 0; i < samples; i++)
     {
@@ -37,25 +36,24 @@ static double time_function_using_inputs(unop_fp64 f, size_t samples, double *in
     }
   }
   end = clock();
-  cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-  avg_time_per_sample = (double) (cpu_time_used / (iters * samples) * MULT_ROUNDING_FACTOR);
+  cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+  avg_time_per_sample = (double)(cpu_time_used / (iters * samples) * MULT_ROUNDING_FACTOR);
   return avg_time_per_sample;
 }
 
-double*
+double *
 time_functions(double low, double high,
-                       size_t func_count, entry *funcs, size_t samples, size_t iters)
+               size_t func_count, entry *funcs, size_t samples, size_t iters)
 {
-  double* function_times = (double*) xmalloc(sizeof(double)*func_count);
+  double *function_times = (double *)xmalloc(sizeof(double) * func_count);
 
   double *inputs = (double *)xmalloc(sizeof(double) * samples);
   fill_inputs(low, high, samples, inputs);
 
-
-  for(size_t fidx = 0; fidx < func_count; fidx++)
+  for (size_t fidx = 0; fidx < func_count; fidx++)
   {
     unop_fp64 f = funcs[fidx].func;
-    function_times[fidx] = time_function_using_inputs(f, samples, inputs, iters); 
+    function_times[fidx] = time_function_using_inputs(f, samples, inputs, iters);
   }
 
   xfree(inputs);
@@ -63,14 +61,13 @@ time_functions(double low, double high,
   return function_times;
 }
 
-void free_memory(double * function_times) 
+void free_memory(double *function_times)
 {
   assert(function_times != NULL);
   xfree(function_times);
 }
 
-void
-print_json(size_t func_count, entry *funcs,
+void print_json(size_t func_count, entry *funcs,
                 double *times,
                 char *func_name, char *func_body)
 {
@@ -87,7 +84,7 @@ print_json(size_t func_count, entry *funcs,
     printf("    \"%s\": {\n", funcs[i].name);
     printf("      \"avg_time_per_sample\": %1.8e", times[i]);
     printf("\n    }");
-    if (i != func_count-1)
+    if (i != func_count - 1)
     {
       printf(",");
     }

@@ -30,7 +30,7 @@ class FailedGenError(Exception):
 class Result():
 
     default_config = {
-        "prec": 128,
+        "precision": 128,
         "analysis_bound": 2**-20,
         "minimize_target": "relative",
     }
@@ -56,7 +56,7 @@ class Result():
 
         # Try [inf - small, sup]
         if not have_res:
-            logger("Sollya call failed, retrying with symmetric mirrored domain")
+            logger.warning("Sollya call failed, trying [inf - small, sup] ")
             diff = domain.sup - domain.inf
             new_domain = Interval(domain.inf - fpcore.ast.Number("0.00390625"),
                                   domain.sup)
@@ -68,7 +68,7 @@ class Result():
 
         # Try [inf, sup + small]
         if not have_res:
-            logger("Sollya call failed, retrying with symmetric mirrored domain")
+            logger.warning("Sollya call failed, trying [inf, sup + small]")
             diff = domain.sup - domain.inf
             new_domain = Interval(domain.inf,
                                   domain.sup + fpcore.ast.Number("0.00390625"))
@@ -78,23 +78,11 @@ class Result():
         if not have_res:
             have_res = self._try_run()
 
-
-        # Try [inf - (sup-inf), sup]
+        # Try [inf-small, sup + small]
         if not have_res:
-            logger("Sollya call failed, retrying with mirrored domain")
+            logger.warning("Sollya call failed, trying [inf, sup + small]")
             diff = domain.sup - domain.inf
-            new_domain = Interval(domain.inf - diff, domain.sup)
-            self.domain = new_domain
-            self._generate_query()
-            have_res = self._try_cache()
-        if not have_res:
-            have_res = self._try_run()
-
-        # Try [inf - (sup-inf), sup+small]
-        if not have_res:
-            logger("Sollya call failed, retrying with symmetric mirrored domain")
-            diff = domain.sup - domain.inf
-            new_domain = Interval(domain.inf - diff,
+            new_domain = Interval(domain.inf - fpcore.ast.Number("0.00390625"),
                                   domain.sup + fpcore.ast.Number("0.00390625"))
             self.domain = new_domain
             self._generate_query()
@@ -142,7 +130,7 @@ class Result():
         monomials_str = ", ".join([str(m) for m in self.monomials])
         mid = (float(self.domain.inf) + float(self.domain.sup))/2
         lines = [
-            'prec = {}!;'.format(self.config["prec"]),
+            'prec = {}!;'.format(self.config["precision"]),
             'algo_analysis_bound = {};'.format(self.config["analysis_bound"]),
             'I = [{};{}];'.format(
                 self.domain.inf.to_sollya(), self.domain.sup.to_sollya()),
@@ -152,13 +140,13 @@ class Result():
             'p = remez(f, monomials, I);',
         ]
 
-        all_coef = ['coeff(p,{})'.format(m) for m in self.monomials]
-        fmt_coef = '@"\\", \\""@'.join(all_coef)
+        all_coeff = ['coeff(p,{})'.format(m) for m in self.monomials]
+        fmt_coeff = '@"\\", \\""@'.join(all_coeff)
 
         more_lines = [
             'display = hexadecimal!;',
             'print("{");',
-            'print("  \\"coefficients\\" : [\\""@{}@"\\"]");'.format(fmt_coef),
+            'print("  \\"coefficients\\" : [\\""@{}@"\\"]");'.format(fmt_coeff),
             'print("}");',
             'quit;'
         ]
@@ -246,7 +234,7 @@ class Result():
 
     def _parse_output(self):
         data = json.loads(self.stdout)
-        for coef in data["coefficients"]:
-            if coef == "NaN":
+        for coeff in data["coefficients"]:
+            if coeff == "NaN":
                 raise json.JSONDecodeError("Sollya made NaN", "stdin", -1)
         self.coefficients = data["coefficients"]
