@@ -312,6 +312,7 @@ def make_benchmark_page(benchmark_data,
     d = today.day
     parts = [f"""
     <!doctype html>
+    <meta charset="UTF-8">
     <html>
 
     <head>
@@ -429,6 +430,7 @@ def make_main_page(generation_dir, benchmark_names, pareto_images, emojis):
     d = today.day
     parts = [f"""
     <!doctype html>
+    <meta charset="UTF-8">
     <html>
 
     <head>
