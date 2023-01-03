@@ -1,0 +1,5 @@
+(FPCore NPB_fastflow_test3b_f3 (t)
+    :name "NPB fastflow test3b f2"
+    :pre (<= 0 t INFINITY)
+
+    (+ (/ (* t (sin t)) (tan t)) (* (+ (/ (* (sin t) (cos (/ 1 t))) (tan (/ 1 t))) (* (* (tan (/ 1 t)) (atan t)) (cos t))) 3.1415)))

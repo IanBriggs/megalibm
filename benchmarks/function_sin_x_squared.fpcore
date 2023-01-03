@@ -1,0 +1,5 @@
+(FPCore sin_x_squared (x)
+    :name "sin x squared"
+    :pre (< (- INFINITY) x INFINITY)
+
+    (sin (* x x)))
