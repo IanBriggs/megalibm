@@ -2,4 +2,4 @@
     :name "herbie web query 822"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (log (log (+ 1.0 (exp (exp x))))))
+    (fmax (tanh x) 0.0))

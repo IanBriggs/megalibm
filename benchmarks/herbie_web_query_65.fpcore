@@ -2,4 +2,4 @@
     :name "herbie web query 65"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (* 611.21 (exp (* (- 18.678 (/ temperature 234.5)) (/ temperature (+ 257.14 temperature))))))
+    (* 2 (sin (pow x 2))))

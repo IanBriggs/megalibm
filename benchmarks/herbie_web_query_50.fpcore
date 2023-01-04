@@ -2,4 +2,4 @@
     :name "herbie web query 50"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (* 0.5 (+ 1 (tanh (/ x 2)))))
+    (* (sin x) (sin x)))

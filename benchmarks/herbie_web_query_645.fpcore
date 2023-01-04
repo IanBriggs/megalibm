@@ -2,4 +2,4 @@
     :name "herbie web query 645"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (/ 1 (+ 1 (exp (- x)))))
+    (/ (sin (sqrt x)) x))

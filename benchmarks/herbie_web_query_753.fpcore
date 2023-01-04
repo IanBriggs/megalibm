@@ -2,4 +2,4 @@
     :name "herbie web query 753"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (exp (lgamma (+ (sqrt n) 1.0))))
+    (cos (+ (log x) (sqr x))))

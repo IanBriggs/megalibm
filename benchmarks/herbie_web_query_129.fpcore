@@ -2,4 +2,4 @@
     :name "herbie web query 129"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (+ (cosh x) (sinh x)))
+    (+ (/ 1 (pow x 4)) (pow x 4)))

@@ -2,4 +2,4 @@
     :name "herbie web query 775"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (expt a 4))
+    (exp (* (log x) 1.5)))

@@ -2,4 +2,4 @@
     :name "herbie web query 598"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (/ (sqrt (+ x 1)) (cos x)))
+    (/ (cos x) (sin 0)))

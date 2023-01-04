@@ -2,4 +2,4 @@
     :name "herbie web query 37"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (* (fmax n 1) (sin (/ 180 (fmax n 1)))))
+    (* (fmax x 1) (sin (/ 180 (fmax x 1)))))
