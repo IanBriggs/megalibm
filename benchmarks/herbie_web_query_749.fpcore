@@ -2,4 +2,4 @@
     :name "herbie web query 749"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (ceil (tan x)))
+    (cos (cos x)))

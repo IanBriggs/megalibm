@@ -2,4 +2,4 @@
     :name "herbie web query 754"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (cos (- (log x) x)))
+    (cosh (* 3 (acosh x))))

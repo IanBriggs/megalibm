@@ -2,4 +2,4 @@
     :name "herbie web query 752"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (cos (* 8 (acos x))))
+    (cos (pow x 2)))

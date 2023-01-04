@@ -2,4 +2,4 @@
     :name "herbie web query 488"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (- x (sin x)))
+    (/ (* (exp x) (- 1 (exp x))) (pow (+ 1 (exp x)) 3)))

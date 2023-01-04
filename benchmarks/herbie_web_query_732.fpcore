@@ -2,4 +2,4 @@
     :name "herbie web query 732"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (asin (- 1 x)))
+    (atan (exp (/ 1.0 (sin x)))))

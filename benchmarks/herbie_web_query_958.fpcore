@@ -2,4 +2,4 @@
     :name "herbie web query 958"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (sin (/ (* x (atan 1)) 45)))
+    (sinh (/ (pow x 2) (pow e x))))
