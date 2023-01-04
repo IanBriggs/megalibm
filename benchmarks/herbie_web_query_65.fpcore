@@ -1,0 +1,5 @@
+(FPCore herbie_web_query_65 (x)
+    :name "herbie web query 65"
+    :pre (<= (- INFINITY) x INFINITY)
+
+    (* 611.21 (exp (* (- 18.678 (/ temperature 234.5)) (/ temperature (+ 257.14 temperature))))))

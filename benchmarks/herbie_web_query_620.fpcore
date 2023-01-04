@@ -1,0 +1,5 @@
+(FPCore herbie_web_query_620 (x)
+    :name "herbie web query 620"
+    :pre (<= (- INFINITY) x INFINITY)
+
+    (/ 1 (acos x)))

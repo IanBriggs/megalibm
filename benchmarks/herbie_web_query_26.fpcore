@@ -1,0 +1,5 @@
+(FPCore herbie_web_query_26 (x)
+    :name "herbie web query 26"
+    :pre (<= (- INFINITY) x INFINITY)
+
+    (* (cos (/ t 3)) (cos (/ (+ pi t) 3))))
