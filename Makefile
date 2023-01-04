@@ -14,7 +14,7 @@ build: ${PY_BINS}
 
 # Link python scripts into bin
 bin/%: src/%.py requirements/done | bin
-	cd bin && ln -sF ../src/$*.py $*
+	cd bin && $(RM) $* && ln -sF ../src/$*.py $*
 
 # Create bin
 bin:
@@ -27,7 +27,7 @@ nightly: bin/nightly.sh
 
 # Link nightly script into bin
 bin/nightly.sh: src/nightly.sh build
-	cd bin && ln -sF ../src/nightly.sh nightly.sh
+	cd bin && $(RM) nightly.sh && ln -sF ../src/nightly.sh nightly.sh
 
 # Build requirements
 .PHONY: requirements
