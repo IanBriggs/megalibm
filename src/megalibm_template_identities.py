@@ -219,9 +219,9 @@ if __name__ == "__main__":
     timer.start()
 
     try:
-        retcode = main(sys.argv)
+        return_code = main(sys.argv)
     except KeyboardInterrupt:
-        retcode = 130  # meaning "Script terminated by Control-C"
+        return_code = 130  # meaning "Script terminated by Control-C"
         print("")
         print("Goodbye")
 
@@ -229,4 +229,4 @@ if __name__ == "__main__":
 
     logger("Elapsed time: {:4f} sec", timer.elapsed())
 
-    sys.exit(retcode)
+    sys.exit(return_code)

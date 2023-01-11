@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function cosine degrees"
+  :pre (< (- INFINITY) x INFINITY)
+
+  (cos (* x (/ PI 180))))

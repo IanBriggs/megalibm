@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function sine degrees"
+  :pre (< (- INFINITY) x INFINITY)
+
+  (sin (* x (/ PI 180))))

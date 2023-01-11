@@ -16,11 +16,11 @@ timer = Timer()
 
 ITERS = [
     10,  # Main iters for finding identities
-    6,  # Iters for backoff dedup
-    5,  # Iters for simple dedup
+    6,  # Iters for backoff deduplication
+    5,  # Iters for simple deduplication
     3,  # Iters for definition finding I(x) - f(x) = 0
     3,  # Iters for definition finding I(x) / f(x) = 1
-    5,  # Iters for generator dedup
+    5,  # Iters for generator deduplication
 ]
 
 period, inflection = snake_egg.vars("period inflection")
@@ -98,7 +98,7 @@ def expr_size(expr, _cache=dict()):
     return size
 
 
-def filter_dedup(exprs, max_iters, use_simple):
+def filter_deduplication(exprs, max_iters, use_simple):
     timer = Timer()
     timer.start()
 
@@ -268,7 +268,7 @@ def extract_identities(func):
     old_len = len(exprs) + 1
     while len(exprs) < old_len:
         old_len = len(exprs)
-        exprs = filter_dedup(
+        exprs = filter_deduplication(
             exprs, ITERS[1], False)
 
     exprs = filter_defs_sub(exprs, func, ITERS[3])
@@ -276,7 +276,7 @@ def extract_identities(func):
 
     exprs = [snake_egg_rules.egg_to_fpcore(expr) for expr in exprs]
     exprs = [expr.substitute(periodic(Number("0")), thefunc(Variable("x"))) for expr in exprs]
-    # exprs = dedup_generators(exprs, ITERS[5])
+    # exprs = deduplication_generators(exprs, ITERS[5])
 
     lines = [str(expr) for expr in exprs]
     lines.sort(reverse=True)

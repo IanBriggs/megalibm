@@ -4,5 +4,5 @@
  :name "fpbench Kahan's exp quotient"
  :herbie-target (if (and (< x 1) (> x -1)) (/ (- (exp x) 1) (log (exp x))) (/ (- (exp x) 1) x))
  :pre (< (- INFINITY) x INFINITY)
- 
+
  (/ (- (exp x) 1) x))

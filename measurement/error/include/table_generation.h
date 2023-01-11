@@ -33,15 +33,17 @@ double *generate_linear_regions(double low, double high, size_t regions);
 
 void free_regions(double *regions);
 
-error **generate_table(size_t region_count, double *regions, size_t smaples,
+error **generate_table(size_t region_count, double *regions, size_t samples,
                        unop_mpfr oracle,
                        size_t func_count, entry *funcs);
 
 void free_table(size_t func_count, error **errorss);
 
-void print_json(size_t region_count, double *regions,
+void print_json(char *func_name,
+                char *func_body,
+                size_t generator_count, char **generators,
+                size_t region_count, double *regions,
                 size_t func_count, entry *funcs,
-                error **errorss,
-                char *func_name, char *func_body);
+                error **errorss);
 
 #endif

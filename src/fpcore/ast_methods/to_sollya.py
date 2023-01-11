@@ -39,6 +39,9 @@ def to_sollya(self):
     if len(s_args) == 2 and self.op in {"+", "-", "*", "/"}:
         return "({}{}{})".format(s_args[0], self.op, s_args[1])
 
+    if len(s_args) == 2 and self.op == "pow":
+        return "({})^({})".format(s_args[0], s_args[1])
+
     return "{}({})".format(self.op, ", ".join(s_args))
 
 

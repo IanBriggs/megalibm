@@ -1,0 +1,5 @@
+(FPCore NPB_fastflow_test3b_f2 (x)
+    :name "NPB fastflow test3b f2"
+    :pre (<= (- INFINITY) x INFINITY)
+
+    (/ (+ (/ 1 (* 2.0 x)) (atan (/ 1.0 x))) (sin (/ 1 x))))

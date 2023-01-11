@@ -1,0 +1,5 @@
+(FPCore herbie_web_query_73 (x)
+    :name "herbie web query 73"
+    :pre (<= (- INFINITY) x INFINITY)
+
+    (* 6378136.99911 (log (tan (+ (* 0.00872664626 x) 0.785398163397)))))

@@ -1,0 +1,5 @@
+(FPCore cos_pi_x (x)
+    :name "cos pi x"
+    :pre (< (- INFINITY) x INFINITY)
+
+    (cos (* PI x)))

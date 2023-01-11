@@ -1,0 +1,5 @@
+(FPCore derivative_of_sinc (x)
+    :name "derivative of sinc"
+    :pre (< (- INFINITY) x INFINITY)
+
+    (/ (- (* x (cos x)) (sin x)) (pow x 2)))

@@ -13,8 +13,8 @@ def simplify_with_egraph(expr):
     egraph.run(snake_egg_rules.rules,
                iter_limit=10,
                time_limit=600,
-               node_limit=10_000,
-               use_simple_scheduler=True)
+               node_limit=20_000,
+               use_simple_scheduler=False)
     simplified = egraph.extract(id)
     return snake_egg_rules.egg_to_fpcore(simplified)
 

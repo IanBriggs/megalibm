@@ -1,0 +1,5 @@
+(FPCore herbie_web_query_808 (x)
+    :name "herbie web query 808"
+    :pre (<= (- INFINITY) x INFINITY)
+
+    (fmax (tanh x) 0.0))

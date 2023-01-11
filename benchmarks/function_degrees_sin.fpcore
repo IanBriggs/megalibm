@@ -1,0 +1,5 @@
+(FPCore degrees_sin (x)
+    :name "degrees sin"
+    :pre (< (- INFINITY) x INFINITY)
+
+    (sin (* (/ PI 180) x)))

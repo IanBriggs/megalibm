@@ -1,0 +1,5 @@
+(FPCore sinc (x)
+    :name "sinc"
+    :pre (< (- INFINITY) x INFINITY)
+
+    (/ (sin x) x))

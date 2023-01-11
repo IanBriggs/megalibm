@@ -19,7 +19,7 @@ def assemble_functions(functions, header_fname):
 
 
 def assemble_error_main(func_name, func_body, mpfr_func, other_funcs,
-                        header_fname, domains):
+                        generators, header_fname, domains):
     lines = ["#include \"table_generation.h\"",
              "#include \"xmalloc.h\"",
              "#include \"{}\"".format(header_fname),
@@ -31,6 +31,15 @@ def assemble_error_main(func_name, func_body, mpfr_func, other_funcs,
              "entry ENTRIES[ENTRY_COUNT] = {"]
     for func in other_funcs:
         lines.append("  {{{}, \"{}\"}},".format(func, func))
+
+    lines.extend([
+        "};",
+        "",
+        "#define GENERATOR_COUNT ({})".format(len(generators)),
+        "char* GENERATORS[GENERATOR_COUNT] = {"
+    ])
+    for gen in generators:
+        lines.append("     \"{}\",".format(gen))
 
     lines.extend(["};",
                   "",
@@ -59,8 +68,12 @@ def assemble_error_main(func_name, func_body, mpfr_func, other_funcs,
         "  error** errorss = generate_table(region_count, regions, samples,",
         "                                   {},".format(mpfr_func),
         "                                   ENTRY_COUNT, ENTRIES);",
-        "  print_json(region_count, regions, ENTRY_COUNT, ENTRIES, errorss, \"{}\", \"{}\");".format(
-            func_name, func_body),
+        "  print_json(\"{}\",".format(func_name),
+        "             \"{}\",".format(func_body),
+        "             GENERATOR_COUNT, GENERATORS,",
+        "             region_count, regions,",
+        "             ENTRY_COUNT, ENTRIES,",
+        "             errorss);",
         "  free_table(ENTRY_COUNT, errorss);",
         "  mpfr_free_cache();",
         "  return 0;",

@@ -5,5 +5,5 @@
  :cite (hamming-1987 herbie-2015)
  :fpbench-domain textbook
  :pre (< (- INFINITY) x INFINITY)
- 
+
  (/ (- x (sin x)) (- x (tan x))))
