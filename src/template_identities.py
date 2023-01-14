@@ -27,7 +27,7 @@ period, inflection = snake_egg.vars("period inflection")
 
 raw_template_rules = [
      ["capture-mirror",    thefunc(sub(inflection, "x")),      mirror(inflection)],
-     ["capture-periodic",  thefunc(add(period, "x")),          periodic(period)],
+     ["capture-periodic",  thefunc(sub("x", period)),          periodic(period)],
 ]
 template_rules = list()
 for l in raw_template_rules:

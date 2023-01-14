@@ -318,6 +318,7 @@ raw_rules = [
   ["sin-PI/2",     sin(div(CONST_PI(), 2)),                        1],                       #div 2 != 0 ---> ()
   ["sin-PI",       sin(CONST_PI()),                                0],
   ["sin-+PI",      sin(add(x, CONST_PI())),                        neg(sin(x))],
+  ["sin+-PI",      sin(sub(x, CONST_PI())),                        neg(sin(x))],
   ["sin-+PI/2",    sin(add(x, div(CONST_PI(), 2))),                cos(x)],                  #div 2 != 0 ---> ()
   ["cos-PI/6",     cos(div(CONST_PI(), 6)),                        div(sqrt(3), 2)],         #sqrt #div 6 != 0 ---> 3 >= 0 && 2 != 0
   ["cos-PI/4",     cos(div(CONST_PI(), 4)),                        div(sqrt(2), 2)],         #sqrt #div 4 != 0 ---> 2 >= 0 && 2 != 0
@@ -523,6 +524,7 @@ raw_rules = [
   #["div-factor",      div(mul(a, b), a),  b],
   #["neg-div-factor",  div(neg(mul(a, b)), a),  neg(b)],
   ["inject_2pi", x, sub(add(x, mul(2, CONST_PI())), mul(2, CONST_PI()))],
+  ["inject_neg_2pi", x, add(sub(x, mul(2, CONST_PI())), mul(2, CONST_PI()))],
   ["fraction_cancellation", add(sub(div(x, 2), x), div(x, 2)), 0 ],
 ]
 
