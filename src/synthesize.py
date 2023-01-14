@@ -15,7 +15,7 @@ def synthesize(target, fuel=10):
         lambdas.MinimaxPolynomial,
         lambdas.Horner,
         lambdas.Periodic,
-        lambdas.InductiveRecons
+        lambdas.PeriodicRecons
     ]
 
     # Each list item is a lambda expression with Hole elements
