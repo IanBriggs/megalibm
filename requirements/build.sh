@@ -82,7 +82,7 @@ else
     echo "  Cloning snake_egg"
     git clone https://github.com/IanBriggs/snake-egg.git snake_egg \
         >>"${LOG}" 2>&1
-
+    
     echo "  Building snake_egg"
     cd snake_egg
     make >>"${LOG}" 2>&1

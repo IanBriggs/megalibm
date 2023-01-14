@@ -332,14 +332,20 @@ def handle_work_item(func):
     return func
 
 
-def main(argv):
+def main():
     logger.warning("Currently unsound")
 
-    args = parse_arguments(argv)
+    # args = parse_arguments(argv)
+    # function_x_plus_sine_x.fpcore
+    # core_function_cos.fpcore
+    # core_function_sin.fpcore
+    args = ["/Users/yashlad/workspace/megalibm/benchmarks/function_x_plus_sine_x.fpcore"]
+    # args = ["/Users/yashlad/workspace/megalibm/benchmarks/core_function_cos.fpcore"]
+
 
     # Read all the files, each file may have multiple functions
     work_items = list()
-    for fname in args.fnames:
+    for fname in args:
         logger("Reading: {}", fname)
         with open(fname, "r") as f:
             text = f.read()
