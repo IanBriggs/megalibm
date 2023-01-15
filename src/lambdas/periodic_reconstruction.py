@@ -112,7 +112,7 @@ class PeriodicRecons(types.Transform):
         new_holes = list()
         for s, p in periods:
             # We only care about s which are not handled by Periodic lambda
-            if float(p) == 0.0 or s.contains_op("thefunc") or s == Variable("x"):
+            if p.contains_op("thefunc") or float(p) == 0.0 or s.contains_op("thefunc") or s == Variable("x"):
                 continue
             # Use e-graph intersection to find the s reconstruction and check if its valid
             extracted = find_reconstruction.get_reconstruction(s)

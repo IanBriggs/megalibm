@@ -27,7 +27,9 @@ def has_period(func: FPCore, period):
     f_period = float(period)
     for s, t_arg in periods:
         # TODO: epsilon cmp is not proper here
-        if abs(float(t_arg) - f_period) < 1e-16:
+        if t_arg.contains_op("thefunc") or float(t_arg) == 0.0:
+            continue
+        if abs(abs(float(t_arg)) - f_period) < 1e-16:
             return True
 
     # Didn't find it
