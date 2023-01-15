@@ -45,8 +45,8 @@ def get_reconstruction(s_expr):
                 use_simple_scheduler=True)
     
     egraph2.run(snake_egg_rules.rules,
-                iter_limit=60,
-                time_limit=10,
+                iter_limit=10,
+                time_limit=60,
                 node_limit=1000,
                 use_simple_scheduler=True)
 
