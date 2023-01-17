@@ -117,7 +117,8 @@ def to_snake_egg(self, to_rule):
     if len(se_args) == 3 and self.op in _TRIOP_MAPPING:
         return _TRIOP_MAPPING[self.op](se_args[0], se_args[1], se_args[2])
 
-    msg = f"Operation not yet supported for to_snake_egg: '{self.op}'"
+    msg = ("Operation not supported for to_snake_egg: "
+          + f"'{self.op}' with {len(se_args)} arguments")
     raise NotImplementedError(msg)
 
 
