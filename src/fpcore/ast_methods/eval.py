@@ -112,6 +112,10 @@ def eval(self, assignment):
     if len(f_args) == 2 and self.op in _BINOP_MAPPING:
         return _BINOP_MAPPING[self.op](f_args[0], f_args[1])
 
+    # TODO: What if we want the function to be evaluated?
+    if self.op == "thefunc":
+        return mpmath.mpf("NaN")
+
     msg = f"Operation not yet supported for eval: '{self.op}'"
     raise NotImplementedError(msg)
 
