@@ -2,4 +2,4 @@
     :name "herbie web query 696"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (/ 1.0 (tanh x)))
+    (/ 1 (tanh x)))

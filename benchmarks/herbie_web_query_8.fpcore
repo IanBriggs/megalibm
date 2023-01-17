@@ -2,4 +2,4 @@
     :name "herbie web query 8"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (* (- (sinh x) 1) (/ 1.0 2.0)))
+    (* (- (sinh x) 1) (/ 1 2)))

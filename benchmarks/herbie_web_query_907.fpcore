@@ -2,4 +2,4 @@
     :name "herbie web query 907"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (pow (sqrt f) (/ 1 3)))
+    (pow x (fmod (sin x) 1)))

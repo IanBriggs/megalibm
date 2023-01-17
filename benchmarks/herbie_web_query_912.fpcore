@@ -2,4 +2,4 @@
     :name "herbie web query 912"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (round (* 1000 (exp (/ (- x) 60)))))
+    (sin (* 2 x)))

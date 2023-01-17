@@ -2,4 +2,4 @@
     :name "herbie web query 908"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (pow (tan x) (sin (pow x (sqrt (cos x))))))
+    (round (* 1000 (exp (/ (- x) 60)))))

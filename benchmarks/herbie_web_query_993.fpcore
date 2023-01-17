@@ -2,4 +2,4 @@
     :name "herbie web query 993"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (sqrt (exp x)))
+    (tan (+ x (/ PI 3))))

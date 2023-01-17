@@ -2,4 +2,4 @@
     :name "herbie web query 360"
     :pre (<= (- INFINITY) x INFINITY)
 
-    (- (log (+ 1.0 x)) 1))
+    (- (log (+ 1 x)) 1))
