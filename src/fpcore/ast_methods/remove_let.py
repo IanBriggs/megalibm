@@ -9,6 +9,8 @@ class FPCoreNameError(Exception):
 
     def __init__(self, name):
         self.name = name
+        msg = f"name '{name}' is note defined in the FPCore"
+        super(FPCoreNameError, self).__init__(msg)
 
 
 @add_method(ASTNode)
