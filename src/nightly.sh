@@ -51,6 +51,5 @@ cd "${THIS_NIGHTLY_LOCATION}"
 
 # Copy data and send notification if on the nightly runner
 if [ "$(hostname)" = "nightly" ]; then
-  scp -r "${THIS_NIGHTLY_LOCATION}" uwplse.org:/var/www/megalibm/
-  nightly-results url https://megalibm.uwplse.org/"${NIGHTLY_TIMESTAMP}/"
+  nightly-results publish "${THIS_NIGHTLY_LOCATION}"
 fi
