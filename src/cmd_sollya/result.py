@@ -18,6 +18,7 @@ logger = Logger(level=Logger.HIGH, color=Logger.green)
 timer = Timer()
 
 
+TIMEOUT = 60 * 5
 CACHE = dict()
 
 
@@ -176,8 +177,16 @@ class Result():
                                   cwd=my_dir) as p:
 
                 # Make sure that the run is complete and grab output
-                # todo: should there be a timeout?
-                raw_out, raw_err = p.communicate()
+                # todo: should there be a timeout? yes....
+                try:
+                    raw_out, raw_err = p.communicate(timeout=TIMEOUT)
+                except subprocess.TimeoutExpired:
+                    p.kill()
+                    logger.warning("Timeout reached, killing Sollya")
+                    self.stdout = ""
+                    self.stderr = ""
+                    self.returncode = -1
+                    return
                 self.stdout = raw_out.decode("utf8").strip()
                 self.stderr = raw_err.decode("utf8").strip()
                 self.returncode = p.returncode
