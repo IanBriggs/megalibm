@@ -13,7 +13,9 @@ def get_mirrors_at(func: FPCore, point):
     s_exprs = list()
     for s, t_arg in mirrors:
         # TODO: epsilon cmp is not proper here
-        if t_arg.is_constant() and abs(float(t_arg) - f_point) < 1e-16:
+        if t_arg.contains_op("thefunc"):
+            continue
+        if t_arg.is_constant() and abs(abs(float(t_arg)) - f_point) < 1e-16:
             s_exprs.append(s)
 
     return s_exprs
@@ -27,7 +29,9 @@ def has_period(func: FPCore, period):
     f_period = float(period)
     for s, t_arg in periods:
         # TODO: epsilon cmp is not proper here
-        if s == Variable("x") and abs(float(t_arg) - f_period) < 1e-16:
+        if t_arg.contains_op("thefunc") or float(t_arg) == 0.0:
+            continue
+        if abs(abs(float(t_arg)) - f_period) < 1e-16:
             return True
 
     # Didn't find it

@@ -1,26 +1,29 @@
-
-
+import os
 from fpcore.ast import Variable
 import lego_blocks
 import numeric_types
-import interval
+# import interval
 import lambdas
 
+
 import snake_egg
+import snake_egg_rules
 
 from interval import Interval
 from lambdas import types
+from snake_egg_rules import operations, egg_to_fpcore
 from utils import Logger
-
+import mpmath
 from lambdas.lambda_utils import find_periods, has_period
+import find_reconstruction
 
 
 logger = Logger(level=Logger.HIGH)
 
 
-class Periodic(types.Transform):
+class PeriodicRecons(types.Transform):
 
-    def __init__(self, in_node: types.Node, period):
+    def __init__(self, in_node: types.Node, period, recons_expr):
         """
         Infinitely expand the domain of an implementation using additive range
           reduction, starting at the left edge of the domain.
@@ -29,18 +32,19 @@ class Periodic(types.Transform):
                  period
         period: A period of the function
         """
+        self.recons_expr = recons_expr
         self.period = period
         super().__init__(in_node)
 
     def __str__(self):
         inner = str(self.in_node)
-        return f"(periodic {self.period} {inner})"
+        return f"(PeriodicRecons {self.period} {inner})"
 
     def replace_lambda(self, search, replace):
         if self == search:
             return replace
         new_in_node = self.in_node.replace_lambda(search, replace)
-        return Periodic(new_in_node, period=self.period)
+        return PeriodicRecons(new_in_node, period=self.period, recons_expr=self.recons_expr)
 
     def type_check(self):
         """
@@ -52,8 +56,9 @@ class Periodic(types.Transform):
 
         float_period = float(self.period)
 
-        #TODO: Turn assert into exception
+        # TODO: Turn assert into exception
         assert type(our_in_type) == types.Impl
+        # TODO: Type check on periods
         assert has_period(our_in_type.function, float_period)
         assert float(our_in_type.domain.width()) <= float_period
 
@@ -71,13 +76,22 @@ class Periodic(types.Transform):
         out_name = so_far[0].in_names[0]
 
         k = self.gensym("k")
-        add = lego_blocks.SimpleAdditive(numeric_types.fp64(),
-                                         [in_name],
-                                         [out_name, k],
-                                         self.in_node.domain.inf,
-                                         self.period)
+        add = lego_blocks.SimpleAdditive(numeric_types.fp64(), [in_name],
+                                         [out_name, k], self.in_node.domain.inf, self.period)
 
-        return [add] + so_far
+        # Inductive reconstruction to map the output according to its s function | (s(f(t(x))))
+        inner_name = so_far[-1].out_names[0]
+        recons_name = self.gensym("recons")
+        ind_recons = lego_blocks.Expression(numeric_types.fp64(),
+                                         [inner_name, k],
+                                         [recons_name],
+                                         self.recons_expr)
+
+        return [add] + so_far + [ind_recons]
+
+    @classmethod
+    def is_valid_expr(cls, expr):
+        return expr != operations.recons("k")
 
     @classmethod
     def generate_hole(cls, out_type):
@@ -95,17 +109,23 @@ class Periodic(types.Transform):
 
         # Get periods and try both [0, period] and [-period/2, period/2]
         periods = find_periods(out_type.function)
-        periods = [t_arg for s, t_arg in periods if s == Variable("x") and not t_arg.contains_op("thefunc")]
-        periods.sort(key=float, reverse=True)
         new_holes = list()
-        for p in periods:
-            if float(p) == 0.0:
+        for s, p in periods:
+            # We only care about s which are not handled by Periodic lambda
+            if p.contains_op("thefunc") or float(p) == 0.0 or s.contains_op("thefunc") or s == Variable("x"):
                 continue
+            # Use e-graph intersection to find the s reconstruction and check if its valid
+            extracted = find_reconstruction.get_reconstruction(s)
+            if not cls.is_valid_expr(extracted):
+                continue
+            recons_expr = egg_to_fpcore(extracted)
             if float(p) < 0.0:
                 p = -p
             pos = types.Impl(out_type.function, Interval(0.0, p))
-            new_holes.append(Periodic(lambdas.Hole(pos), p))
-            cen = types.Impl(out_type.function, Interval(-p/2, p/2))
-            new_holes.append(Periodic(lambdas.Hole(cen), p))
+            new_holes.append(PeriodicRecons(
+                lambdas.Hole(pos), p, recons_expr))
+            cen = types.Impl(out_type.function, Interval(-p / 2, p / 2))
+            new_holes.append(PeriodicRecons(
+                lambdas.Hole(cen), p, recons_expr))
 
         return new_holes

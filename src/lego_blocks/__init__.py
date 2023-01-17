@@ -11,3 +11,4 @@ from .neg_flip import NegFlip
 from .simple_additive import SimpleAdditive
 from .power import Pow
 from .ldexp import Ldexp
+from .expression import Expression
