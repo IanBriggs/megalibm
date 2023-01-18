@@ -326,7 +326,11 @@ def handle_work_item(func):
     if not path.isdir("generated"):
         os.mkdir("generated")
     os.chdir("generated")
-    if not generate_all_code(func, domain):
+    try:
+        did_generation = generate_all_code(func, domain)
+    except Exception as e:
+        logger.warning("Caught exception {}", e)
+    if not did_generation:
         logger.warning("Unable to generate for {}", c_ize_name(func))
     os.chdir(start)
     return func
