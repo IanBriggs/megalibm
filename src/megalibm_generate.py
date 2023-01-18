@@ -326,6 +326,7 @@ def handle_work_item(func):
     if not path.isdir("generated"):
         os.mkdir("generated")
     os.chdir("generated")
+    did_generation = False
     try:
         did_generation = generate_all_code(func, domain)
     except Exception as e:
