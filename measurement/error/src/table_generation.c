@@ -29,8 +29,10 @@ print_errors_list(char *name, size_t len, error *errors, field get)
   printf("      \"%s\": [\n", name);
   for (size_t i = 0; i < len; i++)
   {
-    if (isinf(errors[i])) {
+    if (isinf(get(errors[i]))) {
       printf("        1e400");
+    } else if (isnan(get(errors[i]))) {
+      printf("        \"nan\"");
     } else {
       printf("        %1.16e", get(errors[i]));
     }

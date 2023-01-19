@@ -507,6 +507,14 @@ def read_data(dirname):
                 one_run = json.load(f)
             benchmark_data[i][type] = one_run
 
+            # Since json doesn't like nan, we encode nan as a string
+            if type == "error":
+                for fname in one_run["functions"]:
+                    for dname in one_run["functions"][fname]:
+                        data = one_run["functions"][fname][dname]
+                        data = [float(item) for item in data]
+                        one_run["functions"][fname][dname] = data
+
     # Light data validation
     name = benchmark_data[0]["error"]["name"]
     body = benchmark_data[0]["error"]["body"]
