@@ -29,7 +29,11 @@ print_errors_list(char *name, size_t len, error *errors, field get)
   printf("      \"%s\": [\n", name);
   for (size_t i = 0; i < len; i++)
   {
-    printf("        %1.16e", get(errors[i]));
+    if (isinf(errors[i])) {
+      printf("        1e400");
+    } else {
+      printf("        %1.16e", get(errors[i]));
+    }
     seperator_comma(i, len - 1);
   }
   printf("      ]");
