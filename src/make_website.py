@@ -23,7 +23,8 @@ timer = Timer()
 emoji_meter = [
     '\N{disappointed face}',
     '\N{slightly smiling face}',
-    '\N{grinning face}'
+    '\N{grinning face}',
+    '\N{confused face}',
 ]
 
 # Main result
@@ -428,6 +429,12 @@ def make_main_page(generation_dir, benchmark_names, pareto_images, emojis):
     y = today.year
     m = today.month
     d = today.day
+
+    emoji_counts = {e:0 for e in emoji_meter}
+    for idxs in emojis.values():
+        for e in idxs.values():
+            emoji_counts[e] += 1
+
     parts = [f"""
     <!doctype html>
     <meta charset="UTF-8">
@@ -473,7 +480,20 @@ def make_main_page(generation_dir, benchmark_names, pareto_images, emojis):
             </ul>
             </p>
         </div>
+        <div class="rounded-box top-box">
+            <h1 class="main-title">Summary</h1>
+            <p class="summary">
+            <ul class="summary">
+                <li>Generated always worse {emoji_meter[0]}: {emoji_counts[emoji_meter[0]]}</li>
+                <li>Generated sometimes better {emoji_meter[1]}: {emoji_counts[emoji_meter[1]]}</li>
+                <li>Generated always better {emoji_meter[2]}: {emoji_counts[emoji_meter[2]]}</li>
+                <li>Something went wrong {emoji_meter[3]}: {emoji_counts[emoji_meter[3]]}</li>
+            </ul>
+            </p>
+        </div>
     """.replace("\n    ", "\n").strip()]
+
+
 
     for bench_name in benchmark_names:
         parts.append(make_main_part(generation_dir, bench_name, pareto_images, emojis))
@@ -582,6 +602,10 @@ def make_css():
     ul.description {
         padding-left: 15px;
     }
+    .summary {
+        font-weight: bold;
+        font-size: 200%
+    }
     .subtitle {
         margin-top: 20px;
     }
@@ -683,8 +707,12 @@ def main(argv):
 
         # Plot images
         for idx, data in benchmark_data.items():
-            image_name, emoji = plot_pareto_front(
-                f"{name} domain {idx}", data)
+            try:
+                image_name, emoji = plot_pareto_front(
+                    f"{name} domain {idx}", data)
+            except ZeroDivisionError:
+                image_name = "does_not_exist"
+                emoji = "\N{confused face}"
             pareto_images[name][idx] = image_name
             emojis[name][idx] = emoji
             value_images[name][idx] = plot_line(
@@ -693,8 +721,11 @@ def main(argv):
                 f"{name} domain {idx} absolute error", data, "abs_max_errors")
             rel_err_images[name][idx] = plot_line(
                 f"{name} domain {idx} relative error", data, "rel_max_errors")
-            eps_del_images[name][idx] = plot_eps_del(
-                f"{name} domain {idx} epsilon vs delta", data)
+            try:
+                eps_del_images[name][idx] = plot_eps_del(
+                    f"{name} domain {idx} epsilon vs delta", data)
+            except ValueError:
+                eps_del_images[name][idx] = "does_not_exist"
 
         # Output benchmark webpage
         html = make_benchmark_page(benchmark_data,
