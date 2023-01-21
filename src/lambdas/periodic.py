@@ -97,15 +97,19 @@ class Periodic(types.Transform):
         periods = find_periods(out_type.function)
         periods = [t_arg for s, t_arg in periods if s == Variable("x") and not t_arg.contains_op("thefunc")]
         periods.sort(key=float, reverse=True)
+        floats = set()
         new_holes = list()
         for p in periods:
-            if float(p) == 0.0:
-                continue
-            if float(p) < 0.0:
+            fp = float(p)
+            if fp < 0:
+                fp = -fp
                 p = -p
+            if fp == 0.0 or fp in floats:
+                continue
             pos = types.Impl(out_type.function, Interval(0.0, p))
             new_holes.append(Periodic(lambdas.Hole(pos), p))
             cen = types.Impl(out_type.function, Interval(-p/2, p/2))
             new_holes.append(Periodic(lambdas.Hole(cen), p))
+            floats.add(fp)
 
         return new_holes

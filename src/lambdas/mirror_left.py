@@ -165,13 +165,17 @@ class MirrorLeft(types.Transform):
         out_domain = out_type.domain
         mirrors = get_mirrors(out_type.function)
         new_holes = list()
-        for s_expr, point in mirrors:
+        for reconstruction_expr, point in mirrors:
             if (point.contains_op("thefunc") or not point.is_constant()
                 or not out_domain.contains(point)
-                    or s_expr.contains_op("thefunc")):
+                    or reconstruction_expr.contains_op("thefunc")):
                 continue
             in_domain = Interval(point, out_domain.sup)
             in_type = types.Impl(out_type.function, in_domain)
+
+            complex = {"sin", "cos", "tan"}
+            if any([reconstruction_expr.contains_op(c) for c in complex]):
+                continue
 
             # check for [-inf, inf]
             if (math.isinf(float(out_domain.inf))
@@ -179,7 +183,7 @@ class MirrorLeft(types.Transform):
                 and math.isinf(float(out_domain.sup))
                     and math.copysign(1.0, float(out_domain.sup)) == 1.0):
                 new_holes.append(MirrorLeft(
-                    lambdas.Hole(in_type), s_expr=s_expr))
+                    lambdas.Hole(in_type), s_expr=reconstruction_expr))
                 continue
 
             # check for four cases
@@ -190,7 +194,7 @@ class MirrorLeft(types.Transform):
             # match
             if abs(float(real_out_domain.inf - out_domain.inf)) < 1e-16:
                 new_holes.append(MirrorLeft(
-                    lambdas.Hole(in_type), s_expr=s_expr))
+                    lambdas.Hole(in_type), s_expr=reconstruction_expr))
                 continue
 
             # too small
@@ -203,7 +207,7 @@ class MirrorLeft(types.Transform):
 
             # needs narrowing
             new_holes.append(
-                Narrow(MirrorLeft(lambdas.Hole(in_type), s_expr=s_expr),
+                Narrow(MirrorLeft(lambdas.Hole(in_type), s_expr=reconstruction_expr),
                        out_domain))
 
         return new_holes
