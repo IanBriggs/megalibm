@@ -28,6 +28,10 @@ if [ $# -gt 0 ]; then
   "herbie")
     BENCHMARKS=${GIT_LOCATION}/benchmarks/herbie_*.fpcore
     ;;
+  *)
+    echo "Unknown selection: $1"
+    exit 1
+    ;;
   esac
 fi
 
