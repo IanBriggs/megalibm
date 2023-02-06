@@ -10,9 +10,11 @@ GIT_LOCATION=$(cd "${SCRIPT_LOCATION}" && cd .. && pwd)
 NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
 
 # Benchmarks
-BENCHMARKS="${GIT_LOCATION}/benchmarks"
+BENCHMARKS=${GIT_LOCATION}/benchmarks/core_*.fpcore ${GIT_LOCATION}/benchmarks/function_*.fpcore ${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
 if [ $# -gt 0 ]; then
   case $1 in
+  "all")
+    BENCHMARKS="${GIT_LOCATION}/benchmarks"
   "debug")
     BENCHMARKS=${GIT_LOCATION}/benchmarks/core_function_sin.fpcore
     ;;
