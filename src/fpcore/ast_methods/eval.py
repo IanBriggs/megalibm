@@ -2,7 +2,7 @@ import mpmath
 from fpcore.ast import ASTNode, Constant, FPCore, Number, Operation, Variable
 from utils import add_method
 
-mpmath.prec = 2**14
+mpmath.mp.prec = 2**14
 
 _CONST_MAPPING = {
     "E": mpmath.e,
@@ -83,7 +83,7 @@ def eval(self, *args, **kwargs):
 
 
 @add_method(Constant)
-def eval(self, assignment):
+def eval(self, assignment=None):
     try:
         return _CONST_MAPPING[self.source]
     except KeyError:
@@ -91,19 +91,22 @@ def eval(self, assignment):
 
 
 @add_method(Variable)
-def eval(self, assignment):
-    if self.source not in assignment:
+def eval(self, assignment=None):
+    if assignment is not None and self.source not in assignment:
         raise NameError("{} not in evaluation environment".format(self.source))
-    return mpmath.mpf(assignment[self.source])
+    val =  assignment[self.source]
+    if type(val) == mpmath.mpf:
+        return val
+    return mpmath.mpf(val)
 
 
 @add_method(Number)
-def eval(self, assignment):
+def eval(self, assignment=None):
     return mpmath.mpf(self.source)
 
 
 @add_method(Operation)
-def eval(self, assignment):
+def eval(self, assignment=None):
     f_args = [arg.eval(assignment) for arg in self.args]
 
     if len(f_args) == 1 and self.op in _UNOP_MAPPING:
