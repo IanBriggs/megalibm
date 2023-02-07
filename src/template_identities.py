@@ -276,7 +276,7 @@ def extract_identities(func):
 
     exprs = [snake_egg_rules.egg_to_fpcore(expr) for expr in exprs]
     exprs = [expr.substitute(periodic(Number("0")), thefunc(Variable("x"))) for expr in exprs]
-    exprs = list({expr.simplity() for expr in exprs})
+    # exprs = list({expr.simplify() for expr in exprs})
     # exprs = deduplication_generators(exprs, ITERS[5])
 
     lines = [str(expr) for expr in exprs]

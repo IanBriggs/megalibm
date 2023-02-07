@@ -10,25 +10,30 @@ GIT_LOCATION=$(cd "${SCRIPT_LOCATION}" && cd .. && pwd)
 NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
 
 # Benchmarks
-BENCHMARKS=${GIT_LOCATION}/benchmarks/core_*.fpcore ${GIT_LOCATION}/benchmarks/function_*.fpcore ${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
+BENCH_CORE=${GIT_LOCATION}/benchmarks/core_*.fpcore
+BENCH_FUNC=${GIT_LOCATION}/benchmarks/function_*.fpcore
+BENCH_FPBE=${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
+BENCH_HERB=${GIT_LOCATION}/benchmarks/herbie_*.fpcore
+BENCHMARKS=("${BENCH_CORE[@]}" "${BENCH_FUNC[@]}" "${BENCH_FPBE[@]}")
 if [ $# -gt 0 ]; then
   case $1 in
   "all")
     BENCHMARKS="${GIT_LOCATION}/benchmarks"
+    ;;
   "debug")
     BENCHMARKS=${GIT_LOCATION}/benchmarks/core_function_sin.fpcore
     ;;
   "core")
-    BENCHMARKS=${GIT_LOCATION}/benchmarks/core_*.fpcore
+    BENCHMARKS="${BENCH_CORE[@]}"
     ;;
   "function")
-    BENCHMARKS=${GIT_LOCATION}/benchmarks/function_*.fpcore
+    BENCHMARKS="${BENCH_FUNC[@]}"
     ;;
   "fpbench")
-    BENCHMARKS=${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
+    BENCHMARKS="${BENCH_FPBE[@]}"
     ;;
   "herbie")
-    BENCHMARKS=${GIT_LOCATION}/benchmarks/herbie_*.fpcore
+    BENCHMARKS="${BENCH_HERB[@]}"
     ;;
   *)
     echo "Unknown selection: $1"
