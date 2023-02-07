@@ -2,6 +2,7 @@
 
 import math
 import fpcore
+import mpmath
 
 from utils.logging import Logger
 
@@ -9,17 +10,25 @@ from utils.logging import Logger
 logger = Logger(level=Logger.EXTRA)
 
 
-def parse_bound(string):
-    wrapped = "(FPCore () {})".format(string)
+def parse_bound(something):
+    wrapped = "(FPCore () {})".format(something)
     fpc = fpcore.parse(wrapped)[0]
-    return fpc.body
+    return fpc.simplify().body
 
 
 class Interval():
 
     def __init__(self, inf, sup):
-        self.inf = parse_bound(inf) if type(inf) in {str, float} else inf
-        self.sup = parse_bound(sup) if type(sup) in {str, float} else sup
+        self.inf = parse_bound(inf)
+        self.sup = parse_bound(sup)
+
+        ie = self.inf.eval({})
+        if int(ie) == ie:
+            self.inf = parse_bound(int(ie))
+
+        se = self.sup.eval({})
+        if int(se) == se:
+            self.sup = parse_bound(int(se))
 
         assert (float(self.inf) <= float(self.sup))
 
@@ -54,13 +63,16 @@ class Interval():
             return self.inf
         if items == 1:
             return self.sup
-        assert False, "TODO: better interval indexing"
+        raise IndexError(items)
 
     def width(self):
         return self.sup - self.inf
 
     def contains(self, point):
         logger.log("Testing if {} is in [{}, {}]", point, self.inf, self.sup)
+        if type(point) == mpmath.iv.mpf:
+            me = mpmath.iv.mpf([str(self.inf), str(self.sup)])
+            return point in me
         f_point = float(point)
         return float(self.inf) <= f_point and f_point <= float(self.sup)
 
