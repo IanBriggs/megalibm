@@ -35,8 +35,6 @@ generated_color = "#FC4C02"
 reference_color = "xkcd:vivid green"
 color_cycle = [
     "xkcd:purple",
-    "xkcd:green",
-    "xkcd:blue",
     "xkcd:pink",
     "xkcd:brown",
     "xkcd:red",
