@@ -57,7 +57,7 @@ rm -rf "${GIT_LOCATION}/measurement/error/generated"
 
 # Run the generation in the final directory
 cd "${THIS_NIGHTLY_LOCATION}"
-time "${SCRIPT_LOCATION}"/megalibm_generate ${BENCHMARKS}
+time python3 "${GIT_LOCATION}"/examples/amd_fast_asin.mlm.py
 
 # Move generated to timing dir
 mv "${THIS_NIGHTLY_LOCATION}/generated" "${GIT_LOCATION}/measurement/timing/"
