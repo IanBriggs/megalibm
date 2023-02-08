@@ -9,33 +9,33 @@ SCRIPT_LOCATION=$(readlink -f "${SCRIPT_DIR}")
 GIT_LOCATION=$(cd "${SCRIPT_LOCATION}" && cd .. && pwd)
 NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
 
-# Benchmarks
-BENCHMARKS=${GIT_LOCATION}/benchmarks/core_*.fpcore ${GIT_LOCATION}/benchmarks/function_*.fpcore ${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
-if [ $# -gt 0 ]; then
-  case $1 in
-  "all")
-    BENCHMARKS="${GIT_LOCATION}/benchmarks"
-  "debug")
-    BENCHMARKS=${GIT_LOCATION}/benchmarks/core_function_sin.fpcore
-    ;;
-  "core")
-    BENCHMARKS=${GIT_LOCATION}/benchmarks/core_*.fpcore
-    ;;
-  "function")
-    BENCHMARKS=${GIT_LOCATION}/benchmarks/function_*.fpcore
-    ;;
-  "fpbench")
-    BENCHMARKS=${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
-    ;;
-  "herbie")
-    BENCHMARKS=${GIT_LOCATION}/benchmarks/herbie_*.fpcore
-    ;;
-  *)
-    echo "Unknown selection: $1"
-    exit 1
-    ;;
-  esac
-fi
+# # Benchmarks
+# BENCHMARKS=${GIT_LOCATION}/benchmarks/core_*.fpcore ${GIT_LOCATION}/benchmarks/function_*.fpcore ${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
+# if [ $# -gt 0 ]; then
+#   case $1 in
+#   "all")
+#     BENCHMARKS="${GIT_LOCATION}/benchmarks"
+#   "debug")
+#     BENCHMARKS=${GIT_LOCATION}/benchmarks/core_function_sin.fpcore
+#     ;;
+#   "core")
+#     BENCHMARKS=${GIT_LOCATION}/benchmarks/core_*.fpcore
+#     ;;
+#   "function")
+#     BENCHMARKS=${GIT_LOCATION}/benchmarks/function_*.fpcore
+#     ;;
+#   "fpbench")
+#     BENCHMARKS=${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
+#     ;;
+#   "herbie")
+#     BENCHMARKS=${GIT_LOCATION}/benchmarks/herbie_*.fpcore
+#     ;;
+#   *)
+#     echo "Unknown selection: $1"
+#     exit 1
+#     ;;
+#   esac
+# fi
 
 # Data
 NIGHTLY_TIMESTAMP=$(date +%s)
@@ -52,7 +52,7 @@ rm -rf "${GIT_LOCATION}/measurement/error/generated"
 
 # Run the generation in the final directory
 cd "${THIS_NIGHTLY_LOCATION}"
-time "${SCRIPT_LOCATION}"/megalibm_generate ${BENCHMARKS}
+time python3 "${GIT_LOCATION}"/examples/amd_fast_asin.mlm.py
 
 # Move generated to timing dir
 mv "${THIS_NIGHTLY_LOCATION}/generated" "${GIT_LOCATION}/measurement/timing/"
