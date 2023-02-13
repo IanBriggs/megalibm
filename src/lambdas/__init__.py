@@ -1,6 +1,7 @@
 
 
 from .minimax_polynomial import MinimaxPolynomial
+from .fixed_polynomial import FixedPolynomial
 
 from .general import General
 from .horner import Horner
