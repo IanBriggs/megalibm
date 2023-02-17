@@ -9,7 +9,7 @@
 #   (InflectionRight
 #     (sqrt (/ (- 1 x) 2))
 #     (- (/ PI 2) (* 2 y))
-#     (WeirdForm
+#     (EstrinForm
 #       (Polynomial
 #         (asin x)
 #         (Interval 0 0.5)

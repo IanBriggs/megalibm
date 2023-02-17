@@ -1,5 +1,5 @@
 /*
- * Heavliy modified source from AMD's AOCL math library.
+ * Heavily modified source from AMD's AOCL math library.
  * Modifications were made to allow the file to be compiled on its own.
  * In addition the kernel call to sqrt was replaced with a system level sqrt
  */
