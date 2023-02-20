@@ -1,35 +1,33 @@
 
 
+import math
 import fpcore
 
 from utils.logging import Logger
 
 
-logger = Logger()
+logger = Logger(level=Logger.EXTRA)
 
 
 def parse_bound(string):
     wrapped = "(FPCore () {})".format(string)
-    fpc = fpcore.parse(wrapped)
+    fpc = fpcore.parse(wrapped)[0]
     return fpc.body
 
 
 class Interval():
 
     def __init__(self, inf, sup):
-        self.inf = parse_bound(inf)
-        self.sup = parse_bound(sup)
+        self.inf = parse_bound(inf) if type(inf) in {str, float} else inf
+        self.sup = parse_bound(sup) if type(sup) in {str, float} else sup
 
-        assert(float(self.inf) <= float(self.sup))
-
+        assert (float(self.inf) <= float(self.sup))
 
     def __str__(self):
         return "[{},{}]".format(self.inf, self.sup)
 
-
     def __repr__(self):
         return 'Interval("{}", "{}")'.format(self.inf, self.sup)
-
 
     def __abs__(self):
         #                 0
@@ -48,40 +46,53 @@ class Interval():
         #      [********]
         if float(self.sup) <= 0.0:
             return Interval(-self.sup, -self.sup)
-        else:
-            assert 0, "Unreachable"
 
+        assert 0, "Unreachable"
+
+    def __getitem__(self, items):
+        if items == 0:
+            return self.inf
+        if items == 1:
+            return self.sup
+        assert False, "TODO: better interval indexing"
+
+    def width(self):
+        return self.sup - self.inf
+
+    def contains(self, point):
+        logger.log("Testing if {} is in [{}, {}]", point, self.inf, self.sup)
+        f_point = float(point)
+        return float(self.inf) <= f_point and f_point <= float(self.sup)
 
     def shift(self, k):
         diff = self.sup - self.inf
         shift_by = k*diff
         return Interval(self.inf+shift_by, self.sup+shift_by)
 
-
     def split(self, p):
         return self.aligned_split(p, self.inf)
 
-
     def aligned_split(self, p, edge):
-        assert(0.0 < p)
-        assert(self.inf <= edge and edge <= self.sup)
+        assert (0.0 < p)
+        assert (self.inf <= edge and edge <= self.sup)
 
         inf = self.inf
         lower = edge - self.inf
-        k = floor(lower/p)
+        k = math.floor(lower/p)
         sup = edge - k*p
         sup = min(sup, self.sup)
-        assert(0.0 <= sup-inf and sup-inf <= p)
+        assert (0.0 <= sup-inf and sup-inf <= p)
+        periods = list()
         if sup-inf != 0:
             periods.append(Interval(inf, sup))
 
         start = sup
-        i=0
+        i = 0
         while sup < self.sup:
             inf = start + i*p
             sup = start + (i+1)*p
             sup = min(sup, self.sup)
-            assert(self.inf <= inf and sup <= self.sup)
+            assert (self.inf <= inf and sup <= self.sup)
             periods.append(Interval(inf, sup))
 
         return periods

@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "fpbench exp neg sub"
+ :pre (or (<= (- 20) x 20) (< (- INFINITY) x INFINITY))
+
+ (exp (- (- 1 (* x x)))))

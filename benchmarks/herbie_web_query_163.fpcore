@@ -1,0 +1,5 @@
+(FPCore herbie_web_query_163 (x)
+    :name "herbie web query 163"
+    :pre (<= (- INFINITY) x INFINITY)
+
+    (+ (log x) (sqrt x)))

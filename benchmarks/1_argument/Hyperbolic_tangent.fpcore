@@ -1,5 +1,0 @@
-;; -*- mode: scheme -*-
-
-(FPCore (x)
- :name "Hyperbolic tangent"
- (/ (- (exp x) (exp (- x))) (+ (exp x) (exp (- x)))))

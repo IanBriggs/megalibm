@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "core function tanh"
+  :pre (< (- INFINITY) x INFINITY)
+
+  (tanh x))

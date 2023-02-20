@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "core function log10"
+  :pre (< 0 x INFINITY)
+
+  (log10 x))

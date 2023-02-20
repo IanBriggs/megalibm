@@ -1,8 +1,0 @@
-;; -*- mode: scheme -*-
-
-(FPCore (eps)
- :name "logq (problem 3.4.3)"
- :herbie-target
- (* -2 (+ eps (/ (pow eps 3) 3) (/ (pow eps 5) 5)))
-
- (log (/ (- 1 eps) (+ 1 eps))))

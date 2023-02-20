@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "function sinh alternate"
+ :pre (< (- INFINITY) x INFINITY)
+
+ (/ (- (exp x) (exp (- x))) 2))

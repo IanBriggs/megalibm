@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function coth"
+  :pre (and (< (- INFINITY) x INFINITY) (!= (tanh x) 0))
+
+  (/ 1 (tanh x)))

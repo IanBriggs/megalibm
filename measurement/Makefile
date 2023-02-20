@@ -9,4 +9,3 @@ clean:
 distclean: clean
 	$(MAKE) -C error distclean
 	$(MAKE) -C timing distclean
-

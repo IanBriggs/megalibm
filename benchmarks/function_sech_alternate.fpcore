@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "function sech alternate"
+ :pre (< (- INFINITY) x INFINITY)
+
+ (/ 2 (+ (exp x) (exp (- x)))))

@@ -1,0 +1,9 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "fpbench NMSE problem 3.4.1"
+ :cite (hamming-1987 herbie-2015)
+ :fpbench-domain textbook
+ :pre (< (- INFINITY) x INFINITY)
+
+ (/ (- 1 (cos x)) (* x x)))

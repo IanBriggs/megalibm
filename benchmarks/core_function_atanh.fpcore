@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "core function atanh"
+  :pre (< (- 1) x 1)
+
+  (atanh x))

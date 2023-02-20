@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+ :name "fpbench Falkner and Boettcher, Appendix B, 1"
+ :pre (or (<= (- 0.577) x 0.577) (<= (- (/ 1 (sqrt 3))) x (/ 1 (sqrt 3))))
+
+ (acos (/ (- 1 (* 5 (* x x))) (- (* x x) 1))))

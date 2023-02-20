@@ -1,7 +1,5 @@
 
 
-
-
 class NumericType():
 
     def __init__(self):
@@ -33,7 +31,6 @@ class NumericType():
 
     def sollya_type(self):
         raise NotImplementedError()
-
 
 
 class fp32(NumericType):
@@ -100,3 +97,9 @@ class fp64(NumericType):
 
     def c_type(self):
         return "double"
+
+    def c_pow(self):
+        return "pow"
+
+    def c_ldexp(self):
+        return "ldexp"

@@ -1,36 +1,45 @@
+from fpcore.ast import ASTNode, Atom, Constant, FPCore, Operation
+from utils import add_method
 
+_CONST_MAPPING = {
+    "PI": "Pi",
+    "INFINITY": "Infinity"
+}
 
-from fpcore.ast import ASTNode, Atom, Constant, Operation, FPCore
-from utils import add_method, Logger
-
-
-logger = Logger(level=Logger.EXTRA)
+_UNOP_MAPPING = {
+    "acos": "ArcCos",
+    "asin": "ArcSin",
+    "atan": "ArcTan",
+    "cos": "Cos",
+    "sin": "Sin",
+    "tan": "Tan",
+}
 
 
 @add_method(ASTNode)
-def to_wolfram(self):
+def to_wolfram(self, *args, **kwargs):
     # Make sure calling to_wolfram leads to an error if not overridden
     class_name = type(self).__name__
-    msg = "to_wolfram not implemented for class {}".format(class_name)
+    msg = f"to_wolfram not implemented for class '{class_name}'"
     raise NotImplementedError(msg)
+
 
 @add_method(Atom)
 def to_wolfram(self):
     return self.source
 
+
 @add_method(Constant)
 def to_wolfram(self):
-    mapping = {
-        "PI" : "Pi",
-        "INFINITY" : "Infinity"
-    }
-    return mapping[self.source]
+    try:
+        return _CONST_MAPPING[self.source]
+    except KeyError:
+        raise NotImplementedError(f"Unknown constant '{self.source}'")
+
 
 @add_method(Operation)
 def to_wolfram(self):
-    w_args = list()
-    for a in self.args:
-        w_args.append(a.to_wolfram())
+    w_args = [arg.to_wolfram() for arg in self.args]
 
     if len(w_args) == 1 and self.op in {"+", "-"}:
         return "({}{})".format(self.op, w_args[0])
@@ -38,16 +47,13 @@ def to_wolfram(self):
     if len(w_args) == 2 and self.op in {"+", "-", "*", "/"}:
         return "({}{}{})".format(w_args[0], self.op, w_args[1])
 
-    mapping = {
-        "sin"  : "Sin",
-        "cos"  : "Cos",
-        "tan"  : "Tan",
-        "asin" : "ArcSin",
-        "acos" : "ArcCos",
-        "atan" : "ArcTan",
-    }
-    op = mapping.get(self.op, self.op)
-    return "{}[{}]".format(op, ", ".join(w_args))
+    if len(w_args) == 1 and self.op in _UNOP_MAPPING:
+        op = _UNOP_MAPPING[self.op]
+        return f"{op}[{w_args[0]}]"
+
+    msg = f"Operation not yet supported for to_wolfram: '{self.op}'"
+    raise NotImplementedError(msg)
+
 
 @add_method(FPCore)
 def to_wolfram(self):

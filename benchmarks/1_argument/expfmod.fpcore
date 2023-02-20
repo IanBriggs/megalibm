@@ -1,5 +1,0 @@
-;; -*- mode: scheme -*-
-
-(FPCore (x)
- :name "expfmod"
- (* (fmod (exp x) (sqrt (cos x))) (exp (- x))))

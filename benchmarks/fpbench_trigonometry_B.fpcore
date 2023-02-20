@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "fpbench trigonometry B"
+  :pre (< (- INFINITY) x INFINITY)
+
+  (/ (- 1 (* (tan x) (tan x))) (+ 1 (* (tan x) (tan x)))))

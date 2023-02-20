@@ -6,9 +6,13 @@ from collections import namedtuple
 nt = namedtuple
 
 thefunc   = nt("thefunc",    "x")
+mirror    = nt("mirror",     "inflection")
+periodic  = nt("periodic",   "period")
+recons    = nt("recons", "k")
 
 CONST_PI  = nt("CONST_PI",   "")
 CONST_E   = nt("CONST_E",    "")
+CONST_INFINITY   = nt("CONST_INFINITY",    "")
 
 neg       = nt("neg",        "x")
 inv       = nt("inv",        "x")   # x != 0
@@ -33,7 +37,9 @@ exp       = nt("exp",        "x")
 expm1     = nt("expm1",      "x")
 fabs      = nt("fabs",       "x")
 log       = nt("log",        "x")   #  0 < x
+log10     = nt("log10",      "x")   #  0 < x
 log1p     = nt("log1p",      "x")   # -1 < x
+log2      = nt("log2",       "x")   #  0 < x
 sin       = nt("sin",        "x")
 sinh      = nt("sinh",       "x")
 sqrt      = nt("sqrt",       "x")   #  0 <= x
@@ -41,8 +47,8 @@ tan       = nt("tan",        "x")
 tanh      = nt("tanh",       "x")
 
 atan2     = nt("atan2",      "x y") # x != 0 && y != 0
-pow       = nt("pow",        "x y") # (x < 0 && (int(y) == y || something something odd den)) || (x == 0 && 0 <= y) || (0 < x)
-hypot     = nt("hypot",      "x y") #  0 <= x && 0 <= y
+# pow moved to the end
+hypot     = nt("hypot",      "x y") # 0 <= x && 0 <= y
 remainder = nt("remainder",  "x y") # y != 0
 
 fma       = nt("fma",        "x y z")
@@ -66,3 +72,16 @@ fmax      = nt("fmax",       "x y")
 fmin      = nt("fmin",       "x y")
 fmod      = nt("fmod",       "x y") # y != 0
 
+
+
+pow       = nt("pow",        "x y")
+# note: y == r/s means y is rational, r/s is lowest terms
+# note: irr(y) means y is irrational
+# (y >= 0 && int(y) == y) ||
+# (y < 0 && int(y) == y && x != 0) ||
+# (y == r/s && even(s) && y > 0 && x >= 0) ||
+# (y == r/s && even(s) && y < 0 && x > 0) ||
+# (y == r/s && odd(s) && y > 0) ||
+# (y == r/s && odd(s) && y < 0 && x != 0) ||
+# (irr(y) && y > 0 && x >= 0) ||
+# (irr(y) && y < 0 && x > 0)

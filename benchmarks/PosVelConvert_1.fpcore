@@ -1,0 +1,8 @@
+(FPCore PosVelConvert_1 (x)
+    :name "PosVelConvert 1"
+    :pre (<= 0 x INFINITY)
+
+    (let* ([zeta (* (* (+ (+ (* 2306.2181 x) (* 0.30188 (pow x 2))) (* 0.017998 (pow x 3))) (/ 1 3600)) (/ PI 180))]
+           [theta (* (* (+ (+ (* 2004.3190 x) (* 0.042665 (pow x 2))) (* 0.041833 (pow x 3))) (/ 1 3600)) (/ PI 180))]
+           [z (* (* (+ (+ (* 2306.2181 x) (* 1.09468 (pow x 2))) (* 0.018203 (pow x 3))) (/ 1 3600)) (/ PI 180))])
+        (- (* (* (cos zeta) (cos theta)) (cos z)) (* (sin zeta) (sin z)))))

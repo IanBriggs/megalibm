@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function atanh alternate"
+  :pre (< (- 1) x 1)
+
+  (* (/ 1 2) (log (/ (+ 1 x) (- 1 x)))))

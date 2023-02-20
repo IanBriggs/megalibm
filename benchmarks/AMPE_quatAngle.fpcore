@@ -1,0 +1,6 @@
+(FPCore AMPE_quatAngle (x)
+    :name "AMPE quatAngle"
+    :pre (<= 0 x 2)
+
+    (* 4 (asin (* 0.5 x))))
+

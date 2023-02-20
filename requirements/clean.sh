@@ -1,9 +1,8 @@
 #!/bin/bash
 
-
 set -e
 
-SCRIPT_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_LOCATION="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 LOG="${SCRIPT_LOCATION}/log.txt"
 rm -f "${LOG}"
@@ -13,9 +12,6 @@ rm -f "${DONE_MARKER}"
 
 DEBUG_ENV="${SCRIPT_LOCATION}/debug_env.sh"
 rm -f "${DEBUG_ENV}"
-
-
-
 
 # rust
 echo "Cleaning rust"

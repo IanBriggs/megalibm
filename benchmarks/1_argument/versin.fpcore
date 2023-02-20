@@ -1,5 +1,0 @@
-;; -*- mode: scheme -*-
-
-(FPCore (x)
-  :name "versin"
-  (- 1 (cos x)))

@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function sec"
+  :pre (and (< (- INFINITY) x INFINITY) (!= (cos x) 0))
+
+  (/ 1 (cos x)))

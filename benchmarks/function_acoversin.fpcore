@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function acoversin"
+  :pre (<= 0 x 2)
+
+  (asin (- 1 x)))

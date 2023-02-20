@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function sine x over two"
+  :pre (< (- INFINITY) x INFINITY)
+
+  (sin (/ x 2)))

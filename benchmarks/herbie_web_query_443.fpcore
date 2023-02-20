@@ -1,0 +1,5 @@
+(FPCore herbie_web_query_443 (x)
+    :name "herbie web query 443"
+    :pre (<= (- INFINITY) x INFINITY)
+
+    (- (sqrt (- x 2)) (sqrt (- (pow x 2) 3))))

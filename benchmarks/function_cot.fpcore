@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function cot"
+  :pre (and (< (- INFINITY) x INFINITY) (!= (tan x) 0))
+
+  (/ 1 (tan x)))

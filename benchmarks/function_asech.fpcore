@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function asech"
+  :pre (and (< 0 x) (<= x 1))
+
+  (acosh (/ 1 x)))

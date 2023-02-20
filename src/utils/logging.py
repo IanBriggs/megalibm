@@ -234,10 +234,10 @@ class Logger():
         # Log while using the current function name
         if self.should_log():
             frame = inspect.stack()[1]
-            funcname = self.def_color(frame.function)
-            formatted_funcname = " {}:".format(funcname)
+            func_name = self.def_color(frame.function)
+            formatted_func_name = " {}:".format(func_name)
             formatted_message = self.format_message(message, *args)
-            self._log(formatted_message, pre=formatted_funcname)
+            self._log(formatted_message, pre=formatted_func_name)
 
     def blog(self, description, text, level=None):
         # Log a block of text
@@ -318,12 +318,12 @@ def main(argv):
 if __name__ == "__main__":
     logger = Logger(color=Logger.cyan, def_color=Logger.green)
 
-    retcode = 130  # meaning "Script terminated by Control-C"
+    return_code = 130  # meaning "Script terminated by Control-C"
 
     try:
-        retcode = main(sys.argv)
+        return_code = main(sys.argv)
     except KeyboardInterrupt:
         print("")
         print("Goodbye")
 
-    sys.exit(retcode)
+    sys.exit(return_code)

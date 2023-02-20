@@ -1,5 +1,0 @@
-;; -*- mode: scheme -*-
-
-(FPCore (x)
- :name "Hyperbolic secant"
- (/ 2 (+ (exp x) (exp (- x)))))

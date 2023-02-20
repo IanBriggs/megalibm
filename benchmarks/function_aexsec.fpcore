@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function aexsec"
+  :pre (or (< 0 x INFINITY) (< (- INFINITY) x (- 2)))
+
+  (acos (/ 1 (+ x 1))))

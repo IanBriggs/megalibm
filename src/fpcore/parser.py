@@ -14,11 +14,11 @@ logger = Logger(level=Logger.EXTRA, color=Logger.cyan)
 timer = Timer()
 
 
-
 class FPCoreParseError(Exception):
     def __init__(self, msg, p=None):
         self.msg = msg
         self.p = p
+
 
 class FPCoreParser(Parser):
     tokens = fpcore_lexer.FPCoreLexer.tokens | {"ADDED_OPERATION"}
@@ -28,7 +28,6 @@ class FPCoreParser(Parser):
     @_("fpcore { fpcore }")
     def fpcores(self, p):
         return (p.fpcore0, *p.fpcore1)
-
 
     # fpcore :=
     #     | ( FPCore <signature> <property>* <expr> )
@@ -41,7 +40,6 @@ class FPCoreParser(Parser):
             fpcore_lexer.ADDED_OPERATIONS[name] = fpc
         return fpc
 
-
     # signature :=
     #      | {symbol}? (<argument>*)
     @_("[ SYMBOL ] LP { argument } RP")
@@ -50,15 +48,13 @@ class FPCoreParser(Parser):
         args = p.argument
         return (name, args)
 
-
     # dimension :=
     #     | <variable>
     #     | <number>
     @_("variable",
        "number")
-    def dimention(self, p):
+    def dimension(self, p):
         return p[0]
-
 
     # argument :=
     #     | <variable>
@@ -67,19 +63,18 @@ class FPCoreParser(Parser):
         return p[0]
 
     #     | ( <variable> <dimension>+ )
-    @_("LP variable dimention { dimention } RP")
+    @_("LP variable dimension { dimension } RP")
     def argument(self, p):
-        return p.variable.set_dimention((p.dimention0, *p.dimention1))
+        return p.variable.set_dimension((p.dimension0, *p.dimension1))
 
     #     | ( ! <property>* <variable> <dimension>* )
-    @_("LP BANG { property } variable { dimention } RP")
+    @_("LP BANG { property } variable { dimension } RP")
     def argument(self, p):
         if len(p.property) > 0:
             p.variable.add_properties(p.property)
-        if len(p.dimention) > 0:
-            p.variable.set_dimention(p.dimention)
+        if len(p.dimension) > 0:
+            p.variable.set_dimension(p.dimension)
         return p.variable
-
 
     # expr :=
     #     | <number>
@@ -130,7 +125,6 @@ class FPCoreParser(Parser):
         p.expr.add_properties([prop])
         return p.expr
 
-
     # number :=
     #     | {rational}
     @_("RATIONAL")
@@ -141,7 +135,10 @@ class FPCoreParser(Parser):
     #     | {decnum}
     @_("DECNUM")
     def number(self, p):
-        return ast.Number(p[0])
+        source = p[0]
+        if source[0] == "-":
+            return ast.Operation("-", ast.Number(source[1:]))
+        return ast.Number(source)
         # return ast.Decnum(p[0])
 
     #     | {hexnum}
@@ -153,10 +150,9 @@ class FPCoreParser(Parser):
     #     | ( digits {decnum} {decnum} {decnum} )
     @_("LP DIGITS DECNUM DECNUM DECNUM RP")
     def number(self, p):
-        assert(0)
+        assert (0)
         return None
         # return ast.Digits(p[2], p[3], p[4])
-
 
     # property :=
     #     | : {symbol} <data>
@@ -165,7 +161,6 @@ class FPCoreParser(Parser):
        "COLON OPERATION data")
     def property(self, p):
         return ast.Property(p[1], p[2])
-
 
     # data :=
     #     | {symbol}
@@ -190,7 +185,6 @@ class FPCoreParser(Parser):
     def data(self, p):
         return p.data
 
-
     # operation :=
     #     | ( {operation} <expr>* )
     @_("LP OPERATION { expr } RP",
@@ -198,13 +192,11 @@ class FPCoreParser(Parser):
     def operation(self, p):
         return ast.Operation(p[1], *p.expr)
 
-
     # if_expr :=
     #     | ( if <expr> <expr> <expr> )
     @_("LP IF expr expr expr RP")
     def if_expr(self, p):
         return ast.If(p.expr0, p.expr1, p.expr2)
-
 
     # let :=
     #     | ( let ( <binding>* ) <expr> )
@@ -217,7 +209,6 @@ class FPCoreParser(Parser):
     def let(self, p):
         return ast.LetStar(p.binding, p.expr)
 
-
     # while_expr :=
     #     | ( while <expr> ( <update_binding>* ) <expr> )
     @_("LP WHILE expr LP { update_binding } RP expr RP")
@@ -228,7 +219,6 @@ class FPCoreParser(Parser):
     @_("LP WHILE_STAR expr LP { update_binding } RP expr RP")
     def while_expr(self, p):
         return ast.WhileStar(p.expr0, p.update_binding, p.expr1)
-
 
     # for_expr :=
     #     | ( for ( <binding>* ) ( <update_binding>* ) <expr> )
@@ -241,7 +231,6 @@ class FPCoreParser(Parser):
     def for_expr(self, p):
         return ast.ForStar(p.binding, p.update_binding, p.expr)
 
-
     # tensor :=
     #     | ( tensor ( <binding>* ) <expr> )
     @_("LP TENSOR LP { binding } RP expr RP")
@@ -253,18 +242,11 @@ class FPCoreParser(Parser):
     def tensor(self, p):
         return ast.TensorStar(p.binding, p.update_binding, p.expr)
 
-
     # binding :=
     #     | [ <variable> <expr> ]
     @_("LB variable expr RB")
     def binding(self, p):
         return ast.Binding(p.variable, p.expr)
-
-    #     | ( <variable> <expr> )
-    @_("LP variable expr RP")
-    def binding(self, p):
-        return ast.Binding(p.variable, p.expr)
-
 
     # update_binding :=
     #     | [ <variable> <expr> <expr> ]
@@ -272,13 +254,11 @@ class FPCoreParser(Parser):
     def update_binding(self, p):
         return ast.UpdateBinding(p.variable, p.expr0, p.expr1)
 
-
     # variable :=
     #     | {symbol}
     @_("SYMBOL")
     def variable(self, p):
         return ast.Variable(p[0])
-
 
     # errors
     def error(self, p):
@@ -286,7 +266,7 @@ class FPCoreParser(Parser):
             raise FPCoreParseError("Unexpected end of FPCore")
 
         if (p.type == "SYMBOL"):
-            #and p.value in fpcore_lexer.ADDED_OPERATIONS):
+            # and p.value in fpcore_lexer.ADDED_OPERATIONS):
             p.type = "ADDED_OPERATION"
             self.errok()
             return p
@@ -296,14 +276,14 @@ class FPCoreParser(Parser):
 
 
 _parser = FPCoreParser()
+
+
 def parse(text):
     tokens = fpcore_lexer.lex(text)
     timer.start()
     parsed = _parser.parse(tokens)
     timer.stop()
     return parsed
-
-
 
 
 def main(argv):
@@ -328,11 +308,10 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    retcode = 0
+    return_code = 0
     try:
-        retcode = main(sys.argv)
+        return_code = main(sys.argv)
     except KeyboardInterrupt:
         print("Goodbye")
 
-    sys.exit(retcode)
-
+    sys.exit(return_code)

@@ -1,0 +1,5 @@
+(FPCore sin_2_pi_x (x)
+    :name "sin 2 pi x"
+    :pre (< (- INFINITY) x INFINITY)
+
+    (sin (* 2 (* PI x))))

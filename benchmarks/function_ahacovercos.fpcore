@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function ahacovercos"
+  :pre (<= 0 x 1)
+
+  (asin (- (* 2 x) 1)))

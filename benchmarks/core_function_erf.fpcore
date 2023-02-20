@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "core function erf"
+  :pre (< (- INFINITY) x INFINITY)
+
+  (erf x))

@@ -1,0 +1,5 @@
+(FPCore herbie_web_query_432 (x)
+    :name "herbie web query 432"
+    :pre (<= (- INFINITY) x INFINITY)
+
+    (- (sqrt (+ (+ 1 (sin x)) (pow (sin x) 2))) (sqrt (+ 1 (sin x)))))

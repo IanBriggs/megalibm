@@ -24,11 +24,11 @@ logger.set_log_level(Logger.HIGH)
 
 
 
-function = fpcore.parse("(FPCore (x) (sin x))")
+function = fpcore.parse("(FPCore (x) (sin x))")[0]
 domain = Interval("0.0", "(/ PI 2)")
 monomials = [0, 1, 3]
 
-p = lambdas.Polynomial(function, domain, monomials, list())
+p = lambdas.OddPolynomial(function, domain, monomials, list())
 logger(p)
 logger("  Type: {}", p.out_type)
 
@@ -57,4 +57,3 @@ logger(sig)
 
 src = ["#include <math.h>", "#include <assert.h>\n\n"] + src
 logger.blog("C function", "\n".join(src))
-

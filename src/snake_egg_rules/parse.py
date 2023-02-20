@@ -1,58 +1,78 @@
-
-
-from snake_egg_rules.operations import *
-import fpcore.ast as ast
-
 import fractions
 
+import fpcore.ast as ast
+
+from snake_egg_rules.operations import *
+from utils.logging import Logger
+
+
+logger = Logger()
 
 zero_arg = {
     CONST_PI: lambda: ast.Constant("PI"),
-    CONST_E:  lambda: ast.Constant("E"),
+    CONST_E: lambda: ast.Constant("E"),
 }
+
+
+def mk_one(operation):
+    return lambda x: ast.Operation(operation, x)
+
 
 one_arg = {
-    thefunc: lambda x: ast.Operation("thefunc", x),
-    acos:  lambda x: ast.Operation("acos",  x),
-    acosh: lambda x: ast.Operation("acosh", x),
-    asin:  lambda x: ast.Operation("asin",  x),
-    asinh: lambda x: ast.Operation("asinh", x),
-    atan:  lambda x: ast.Operation("atan",  x),
-    atanh: lambda x: ast.Operation("atanh", x),
-    cbrt:  lambda x: ast.Operation("cbrt",  x),
-    cos:   lambda x: ast.Operation("cos",   x),
-    cosh:  lambda x: ast.Operation("cosh",  x),
-    erf:   lambda x: ast.Operation("erf",   x),
-    erfc:  lambda x: ast.Operation("erfc",  x),
-    exp:   lambda x: ast.Operation("exp",   x),
-    expm1: lambda x: ast.Operation("expm1", x),
-    fabs:  lambda x: ast.Operation("fabs",  x),
-    inv:   lambda x: ast.Operation("inv",   x),
-    log1p: lambda x: ast.Operation("log1p", x),
-    log:   lambda x: ast.Operation("log",   x),
-    neg:   lambda x: ast.Operation("-",     x),
-    sin:   lambda x: ast.Operation("sin",   x),
-    sinh:  lambda x: ast.Operation("sinh",  x),
-    sqrt:  lambda x: ast.Operation("sqrt",  x),
-    tan:   lambda x: ast.Operation("tan",   x),
-    tanh:  lambda x: ast.Operation("tanh",  x),
+    thefunc: mk_one("thefunc"),
+    mirror: mk_one("mirror"),
+    periodic: mk_one("periodic"),
+    acos: mk_one("acos"),
+    acosh: mk_one("acosh"),
+    asin: mk_one("asin"),
+    asinh: mk_one("asinh"),
+    atan: mk_one("atan"),
+    atanh: mk_one("atanh"),
+    cbrt: mk_one("cbrt"),
+    cos: mk_one("cos"),
+    cosh: mk_one("cosh"),
+    erf: mk_one("erf"),
+    erfc: mk_one("erfc"),
+    exp: mk_one("exp"),
+    exp2: mk_one("exp"),
+    expm1: mk_one("expm1"),
+    fabs: mk_one("fabs"),
+    inv: mk_one("inv"),
+    tgamma: mk_one("tgamma"),
+    lgamma: mk_one("lgamma"),
+    log1p: mk_one("log1p"),
+    log10: mk_one("log10"),
+    log: mk_one("log"),
+    log2: mk_one("log2"),
+    neg: mk_one("-"),
+    sin: mk_one("sin"),
+    sinh: mk_one("sinh"),
+    sqrt: mk_one("sqrt"),
+    tan: mk_one("tan"),
+    tanh: mk_one("tanh"),
 }
 
+
+def mk_two(operation):
+    return lambda a, b: ast.Operation(operation, a, b)
+
+
 two_arg = {
-    add:       lambda x, y: ast.Operation("+", x, y),
-    atan2:     lambda x, y: ast.Operation("atan2", x, y),
-    div:       lambda x, y: ast.Operation("/", x, y),
-    fmod:      lambda x, y: ast.Operation("fmod", x, y),
-    hypot:     lambda x, y: ast.Operation("hypot", x, y),
-    mul:       lambda x, y: ast.Operation("*", x, y),
-    pow:       lambda x, y: ast.Operation("pow", x, y),
-    remainder: lambda x, y: ast.Operation("remainder", x, y),
-    sub:       lambda x, y: ast.Operation("-", x, y),
+    add: mk_two("+"),
+    atan2: mk_two("atan2"),
+    div: mk_two("/"),
+    fmod: mk_two("fmod"),
+    hypot: mk_two("hypot"),
+    mul: mk_two("*"),
+    pow: mk_two("pow"),
+    remainder: mk_two("remainder"),
+    sub: mk_two("-"),
 }
 
 three_arg = {
     fma: lambda x, y, z: ast.Operation("fma", x, y, z,),
 }
+
 
 def egg_to_fpcore(expr):
     T = type(expr)
@@ -61,12 +81,15 @@ def egg_to_fpcore(expr):
         return ast.Variable(expr)
 
     if T == int:
+        assert expr >= 0
         return ast.Number(str(expr))
 
     if T == float:
+        assert expr >= 0
         return ast.Number(str(expr))
 
     if T == fractions.Fraction:
+        assert expr >= 0
         if expr.denominator == 1:
             return ast.Number(str(expr.numerator))
         return ast.Operation("/",
@@ -75,11 +98,24 @@ def egg_to_fpcore(expr):
 
     # TODO: Definitely a bug, why are zero arg tuples weird?
     #print(f"expr: '{expr}' of type: '{T}'")
-    #if T in zero_arg:
+    # if T in zero_arg:
     #    return zero_arg[T]()
 
     if expr in zero_arg:
         return zero_arg[expr]()
+
+    if T not in one_arg and T not in two_arg and T not in three_arg:
+        logger.warning("Unknown type for egg '{}'", T)
+        arg = egg_to_fpcore(expr[0])
+        s = str(expr)
+        op = s[:s.index("(")]
+        return ast.Operation(op, arg)
+
+    if T == mirror:
+        return ast.Operation("mirror", egg_to_fpcore(expr.inflection))
+
+    if T == periodic:
+        return ast.Operation("periodic", egg_to_fpcore(expr.period))
 
     x = egg_to_fpcore(expr.x)
     if T in one_arg:

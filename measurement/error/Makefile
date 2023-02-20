@@ -1,37 +1,60 @@
 
 
 CC ?= gcc
-CFLAGS ?= -Wall -Wextra -Wconversion -O3 -march=native -mtune=native -fno-builtin -DNDEBUG
+CFLAGS ?= -Wall -Wextra -Wconversion -O3 -mtune=native -fno-builtin -DNDEBUG
+CFLAGS += -Wno-unused-variable
 CFLAGS += -Iinclude
 
-BIN_SRCS = $(wildcard generated/main_*.c)
-BINS = $(foreach s,$(BIN_SRCS),$(patsubst generated/main_%.c,bin/main_%,$s))
-SRCS = $(filter-out $(BIN_SRCS),$(wildcard generated/*.c))
-OBJS = $(foreach s,$(SRCS),$(patsubst generated/%.c,obj/%.o,$s))
-OBJS += obj/table_generation.o
-OBJS += obj/xmalloc.o
+ifeq (, $(shell which brew))
+else
+export C_INCLUDE_PATH := /opt/homebrew/include:${C_INCLUDE_PATH}
+export LIBRARY_PATH := /opt/homebrew/lib:${LIBRARY_PATH}
+endif
 
-CFLAGS +=  -Igenerated
+GEN_DIRS = $(wildcard generated/*)
+BINS = $(foreach g,$(GEN_DIRS),${g}/error_main)
+INTER = $(foreach g,$(GEN_DIRS),${g}/funcs.o)
+OBJS = obj/table_generation.o obj/xmalloc.o
 
+ERROR_DATA_0 = $(foreach g,$(GEN_DIRS),${g}/error_data_0.json)
+ERROR_DATA_1 = $(foreach g,$(GEN_DIRS),${g}/error_data_1.json)
+ERROR_DATA_2 = $(foreach g,$(GEN_DIRS),${g}/error_data_2.json)
+ERROR_DATA_3 = $(foreach g,$(GEN_DIRS),${g}/error_data_3.json)
+ERROR_DATAS = ${ERROR_DATA_0} ${ERROR_DATA_1} ${ERROR_DATA_2} ${ERROR_DATA_3}
 
 .PHONY: all
-all: ${BINS}
+all: build
+
+.PHONY: build
+build: ${BINS}
+
+.PHONY: run
+run: ${ERROR_DATAS}
+
+.PHONY: intermediates
+intermediates: ${OBJS} ${INTER}
+
+generated/%/error_data_0.json: generated/%/error_main
+	./$< 0 > $@
+
+generated/%/error_data_1.json: generated/%/error_main
+	./$< 1 > $@
+
+generated/%/error_data_2.json: generated/%/error_main
+	./$< 2 > $@
+
+generated/%/error_data_3.json: generated/%/error_main
+	./$< 3 > $@
 
 
-bin/main_%: generated/main_%.c ${OBJS} | bin
-	$(CC) ${CFLAGS} $< ${OBJS} -lmpfr -lgmp -lm -o $@
+generated/%/error_main: generated/%/error_main.c generated/%/funcs.o ${OBJS}
+	${CC} ${CFLAGS} -Igenerated/$* $^ -lmpfr -lgmp -lm -o $@
 
-obj/%.o: generated/%.c generated/%.h | obj
-	$(CC) ${CFLAGS} $< -c -o $@
+generated/%/funcs.o: generated/%/funcs.c generated/%/funcs.h
+	${CC} ${CFLAGS} -Igenerated/$* $< -c -o $@
 
 obj/%.o: src/%.c include/%.h | obj
 	$(CC) ${CFLAGS} $< -c -o $@
-
-
-
-
-bin:
-	mkdir bin
 
 obj:
 	mkdir obj
@@ -45,5 +68,5 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	$(RM) -r data
+	$(RM) -r error_data
 	$(RM) -r generated

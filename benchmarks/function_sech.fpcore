@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function sech"
+  :pre (and (< (- INFINITY) x INFINITY) (!= (cosh x) 0))
+
+  (/ 1 (cosh x)))

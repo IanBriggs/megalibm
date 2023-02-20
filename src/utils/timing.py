@@ -18,52 +18,52 @@ class Timer():
         self._start = None
 
     def start(self):
-        assert(self._start is None)
+        assert (self._start is None)
         self._start = time.perf_counter()
 
     def stop(self):
-        assert(self._start is not None)
+        assert (self._start is not None)
         self._times.append(time.perf_counter() - self._start)
         self._start = None
         return self._times[-1]
 
     def elapsed(self):
-        assert(self._start is None)
+        assert (self._start is None)
         elapsed = sum(self._times)
         return elapsed
 
     def average(self):
-        assert(self._start is None)
-        assert(len(self._times) >= 1)
+        assert (self._start is None)
+        assert (len(self._times) >= 1)
         mean = self.elapsed() / len(self._times)
         return mean
 
     def stddev(self):
-        assert(self._start is None)
-        assert(len(self._times) >= 2)
+        assert (self._start is None)
+        assert (len(self._times) >= 2)
         mean = self.average()
         diffs = [t-mean for t in self._times]
         squares = [d**2 for d in diffs]
         sum_of_squares = sum(squares)
         mean_of_squares = sum_of_squares / len(squares)
-        sqroot = math.sqrt(mean_of_squares)
-        return sqroot
+        sq_root = math.sqrt(mean_of_squares)
+        return sq_root
 
     def minimum(self):
-        assert(self._start is None)
-        assert(len(self._times) >= 1)
+        assert (self._start is None)
+        assert (len(self._times) >= 1)
         minimum = min(self._times)
         return minimum
 
     def maximum(self):
-        assert(self._start is None)
-        assert(len(self._times) >= 1)
+        assert (self._start is None)
+        assert (len(self._times) >= 1)
         maximum = max(self._times)
         return maximum
 
     def median(self):
-        assert(self._start is None)
-        assert(len(self._times) >= 1)
+        assert (self._start is None)
+        assert (len(self._times) >= 1)
         ordered = sorted(self._times)
         if len(ordered) % 2 == 1:
             middle = len(ordered)/2
@@ -77,7 +77,7 @@ class Timer():
         return median
 
     def times(self):
-        assert(self._start is None)
+        assert (self._start is None)
         return self._times.copy()
 
 
@@ -108,7 +108,7 @@ def main(argv):
     loop_stop = time.perf_counter()
 
     iterations = len(my_timer)
-    assert(iters == iterations)
+    assert (iters == iterations)
     minimum = my_timer.minimum() * 1e9
     average = my_timer.average() * 1e9
     median = my_timer.median() * 1e9
@@ -139,12 +139,12 @@ def main(argv):
 if __name__ == "__main__":
     import sys
 
-    retcode = 130  # meaning "Script terminated by Control-C"
+    return_code = 130  # meaning "Script terminated by Control-C"
 
     try:
-        retcode = main(sys.argv)
+        return_code = main(sys.argv)
     except KeyboardInterrupt:
         print("")
         print("Goodbye")
 
-    sys.exit(retcode)
+    sys.exit(return_code)

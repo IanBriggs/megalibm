@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function ahaversin"
+  :pre (<= 0 x 1)
+
+  (acos (- 1 (* 2 x))))

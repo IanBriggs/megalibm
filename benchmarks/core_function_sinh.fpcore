@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "core function sinh"
+  :pre (< (- INFINITY) x INFINITY)
+
+  (sinh x))

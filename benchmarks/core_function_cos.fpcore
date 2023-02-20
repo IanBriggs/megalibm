@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "core function cos"
+  :pre (< (- INFINITY) x INFINITY)
+
+  (cos x))

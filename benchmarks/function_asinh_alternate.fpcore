@@ -1,0 +1,8 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function asinh alternate"
+  :herbie-target (if (< x 0) (log (/ -1 (- x (sqrt (+ (* x x) 1))))) (log (+ x (sqrt (+ (* x x) 1)))))
+  :pre (< (- INFINITY) x INFINITY)
+
+  (log (+ x (sqrt (+ (* x x) 1)))))

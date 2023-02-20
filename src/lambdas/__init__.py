@@ -1,28 +1,20 @@
 
 
-from .even_polynomial import EvenPolynomial
-from .odd_polynomial import OddPolynomial
+from .minimax_polynomial import MinimaxPolynomial
+from .fixed_polynomial import FixedPolynomial
 
 from .general import General
 from .horner import Horner
 
-from .double_angle import DoubleAngle
+from .periodic import Periodic
+from .periodic_reconstruction import PeriodicRecons
+from .repeat_exp import RepeatExp
 
-from .repeat_flip import RepeatFlip
-from .repeat_negate import RepeatNegate
-from .repeat_inf import RepeatInf
+from .mirror_right import MirrorRight
+from .mirror_left import MirrorLeft
 
-from .flip_about_zero_x import FlipAboutZeroX
-from .mirror_about_zero_x import MirrorAboutZeroX
-
-from .make_tuple import MakeTuple
-from .first import First
-from .second import Second
-
-from .generate_c_code import generate_c_code
-from .generate_libm_c_code import generate_libm_c_code
-from .generate_mpfr_c_code import generate_mpfr_c_code
-
-from .narrow import Narrow
+from .lambda_utils import generate_c_code, generate_libm_c_code, generate_mpfr_c_code
 
 from .hole import Hole
+
+from .punt_to_libm import PuntToLibm

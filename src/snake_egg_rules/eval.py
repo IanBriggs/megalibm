@@ -27,9 +27,11 @@ def eval(op, args):
     if type(op) in {int, float, str, fractions.Fraction}:
         try:
             f = fractions.Fraction(op)
-            if f.denominator == 1:
-                return int(f.numerator)
-            return None
+            if f.denominator != 1:
+                return None
+            if f.numerator < 0:
+                logger("Negative literal: {}", f.numerator)
+            return int(f.numerator)
         except ValueError as e:
             if op not in REPORTED:
                 logger("Treating as variable: '{}'", op)
@@ -38,8 +40,10 @@ def eval(op, args):
 
     if op in lambdas:
         res = lambdas[op](*args)
-        if type(res) == int:
-            return res
-        return None
+        if type(res) != int:
+            return None
+        if res < 0:
+            return None
+        return int(res)
 
     return None

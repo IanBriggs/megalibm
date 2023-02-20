@@ -19,16 +19,17 @@ class FPCoreLexError(Exception):
         self.msg = msg
         self.tok = tok
 
+
 class FPCoreLexer(Lexer):
     tokens = {
-        # Delimitors
+        # Delimiters
         LP,  # left paren
         RP,  # right paren
         LB,  # left square bracket
         RB,  # right square bracket
         COLON,
         BANG,
-        HASH, # Bill's syntactic sugar
+        HASH,  # Bill's syntactic sugar
 
         # Literals
         RATIONAL,
@@ -162,7 +163,7 @@ class FPCoreLexer(Lexer):
         "isinf", "isnan", "isnormal", "signbit",
         "dim", "size", "ref",
         "thefunc",
-        ], key=len)
+    ], key=len)
     for i in range(len(OPERATIONS)):
         SYMBOL[OPERATIONS[i]] = OPERATION
     _not_regex = "({})".format(")|(".join(OPERATIONS))
@@ -178,13 +179,13 @@ class FPCoreLexer(Lexer):
 
 
 _lexer = FPCoreLexer()
+
+
 def lex(text):
     timer.start()
     lexed = _lexer.tokenize(text)
     timer.stop()
     return lexed
-
-
 
 
 def main(argv):
@@ -207,10 +208,10 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    retcode = 0
+    return_code = 0
     try:
-        retcode = main(sys.argv)
+        return_code = main(sys.argv)
     except KeyboardInterrupt:
         print("Goodbye")
 
-    sys.exit(retcode)
+    sys.exit(return_code)

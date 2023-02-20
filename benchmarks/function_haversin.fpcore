@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "function haversin"
+  :pre (< (- INFINITY) x INFINITY)
+
+  (/ (- 1 (cos x)) 2))

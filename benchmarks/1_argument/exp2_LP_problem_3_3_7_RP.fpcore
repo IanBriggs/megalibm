@@ -1,9 +1,0 @@
-;; -*- mode: scheme -*-
-
-(FPCore (x)
- :name "exp2 (problem 3.3.7)"
- ;; :herbie-expected 1.5 ;; Fails in single-precision due to regimes threshold
- :herbie-target
- (* 4 (pow (sinh (/ x 2)) 2))
-
- (+ (- (exp x) 2) (exp (- x))))
