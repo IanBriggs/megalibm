@@ -51,37 +51,34 @@ logger.set_log_level(Logger.HIGH)
 # +---------------------------------------------------------------------------+
 # | Should be handled by a new parser                                         |
 # |                                                                           |
-red_left = fpcore.parse("(FPCore (x) (- x))")[0].body
-rec_left = fpcore.parse("(FPCore (x) (- y))")[0].body
 
-red_right = fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body
-rec_right = fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body
+mlm = \
+lambdas.InflectionLeft(
+    lambdas.InflectionRight(
+        lambdas.Horner(
+            lambdas.FixedPolynomial(
+                fpcore.parse("(FPCore (x) (asin x))")[0],
+                Interval("0", "0.5"),
+                13,
+                [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25],
+                [1,
+                0.1666666666666477004,
+                0.07500000000417969548,
+                0.04464285678140855751,
+                0.03038196065035564039,
+                0.0223717279703189581,
+                0.01736009463784134871,
+                0.01388184285963460496,
+                0.01218919111033679899,
+                0.00644940526689945226,
+                0.01972588778568478904,
+                -0.01651175205874840998,
+                0.03209627299824770186, ])),
+        fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
+        fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body),
+    fpcore.parse("(FPCore (x) (- x))")[0].body,
+    fpcore.parse("(FPCore (x) (- y))")[0].body)
 
-func = fpcore.parse("(FPCore (x) (asin x))")[0]
-domain = Interval("0", "0.5")
-monomials = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25]
-coefficients = [
-    1,
-    0.1666666666666477004,
-    0.07500000000417969548,
-    0.04464285678140855751,
-    0.03038196065035564039,
-    0.0223717279703189581,
-    0.01736009463784134871,
-    0.01388184285963460496,
-    0.01218919111033679899,
-    0.00644940526689945226,
-    0.01972588778568478904,
-    -0.01651175205874840998,
-    0.03209627299824770186, ]
-
-
-# TODO: use yash's fixed polynomial here
-#p = lambdas.Polynomial(f, domain, monomials, coefficients)
-p = lambdas.MinimaxPolynomial(func, domain, len(monomials))
-w = lambdas.Horner(p)
-ir = lambdas.InflectionRight(w, red_right, rec_right)
-il = lambdas.InflectionLeft(ir, red_left, rec_left)
 # |                                                                           |
 # +---------------------------------------------------------------------------+
 
@@ -96,9 +93,9 @@ if not path.isdir("generated"):
 os.chdir("generated")
 
 # dsl
-il.type_check()
+mlm.type_check()
 dsl_func_name = "dsl_amd_fast_asin"
-dsl_sig, dsl_src = lambdas.generate_c_code(il, dsl_func_name)
+dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
@@ -110,6 +107,8 @@ with open(path.join(GIT_DIR, "examples", "amd_fast_asin.c"), "r") as f:
     libm_src = [line.rstrip() for line in text.splitlines()]
 
 # oracle
+func = fpcore.parse("(FPCore (x) (asin x))")[0]
+domain = Interval(-1, 1)
 target = lambdas.types.Impl(func, domain)
 mpfr_func_name = "mpfr_dsl_amd_fast_asin"
 mpfr_sig, mpfr_src = lambdas.generate_mpfr_c_code(target, mpfr_func_name)
@@ -138,7 +137,7 @@ domains = [("-1", "1"),
            ("0",  "0.5"),
            ("0.4375", "0.5625"),]
 func_body = func.to_html()
-generators = [str(il)]
+generators = [str(mlm)]
 
 # Error measurement
 main_lines = assemble_error_main(name, func_body,
