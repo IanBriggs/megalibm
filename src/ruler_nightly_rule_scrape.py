@@ -24,8 +24,9 @@ runs_split = list(filter(lambda run: len(run) > 1, runs_split))
 print(runs_split)
 runs_split.sort(key = lambda run1: int(run1[0]))
 
-branches = list(set([run[2] for run in runs_split]))
-print(branches)
+branches = ['nightlies-tests']
+# branches = list(set([run[2] for run in runs_split]))
+# print(branches)
 
 # timestamp, "nightly", branch, commit
 def assign_to_branch(acc, x):
