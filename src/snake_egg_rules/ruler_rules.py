@@ -7,8 +7,8 @@ from functools import reduce
 import re
 import json
 
-from operations import *
-# from snake_egg_rules.operations import *
+# from operations import *
+from snake_egg_rules.operations import *
 from snake_egg import EGraph, Rewrite, Var, vars
 
 rules = list() 
