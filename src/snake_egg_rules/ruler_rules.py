@@ -111,7 +111,7 @@ def assign_to_branch(acc, x):
 def scrape_and_grab_json():
     DOMS_TO_COMBINE = ['rational']
 
-    rule_save_path = "../ruler_rules/"
+    rule_save_path = "ruler_rules/"
     url = "http://nightly.cs.washington.edu/reports/ruler/"
     json_folder = "json/"
     sep = "%3A"
@@ -119,11 +119,11 @@ def scrape_and_grab_json():
     html = page.read().decode("utf-8")
 
     links_to_runs = re.findall("<a href=\"(.*)\">", html)
-    print(links_to_runs)
+    # print(links_to_runs)
 
     runs_split = [run.split(sep) for run in links_to_runs]
     runs_split = list(filter(lambda run: len(run) > 1, runs_split))
-    print(runs_split)
+    # print(runs_split)
     runs_split.sort(key=lambda run1: int(run1[0]))
 
     branches = ['nightlies-tests']
@@ -132,7 +132,7 @@ def scrape_and_grab_json():
 
     # timestamp, "nightly", branch, commit
     runs_split_by_branches = reduce(assign_to_branch, runs_split, dict.fromkeys(branches, []))
-    print(runs_split_by_branches)
+    # print(runs_split_by_branches)
 
     for branch_name in branches:
         all_rules = []    
