@@ -64,7 +64,7 @@ echo "export PATH=\"${CARGO_HOME}/bin:\$PATH"\" >>"${DEBUG_ENV}"
 
 # python libraries
 echo "Installing python dependencies"
-python3 -m pip install --upgrade --quiet maturin mpmath sly matplotlib z3-solver
+python3 -m pip install --upgrade --quiet maturin mpmath sly matplotlib z3-solver sexpdata
 echo "  Done"
 
 # snake_egg
