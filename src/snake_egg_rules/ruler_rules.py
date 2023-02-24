@@ -111,7 +111,7 @@ def assign_to_branch(acc, x):
 def scrape_and_grab_json():
     DOMS_TO_COMBINE = ['rational']
 
-    rule_save_path = "ruler_rules/"
+    # rule_save_path = "ruler_rules/"
     url = "http://nightly.cs.washington.edu/reports/ruler/"
     json_folder = "json/"
     sep = "%3A"
@@ -163,10 +163,13 @@ def scrape_and_grab_json():
                         f"This commit failed. Trying again with commit {latest[3]} at time {latest[0]}")
                 else:
                     raise err    
-        filename = f'{rule_save_path}{branch_name}-{latest[0]}.txt'
-        with open(filename, 'w') as f:
-            f.write("\n".join(all_rules))
-            print(f"Saved collated rules into {filename}.")
+        
+        # filename = f'{rule_save_path}{branch_name}-{latest[0]}.txt'
+        # with open(filename, 'w') as f:
+        #     f.write("\n".join(all_rules))
+        #     print(f"Saved collated rules into {filename}.")
+        print("Collated rules are:")
+        print("\n".join(all_rules))
 
         rule_str = process_rules(all_rules)
         evaled_rules = eval(rule_str)
