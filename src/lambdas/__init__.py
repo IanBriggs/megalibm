@@ -18,3 +18,4 @@ from .lambda_utils import generate_c_code, generate_libm_c_code, generate_mpfr_c
 from .hole import Hole
 
 from .punt_to_libm import PuntToLibm
+from .estrin import Estrin
