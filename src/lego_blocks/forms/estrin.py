@@ -44,7 +44,7 @@ class Estrin(forms.Form):
     def estrin(self, mons, groups, x_power):
         degree = mons[-1]
 
-        if degree <= 1:
+        if len(mons) <= 2:
             if len(mons) == 0:
                 return f"{groups[0]}*{self.expand_pow(x_power)}"
             else:
@@ -73,8 +73,13 @@ class Estrin(forms.Form):
         mons = self.polynomial.monomials
         cast_coeff = ["(({}){})".format(c_type, c) for c
                       in self.polynomial.coefficients]
-        
-        rhs = self.estrin(mons, cast_coeff, 1)
+        cast_in = "(({}){})".format(c_type, self.in_names[0])
+
+        if all(term % 2 != 0 for term in self.polynomial.monomials):
+            mons = [pow - 1 for pow in mons]
+            rhs = f"{cast_in}*({self.estrin(mons, cast_coeff, 2)})"
+        else:
+            rhs = self.estrin(mons, cast_coeff, 1)
 
 
         code = "{} {} = {};".format(c_type, out, rhs)
