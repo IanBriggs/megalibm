@@ -10,6 +10,8 @@ from .ast_methods import (
     cross,
     contains_op,
     decompose_identities,
+    dunder_lt,
+    dunder_le,
     egg_equal,
     equals,
     eval,

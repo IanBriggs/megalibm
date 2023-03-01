@@ -9,6 +9,7 @@ from .if_less import IfLess
 from .multiply import Multiply
 from .neg_flip import NegFlip
 from .simple_additive import SimpleAdditive
+from .split_domain import SplitDomain
 from .power import Pow
 from .ldexp import Ldexp
 from .expression import Expression

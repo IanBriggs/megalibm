@@ -9,7 +9,6 @@ SCRIPT_LOCATION=$(readlink -f "${SCRIPT_DIR}")
 GIT_LOCATION=$(cd "${SCRIPT_LOCATION}" && cd .. && pwd)
 NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
 
-<<<<<<< HEAD
 # Benchmarks
 BENCH_CORE=${GIT_LOCATION}/benchmarks/core_*.fpcore
 BENCH_FUNC=${GIT_LOCATION}/benchmarks/function_*.fpcore
@@ -42,35 +41,6 @@ if [ $# -gt 0 ]; then
     ;;
   esac
 fi
-=======
-# # Benchmarks
-# BENCHMARKS=${GIT_LOCATION}/benchmarks/core_*.fpcore ${GIT_LOCATION}/benchmarks/function_*.fpcore ${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
-# if [ $# -gt 0 ]; then
-#   case $1 in
-#   "all")
-#     BENCHMARKS="${GIT_LOCATION}/benchmarks"
-#   "debug")
-#     BENCHMARKS=${GIT_LOCATION}/benchmarks/core_function_sin.fpcore
-#     ;;
-#   "core")
-#     BENCHMARKS=${GIT_LOCATION}/benchmarks/core_*.fpcore
-#     ;;
-#   "function")
-#     BENCHMARKS=${GIT_LOCATION}/benchmarks/function_*.fpcore
-#     ;;
-#   "fpbench")
-#     BENCHMARKS=${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
-#     ;;
-#   "herbie")
-#     BENCHMARKS=${GIT_LOCATION}/benchmarks/herbie_*.fpcore
-#     ;;
-#   *)
-#     echo "Unknown selection: $1"
-#     exit 1
-#     ;;
-#   esac
-# fi
->>>>>>> adba964ac983b3109ec8704d75deff2f0dfe559b
 
 # Data
 NIGHTLY_TIMESTAMP=$(date +%s)

@@ -5,11 +5,12 @@ from .fixed_polynomial import FixedPolynomial
 
 from .general import General
 from .horner import Horner
-from .grouped import Grouped
 
 from .periodic import Periodic
 from .periodic_reconstruction import PeriodicRecons
 from .repeat_exp import RepeatExp
+
+from .split_domain import SplitDomain
 
 from .mirror_right import MirrorRight
 from .inflection_right import InflectionRight
