@@ -110,6 +110,7 @@ def assign_to_branch(acc, x):
 
 def scrape_and_grab_json():
     DOMS_TO_COMBINE = ['rational']
+    OPTIONAL_DOMS = ['trig']
 
     # rule_save_path = "ruler_rules/"
     url = "http://nightly.cs.washington.edu/reports/ruler/"
@@ -166,6 +167,21 @@ def scrape_and_grab_json():
                     f"This commit failed. Trying again with commit {latest[3]} at time {latest[0]}")
             else:
                 raise err    
+            
+    # we got the right run, let's see if we can get the other optional domains
+    for domain in OPTIONAL_DOMS:
+        try:
+            page_to_scrape = url + \
+                sep.join(latest) + json_folder + domain + ".json"
+            print(f"Scraping json from {domain}, using {page_to_scrape}")    
+            json_file = json.load(urlopen(page_to_scrape))
+            # print(json_file)
+            all_rules.extend(json_file["rules"])
+        except HTTPError as err:
+            if err.code == 404:
+                print(f"Optional domain {domain} was not available for commit {latest[3]} on branch {branch_name}.")
+            else:
+                raise err 
     
     # filename = f'{rule_save_path}{branch_name}-{latest[0]}.txt'
     # with open(filename, 'w') as f:
