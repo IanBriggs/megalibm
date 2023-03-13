@@ -1,6 +1,6 @@
 # How Math Functions are Made
 
-With floating point we get aceess to (usually) addition, subtraction, division, and multiplication.
+With floating point we get access to (usually) addition, subtraction, division, and multiplication.
 Then how are `libm` functions implemented?
 These functions include $\sin$, $\cos$, $\exp$, and all sorts of other functions.
 
@@ -43,9 +43,9 @@ def table_sin(x):
 ### Polynomials
 
 There is a long history of approximating a function by a representative polynomial.
-Taylor Polynomials are the most famous, but there are also chebyshev polynomials, and <>.
+Taylor Polynomials are the most famous, but there are also Chebyshev polynomials, and Maclaurin series, among others.
 These produce an expression with infinite terms, so to keep the value computable we truncate the polynomial.
-If we take the Taylor Polynomial for $\sin$ and truncate it to $2$ terms we get $x - \frac{x^3}{3!}$, which we then approximate using the code `x + x*x*x/6`.
+If we take the Taylor Polynomial for $\sin$ at $0$ and truncate it to $2$ terms we get $x - \frac{x^3}{3!}$, which we then approximate using the code `x + x*x*x/6`.
 This yields the following graph.
 
 ```
@@ -71,21 +71,26 @@ Basically, this means the table has a set of coefficients for a polynomial in th
 
 Polynomials can also be improved.
 How a polynomial is actually implemented can change both the accuracy and speed of that polynomial.
-If you look at the expression `1 - x*x/2 + x*x*x*x/24 + x*x*x*x*x*x/720` it is easy to see that each succesive term using `x` contains the previous (`x*x` is in `x*x*x*x`).
-Evalutaion using the Horner method simply re-parenthises the expression and performs some factoring to yield `1 - x*x(1/2 + x*x(1/24 + x*x(1/720)))`.
+If you look at the expression `1 - x*x/2 + x*x*x*x/24 + x*x*x*x*x*x/720` it is easy to see that each successive term using `x` contains the previous (`x*x` is in `x*x*x*x`).
+Evaluation using the Horner method simply re-parenthesizes the expression and performs some factoring to yield `1 - x*x(1/2 + x*x(1/24 + x*x(1/720)))`.
 In this version the only repeated computation is `x*x`, which can be computed once as `x2 = x*x` then used in the polynomial form.
 This version is both more accurate and faster to evaluate than the first version of the expression, especially when the FMA operation is available.
 There are other ways of implementing polynomials that utilize compensation terms to achieve higher accuracy, or use high precision tricks to implement part of the polynomial.
 Estrin's Scheme is yet another way ov evaluating a polynomial, this time optimized for parallel evaluation.
 
 There are also a number of ways to generate a polynomial.
-For a single polynomial the best method is the Remez algorithm which produces real valued coeeficients, and the lll algorithm produces the best floating point versions of those coefficients.
+For a single polynomial the best method is the Remez algorithm which produces real valued coefficients, and the lll algorithm produces the best floating point versions of those coefficients.
 Both of these are implemented in the Sollya tool.
-The stability of these algorithms is a bit precarius as the difference between an error or a result being produced is a matter of small changes to the configuration.
+The stability of these algorithms is a bit precarious as the difference between an error or a result being produced is a matter of small changes to the configuration.
 
-Instead of just looking at a single polynomial Pade aproximations use a fraction of polynomials.
+Instead of just looking at a single polynomial Pade approximations use a fraction of polynomials.
 These work better when the function being approximated can reach infinity.
 I am unaware of software that produces Pade approximations.
+
+A way to generate a similar approximation is to rewrite the expression as a fraction and approximate both parts of the fractions.
+Applying this to $\sin^{-1}(x)$ we get $(\sin^{-1}\left(\sqrt{x}\right)-\sqrt{x}) / (x\cdot\sqrt{x})$.
+Now both the numerator and denominator can be approximated separately.
+
 
 There is recent, amazing, work in the RLibm project.
 All other methods stem from using real values approximations of a function, then somehow translating the real valued approximation to floating point.
@@ -98,7 +103,7 @@ There are additional tricks they use to make this scale to 32 bits, but the basi
 
 ### Limitations
 
-Any method for approximating a function has nontrivail tradeofs of domain, speed, accuracy, portability, and memory usage.
+Any method for approximating a function has nontrivial tradeoffs of domain, speed, accuracy, portability, and memory usage.
 
 For any approximation method the error increases dramatically with the size of the domain.
 As such we want to use as small of a domain for approximations.
@@ -107,12 +112,12 @@ To achieve this so called "range reductions" and "reconstructions" are used.
 
 ## Range Reductions and Reconstructions
 
-Despite the name, range reductions take values in a larger domain and map them to a smaller domain, then after modifying the output of the inner aproximation to produce the next output.
+Despite the name, range reductions take values in a larger domain and map them to a smaller domain, then after modifying the output of the inner approximation to produce the next output.
 
 
 ### Mirror to the Right
 
-Looking back at our $\sin$ approximations we can see that the approximated region, $[0, \pi/2]$, is a mirror reflextion of the region $[\pi/2, pi]$.
+Looking back at our $\sin$ approximations we can see that the approximated region, $[0, \pi/2]$, is a mirror reflection of the region $[\pi/2, pi]$.
 
 ```
 def mr_table_sin(x):
@@ -125,13 +130,13 @@ def mr_table_sin(x):
 We can perform this mirroring by passing through values less than $\pi/2$, and for the rest subtracting the value from $\pi$.
 You can also think of this as plotting the function with a wet ink on paper and folding along $x=\pi/2$.
 
-For this type of reduction to be valid for a function $f$ at the inflextion point $p$, we need the following identity to be true: $f(x) = f(2\cdot p - x$.
+For this type of reduction to be valid for a function $f$ at the inflection point $p$, we need the following identity to be true: $f(x) = f(2\cdot p - x$.
 I think this might not need to be true for all $x$, but just a local region near $p$ depending on the other reductions used.
 
 
 ### Mirror to the Left
 
-A similar reduction can be made that mirrors the approximation from the right of the inflextion point to the left.
+A similar reduction can be made that mirrors the approximation from the right of the inflection point to the left.
 Usage of this can be seen if you have an approximation of $\cos$ on $[0, \pi/2]$ and mirror it to be valid on $[-\pi/2, pi/2]$
 
 ```
@@ -147,7 +152,7 @@ def ml_table_cos(x):
 
 ![MirrorLeftTableCos](images/ml_table_cos.png)
 
-The mapping this time is to pass $x$ through if it is more than the inflextion point, and subtract $x$ from the inflection point when $x$ otherwise.
+The mapping this time is to pass $x$ through if it is more than the inflection point, and subtract $x$ from the inflection point when $x$ otherwise.
 For $f$ and $p$ this is only valid if $f(x) = f(p - x)$.
 
 
@@ -232,8 +237,8 @@ It must be that $f(x) = f(x-p)\cdot 2$.
 Another way of performing this reduction an reconstruction opens an interesting view of the function.
 With the shown reduction the value of `new_x` is on the range $[0, \ln(2)]$.
 An alternate way of calculating `k` and `new_x`, is `k = ceil(x/log(2) - log(2)/2)` and `new_x = x - k * log(2)`.
-This causes `k` to be offset from the first way it was calulated, and in turn `new_x` is now in the range $[\ln^2(2)/2-\ln(2), \ln^2(2)/2] ~ [-0.4529, 0.2402]$.
+This causes `k` to be offset from the first way it was calculated, and in turn `new_x` is now in the range $[\ln^2(2)/2-\ln(2), \ln^2(2)/2] ~ [-0.4529, 0.2402]$.
 Mathematically both pairs of reduction and reconstruction are equal, but the inner approximation will be over a different region.
-This useful for approximations that increase arror as the value get further from zero, such as the Maclaurin series approximation of a function.
+This useful for approximations that increase error as the value get further from zero, such as the Maclaurin series approximation of a function.
 
 ### 
