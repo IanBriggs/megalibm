@@ -6,36 +6,20 @@
 # (InflectionLeft
 #   (- x)
 #   (- y)
-#   (SplitDomain
-#     [(Interval 0 1.38777878078144552145514e-17)
-#        (HornerForm
-#          (Polynomial
-#            (asin x)
-#            (Interval 0 1.38777878078144552145514e-17)
-#            [1]
-#            [1]))]
-#     [(Interval 1.38777878078144552145514e-17 1)
-#         (InflectionRight
-#           (sqrt (/ (- 1 x) 2))
-#           (- (/ PI 2) (* 2 y))
-#           (EstrinForm
-#             (Polynomial
-#               (asin x)
-#               (Interval 0 0.5)
-#               [1 3 5 7 9 11 13 15 17 19 21 23 25]
-#               [ 1
-#                 0.1666666666666477004
-#                 0.07500000000417969548
-#                 0.04464285678140855751
-#                 0.03038196065035564039
-#                 0.0223717279703189581
-#                 0.01736009463784134871
-#                 0.01388184285963460496
-#                 0.01218919111033679899
-#                 0.00644940526689945226
-#                 0.01972588778568478904
-#                -0.01651175205874840998
-#                 0.03209627299824770186]))))
+#   (InflectionRight
+#     (sqrt (\ (- 1 x) 2))
+#     (- (\ PI 2) (* 2 y))
+#     (EstrinForm
+#       (Polynomial
+#         (asin x)
+#         (Interval 0 0.5)
+#         [1 3 5 7 9 11]
+#         [ 1
+#           0.1666679084300994873
+#           0.07494434714317321777
+#           0.04555018618702888489
+#           0.02385816909372806549
+#           0.04263564199209213257]))))
 
 import os
 import os.path as path
@@ -50,7 +34,8 @@ sys.path.append(SRC_DIR)
 import fpcore
 import lambdas
 
-from lambdas import InflectionLeft, InflectionRight, Horner, FixedPolynomial, SplitDomain
+
+from lambdas import InflectionLeft, InflectionRight, Horner, FixedPolynomial
 from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
 from interval import Interval
 from utils.logging import Logger
@@ -60,49 +45,28 @@ logger.set_log_level(Logger.HIGH)
 
 # +---------------------------------------------------------------------------+
 # | Should be handled by a new parser                                         |
-# |                                                                           |
+# |
+
 
 asin = fpcore.parse("(FPCore (x) (asin x))")[0]
-# This is the value that corresponds to AMD's code
-linear_cutoff = " 1.38777878078144552145514403413465714614676459320581451695186814276894438080489635467529296875e-17"
-# A much better value is
-# linear_cutoff = " 2.14910850667674987607097081103446623018271566252224147319793701171875e-8"
 
 mlm = \
     InflectionLeft(
-        SplitDomain({
-            Interval("0", linear_cutoff):
+        InflectionRight(
             Horner(
                 FixedPolynomial(
                     asin,
-                    Interval("0", linear_cutoff),
-                    1,
-                    [1],
-                    [1]
-                )),
-            Interval(linear_cutoff, "1"):
-            InflectionRight(
-                Horner(
-                    FixedPolynomial(
-                        asin,
-                        Interval("0", "0.5"),
-                        13,
-                        [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25],
-                        [1,
-                         0.1666666666666477004,
-                         0.07500000000417969548,
-                         0.04464285678140855751,
-                         0.03038196065035564039,
-                         0.0223717279703189581,
-                         0.01736009463784134871,
-                         0.01388184285963460496,
-                         0.01218919111033679899,
-                         0.00644940526689945226,
-                         0.01972588778568478904,
-                         -0.01651175205874840998,
-                         0.03209627299824770186, ])),
-                fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
-                fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body)}),
+                    Interval("0", "0.5"),
+                    6,
+                    [1, 3, 5, 7, 9, 11],
+                    [ 1,
+                      0.1666679084300994873,
+                      0.07494434714317321777,
+                      0.04555018618702888489,
+                      0.02385816909372806549,
+                      0.04263564199209213257])),
+            fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
+            fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body),
         fpcore.parse("(FPCore (x) (- x))")[0].body,
         fpcore.parse("(FPCore (x) (- y))")[0].body)
 
@@ -121,23 +85,23 @@ os.chdir("generated")
 
 # dsl
 mlm.type_check()
-dsl_func_name = "dsl_amd_fast_asin"
+dsl_func_name = "dsl_amd_fast_asinf"
 dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
-libm_func_name = "libm_dsl_amd_fast_asin"
-libm_sig = "double libm_dsl_amd_fast_asin(double x);"
-with open(path.join(GIT_DIR, "examples", "amd_fast_asin.c"), "r") as f:
+libm_func_name = "libm_dsl_amd_fast_asinf"
+libm_sig = "double libm_dsl_amd_fast_asinf(double x);"
+with open(path.join(GIT_DIR, "examples", "amd_fast_asinf.c"), "r") as f:
     text = f.read()
-    text = text.replace("amd_fast_asin", "libm_dsl_amd_fast_asin")
+    text = text.replace("amd_fast_asinf", "libm_dsl_amd_fast_asinf")
     libm_src = [line.rstrip() for line in text.splitlines()]
 
 # oracle
 func = fpcore.parse("(FPCore (x) (asin x))")[0]
 domain = Interval(-1, 1)
 target = lambdas.types.Impl(func, domain)
-mpfr_func_name = "mpfr_dsl_amd_fast_asin"
+mpfr_func_name = "mpfr_dsl_amd_fast_asinf"
 mpfr_sig, mpfr_src = lambdas.generate_mpfr_c_code(target, mpfr_func_name)
 
 # output directory
@@ -161,7 +125,7 @@ with open(func_fname, "w") as f:
 
 domains = [("-1", "1"),
            ("0", "1"),
-           (float(linear_cutoff) - 1e-8, float(linear_cutoff) + 1e-8),
+           ("0", "0.5"),
            ("0.4375", "0.5625"),]
 func_body = func.to_html()
 generators = [str(mlm)]

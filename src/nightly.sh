@@ -9,38 +9,39 @@ SCRIPT_LOCATION=$(readlink -f "${SCRIPT_DIR}")
 GIT_LOCATION=$(cd "${SCRIPT_LOCATION}" && cd .. && pwd)
 NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
 
-# Benchmarks
-BENCH_CORE=${GIT_LOCATION}/benchmarks/core_*.fpcore
-BENCH_FUNC=${GIT_LOCATION}/benchmarks/function_*.fpcore
-BENCH_FPBE=${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
-BENCH_HERB=${GIT_LOCATION}/benchmarks/herbie_*.fpcore
-BENCHMARKS=("${BENCH_CORE[@]}" "${BENCH_FUNC[@]}" "${BENCH_FPBE[@]}")
-if [ $# -gt 0 ]; then
-  case $1 in
-  "all")
-    BENCHMARKS="${GIT_LOCATION}/benchmarks"
-    ;;
-  "debug")
-    BENCHMARKS=${GIT_LOCATION}/benchmarks/core_function_sin.fpcore
-    ;;
-  "core")
-    BENCHMARKS="${BENCH_CORE[@]}"
-    ;;
-  "function")
-    BENCHMARKS="${BENCH_FUNC[@]}"
-    ;;
-  "fpbench")
-    BENCHMARKS="${BENCH_FPBE[@]}"
-    ;;
-  "herbie")
-    BENCHMARKS="${BENCH_HERB[@]}"
-    ;;
-  *)
-    echo "Unknown selection: $1"
-    exit 1
-    ;;
-  esac
-fi
+# Used for generative benchmarks
+# # Benchmarks
+# BENCH_CORE=${GIT_LOCATION}/benchmarks/core_*.fpcore
+# BENCH_FUNC=${GIT_LOCATION}/benchmarks/function_*.fpcore
+# BENCH_FPBE=${GIT_LOCATION}/benchmarks/fpbench_*.fpcore
+# BENCH_HERB=${GIT_LOCATION}/benchmarks/herbie_*.fpcore
+# BENCHMARKS=("${BENCH_CORE[@]}" "${BENCH_FUNC[@]}" "${BENCH_FPBE[@]}")
+# if [ $# -gt 0 ]; then
+#   case $1 in
+#   "all")
+#     BENCHMARKS="${GIT_LOCATION}/benchmarks"
+#     ;;
+#   "debug")
+#     BENCHMARKS=${GIT_LOCATION}/benchmarks/core_function_sin.fpcore
+#     ;;
+#   "core")
+#     BENCHMARKS="${BENCH_CORE[@]}"
+#     ;;
+#   "function")
+#     BENCHMARKS="${BENCH_FUNC[@]}"
+#     ;;
+#   "fpbench")
+#     BENCHMARKS="${BENCH_FPBE[@]}"
+#     ;;
+#   "herbie")
+#     BENCHMARKS="${BENCH_HERB[@]}"
+#     ;;
+#   *)
+#     echo "Unknown selection: $1"
+#     exit 1
+#     ;;
+#   esac
+# fi
 
 # Data
 NIGHTLY_TIMESTAMP=$(date +%s)
@@ -57,7 +58,9 @@ rm -rf "${GIT_LOCATION}/measurement/error/generated"
 
 # Run the generation in the final directory
 cd "${THIS_NIGHTLY_LOCATION}"
-time python3 "${GIT_LOCATION}"/examples/amd_fast_asin.mlm.py
+for e in "${GIT_LOCATION}"/examples/*.mlm.py ; do
+  time python3 "${e}"
+done
 
 # Move generated to timing dir
 mv "${THIS_NIGHTLY_LOCATION}/generated" "${GIT_LOCATION}/measurement/timing/"

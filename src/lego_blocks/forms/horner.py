@@ -1,13 +1,47 @@
 
 
+from fpcore.ast import ASTNode, Variable
 from lego_blocks import forms
+
+
+def simple_horner_poly(x, mons, coeffs):
+    assert len(mons) == len(coeffs)
+    if len(mons) == 0:
+        return None
+
+    c = coeffs[0]
+    coeffs = coeffs[1:]
+
+    if mons[0] == 0:
+        part = ""
+        next_mons = mons[1:]
+    elif mons[0] == 1:
+        part = f"{x}*"
+        next_mons = [m-1 for m in mons[1:]]
+    elif mons[0] == 2:
+        part = f"({x}*{x})*"
+        next_mons = [m-2 for m in mons[1:]]
+    elif mons[0] == 3:
+        part = f"(({x}*{x})*{x})*"
+        next_mons = [m-3 for m in mons[1:]]
+    else:
+        raise ValueError(f"Simple Horner is broken: {mons[0]}")
+
+    next_part = simple_horner_poly(x, next_mons, coeffs)
+
+    if issubclass(type(c), ASTNode):
+        c = float(c)
+
+    if next_part is None:
+        return f"{part}{c}"
+    return f"{part}({c} + {next_part})"
 
 
 class Horner(forms.Form):
 
     def __init__(self, numeric_type, in_names, out_names, polynomial):
         super().__init__(numeric_type, in_names, out_names)
-        assert (type(polynomial) == forms.Polynomial)
+        assert (type(polynomial) in {forms.Polynomial, forms.RationalPolynomial})
 
         self.polynomial = polynomial
 
@@ -20,46 +54,22 @@ class Horner(forms.Form):
     def to_c(self):
         c_type = self.numeric_type.c_type()
         out = self.out_names[0]
-        cast_in = "(({}){})".format(c_type, self.in_names[0])
+        x = self.in_names[0]
 
-        parts = list()
-        mons = self.polynomial.monomials
-        cast_coeff = ["(({}){})".format(c_type, c) for c
-                      in self.polynomial.coefficients]
+        if type(self.polynomial) == forms.Polynomial:
+            mons = self.polynomial.monomials
+            coeffs = self.polynomial.coefficients
+            body = simple_horner_poly(x, mons, coeffs)
+        elif type(self.polynomial) == forms.RationalPolynomial:
+            num_mons = self.polynomial.numerator_monomials
+            num_coeffs = self.polynomial.numerator_coefficients
+            p = simple_horner_poly(x, num_mons, num_coeffs)
+            den_mons = self.polynomial.denominator_monomials
+            den_coeffs = self.polynomial.denominator_coefficients
+            q = simple_horner_poly(x, den_mons, den_coeffs)
+            o = self.polynomial.offset.substitute(Variable("x"), x)
+            body = f"{o} + ({p}) / ({q})"
 
-        def expand_pow(n):
-            return "*".join(cast_in for _ in range(n))
-
-        if len(mons) == 1:
-            if mons[0] == 0:
-                parts.append("{}".format(cast_coeff[0]))
-            else:
-                parts.append(
-                    "{}*{}".format(expand_pow(mons[0]), cast_coeff[0]))
-
-        else:
-            if mons[0] == 0:
-                parts.append("{} \n        +".format(cast_coeff[0]))
-            else:
-                parts.append(
-                    "{}*({} \n        + ".format(expand_pow(mons[0]), cast_coeff[0]))
-
-            for i in range(1, len(mons) - 1):
-                power = mons[i] - mons[i - 1]
-                parts.append(
-                    "{}*({} \n        + ".format(expand_pow(power), cast_coeff[i]))
-
-            final_power = mons[-1] - mons[-2]
-            parts.append(
-                "{}*{}".format(expand_pow(final_power), cast_coeff[-1]))
-
-            for i in range(1, len(mons) - 1):
-                parts.append(")")
-
-            if mons[0] != 0:
-                parts.append(")")
-
-        rhs = "({})".format("".join(parts))
-        code = "{} {} = {};".format(c_type, out, rhs)
+        code = "{} {} = {};".format(c_type, out, body)
 
         return [code]

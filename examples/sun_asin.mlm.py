@@ -7,35 +7,33 @@
 #   (- x)
 #   (- y)
 #   (SplitDomain
-#     [(Interval 0 1.38777878078144552145514e-17)
-#        (HornerForm
-#          (Polynomial
-#            (asin x)
-#            (Interval 0 1.38777878078144552145514e-17)
-#            [1]
-#            [1]))]
-#     [(Interval 1.38777878078144552145514e-17 1)
+#      [(Interval 1 1)
+#        (Horner (Polynomial (asin x)
+#          (Interval 1 1) [0] [PI_2])]
+#      [(Interval 0  7.450580596923828125e-9)
+#        (Horner (Polynomial (asin x)
+#          (Interval 0 7.450580596923828125e-9) [1] [1])]
+#      [(Interval 7.450580596923828125e-9 1.0)
 #         (InflectionRight
 #           (sqrt (/ (- 1 x) 2))
 #           (- (/ PI 2) (* 2 y))
-#           (EstrinForm
-#             (Polynomial
-#               (asin x)
-#               (Interval 0 0.5)
-#               [1 3 5 7 9 11 13 15 17 19 21 23 25]
-#               [ 1
-#                 0.1666666666666477004
-#                 0.07500000000417969548
-#                 0.04464285678140855751
-#                 0.03038196065035564039
-#                 0.0223717279703189581
-#                 0.01736009463784134871
-#                 0.01388184285963460496
-#                 0.01218919111033679899
-#                 0.00644940526689945226
-#                 0.01972588778568478904
-#                -0.01651175205874840998
-#                 0.03209627299824770186]))))
+#           (Horner (RationalPolynomial (asin x)
+#              (Interval 0 0.5)
+#              x
+#              [3 5 7 9 11 13]
+#              [ 1.66666666666666657415e-01
+#               -3.25565818622400915405e-01
+#                2.01212532134862925881e-01
+#               -4.00555345006794114027e-02
+#                7.91534994289814532176e-04
+#                3.47933107596021167570e-05]
+#              [0 2 4 6 8]
+#              [ 1
+#               -2.40339491173441421878e+00
+#                2.02094576023350569471e+00
+#               -6.88283971605453293030e-01
+#                7.70381505559019352791e-02]))]))
+
 
 import os
 import os.path as path
@@ -50,7 +48,7 @@ sys.path.append(SRC_DIR)
 import fpcore
 import lambdas
 
-from lambdas import InflectionLeft, InflectionRight, Horner, FixedPolynomial, SplitDomain
+from lambdas import InflectionLeft, InflectionRight, Horner, FixedRationalPolynomial, SplitDomain, FixedPolynomial
 from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
 from interval import Interval
 from utils.logging import Logger
@@ -63,46 +61,40 @@ logger.set_log_level(Logger.HIGH)
 # |                                                                           |
 
 asin = fpcore.parse("(FPCore (x) (asin x))")[0]
-# This is the value that corresponds to AMD's code
-linear_cutoff = " 1.38777878078144552145514403413465714614676459320581451695186814276894438080489635467529296875e-17"
-# A much better value is
-# linear_cutoff = " 2.14910850667674987607097081103446623018271566252224147319793701171875e-8"
+
+one_i = Interval("1", "1")
+linear_cutoff = "7.450580596923828125e-9"
+linear_i = Interval("0", linear_cutoff)
+HPI = fpcore.parse("(FPCore () PI_2)")[0].body
 
 mlm = \
     InflectionLeft(
         SplitDomain({
-            Interval("0", linear_cutoff):
-            Horner(
-                FixedPolynomial(
-                    asin,
-                    Interval("0", linear_cutoff),
-                    1,
-                    [1],
-                    [1]
-                )),
+            one_i: Horner(FixedPolynomial(asin, one_i, 1, [0], [HPI])),
+            linear_i: Horner(FixedPolynomial(asin, linear_i, 1, [1], [1])),
             Interval(linear_cutoff, "1"):
-            InflectionRight(
-                Horner(
-                    FixedPolynomial(
-                        asin,
-                        Interval("0", "0.5"),
-                        13,
-                        [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25],
-                        [1,
-                         0.1666666666666477004,
-                         0.07500000000417969548,
-                         0.04464285678140855751,
-                         0.03038196065035564039,
-                         0.0223717279703189581,
-                         0.01736009463784134871,
-                         0.01388184285963460496,
-                         0.01218919111033679899,
-                         0.00644940526689945226,
-                         0.01972588778568478904,
-                         -0.01651175205874840998,
-                         0.03209627299824770186, ])),
-                fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
-                fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body)}),
+                InflectionRight(
+                    Horner(
+                        FixedRationalPolynomial(
+                            asin,
+                            Interval("0", "0.5"),
+                            fpcore.parse("(FPCore (x) x)")[0].body,
+                            [3, 5, 7, 9, 11, 13],
+                            [ 1.66666666666666657415e-01,
+                             -3.25565818622400915405e-01,
+                              2.01212532134862925881e-01,
+                             -4.00555345006794114027e-02,
+                              7.91534994289814532176e-04,
+                              3.47933107596021167570e-05],
+                            [0, 2, 4, 6, 8],
+                            [ 1,
+                             -2.40339491173441421878e+00,
+                              2.02094576023350569471e+00,
+                             -6.88283971605453293030e-01,
+                              7.70381505559019352791e-02])),
+                    fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
+                    fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body),
+        }),
         fpcore.parse("(FPCore (x) (- x))")[0].body,
         fpcore.parse("(FPCore (x) (- y))")[0].body)
 
@@ -121,23 +113,23 @@ os.chdir("generated")
 
 # dsl
 mlm.type_check()
-dsl_func_name = "dsl_amd_fast_asin"
+dsl_func_name = "dsl_sun_asin"
 dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
-libm_func_name = "libm_dsl_amd_fast_asin"
-libm_sig = "double libm_dsl_amd_fast_asin(double x);"
-with open(path.join(GIT_DIR, "examples", "amd_fast_asin.c"), "r") as f:
+libm_func_name = "libm_dsl_sun_asin"
+libm_sig = "double libm_dsl_sun_asin(double x);"
+with open(path.join(GIT_DIR, "examples", "sun_asin.c"), "r") as f:
     text = f.read()
-    text = text.replace("amd_fast_asin", "libm_dsl_amd_fast_asin")
+    text = text.replace("sun_asin", "libm_dsl_sun_asin")
     libm_src = [line.rstrip() for line in text.splitlines()]
 
 # oracle
 func = fpcore.parse("(FPCore (x) (asin x))")[0]
 domain = Interval(-1, 1)
 target = lambdas.types.Impl(func, domain)
-mpfr_func_name = "mpfr_dsl_amd_fast_asin"
+mpfr_func_name = "mpfr_dsl_sun_asin"
 mpfr_sig, mpfr_src = lambdas.generate_mpfr_c_code(target, mpfr_func_name)
 
 # output directory

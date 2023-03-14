@@ -6,36 +6,28 @@
 # (InflectionLeft
 #   (- x)
 #   (- y)
-#   (SplitDomain
-#     [(Interval 0 1.38777878078144552145514e-17)
-#        (HornerForm
-#          (Polynomial
-#            (asin x)
-#            (Interval 0 1.38777878078144552145514e-17)
-#            [1]
-#            [1]))]
-#     [(Interval 1.38777878078144552145514e-17 1)
-#         (InflectionRight
-#           (sqrt (/ (- 1 x) 2))
-#           (- (/ PI 2) (* 2 y))
-#           (EstrinForm
-#             (Polynomial
-#               (asin x)
-#               (Interval 0 0.5)
-#               [1 3 5 7 9 11 13 15 17 19 21 23 25]
-#               [ 1
-#                 0.1666666666666477004
-#                 0.07500000000417969548
-#                 0.04464285678140855751
-#                 0.03038196065035564039
-#                 0.0223717279703189581
-#                 0.01736009463784134871
-#                 0.01388184285963460496
-#                 0.01218919111033679899
-#                 0.00644940526689945226
-#                 0.01972588778568478904
-#                -0.01651175205874840998
-#                 0.03209627299824770186]))))
+#   (InflectionRight
+#     (sqrt (\ (- 1 x) 2))
+#     (- (\ PI 2) 2 y)
+#     (Horner
+#       (RationalPolynomial
+#         (asin x)
+#         (Interval 0 0.5)
+#         x
+#         [3 5 7 9 11 13]
+#         [ 0.227485835556935010735943483075
+#          -0.445017216867635649900123110649
+#           0.275558175256937652532686256258
+#          -0.0549989809235685841612020091328
+#           0.00109242697235074662306043804220
+#           0.0000482901920344786991880522822991]
+#         [2 4 6 8 10]
+#         [ 1.36491501334161032038194214209
+#          -3.28431505720958658909889444194
+#           2.76568859157270989520376345954
+#          -0.943639137032492685763471240072
+#           0.105869422087204370341222318533]))))
+
 
 import os
 import os.path as path
@@ -50,7 +42,7 @@ sys.path.append(SRC_DIR)
 import fpcore
 import lambdas
 
-from lambdas import InflectionLeft, InflectionRight, Horner, FixedPolynomial, SplitDomain
+from lambdas import InflectionLeft, InflectionRight, Horner, FixedRationalPolynomial, SplitDomain
 from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
 from interval import Interval
 from utils.logging import Logger
@@ -70,39 +62,27 @@ linear_cutoff = " 1.387778780781445521455144034134657146146764593205814516951868
 
 mlm = \
     InflectionLeft(
-        SplitDomain({
-            Interval("0", linear_cutoff):
+        InflectionRight(
             Horner(
-                FixedPolynomial(
+                FixedRationalPolynomial(
                     asin,
-                    Interval("0", linear_cutoff),
-                    1,
-                    [1],
-                    [1]
-                )),
-            Interval(linear_cutoff, "1"):
-            InflectionRight(
-                Horner(
-                    FixedPolynomial(
-                        asin,
-                        Interval("0", "0.5"),
-                        13,
-                        [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25],
-                        [1,
-                         0.1666666666666477004,
-                         0.07500000000417969548,
-                         0.04464285678140855751,
-                         0.03038196065035564039,
-                         0.0223717279703189581,
-                         0.01736009463784134871,
-                         0.01388184285963460496,
-                         0.01218919111033679899,
-                         0.00644940526689945226,
-                         0.01972588778568478904,
-                         -0.01651175205874840998,
-                         0.03209627299824770186, ])),
-                fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
-                fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body)}),
+                    Interval("0", "0.5"),
+                    fpcore.parse("(FPCore (x) x)")[0].body,
+                    [3, 5, 7, 9, 11, 13],
+                    [ 0.227485835556935010735943483075,
+                     -0.445017216867635649900123110649,
+                      0.275558175256937652532686256258,
+                     -0.0549989809235685841612020091328,
+                      0.00109242697235074662306043804220,
+                      0.0000482901920344786991880522822991],
+                    [0, 2, 4, 6, 8],
+                    [ 1.36491501334161032038194214209,
+                     -3.28431505720958658909889444194,
+                      2.76568859157270989520376345954,
+                     -0.943639137032492685763471240072,
+                      0.105869422087204370341222318533])),
+            fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
+            fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body),
         fpcore.parse("(FPCore (x) (- x))")[0].body,
         fpcore.parse("(FPCore (x) (- y))")[0].body)
 
@@ -121,23 +101,23 @@ os.chdir("generated")
 
 # dsl
 mlm.type_check()
-dsl_func_name = "dsl_amd_fast_asin"
+dsl_func_name = "dsl_amd_ref_asin"
 dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
-libm_func_name = "libm_dsl_amd_fast_asin"
-libm_sig = "double libm_dsl_amd_fast_asin(double x);"
-with open(path.join(GIT_DIR, "examples", "amd_fast_asin.c"), "r") as f:
+libm_func_name = "libm_dsl_amd_ref_asin"
+libm_sig = "double libm_dsl_amd_ref_asin(double x);"
+with open(path.join(GIT_DIR, "examples", "amd_ref_asin.c"), "r") as f:
     text = f.read()
-    text = text.replace("amd_fast_asin", "libm_dsl_amd_fast_asin")
+    text = text.replace("amd_ref_asin", "libm_dsl_amd_ref_asin")
     libm_src = [line.rstrip() for line in text.splitlines()]
 
 # oracle
 func = fpcore.parse("(FPCore (x) (asin x))")[0]
 domain = Interval(-1, 1)
 target = lambdas.types.Impl(func, domain)
-mpfr_func_name = "mpfr_dsl_amd_fast_asin"
+mpfr_func_name = "mpfr_dsl_amd_ref_asin"
 mpfr_sig, mpfr_src = lambdas.generate_mpfr_c_code(target, mpfr_func_name)
 
 # output directory
