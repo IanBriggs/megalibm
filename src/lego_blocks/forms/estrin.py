@@ -39,7 +39,8 @@ class Estrin(forms.Form):
             return ""
         c_type = self.numeric_type.c_type()
         cast_in = "(({}){})".format(c_type, self.in_names[0])
-        return "*".join(cast_in for _ in range(n))
+        x_pow_n = "*".join(cast_in for _ in range(n))
+        return f"({x_pow_n})"
 
     def estrin(self, mons, groups, x_power):
         degree = mons[-1]
@@ -48,14 +49,14 @@ class Estrin(forms.Form):
             if len(mons) == 0:
                 return f"{groups[0]}*{self.expand_pow(x_power)}"
             else:
-                return f"{groups[0]} + \n {groups[1]}*{self.expand_pow(x_power)}"
+                return f"{groups[0]} \n             +{groups[1]}*{self.expand_pow(x_power)}"
         
         even = groups[0::2]
         odd = groups[1::2]
         new_groups = []
 
         for i, (a, b) in enumerate(zip(even, odd)):
-            group = f"({a} + {b}*{self.expand_pow(x_power)})"
+            group = f"({a} \n             + {b}*{self.expand_pow(x_power)})"
             new_groups.append(group)
         
         if len(even) > len(odd):
@@ -76,8 +77,19 @@ class Estrin(forms.Form):
         cast_in = "(({}){})".format(c_type, self.in_names[0])
 
         if all(term % 2 != 0 for term in self.polynomial.monomials):
+            # if mons[0] == 0:
+            #     mons = [pow - 1 for pow in mons[1:]]
+            #     rhs = f"{cast_coeff[0]} + {cast_in}*({self.estrin(mons, cast_coeff[1:], 2)})"
+            # else:
             mons = [pow - 1 for pow in mons]
             rhs = f"{cast_in}*({self.estrin(mons, cast_coeff, 2)})"
+        elif all(term % 2 == 0 for term in self.polynomial.monomials):
+            if mons[0] == 0:
+                # rhs = f"{cast_coeff[0]} + {self.expand_pow(2)}*({self.estrin(mons, cast_coeff[1:], 2)})"
+                rhs = self.estrin(mons, cast_coeff, 2)
+            else:
+                mons = [pow - 2 for pow in mons]
+                rhs = f"{self.expand_pow(2)}*({self.estrin(mons, cast_coeff, 2)})"
         else:
             rhs = self.estrin(mons, cast_coeff, 1)
 

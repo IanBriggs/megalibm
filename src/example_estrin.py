@@ -21,8 +21,10 @@ logger.set_log_level(Logger.HIGH)
 
 function = fpcore.parse("(FPCore (x) (sin x))")[0]
 domain = Interval("0.0", "(/ PI 2)")
-monomials = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-coefficients = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+monomials = [1, 2,3, 4,5, 6,7, 8,9, 10, 11,12]
+coefficients = [1, 2,3, 4,5, 6,7, 8,9, 10, 11,12]
+# monomials = [1,3, 5, 7, 9, 11]
+# coefficients = [1,3,5, 7,9, 11]
 terms = 5
 
 poly = lambdas.FixedPolynomial(function, domain, terms, monomials, coefficients)
@@ -42,5 +44,5 @@ if not path.isdir("generated_poly_est"):
 os.chdir("generated_poly_est")
 
 func_lines = assemble_functions([gen_src], "funcs.h")
-with open("funcs_5.c", "w") as f:
+with open("full.c", "w") as f:
     f.write("\n".join(func_lines))
