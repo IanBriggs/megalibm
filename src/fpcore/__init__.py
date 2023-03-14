@@ -28,7 +28,6 @@ from .ast_methods import (
     substitute,
     to_html,
     to_libm_c,
-    to_libm_c2,
     to_mpfr_c,
     to_snake_egg,
     to_sollya,
