@@ -32,6 +32,7 @@
  */
 
 #include <math.h>
+#include <stdint.h>
 // #include "libm_util_amd.h"
 #define SIGNBIT_DP64      0x8000000000000000
 #define PINFBITPATT_DP64  0x7ff0000000000000
@@ -59,7 +60,6 @@
     x = _bitsy.d; \
   }
 // #include <libm/alm_special.h>
-typedef unsigned long long uint64_t;
 static inline void __amd_raise_fp_exc(int flags)
 {
     if ((flags & AMD_F_UNDERFLOW) == AMD_F_UNDERFLOW) {
@@ -89,7 +89,7 @@ double __alm_handle_error(uint64_t value, int flags)
 }
 // #include <libm/amd_funcs_internal.h>
 
-double 
+double
 // ALM_PROTO_REF(asin)
 amd_ref_asin(double x)
 {
