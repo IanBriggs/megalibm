@@ -32,39 +32,10 @@ function in_path {
     command -v "$1" &>/dev/null
 }
 
-# rust
-echo "Installing rust"
-RUST_HOME="${SCRIPT_LOCATION}/rust"
-DONE_RUST_MARKER="${RUST_HOME}/done"
-export RUSTUP_HOME="${RUST_HOME}"      # needed since rustup doesn't have --prefix
-export CARGO_HOME="${RUST_HOME}/cargo" # ditto
-if in_path rustc && in_path cargo; then
-    echo "  rust already in env"
-elif [ -f "${DONE_RUST_MARKER}" ]; then
-    echo "  rust already installed"
-else
-    cd "${SCRIPT_LOCATION}"
-
-    echo "  Cleaning build location"
-    rm -rf rust
-
-    echo "  Dowloading and running rustup script"
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
-        >>"${LOG}" 2>&1
-
-    echo "  Done"
-    touch "${DONE_RUST_MARKER}"
-fi
-
-export PATH="${CARGO_HOME}/bin:${PATH}"
-
-echo "export RUSTUP_HOME=\"${RUST_HOME}\"" >>"${DEBUG_ENV}"
-echo "export CARGO_HOME=\"${RUST_HOME}/cargo\"" >>"${DEBUG_ENV}"
-echo "export PATH=\"${CARGO_HOME}/bin:\$PATH"\" >>"${DEBUG_ENV}"
-
 # python libraries
 echo "Installing python dependencies"
-python3 -m pip install --upgrade --quiet maturin mpmath sly matplotlib z3-solver
+python3 -m pip install --upgrade --quiet pip
+python3 -m pip install --upgrade --quiet maturin mpmath sly sympy matplotlib z3-solver
 echo "  Done"
 
 # snake_egg
@@ -82,7 +53,7 @@ else
     echo "  Cloning snake_egg"
     git clone https://github.com/IanBriggs/snake-egg.git snake_egg \
         >>"${LOG}" 2>&1
-    
+
     echo "  Building snake_egg"
     cd snake_egg
     make >>"${LOG}" 2>&1

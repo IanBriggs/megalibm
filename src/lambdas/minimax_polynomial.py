@@ -29,7 +29,8 @@ class MinimaxPolynomial(types.Source):
         body = self.function.body
         inf = self.domain.inf
         sup = self.domain.sup
-        return f"(MinimaxPolynomial {body} [{inf} {sup}])"
+        terms = self.terms
+        return f"(MinimaxPolynomial {body} [{inf} {sup}] {terms})"
 
     def __repr__(self):
         return "MinimaxPolynomial({}, {}, {})".format(repr(self.function),
@@ -65,7 +66,7 @@ class MinimaxPolynomial(types.Source):
         mirrors = decomposed_identities["mirror"]
 
         for s, t_arg in mirrors:
-            if t_arg == 0:
+            if float(t_arg) == 0:
                 if s == Variable("x"):
                     monomials += range(2, 2*self.terms+1, 2)
                     break

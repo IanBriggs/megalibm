@@ -34,7 +34,7 @@ class IfLess(lego_blocks.LegoBlock):
         }
 
         lines = [
-            "{type} {out} = {in} < {bound} ? {true_val} : {false_val};".format(
+            "{type} {out} = {in} <= {bound} ? {true_val} : {false_val};".format(
                 **fmt),
         ]
 

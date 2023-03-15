@@ -61,6 +61,7 @@
         "srcs",
         "strtol",
         "subexpression",
+        "sympy",
         "tgamma",
         "thefunc",
         "TRIOP",
