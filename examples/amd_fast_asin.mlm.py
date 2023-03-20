@@ -50,7 +50,7 @@ sys.path.append(SRC_DIR)
 import fpcore
 import lambdas
 
-from lambdas import InflectionLeft, InflectionRight, Horner, FixedPolynomial, SplitDomain
+from lambdas import InflectionLeft, InflectionRight, Horner, FixedPolynomial, SplitDomain, Estrin
 from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
 from interval import Interval
 from utils.logging import Logger
@@ -82,7 +82,7 @@ mlm = \
                 )),
             Interval(linear_cutoff, "1"):
             InflectionRight(
-                Horner(
+                Estrin(
                     FixedPolynomial(
                         asin,
                         Interval("0", "0.5"),
@@ -100,7 +100,8 @@ mlm = \
                          0.00644940526689945226,
                          0.01972588778568478904,
                          -0.01651175205874840998,
-                         0.03209627299824770186, ])),
+                         0.03209627299824770186, ]),
+                         split=1),
                 fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
                 fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body)}),
         fpcore.parse("(FPCore (x) (- x))")[0].body,
