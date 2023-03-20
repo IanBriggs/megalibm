@@ -20,29 +20,24 @@ class Estrin(forms.Form):
                                                        repr(self.in_names),
                                                        repr(self.out_names),
                                                        repr(self.polynomial))
-
-    # def to_c(self):
-    #     """ Suppose we want to evaluate c1 + c2x """
-    #     c_type = self.numeric_type.c_type()
-    #     out = self.out_names[0]
-    #     cast_in = "(({}){})".format(c_type, self.in_names[0])
-    #     # our_poly = Operation("+", Number("1"), Operation("+", Operation("*", Variable("x"), Number("2")), Operation("*", Operation("+", Number("3"), Operation("+", Operation("*", Variable("x"), Number("4")), Operation("*",  Variable("x"), Variable("x"))))))
-    #     # our_poly = Operation("+", Number("1"), Operation("*", Variable("x"), Number("2")))
-    #     our_poly = Operation("+", Operation("+", Number("1"), Operation("*", Variable("x"), Number("2"))),Operation("*", Operation("+", Number("3"), Operation("*", Variable("x"), Number("4"))), Operation("*", Variable("x"), Variable("x"))))
-    #     our_poly = our_poly.substitute(Variable("x"), Variable("in_0"))
-
-    #     code = f"{c_type} {out} = {our_poly.to_libm_c2()};"
-    #     c = f"{c_type} {out} = {our_poly.to_libm_c()};"
-    #     print(c)
-    #     return [code]
-
+    
     def expand_pow(self, n):
         if n == 0:
             return ""
         c_type = self.numeric_type.c_type()
-        cast_in = "(({}){})".format(c_type, self.in_names[0])
-        x_pow_n = "*".join(cast_in for _ in range(n))
-        return f"({x_pow_n})"
+        x = "(({}){})".format(c_type, self.in_names[0])
+        if n == 1:
+            return x
+        x_2 = f"((({c_type}){self.in_names[0]})*(({c_type}){self.in_names[0]}))"
+        if n == 2:
+            return x_2
+        if n % 2:
+            return f"(({self.expand_pow(n-1)})*{x})"
+        else:
+            if n//2 % 2:
+                return f"(({self.expand_pow(n-2)})*{x_2})"
+            else:
+                return f"(({self.expand_pow(n//2)})*({self.expand_pow(n//2)}))"
 
     def estrin(self, mons, groups, x_power):
         degree = mons[-1]
@@ -51,14 +46,14 @@ class Estrin(forms.Form):
             if len(mons) == 1:
                 return f"{groups[0]}*{self.expand_pow(x_power)}"
             else:
-                return f"{groups[0]} \n             +{groups[1]}*{self.expand_pow(x_power)}"
+                return f"{groups[0]} \n               + {groups[1]}*{self.expand_pow(x_power)}"
 
         even = groups[0::2]
         odd = groups[1::2]
         new_groups = []
 
         for i, (a, b) in enumerate(zip(even, odd)):
-            group = f"({a} \n             + {b}*{self.expand_pow(x_power)})"
+            group = f"({a} \n               + {b}*{self.expand_pow(x_power)})"
             new_groups.append(group)
 
         if len(even) > len(odd):
