@@ -208,7 +208,7 @@ trig_no_div = """(+ ?b ?a) ==> (+ ?a ?b)
 (+ (fabs ?a) (fabs ?a)) ==> (fabs (+ ?a ?a))
 (fabs (+ ?a ?a)) ==> (+ (fabs ?a) (fabs ?a))"""
 
-trig_div = """?a ==> (/ ?a 1)
+trig_div_safe = """?a ==> (/ ?a 1)
 (/ ?a 1) ==> ?a
 (~ ?a) ==> (/ ?a -1)
 (/ ?a -1) ==> (~ ?a)
@@ -238,7 +238,9 @@ trig_div = """?a ==> (/ ?a 1)
 (/ (- ?b ?a) (- ?b ?a)) ==> (/ (- ?a ?b) (- ?a ?b))
 (/ (- ?a ?b) (- ?b ?a)) ==> (/ (- ?b ?a) (- ?a ?b))
 (/ (* ?a ?b) (/ ?a ?a)) ==> (* (* ?a ?a) (/ ?b ?a))
-(* (* ?a ?a) (/ ?b ?a)) ==> (/ (* ?a ?b) (/ ?a ?a))
+(* (* ?a ?a) (/ ?b ?a)) ==> (/ (* ?a ?b) (/ ?a ?a))"""
+
+trig_div = """
 (/ 0 (- ?b ?a)) ==> (/ 0 (- ?a ?b))
 (* (* ?a ?b) (/ 0 ?a)) ==> 0
 (* ?b (/ 0 ?a)) ==> (* (+ ?a ?b) (/ 0 ?a))
@@ -371,7 +373,7 @@ def process_rules(content):
     # print(rules)
     return rules
 
-all_rules = (sound_div_rules + "\n" + trig_no_div).split("\n")
+all_rules = (sound_div_rules + "\n" + trig_no_div + "\n" + trig_div_safe).split("\n")
 rule_str = process_rules(all_rules)
 
 rules = list()
