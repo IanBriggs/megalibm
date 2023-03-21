@@ -7,10 +7,11 @@ PY_SCRIPTS = src/megalibm_identities.py \
 			 src/make_website.py
 
 PY_BINS = $(foreach p,${PY_SCRIPTS},$(patsubst src/%.py,bin/%,$p))
+SH_BINS = bin/nightly.sh bin/retry.sh
 
 # Fill bin
 .PHONY: build
-build: ${PY_BINS}
+build: ${PY_BINS} ${SH_BINS}
 
 # Link python scripts into bin
 bin/%: src/%.py requirements/done | bin
@@ -22,12 +23,16 @@ bin:
 
 # Run nightly
 .PHONY: nightly
-nightly: bin/nightly.sh
+nightly: bin/nightly.sh build
 	$<
 
 # Link nightly script into bin
-bin/nightly.sh: src/nightly.sh build
+bin/nightly.sh: src/nightly.sh
 	cd bin && $(RM) nightly.sh && ln -sF ../src/nightly.sh nightly.sh
+
+# Link retry script into bin
+bin/retry.sh: src/retry.sh
+	cd bin && $(RM) retry.sh && ln -sF ../src/retry.sh retry.sh
 
 # Build requirements
 .PHONY: requirements
