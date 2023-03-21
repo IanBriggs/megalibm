@@ -266,11 +266,8 @@ trig_div_safe = """?a ==> (/ ?a 1)
 (* (+ ?a 1) (/ ?a ?a)) ==> (+ ?a (/ ?a ?a))
 (* (- 1 ?a) (/ ?a ?a)) ==> (- (/ ?a ?a) ?a)
 (- (/ ?a ?a) ?a) ==> (* (- 1 ?a) (/ ?a ?a))
-(- ?a (/ ?a ?a)) ==> (* (+ ?a -1) (/ ?a ?a))"""
-
-# up to and including line 259 succeeded last time 
-
-trig_div = """(* (+ ?a -1) (/ ?a ?a)) ==> (- ?a (/ ?a ?a))
+(- ?a (/ ?a ?a)) ==> (* (+ ?a -1) (/ ?a ?a))
+(* (+ ?a -1) (/ ?a ?a)) ==> (- ?a (/ ?a ?a))
 (- (~ ?a) (/ ?a ?a)) ==> (* (- -1 ?a) (/ ?a ?a))
 (* (- -1 ?a) (/ ?a ?a)) ==> (- (~ ?a) (/ ?a ?a))
 (/ 0 (fabs ?a)) ==> (/ 0 ?a)
@@ -281,6 +278,10 @@ trig_div = """(* (+ ?a -1) (/ ?a ?a)) ==> (- ?a (/ ?a ?a))
 (/ 0 (* ?a ?a)) ==> (/ 0 ?a)
 (/ 0 ?a) ==> (/ 0 (+ ?a ?a))
 (/ 0 (+ ?a ?a)) ==> (/ 0 ?a)"""
+
+# up to and including line 269 succeeded last time 
+
+trig_div = """"""
 
 print("Excluding: " + trig_div)
 
