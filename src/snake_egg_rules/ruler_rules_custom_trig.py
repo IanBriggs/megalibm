@@ -387,4 +387,4 @@ for l in evaled_rules:
   to = l[2]
   rules.append(Rewrite(frm, to, name))
 
-print(rules)
+print(rule_str)
