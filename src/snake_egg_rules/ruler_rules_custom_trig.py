@@ -256,11 +256,8 @@ trig_div_safe = """?a ==> (/ ?a 1)
 (/ ?a ?a) ==> (/ (* ?a ?a) (* ?a ?a))
 (/ ?a ?a) ==> (/ (+ ?a ?a) (+ ?a ?a))
 (/ (+ ?a ?a) (+ ?a ?a)) ==> (/ ?a ?a)
-(/ (* ?a ?a) ?a) ==> (+ ?a (/ 0 ?a))"""
-
-# up to and including line 241 succeeded last time 
-
-trig_div = """(+ ?a (/ 0 ?a)) ==> (/ (* ?a ?a) ?a)
+(/ (* ?a ?a) ?a) ==> (+ ?a (/ 0 ?a))
+(+ ?a (/ 0 ?a)) ==> (/ (* ?a ?a) ?a)
 (/ (* ?a ?a) (~ ?a)) ==> (- (/ 0 ?a) ?a)
 (- (/ 0 ?a) ?a) ==> (/ (* ?a ?a) (~ ?a))
 (/ (* ?a ?a) (fabs ?a)) ==> (+ (fabs ?a) (/ 0 ?a))
@@ -269,8 +266,11 @@ trig_div = """(+ ?a (/ 0 ?a)) ==> (/ (* ?a ?a) ?a)
 (* (+ ?a 1) (/ ?a ?a)) ==> (+ ?a (/ ?a ?a))
 (* (- 1 ?a) (/ ?a ?a)) ==> (- (/ ?a ?a) ?a)
 (- (/ ?a ?a) ?a) ==> (* (- 1 ?a) (/ ?a ?a))
-(- ?a (/ ?a ?a)) ==> (* (+ ?a -1) (/ ?a ?a))
-(* (+ ?a -1) (/ ?a ?a)) ==> (- ?a (/ ?a ?a))
+(- ?a (/ ?a ?a)) ==> (* (+ ?a -1) (/ ?a ?a))"""
+
+# up to and including line 259 succeeded last time 
+
+trig_div = """(* (+ ?a -1) (/ ?a ?a)) ==> (- ?a (/ ?a ?a))
 (- (~ ?a) (/ ?a ?a)) ==> (* (- -1 ?a) (/ ?a ?a))
 (* (- -1 ?a) (/ ?a ?a)) ==> (- (~ ?a) (/ ?a ?a))
 (/ 0 (fabs ?a)) ==> (/ 0 ?a)
@@ -282,7 +282,7 @@ trig_div = """(+ ?a (/ 0 ?a)) ==> (/ (* ?a ?a) ?a)
 (/ 0 ?a) ==> (/ 0 (+ ?a ?a))
 (/ 0 (+ ?a ?a)) ==> (/ 0 ?a)"""
 
-
+print("Excluding: " + trig_div)
 
 # Get raw rules from txt
 x, y, z, a, b, c, d = vars("x y z a b c d")
