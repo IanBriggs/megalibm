@@ -264,6 +264,7 @@ trig_no_div = """(+ ?b ?a) ==> (+ ?a ?b)
 (sin (+ ?b ?a)) ==> (+ (* (sin ?a) (cos ?b)) (* (sin ?b) (cos ?a)))
 (+ (* (sin ?a) (sin ?a)) (* (cos ?a) (cos ?a))) ==> 1"""
 
+
 trig_div_safe = """?a ==> (/ ?a 1)
 (/ ?a 1) ==> ?a
 (~ ?a) ==> (/ ?a -1)
@@ -339,7 +340,20 @@ trig_div_safe = """?a ==> (/ ?a 1)
 
 trig_div = """"""
 
-print("Excluding: " + trig_div)
+
+explog = ["(exp (+ ?a ?b)) ==> (* (exp ?a) (exp ?b))",
+          "(exp (~ ?a)) ==> (/ 1 (exp ?a))","(* (exp ?a) (exp ?b)) ==> (exp (+ ?a ?b))","(/ 1 (exp ?a)) ==> (exp (~ ?a))","(exp 0) ==> 1","(log (exp ?a)) ==> ?a",
+          "(exp (log ?a)) ==> ?a","(sqrt 1) ==> 1","1 ==> (sqrt 1)","(cbrt 1) ==> 1","1 ==> (cbrt 1)","(pow 1 ?a) ==> 1","?a ==> (pow ?a 1)","(pow ?a 1) ==> ?a",
+          "(log (sqrt ?a)) ==> (* 1/2 (log ?a))","(* 1/2 (log ?a)) ==> (log (sqrt ?a))","(* 1/3 (log ?a)) ==> (log (cbrt ?a))",
+          "(log (cbrt ?a)) ==> (* 1/3 (log ?a))","(cbrt (sqrt ?a)) ==> (sqrt (cbrt ?a))","(sqrt (cbrt ?a)) ==> (cbrt (sqrt ?a))",
+          "(* (cbrt ?b) (cbrt ?a)) ==> (cbrt (* ?b ?a))","(cbrt (* ?b ?a)) ==> (* (cbrt ?b) (cbrt ?a))","(* (sqrt ?b) (sqrt ?a)) ==> (sqrt (* ?a ?b))",
+          "(pow (cbrt ?b) ?a) ==> (cbrt (pow ?b ?a))","(cbrt (pow ?b ?a)) ==> (pow (cbrt ?b) ?a)","(sqrt (pow ?b ?a)) ==> (pow (sqrt ?b) ?a)",
+          "(pow (sqrt ?b) ?a) ==> (sqrt (pow ?b ?a))","(pow ?c (+ ?b ?a)) ==> (* (pow ?c ?b) (pow ?c ?a))","(pow (* ?c ?b) ?a) ==> (* (pow ?c ?a) (pow ?b ?a))",
+          "(* (pow ?c ?a) (pow ?b ?a)) ==> (pow (* ?c ?b) ?a)","(pow (exp ?c) (* ?b ?a)) ==> (pow (exp ?a) (* ?b ?c))",
+          "(* ?c (log (pow ?b ?a))) ==> (* ?a (log (pow ?b ?c)))","(pow (pow ?c ?b) (log ?a)) ==> (pow (pow ?a ?b) (log ?c))",
+          "(pow ?c (* ?b ?a)) ==> (pow (pow ?c ?b) ?a)","(pow (pow ?c ?b) ?a) ==> (pow ?c (* ?b ?a))","(pow (pow ?c ?b) ?a) ==> (pow (pow ?c ?a) ?b)"]
+
+# print("Excluding: " + trig_div)
 
 # Get raw rules from txt
 x, y, z, a, b, c, d = vars("x y z a b c d")
@@ -432,6 +446,8 @@ def process_rules(content):
     return rules
 
 all_rules = (sound_div_rules + "\n" + trig_no_div + "\n" + trig_div_safe).split("\n")
+all_rules.extend(explog)
+print(all_rules)
 rule_str = process_rules(all_rules)
 
 rules = list()
