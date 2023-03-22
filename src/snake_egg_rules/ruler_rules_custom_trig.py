@@ -15,6 +15,8 @@ from snake_egg_rules.operations import *
 from snake_egg import EGraph, Rewrite, Var, vars
 
 
+x, y, z, a, b, c, d = vars("x y z a b c d")
+
 # We want only rules that are always true and safe.
 #
 # True rules are always equal.
@@ -353,10 +355,120 @@ explog = ["(exp (+ ?a ?b)) ==> (* (exp ?a) (exp ?b))",
           "(* ?c (log (pow ?b ?a))) ==> (* ?a (log (pow ?b ?c)))","(pow (pow ?c ?b) (log ?a)) ==> (pow (pow ?a ?b) (log ?c))",
           "(pow ?c (* ?b ?a)) ==> (pow (pow ?c ?b) ?a)","(pow (pow ?c ?b) ?a) ==> (pow ?c (* ?b ?a))","(pow (pow ?c ?b) ?a) ==> (pow (pow ?c ?a) ?b)"]
 
+megalibm_main_rules = [["asin-acos",          asin(x),       sub(div(CONST_PI(), 2), acos(x))],  #asin #acos #div -1 <= x <= 1 ---> 2 != 0 && -1 <= x <= 1
+  ["acos-asin",          acos(x),       sub(div(CONST_PI(), 2), asin(x))],  #asin #acos #div -1 <= x <= 1 ---> 2 != 0 && -1 <= x <= 1
+  ["asin-neg",           asin(neg(x)),  neg(asin(x))],                      #asin -1 <= -x <= 1 --> -1 <= x <= 1
+  ["acos-neg",           acos(neg(x)),  sub(CONST_PI(), acos(x))],          #acos -1 <= -x <= 1 --> -1 <= x <= 1
+  ["atan-neg",           atan(neg(x)),  neg(atan(x))],
+
+  # Hyperbolic trigonometric functions
+  # h trig-reduce (hyperbolic simplify)
+  ["sinh-def",     sinh(x),                                            div(sub(exp(x), exp(neg(x))), 2)],                         #div () ---> 2 != 0
+  ["cosh-def",     cosh(x),                                            div(add(exp(x), exp(neg(x))), 2)],                         #div () ---> 2 != 0
+  ["tanh-def-a",   tanh(x),                                            div(sub(exp(x), exp(neg(x))), add(exp(x), exp(neg(x))))],  #div () ---> exp(x)+exp(-x) != 0
+  ["tanh-def-b",   tanh(x),                                            div(sub(exp(mul(2, x)), 1), add(exp(mul(2, x)), 1))],      #div () ---> exp(2*x)+1 != 0
+  ["tanh-def-c",   tanh(x),                                            div(sub(1, exp(mul(neg(2), x))), add(1, exp(mul(neg(2), x))))],    #div () ---> 1+exp(-2*x) != 0
+  ["sinh-cosh",    sub(mul(cosh(x), cosh(x)), mul(sinh(x), sinh(x))),  1],
+  ["sinh-+-cosh",  add(cosh(x), sinh(x)),                              exp(x)],
+  ["sinh---cosh",  sub(cosh(x), sinh(x)),                              exp(neg(x))],
+
+  # h trig-expand (hyperbolic)
+  ["sinh-undef",         sub(exp(x), exp(neg(x))),                                 mul(2, sinh(x))],
+  ["cosh-undef",         add(exp(x), exp(neg(x))),                                 mul(2, cosh(x))],
+  ["tanh-undef",         div(sub(exp(x), exp(neg(x))), add(exp(x), exp(neg(x)))),  tanh(x)],                                                        #div exp(x)+exp(-x) != 0 ---> ()
+  ["cosh-sum",           cosh(add(x, y)),                                          add(mul(cosh(x), cosh(y)), mul(sinh(x), sinh(y)))],
+  ["cosh-diff",          cosh(sub(x, y)),                                          sub(mul(cosh(x), cosh(y)), mul(sinh(x), sinh(y)))],
+  ["cosh-2",             cosh(mul(2, x)),                                          add(mul(sinh(x), sinh(x)), mul(cosh(x), cosh(x)))],
+  #unsafe ["cosh-1/2",   cosh(div(x, 2)),                                          sqrt(div(add(cosh(x), 1), 2))],                                  #sqrt #div 2 != 0 -/-> 2 != 0 && (cosh(x)+1)/2 >= 0
+  ["sinh-sum",           sinh(add(x, y)),                                          add(mul(sinh(x), cosh(y)), mul(cosh(x), sinh(y)))],
+  ["sinh-diff",          sinh(sub(x, y)),                                          sub(mul(sinh(x), cosh(y)), mul(cosh(x), sinh(y)))],
+  ["sinh-2",             sinh(mul(2, x)),                                          mul(2, mul(sinh(x), cosh(x)))],
+  #unsafe ["sinh-1/2",   sinh(div(x, 2)),                                          div(sinh(x), sqrt(mul(2, add(cosh(x), 1))))],                    #sqrt #div 2 != 0 -/->  2*(cosh(x)+1) >= 0 && sqrt(2*(cosh(x)+1)) != 0
+  #unsafe ["tanh-sum",   tanh(add(x, y)),                                          div(add(tanh(x), tanh(y)), add(1, mul(tanh(x), tanh(y))))],      #div () -/-> 1+tanh(x)*tanh(y) != 0
+  ["tanh-2",             tanh(mul(2, x)),                                          div(mul(2, tanh(x)), add(1, mul(tanh(x), tanh(x))))],            #div () ---> 1+tanh(x)*tanh(x) != 0
+  #unsafe ["tanh-1/2",   tanh(div(x, 2)),                                          div(sinh(x), add(cosh(x), 1))],                                  #div () -/-> cosh(x)+1 != 0
+  #unsafe ["tanh-1/2*",  tanh(div(x, 2)),                                          div(sub(cosh(x), 1), sinh(x))],                                  #div () -/-> sinh(x) != 0
+  ["sum-sinh",           add(sinh(x), sinh(y)),                                    mul(2, mul(sinh(div(add(x, y), 2)), cosh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
+  ["sum-cosh",           add(cosh(x), cosh(y)),                                    mul(2, mul(cosh(div(add(x, y), 2)), cosh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
+  ["diff-sinh",          sub(sinh(x), sinh(y)),                                    mul(2, mul(cosh(div(add(x, y), 2)), sinh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
+  ["diff-cosh",          sub(cosh(x), cosh(y)),                                    mul(2, mul(sinh(div(add(x, y), 2)), sinh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
+
+  # h trig-expand-fp-safe (hyperbolic fp-safe)
+  ["sinh-neg",  sinh(neg(x)),  neg(sinh(x))],
+  ["sinh-0",    sinh(0),       0],
+  ["cosh-neg",  cosh(neg(x)),  cosh(x)],
+  ["cosh-0",    cosh(0),       1],
+
+  # ah trig-expand (hyperbolic)
+  #unknown ["asinh-def",   asinh(x),                          log(add(x, sqrt(add(mul(x, x), 1))))],    #log #sqrt ???
+  #unknown ["acosh-def",   acosh(x),                          log(add(x, sqrt(sub(mul(x, x), 1))))],    #acosh #log #sqrt ???
+  #unknown ["atanh-def",   atanh(x),                          div(log(div(add(1, x), sub(1, x))), 2)],  #atanh #log #div ???
+  #unknown ["acosh-2",     acosh(sub(mul(2, mul(x, x)), 1)),  mul(2, acosh(x))],                        #acosh ???
+  #unknown ["asinh-2",     acosh(add(mul(2, mul(x, x)), 1)),  mul(2, asinh(x))],                        #acosh ???
+  ["sinh-asinh",           sinh(asinh(x)),                    x],
+  #unknown ["sinh-acosh",  sinh(acosh(x)),                    sqrt(sub(mul(x, x), 1))],                 #acosh #sqrt ???
+  #unknown ["sinh-atanh",  sinh(atanh(x)),                    div(x, sqrt(sub(1, mul(x, x))))],         #atanh #sqrt #div ???
+  #unsafe ["cosh-asinh",   cosh(asinh(x)),                    sqrt(add(mul(x, x), 1))],                 #sqrt () -/-> x*x+1 >= 0
+  #unknown ["cosh-acosh",  cosh(acosh(x)),                    x],                                       #acosh ???
+  #unknown ["cosh-atanh",  cosh(atanh(x)),                    div(1, sqrt(sub(1, mul(x, x))))],         #atanh #sqrt #div ???
+  #unsafe ["tanh-asinh",   tanh(asinh(x)),                    div(x, sqrt(add(1, mul(x, x))))],         #sqrt #div () -/-> 1+x*x >= 0 && sqrt(1+x*x) != 0
+  #unknown ["tanh-acosh",  tanh(acosh(x)),                    div(sqrt(sub(mul(x, x), 1)), x)],         #acosh #sqrt #div ???
+  #unknown ["tanh-atanh",  tanh(atanh(x)),                    x],                                       #atanh ???
+
+  # Specialized numerical functions
+  # special-numerical-reduce (numerics simplify)
+  #unknown ["expm1-def",    sub(exp(x), 1),                   expm1(x)],     #expm1 ???
+  #unknown ["log1p-def",    log(add(1, x)),                   log1p(x)],     #log1p #log ???
+  #unknown ["log1p-expm1",  log1p(expm1(x)),                  x],            #expm1 #log1p ???
+  #unknown ["expm1-log1p",  expm1(log1p(x)),                  x],            #expm1 #log1p ???
+  #unknown ["hypot-def",    sqrt(add(mul(x, x), mul(y, y))),  hypot(x, y)],  #hypot #sqrt ???
+  #unknown ["hypot-1-def",  sqrt(add(1, mul(y, y))),          hypot(1, y)],  #hypot #sqrt ???
+  #bad ["fma-def",          add(mul(x, y), z),                fma(x, y, z)],
+  #bad ["fma-neg",          sub(mul(x, y), z),                fma(x, y, neg(z))],
+  #bad ["fma-undef",         fma(x, y, z),                     add(mul(x, y), z)],
+
+  # special-numerical-expand (numerics)
+  #unknown ["expm1-undef",     expm1(x),     sub(exp(x), 1)],                   #expm1 ???
+  #unknown ["log1p-undef",     log1p(x),     log(add(1, x))],                   #log1p #log ???
+  #unknown ["log1p-expm1-u",  x,            log1p(expm1(x))],                  #expm1 #log1p ???
+  #unknown ["expm1-log1p-u",  x,            expm1(log1p(x))],                  #expm1 #log1p ???
+  #unknown ["hypot-undef",     hypot(x, y),  sqrt(add(mul(x, x), mul(y, y)))],  #hypot #sqrt ???
+
+  # numerics-papers (numerics)
+  #              "Further Analysis of Kahan's Algorithm for
+  #              the Accurate Computation of 2x2 Determinants"
+  #              Jeannerod et al., Mathematics of Computation, 2013
+  #              a * b - c * d               ===> fma(a, b, -(d * c)) + fma(-d, c, d * c)
+  #bad ["prod-diff",  sub(mul(a, b), mul(c, d)),  add(fma(a, b, neg(mul(d, c))), fma(neg(d), c, mul(d, c)))],
+
+  # # compare-reduce (bools simplify fp-safe-nan)
+  #skip ["lt-same",   (< x x),         (FALSE)],
+  #skip ["gt-same",   (> x x),         (FALSE)],
+  #skip ["lte-same",  (<= x x),        (TRUE)],
+  #skip ["gte-same",  (>= x x),        (TRUE)],
+  #skip ["not-lt",    (not (< x y)),   (>= x y)],
+  #skip ["not-gt",    (not (> x y)),   (<= x y)],
+  #skip ["not-lte",   (not (<= x y)),  (> x y)],
+  #skip ["not-gte",   (not (>= x y)),  (< x y)],
+
+  # # branch-reduce (branches simplify fp-safe)
+  #skip ["if-true",        (if (TRUE), x y),    x],
+  #skip ["if-false",       (if (FALSE), x y),   y],
+  #skip ["if-same",        (if a x x),          x],
+  #skip ["if-not",         (if (not a), x y),   (if a y x)],
+  #skip ["if-if-or",       (if a x (if b x y))  (if (or a, b), x y)],
+  #skip ["if-if-or-not",   (if a x (if b y x))  (if (or a (not b)), x y)],
+  #skip ["if-if-and",      (if a (if b x y) y)  (if (and a, b), x y)],
+  #skip ["if-if-and-not",  (if a (if b y x) y)  (if (and a (not b)), x y)],
+
+  # erf-rules (special simplify)
+  ["erf-odd",   erf(neg(x)),  neg(erf(x))],
+  ["erf-erfc",  erfc(x),      sub(1, erf(x))],
+  ["erfc-erf",  erf(x),       sub(1, erfc(x))]]
+
 # print("Excluding: " + trig_div)
 
 # Get raw rules from txt
-x, y, z, a, b, c, d = vars("x y z a b c d")
 
 operator_map = {
   "+ ": "add ",
@@ -452,11 +564,13 @@ rule_str = process_rules(all_rules)
 
 rules = list()
 evaled_rules = eval(rule_str)
-# print(rules)
+evaled_rules.extend(megalibm_main_rules)
 for l in evaled_rules:
   name = l[0]
   frm = l[1]
   to = l[2]
   rules.append(Rewrite(frm, to, name))
+
+# print(evaled_rules)
 
 print(rule_str)
