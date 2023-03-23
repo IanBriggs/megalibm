@@ -343,26 +343,50 @@ trig_div_safe = """?a ==> (/ ?a 1)
 trig_div = """"""
 
 
-explog = ["(exp (+ ?a ?b)) ==> (* (exp ?a) (exp ?b))",
-          "(exp (~ ?a)) ==> (/ 1 (exp ?a))","(* (exp ?a) (exp ?b)) ==> (exp (+ ?a ?b))","(/ 1 (exp ?a)) ==> (exp (~ ?a))","(exp 0) ==> 1","(log (exp ?a)) ==> ?a",
-          "(exp (log ?a)) ==> ?a","(sqrt 1) ==> 1","1 ==> (sqrt 1)","(cbrt 1) ==> 1","1 ==> (cbrt 1)","(pow 1 ?a) ==> 1","?a ==> (pow ?a 1)","(pow ?a 1) ==> ?a",
-          "(log (sqrt ?a)) ==> (* 1/2 (log ?a))","(* 1/2 (log ?a)) ==> (log (sqrt ?a))","(* 1/3 (log ?a)) ==> (log (cbrt ?a))",
-          "(log (cbrt ?a)) ==> (* 1/3 (log ?a))","(cbrt (sqrt ?a)) ==> (sqrt (cbrt ?a))","(sqrt (cbrt ?a)) ==> (cbrt (sqrt ?a))",
-          "(* (cbrt ?b) (cbrt ?a)) ==> (cbrt (* ?b ?a))","(cbrt (* ?b ?a)) ==> (* (cbrt ?b) (cbrt ?a))","(* (sqrt ?b) (sqrt ?a)) ==> (sqrt (* ?a ?b))",
-          "(pow (cbrt ?b) ?a) ==> (cbrt (pow ?b ?a))","(cbrt (pow ?b ?a)) ==> (pow (cbrt ?b) ?a)","(sqrt (pow ?b ?a)) ==> (pow (sqrt ?b) ?a)",
-          "(pow (sqrt ?b) ?a) ==> (sqrt (pow ?b ?a))","(pow ?c (+ ?b ?a)) ==> (* (pow ?c ?b) (pow ?c ?a))","(pow (* ?c ?b) ?a) ==> (* (pow ?c ?a) (pow ?b ?a))",
-          "(* (pow ?c ?a) (pow ?b ?a)) ==> (pow (* ?c ?b) ?a)","(pow (exp ?c) (* ?b ?a)) ==> (pow (exp ?a) (* ?b ?c))",
-          "(* ?c (log (pow ?b ?a))) ==> (* ?a (log (pow ?b ?c)))","(pow (pow ?c ?b) (log ?a)) ==> (pow (pow ?a ?b) (log ?c))",
-          "(pow ?c (* ?b ?a)) ==> (pow (pow ?c ?b) ?a)","(pow (pow ?c ?b) ?a) ==> (pow ?c (* ?b ?a))","(pow (pow ?c ?b) ?a) ==> (pow (pow ?c ?a) ?b)"]
+explog_div = ["(exp (~ ?a)) ==> (/ 1 (exp ?a))",
+              "(/ 1 (exp ?a)) ==> (exp (~ ?a))",
+              ]
 
-megalibm_main_rules = """[["asin-acos",          asin(x),       sub(div(CONST_PI(), 2), acos(x))],  #asin #acos #div -1 <= x <= 1 ---> 2 != 0 && -1 <= x <= 1
+explog_no_div = ["(exp (+ ?a ?b)) ==> (* (exp ?a) (exp ?b))",
+          "(* (exp ?a) (exp ?b)) ==> (exp (+ ?a ?b))",
+          "(exp 0) ==> 1",
+          "(log (exp ?a)) ==> ?a",
+          "(exp (log ?a)) ==> ?a",
+          "(sqrt 1) ==> 1",
+          "1 ==> (sqrt 1)",
+          "(cbrt 1) ==> 1",
+          "1 ==> (cbrt 1)",
+          "(pow 1 ?a) ==> 1",
+          "?a ==> (pow ?a 1)",
+          "(pow ?a 1) ==> ?a",
+          "(log (sqrt ?a)) ==> (* 1/2 (log ?a))",
+          "(* 1/2 (log ?a)) ==> (log (sqrt ?a))",
+          "(* 1/3 (log ?a)) ==> (log (cbrt ?a))",
+          "(log (cbrt ?a)) ==> (* 1/3 (log ?a))",
+          "(cbrt (sqrt ?a)) ==> (sqrt (cbrt ?a))",
+          "(sqrt (cbrt ?a)) ==> (cbrt (sqrt ?a))",
+          "(* (cbrt ?b) (cbrt ?a)) ==> (cbrt (* ?b ?a))",
+          "(cbrt (* ?b ?a)) ==> (* (cbrt ?b) (cbrt ?a))",
+          "(* (sqrt ?b) (sqrt ?a)) ==> (sqrt (* ?a ?b))",
+          "(pow (cbrt ?b) ?a) ==> (cbrt (pow ?b ?a))",
+          "(cbrt (pow ?b ?a)) ==> (pow (cbrt ?b) ?a)",
+          "(sqrt (pow ?b ?a)) ==> (pow (sqrt ?b) ?a)",
+          "(pow (sqrt ?b) ?a) ==> (sqrt (pow ?b ?a))",
+          "(pow ?c (+ ?b ?a)) ==> (* (pow ?c ?b) (pow ?c ?a))",
+          "(pow (* ?c ?b) ?a) ==> (* (pow ?c ?a) (pow ?b ?a))",
+          "(* (pow ?c ?a) (pow ?b ?a)) ==> (pow (* ?c ?b) ?a)",
+          "(pow (exp ?c) (* ?b ?a)) ==> (pow (exp ?a) (* ?b ?c))",
+          "(* ?c (log (pow ?b ?a))) ==> (* ?a (log (pow ?b ?c)))",
+          "(pow (pow ?c ?b) (log ?a)) ==> (pow (pow ?a ?b) (log ?c))",
+          "(pow ?c (* ?b ?a)) ==> (pow (pow ?c ?b) ?a)",
+          "(pow (pow ?c ?b) ?a) ==> (pow ?c (* ?b ?a))",
+          "(pow (pow ?c ?b) ?a) ==> (pow (pow ?c ?a) ?b)"]
+
+megalibm_main_rules = [["asin-acos",          asin(x),       sub(div(CONST_PI(), 2), acos(x))],  #asin #acos #div -1 <= x <= 1 ---> 2 != 0 && -1 <= x <= 1
   ["acos-asin",          acos(x),       sub(div(CONST_PI(), 2), asin(x))],  #asin #acos #div -1 <= x <= 1 ---> 2 != 0 && -1 <= x <= 1
   ["asin-neg",           asin(neg(x)),  neg(asin(x))],                      #asin -1 <= -x <= 1 --> -1 <= x <= 1
   ["acos-neg",           acos(neg(x)),  sub(CONST_PI(), acos(x))],          #acos -1 <= -x <= 1 --> -1 <= x <= 1
   ["atan-neg",           atan(neg(x)),  neg(atan(x))],
-
-  # Hyperbolic trigonometric functions
-  # h trig-reduce (hyperbolic simplify)
   ["sinh-def",     sinh(x),                                            div(sub(exp(x), exp(neg(x))), 2)],                         #div () ---> 2 != 0
   ["cosh-def",     cosh(x),                                            div(add(exp(x), exp(neg(x))), 2)],                         #div () ---> 2 != 0
   ["tanh-def-a",   tanh(x),                                            div(sub(exp(x), exp(neg(x))), add(exp(x), exp(neg(x))))],  #div () ---> exp(x)+exp(-x) != 0
@@ -371,40 +395,28 @@ megalibm_main_rules = """[["asin-acos",          asin(x),       sub(div(CONST_PI
   ["sinh-cosh",    sub(mul(cosh(x), cosh(x)), mul(sinh(x), sinh(x))),  1],
   ["sinh-+-cosh",  add(cosh(x), sinh(x)),                              exp(x)],
   ["sinh---cosh",  sub(cosh(x), sinh(x)),                              exp(neg(x))],
-
-  # h trig-expand (hyperbolic)
   ["sinh-undef",         sub(exp(x), exp(neg(x))),                                 mul(2, sinh(x))],
   ["cosh-undef",         add(exp(x), exp(neg(x))),                                 mul(2, cosh(x))],
   ["tanh-undef",         div(sub(exp(x), exp(neg(x))), add(exp(x), exp(neg(x)))),  tanh(x)],                                                        #div exp(x)+exp(-x) != 0 ---> ()
   ["cosh-sum",           cosh(add(x, y)),                                          add(mul(cosh(x), cosh(y)), mul(sinh(x), sinh(y)))],
   ["cosh-diff",          cosh(sub(x, y)),                                          sub(mul(cosh(x), cosh(y)), mul(sinh(x), sinh(y)))],
   ["cosh-2",             cosh(mul(2, x)),                                          add(mul(sinh(x), sinh(x)), mul(cosh(x), cosh(x)))],
-  #unsafe ["cosh-1/2",   cosh(div(x, 2)),                                          sqrt(div(add(cosh(x), 1), 2))],                                  #sqrt #div 2 != 0 -/-> 2 != 0 && (cosh(x)+1)/2 >= 0
   ["sinh-sum",           sinh(add(x, y)),                                          add(mul(sinh(x), cosh(y)), mul(cosh(x), sinh(y)))],
   ["sinh-diff",          sinh(sub(x, y)),                                          sub(mul(sinh(x), cosh(y)), mul(cosh(x), sinh(y)))],
   ["sinh-2",             sinh(mul(2, x)),                                          mul(2, mul(sinh(x), cosh(x)))],
-  #unsafe ["sinh-1/2",   sinh(div(x, 2)),                                          div(sinh(x), sqrt(mul(2, add(cosh(x), 1))))],                    #sqrt #div 2 != 0 -/->  2*(cosh(x)+1) >= 0 && sqrt(2*(cosh(x)+1)) != 0
-  #unsafe ["tanh-sum",   tanh(add(x, y)),                                          div(add(tanh(x), tanh(y)), add(1, mul(tanh(x), tanh(y))))],      #div () -/-> 1+tanh(x)*tanh(y) != 0
   ["tanh-2",             tanh(mul(2, x)),                                          div(mul(2, tanh(x)), add(1, mul(tanh(x), tanh(x))))],            #div () ---> 1+tanh(x)*tanh(x) != 0
-  #unsafe ["tanh-1/2",   tanh(div(x, 2)),                                          div(sinh(x), add(cosh(x), 1))],                                  #div () -/-> cosh(x)+1 != 0
-  #unsafe ["tanh-1/2*",  tanh(div(x, 2)),                                          div(sub(cosh(x), 1), sinh(x))],                                  #div () -/-> sinh(x) != 0
   ["sum-sinh",           add(sinh(x), sinh(y)),                                    mul(2, mul(sinh(div(add(x, y), 2)), cosh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
   ["sum-cosh",           add(cosh(x), cosh(y)),                                    mul(2, mul(cosh(div(add(x, y), 2)), cosh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
   ["diff-sinh",          sub(sinh(x), sinh(y)),                                    mul(2, mul(cosh(div(add(x, y), 2)), sinh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
   ["diff-cosh",          sub(cosh(x), cosh(y)),                                    mul(2, mul(sinh(div(add(x, y), 2)), sinh(div(sub(x, y), 2))))],  #div () ---> 2 != 0
-
-  # h trig-expand-fp-safe (hyperbolic fp-safe)
   ["sinh-neg",  sinh(neg(x)),  neg(sinh(x))],
   ["sinh-0",    sinh(0),       0],
   ["cosh-neg",  cosh(neg(x)),  cosh(x)],
   ["cosh-0",    cosh(0),       1],
-
   ["sinh-asinh",           sinh(asinh(x)),                    x],
-
-  # erf-rules (special simplify)
   ["erf-odd",   erf(neg(x)),  neg(erf(x))],
   ["erf-erfc",  erfc(x),      sub(1, erf(x))],
-  ["erfc-erf",  erf(x),       sub(1, erfc(x))]]"""
+  ["erfc-erf",  erf(x),       sub(1, erfc(x))]]
 
 # print("Excluding: " + trig_div)
 
@@ -497,15 +509,16 @@ def process_rules(content):
     # print(rules)
     return rules
 
-all_rules = (trig_no_div + "\n" + trig_div_safe).split("\n")
+# all_rules = (trig_no_div + "\n" + trig_div_safe).split("\n")
+all_rules = (trig_no_div).split("\n")
 # all_rules = (sound_div_rules + "\n" + trig_no_div + "\n" + trig_div_safe).split("\n")
-all_rules.extend(explog)
+all_rules.extend(explog_no_div)
 print(all_rules)
 rule_str = process_rules(all_rules)
 
 rules = list()
-evaled_rules = eval(rule_str + "\n" + megalibm_main_rules)
-# evaled_rules.extend(megalibm_main_rules)
+evaled_rules = eval(rule_str)
+evaled_rules.extend(megalibm_main_rules)
 for l in evaled_rules:
   name = l[0]
   frm = l[1]
