@@ -509,10 +509,11 @@ def process_rules(content):
     # print(rules)
     return rules
 
-# all_rules = (trig_no_div + "\n" + trig_div_safe).split("\n")
-all_rules = (trig_no_div).split("\n")
+all_rules = (trig_no_div + "\n" + trig_div_safe).split("\n")
+# all_rules = (trig_no_div).split("\n")
 # all_rules = (sound_div_rules + "\n" + trig_no_div + "\n" + trig_div_safe).split("\n")
 all_rules.extend(explog_no_div)
+all_rules.extend(explog_div)
 print(all_rules)
 rule_str = process_rules(all_rules)
 
