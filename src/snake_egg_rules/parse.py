@@ -80,21 +80,25 @@ def egg_to_fpcore(expr):
     if T == str:
         return ast.Variable(expr)
 
-    if T == int:
-        assert expr >= 0
-        return ast.Number(str(expr))
-
-    if T == float:
-        assert expr >= 0
-        return ast.Number(str(expr))
+    if T in {int, float}:
+        if expr < 0:
+            return ast.Operation("-", ast.Number(str(-expr)))
+        else:
+            return ast.Number(str(expr))
 
     if T == fractions.Fraction:
-        assert expr >= 0
+        do_neg = expr < 0
+        if do_neg:
+            expr = - expr
         if expr.denominator == 1:
-            return ast.Number(str(expr.numerator))
-        return ast.Operation("/",
+            num = ast.Number(str(expr.numerator))
+        else:
+            num = ast.Operation("/",
                              ast.Number(str(expr.numerator)),
                              ast.Number(str(expr.denominator)))
+        if do_neg:
+            num = ast.Operation("-", num)
+        return num
 
     # TODO: Definitely a bug, why are zero arg tuples weird?
     #print(f"expr: '{expr}' of type: '{T}'")
