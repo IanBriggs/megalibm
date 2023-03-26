@@ -418,6 +418,7 @@ megalibm_main_rules = [["asin-acos",          asin(x),       sub(div(CONST_PI(),
   ["erf-erfc",  erfc(x),      sub(1, erf(x))],
   ["erfc-erf",  erf(x),       sub(1, erfc(x))]]
 
+
 # print("Excluding: " + trig_div)
 
 # Get raw rules from txt
@@ -519,7 +520,7 @@ rule_str = process_rules(all_rules)
 
 rules = list()
 evaled_rules = eval(rule_str)
-evaled_rules.extend(megalibm_main_rules)
+# evaled_rules.extend(megalibm_main_rules)
 for l in evaled_rules:
   name = l[0]
   frm = l[1]
