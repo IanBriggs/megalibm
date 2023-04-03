@@ -27,11 +27,11 @@ nightly: bin/nightly.sh build
 	$<
 
 # Link nightly script into bin
-bin/nightly.sh: src/nightly.sh
+bin/nightly.sh: src/nightly.sh | bin
 	cd bin && $(RM) nightly.sh && ln -sF ../src/nightly.sh nightly.sh
 
 # Link retry script into bin
-bin/retry.sh: src/retry.sh
+bin/retry.sh: src/retry.sh | bin
 	cd bin && $(RM) retry.sh && ln -sF ../src/retry.sh retry.sh
 
 # Build requirements
