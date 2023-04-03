@@ -23,11 +23,11 @@ class Interval():
         self.sup = parse_bound(sup)
 
         ie = self.inf.eval({})
-        if int(ie) == ie:
+        if math.isfinite(float(ie)) and int(ie) == ie:
             self.inf = parse_bound(int(ie))
 
         se = self.sup.eval({})
-        if int(se) == se:
+        if math.isfinite(float(se)) and int(se) == se:
             self.sup = parse_bound(int(se))
 
         assert (float(self.inf) <= float(self.sup))
@@ -71,7 +71,9 @@ class Interval():
     def contains(self, point):
         logger.log("Testing if {} is in [{}, {}]", point, self.inf, self.sup)
         if type(point) == mpmath.iv.mpf:
-            me = mpmath.iv.mpf([str(self.inf), str(self.sup)])
+            inf = str(self.inf).replace("INFINITY", "inf")
+            sup = str(self.sup).replace("INFINITY", "inf")
+            me = mpmath.iv.mpf([inf, sup])
             return point in me
         f_point = float(point)
         return float(self.inf) <= f_point and f_point <= float(self.sup)

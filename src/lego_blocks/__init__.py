@@ -13,3 +13,7 @@ from .split_domain import SplitDomain
 from .power import Pow
 from .ldexp import Ldexp
 from .expression import Expression
+
+from .mod_switch import ModSwitch
+from .cody_waite import CodyWaite
+from .transform_out import TransformOut

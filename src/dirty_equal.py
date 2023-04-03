@@ -28,9 +28,17 @@ def dirty_equal(a: fpcore.ast.ASTNode, b: fpcore.ast.ASTNode,
     mpmath.mp.prec = 1024
 
     inf = domain.inf.eval()
-    sup = domain.sup.eval()
+    if not mpmath.isfinite(inf):
+        inf = mpmath.mpf("1e300")
 
-    if not try_point(a, b, inf) or not try_point(a, b, sup):
+    sup = domain.sup.eval()
+    if not mpmath.isfinite(sup):
+        sup = mpmath.mpf("1e300")
+
+    if not try_point(a, b, inf):
+        return False
+
+    if not try_point(a, b, sup):
         return False
 
     width = sup - inf
@@ -51,8 +59,8 @@ def dirty_equal(a: fpcore.ast.ASTNode, b: fpcore.ast.ASTNode,
     return True
 
 def try_point(a: fpcore.ast.ASTNode, b: fpcore.ast.ASTNode, point: mpmath.mpf):
-    a_out = a.eval({"x": point})
-    b_out = b.eval({"x": point})
+    a_out = a.eval(assignment={"x": point})
+    b_out = b.eval(assignment={"x": point})
 
     lost_bits = 4
     bound = mpmath.power(2, -(mpmath.mp.prec-lost_bits))

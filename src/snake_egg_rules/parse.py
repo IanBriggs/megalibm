@@ -11,6 +11,7 @@ logger = Logger()
 zero_arg = {
     CONST_PI: lambda: ast.Constant("PI"),
     CONST_E: lambda: ast.Constant("E"),
+    CONST_INFINITY: lambda: ast.Constant("INFINITY"),
 }
 
 

@@ -15,7 +15,7 @@ class LegoBlock():
 
     def __repr__(self):
         class_name = type(self).__name__
-        return "{}({}, {}, {})".format(class_name,
+        return "{}({}, {})".format(class_name,
                                        repr(self.in_names),
                                        repr(self.out_names))
 

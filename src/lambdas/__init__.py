@@ -24,3 +24,7 @@ from .hole import Hole
 
 from .punt_to_libm import PuntToLibm
 from .estrin import Estrin
+
+from .transform_out import TransformOut
+
+from .cody_waite import CodyWaite
