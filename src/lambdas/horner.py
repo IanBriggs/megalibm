@@ -9,7 +9,7 @@ from lambdas import types
 
 class Horner(types.Transform):
 
-    def __init__(self, in_node: types.Node):
+    def __init__(self, in_node: types.Node, split=0):
         """
         Takes a polynomial and implements it using horner form
 
@@ -17,6 +17,7 @@ class Horner(types.Transform):
         """
         super().__init__(in_node)
         self.domain = self.in_node.domain
+        self.split = split
 
     def type_check(self):
         """ Check that the input is a polynomial """
@@ -30,10 +31,11 @@ class Horner(types.Transform):
 
     def generate(self):
         """ Implement a polynomial using the horner form lego block """
+        print("Hi Anh Again")
         p = super().generate()
         in_name = self.gensym("in")
         out_name = self.gensym("out")
-        return [forms.Horner(numeric_types.fp64(), [in_name], [out_name], p)]
+        return [forms.Horner(numeric_types.fp64(), [in_name], [out_name], p, self.split)]
 
     @classmethod
     def generate_hole(cls, out_type):

@@ -9,6 +9,7 @@ def assemble_header(decls):
 def assemble_functions(functions, header_fname):
     lines = ["#include \"{}\"".format(header_fname),
              "#include \"table_generation.h\"",
+             "#include \"cody_waite_reduction.h\"",
              "#include <assert.h>",
              "#include <math.h>",
              ""]

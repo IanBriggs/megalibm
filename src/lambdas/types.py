@@ -38,7 +38,6 @@ class Impl():
                                      repr(self.domain))
 
 
-
 # lambda object types
 USED_NAMES = set()
 
@@ -78,7 +77,7 @@ class Node():
     def gensym(self, prefix):
         matched = {vn for vn in USED_NAMES if vn.startswith(prefix)}
         i = len(matched)
-        name = "{}_{}".format(prefix, i)
+        name = prefix
         while name in matched:
             i += 1
             name = "{}_{}".format(prefix, i)

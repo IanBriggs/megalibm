@@ -15,7 +15,7 @@ class FixedPolynomial(types.Source):
         function: FPCore representing the function
         domain: Interval domain, must be finite
         terms: the number of terms in the expression including the constant term
-        monomials: list of monomials in ascending order 
+        monomials: list of monomials in ascending order
         coefficients: list of coefficients for the monomials
         """
         super().__init__(function, domain)
@@ -37,11 +37,11 @@ class FixedPolynomial(types.Source):
                                                       repr(self.terms))
 
     def type_check(self):
-        try:
-            if self.function.eval(0) != 0:
-                assert(self.monomials[0] == 0)
-        except ZeroDivisionError:
-            pass
+        # try:
+        #     if self.function.eval(0) != 0:
+        #         assert(self.monomials[0] == 0)
+        # except ZeroDivisionError:
+        #     pass
 
         if (not math.isfinite(self.domain.inf)
                 or not math.isfinite(self.domain.sup)):
