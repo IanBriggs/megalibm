@@ -3,7 +3,7 @@ import math
 from fpcore.ast import Variable
 from lambdas.narrow import Narrow
 import lego_blocks
-import numeric_types
+from numeric_types import fp64, fp32
 import lambdas
 
 import fpcore
@@ -81,7 +81,7 @@ class InflectionRight(types.Transform):
         self.passed_check = True
         self.out_type = types.Impl(f, self.domain)
 
-    def generate(self):
+    def generate(self, numeric_type=fp64):
         # x_in = ...
         # if x_in < inflection_point:
         #   reduced = x_in
@@ -97,31 +97,35 @@ class InflectionRight(types.Transform):
         #   y_out = reconstruct(y_out)
 
         # Generate the inner code first
-        so_far = super().generate()
+        so_far = super().generate(numeric_type=numeric_type)
 
         # Reduction
         x_in_name = self.gensym("x_in")
         reduced_name = so_far[0].in_names[0]
         red_expr = self.reduction.substitute(Variable("x"), Variable(x_in_name))
+        if isinstance(numeric_type(), fp32):
+            red_expr = red_expr.substitute_floatop()
 
-        red = lego_blocks.IfLess(numeric_types.fp64(),
+        red = lego_blocks.IfLess(numeric_type(),
                                [x_in_name],
                                [reduced_name],
                                float(self.inflection_point),
                                x_in_name,
-                               red_expr.to_libm_c())
+                               red_expr.to_libm_c(numeric_type=numeric_type()))
 
         # Reconstruction
         inner_name = so_far[-1].out_names[0]
         y_out_name = self.gensym("y_out")
         rec_expr = self.reconstruction.substitute(Variable("y"), Variable(inner_name))
+        if isinstance(numeric_type(), fp32):
+            rec_expr = rec_expr.substitute_floatop()
 
-        rec = lego_blocks.IfLess(numeric_types.fp64(),
+        rec = lego_blocks.IfLess(numeric_type(),
                                        [x_in_name],
                                        [y_out_name],
                                        float(self.inflection_point),
                                        inner_name,
-                                       rec_expr.to_libm_c())
+                                       rec_expr.to_libm_c(numeric_type=numeric_type()))
 
         return [red] + so_far + [rec]
 

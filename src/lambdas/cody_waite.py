@@ -5,7 +5,7 @@ from dirty_equal import dirty_equal
 import fpcore
 from fpcore.ast import Number, Operation, Variable
 import lego_blocks
-import numeric_types
+from numeric_types import fp64 
 import lambdas
 
 from interval import Interval
@@ -52,7 +52,7 @@ class CodyWaite(types.Transform):
         if self.mod_cases is not None:
             new_cases = dict()
             for k, body in self.cases.items():
-                new_cases[i] = body.replace_lambda(search, replace)
+                new_cases[k] = body.replace_lambda(search, replace)
         return self.__class__(new_in_node,
                               constant=self.constant,
                               mod_cases=new_cases,
@@ -131,7 +131,7 @@ class CodyWaite(types.Transform):
         self.out_type = types.Impl(target_function,
                                    self.domain)
 
-    def generate(self):
+    def generate(self, numeric_type=fp64):
         # in = ...
         # r = cody_waite_reduce(in, inv_period, period_c, period, &k, NULL);
         # switch_out;
@@ -151,7 +151,7 @@ class CodyWaite(types.Transform):
         k = self.gensym("r")
 
         part_0 = lego_blocks.CodyWaite(
-            numeric_types.fp64(),
+            numeric_type(),
             [cw_in], [r, k],
             self.constant,
             self.bits_per,
@@ -173,7 +173,7 @@ class CodyWaite(types.Transform):
             mod_to_lego[n] = genned
 
         part_1 = lego_blocks.ModSwitch(
-            numeric_types.fp64(),
+            numeric_type(),
             [r, k], [switch_out],
             mod_to_lego
         )

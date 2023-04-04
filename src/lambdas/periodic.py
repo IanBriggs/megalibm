@@ -2,7 +2,7 @@
 
 from fpcore.ast import Variable
 import lego_blocks
-import numeric_types
+from numeric_types import fp64 
 import interval
 import lambdas
 
@@ -61,17 +61,17 @@ class Periodic(types.Transform):
         self.out_type = types.Impl(our_in_type.function,
                                    self.domain)
 
-    def generate(self):
+    def generate(self, numeric_type=fp64):
         # in = ...
         # k = floor((in-sup) / period)
         # out = in - period * k
         # ...
-        so_far = super().generate()
+        so_far = super().generate(numeric_type=numeric_type)
         in_name = self.gensym("in")
         out_name = so_far[0].in_names[0]
 
         k = self.gensym("k")
-        add = lego_blocks.SimpleAdditive(numeric_types.fp64(),
+        add = lego_blocks.SimpleAdditive(numeric_type(),
                                          [in_name],
                                          [out_name, k],
                                          self.in_node.domain.inf,

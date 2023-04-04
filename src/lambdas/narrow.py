@@ -1,6 +1,7 @@
 
 from interval import Interval
 import lambdas.types as types
+from numeric_types import fp64 
 from utils import Logger
 
 logger = Logger(level=Logger.HIGH)
@@ -55,5 +56,5 @@ class Narrow(types.Transform):
         self.domain = next_domain
         self.out_type = types.Impl(our_in_type.function, next_domain)
 
-    def generate(self):
-        return super().generate()
+    def generate(self, numeric_type=fp64):
+        return super().generate(numeric_type=numeric_type)

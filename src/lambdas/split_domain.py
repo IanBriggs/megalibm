@@ -2,7 +2,7 @@
 from interval import Interval
 from lambdas import types
 import lego_blocks
-import numeric_types
+from numeric_types import fp64 
 
 
 class SplitDomain(types.Transform):
@@ -63,7 +63,7 @@ class SplitDomain(types.Transform):
         self.passed_check = True
         self.out_type = types.Impl(f, self.domain)
 
-    def generate(self):
+    def generate(self, numeric_type=fp64):
         # There are many ways to do this.
         # Fiddling with the nesting of if statements can change speed.
         # We currently leave this to the expert after code generation.
@@ -77,9 +77,9 @@ class SplitDomain(types.Transform):
 
         split_in = self.gensym("split_in")
         split_out = self.gensym("split_out")
-        domains_to_lego = {dom: impl.generate()
+        domains_to_lego = {dom: impl.generate(numeric_type=numeric_type)
                            for dom, impl in self.domains_to_impls.items()}
-        inner = lego_blocks.SplitDomain(numeric_types.fp64(),
+        inner = lego_blocks.SplitDomain(numeric_type(),
                                         [split_in], [split_out],
                                         domains_to_lego)
 

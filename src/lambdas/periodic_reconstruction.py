@@ -1,7 +1,7 @@
 import os
 from fpcore.ast import Variable
 import lego_blocks
-import numeric_types
+from numeric_types import fp64 
 # import interval
 import lambdas
 
@@ -66,23 +66,23 @@ class PeriodicRecons(types.Transform):
         self.out_type = types.Impl(our_in_type.function,
                                    self.domain)
 
-    def generate(self):
+    def generate(self, numeric_type=fp64):
         # in = ...
         # k = floor((in-sup) / period)
         # out = in - period * k
         # ...
-        so_far = super().generate()
+        so_far = super().generate(numeric_type=numeric_type)
         in_name = self.gensym("in")
         out_name = so_far[0].in_names[0]
 
         k = self.gensym("k")
-        add = lego_blocks.SimpleAdditive(numeric_types.fp64(), [in_name],
+        add = lego_blocks.SimpleAdditive(numeric_type(), [in_name],
                                          [out_name, k], self.in_node.domain.inf, self.period)
 
         # Inductive reconstruction to map the output according to its s function | (s(f(t(x))))
         inner_name = so_far[-1].out_names[0]
         recons_name = self.gensym("recons")
-        ind_recons = lego_blocks.Expression(numeric_types.fp64(),
+        ind_recons = lego_blocks.Expression(numeric_type(),
                                          [inner_name, k],
                                          [recons_name],
                                          self.recons_expr)

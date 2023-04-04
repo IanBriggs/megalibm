@@ -25,17 +25,18 @@ class SimpleAdditive(lego_blocks.LegoBlock):
             "k": self.out_names[1],
             "out": self.out_names[0],
             "type": self.numeric_type.c_type(),
+            "suffix": self.numeric_type.c_const_suffix()
         }
         inv_period = fpcore.ast.Operation(
             "/", fpcore.ast.Number("1"), self.period)
         inv_period_value = float(inv_period.eval(assignment={}))
         period_value = float(self.period.eval(assignment={}))
         fmt["cast_in"] = "(({}){})".format(fmt["type"], self.in_names[0])
-        fmt["cast_period"] = "(({}){})".format(
-            fmt["type"], period_value)
-        fmt["cast_inv_period"] = "(({}){})".format(
-            fmt["type"], inv_period_value)
-        fmt["cast_offset"] = "(({}){})".format(fmt["type"], float(self.offset))
+        fmt["cast_period"] = "(({}){}{})".format(
+            fmt["type"], period_value, fmt["suffix"])
+        fmt["cast_inv_period"] = "(({}){}{})".format(
+            fmt["type"], inv_period_value, fmt["suffix"])
+        fmt["cast_offset"] = "(({}){}{})".format(fmt["type"], float(self.offset), fmt["suffix"])
         lines = [
             "int {k} = (int) floor(({cast_in}-{cast_offset})*{cast_inv_period});".format(**fmt),
             "{type} {out} = {cast_in} - {k}*{cast_period};".format(**fmt),

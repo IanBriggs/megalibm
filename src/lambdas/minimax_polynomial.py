@@ -4,7 +4,7 @@ from fpcore.ast_methods.decompose_identities import decompose_identities
 from interval import Interval
 
 import math
-import numeric_types
+from numeric_types import fp64 
 import cmd_sollya
 import lego_blocks.forms as forms
 
@@ -45,7 +45,7 @@ class MinimaxPolynomial(types.Source):
 
         self.out_type = types.Poly(self.function, self.domain)
 
-    def generate(self):
+    def generate(self, numeric_type=fp64):
         """
         Uses Sollya to fit a polynomial to the function choosing whether a
           constant term is needed and whether even, odd, or all degrees should
@@ -80,7 +80,7 @@ class MinimaxPolynomial(types.Source):
         res = cmd_sollya.Result(self.function,
                                 self.domain,
                                 monomials,
-                                numeric_types.fp64())
+                                numeric_type())
 
         # Return the lego_block.form
         return forms.Polynomial(self.function,

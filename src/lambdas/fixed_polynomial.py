@@ -3,6 +3,7 @@ from fpcore.ast import FPCore
 from interval import Interval
 from lambdas import types
 from lego_blocks import forms
+from numeric_types import fp64 
 
 
 class FixedPolynomial(types.Source):
@@ -54,7 +55,7 @@ class FixedPolynomial(types.Source):
 
         self.out_type = types.Poly(self.function, self.domain)
 
-    def generate(self):
+    def generate(self, numeric_type=fp64):
         return forms.Polynomial(self.function,
                                 self.monomials,
                                 self.coefficients,

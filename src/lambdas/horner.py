@@ -2,7 +2,7 @@
 import math
 import lambdas
 
-import numeric_types
+from numeric_types import fp64 
 import lego_blocks.forms as forms
 from lambdas import types
 
@@ -29,13 +29,12 @@ class Horner(types.Transform):
 
         self.out_type = types.Impl(our_in_type.function, our_in_type.domain)
 
-    def generate(self):
+    def generate(self, numeric_type=fp64):
         """ Implement a polynomial using the horner form lego block """
-        print("Hi Anh Again")
-        p = super().generate()
+        p = super().generate(numeric_type=numeric_type)
         in_name = self.gensym("in")
         out_name = self.gensym("out")
-        return [forms.Horner(numeric_types.fp64(), [in_name], [out_name], p, self.split)]
+        return [forms.Horner(numeric_type(), [in_name], [out_name], p, self.split)]
 
     @classmethod
     def generate_hole(cls, out_type):

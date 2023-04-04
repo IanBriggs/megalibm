@@ -3,7 +3,7 @@ import math
 from fpcore.ast import Variable
 from lambdas.narrow import Narrow
 import lego_blocks
-import numeric_types
+from numeric_types import fp64 
 import lambdas
 
 import fpcore
@@ -48,7 +48,7 @@ class TransformOut(types.Transform):
         self.domain = domain
         self.out_type = types.Impl(new_f, self.domain)
 
-    def generate(self):
+    def generate(self, numeric_type=fp64):
         # in = ...
         # out = expr(in)
 
@@ -58,7 +58,7 @@ class TransformOut(types.Transform):
         t_out = self.gensym("t_out")
 
         rec = lego_blocks.TransformOut(
-            numeric_types.fp64(),
+            numeric_type(),
             [t_in], [t_out],
             self.expr
         )

@@ -1,5 +1,5 @@
 
-import numeric_types
+from numeric_types import fp64 
 from fpcore.ast import FPCore, Operation, Variable
 
 
@@ -52,11 +52,13 @@ def find_periods(func: FPCore):
     return periods
 
 
-def generate_c_code(lam, name):
-    passes = lam.generate()
-    in_type = passes[0].numeric_type.c_type()
+def generate_c_code(lam, name, numeric_type=fp64):
+    passes = lam.generate(numeric_type=numeric_type)
+    # in_type = passes[0].numeric_type.c_type()
+    in_type = numeric_type().c_type()
     in_name = passes[0].in_names[0]
-    out_type = passes[-1].numeric_type.c_type()
+    # out_type = passes[-1].numeric_type.c_type()
+    out_type = numeric_type().c_type()
     out_name = passes[-1].out_names[0]
     signature = "{} {}({} {})".format(out_type, name, in_type, in_name)
     signature_h = signature + ";"
@@ -77,9 +79,9 @@ def generate_c_code(lam, name):
 
 def generate_libm_c_code(typ, name):
     func = typ.function
-    in_type = numeric_types.fp64().c_type()
+    in_type = fp64().c_type()
     in_name = func.arguments[0]
-    out_type = numeric_types.fp64().c_type()
+    out_type = fp64().c_type()
     signature = "{} {}({} {})".format(out_type, name, in_type, in_name)
     signature_h = signature + ";"
 
