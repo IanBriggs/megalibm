@@ -1,4 +1,5 @@
 
+from better_float_cast import better_float_cast
 from fpcore.ast import FPCore
 from interval import Interval
 import lambdas
@@ -39,8 +40,8 @@ class PuntToLibm(types.Source):
         # where both low and high are finite (done so this only triggers inside
         #   range reductions)
         if (type(out_type) != types.Impl
-            or not math.isfinite(float(out_type.domain.inf))
-                or not math.isfinite(float(out_type.domain.sup))):
+            or not math.isfinite(better_float_cast(out_type.domain.inf))
+                or not math.isfinite(better_float_cast(out_type.domain.sup))):
             return list()
 
         # To get this output we just need be constructed with given args

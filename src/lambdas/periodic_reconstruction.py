@@ -1,4 +1,5 @@
 import os
+from better_float_cast import better_float_cast
 from fpcore.ast import Variable
 import lego_blocks
 import numeric_types
@@ -54,13 +55,13 @@ class PeriodicRecons(types.Transform):
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
 
-        float_period = float(self.period)
+        float_period = better_float_cast(self.period)
 
         # TODO: Turn assert into exception
         assert type(our_in_type) == types.Impl
         # TODO: Type check on periods
         assert has_period(our_in_type.function, float_period)
-        assert float(our_in_type.domain.width()) <= float_period
+        assert better_float_cast(our_in_type.domain.width()) <= float_period
 
         self.domain = Interval("(- INFINITY)", "INFINITY")
         self.out_type = types.Impl(our_in_type.function,
@@ -99,8 +100,8 @@ class PeriodicRecons(types.Transform):
         # (Impl (func) -INFINITY INFINITY)
         # where (func) is periodic
         if (type(out_type) != types.Impl
-            or float(out_type.domain.inf) != -float("inf")
-                or float(out_type.domain.sup) != float("inf")):
+            or better_float_cast(out_type.domain.inf) != -better_float_cast("inf")
+                or better_float_cast(out_type.domain.sup) != better_float_cast("inf")):
             return list()
 
         # To get this output we need as input
@@ -112,14 +113,14 @@ class PeriodicRecons(types.Transform):
         new_holes = list()
         for s, p in periods:
             # We only care about s which are not handled by Periodic lambda
-            if p.contains_op("thefunc") or float(p) == 0.0 or s.contains_op("thefunc") or s == Variable("x"):
+            if p.contains_op("thefunc") or better_float_cast(p) == 0.0 or s.contains_op("thefunc") or s == Variable("x"):
                 continue
             # Use e-graph intersection to find the s reconstruction and check if its valid
             extracted = find_reconstruction.get_reconstruction(s)
             if not cls.is_valid_expr(extracted):
                 continue
             recons_expr = egg_to_fpcore(extracted)
-            if float(p) < 0.0:
+            if better_float_cast(p) < 0.0:
                 p = -p
             pos = types.Impl(out_type.function, Interval(0.0, p))
             new_holes.append(PeriodicRecons(

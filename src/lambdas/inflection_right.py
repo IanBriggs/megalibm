@@ -1,5 +1,6 @@
 
 import math
+from better_float_cast import better_float_cast
 from fpcore.ast import Variable
 from lambdas.narrow import Narrow
 import lego_blocks
@@ -107,7 +108,7 @@ class InflectionRight(types.Transform):
         red = lego_blocks.IfLess(numeric_types.fp64(),
                                [x_in_name],
                                [reduced_name],
-                               float(self.inflection_point),
+                               better_float_cast(self.inflection_point),
                                x_in_name,
                                red_expr.to_libm_c())
 
@@ -119,7 +120,7 @@ class InflectionRight(types.Transform):
         rec = lego_blocks.IfLess(numeric_types.fp64(),
                                        [x_in_name],
                                        [y_out_name],
-                                       float(self.inflection_point),
+                                       better_float_cast(self.inflection_point),
                                        inner_name,
                                        rec_expr.to_libm_c())
 

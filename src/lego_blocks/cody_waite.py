@@ -1,4 +1,5 @@
 
+from better_float_cast import better_float_cast
 from calculate_cody_waite_constants import calculate_cody_waite_constants
 import lego_blocks
 import fpcore
@@ -32,7 +33,7 @@ class CodyWaite(lego_blocks.LegoBlock):
         period_str = ",".join(period_strs)
 
         source_lines = [
-            f"{cdecl} {inv_period} = {1/float(self.period)};",
+            f"{cdecl} {inv_period} = {1/better_float_cast(self.period)};",
             f"{cdecl} {period}[{len(period_strs)}] = {{{period_str}}};",
             f"int {k};",
             f"{cdecl} {r} = cody_waite_reduce({cw_in}, {inv_period}, {len(period_strs)}, {period}, &{k}, NULL);",

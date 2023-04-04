@@ -1,5 +1,6 @@
 
 import math
+from better_float_cast import better_float_cast
 from fpcore.ast import Variable
 from lambdas.narrow import Narrow
 import lego_blocks
@@ -49,7 +50,7 @@ class MirrorRight(types.Transform):
         assert type(our_in_type) == types.Impl
 
         func = our_in_type.function
-        float_sup = float(our_in_type.domain.sup)
+        float_sup = better_float_cast(our_in_type.domain.sup)
 
         # Its an error if the identity is not present
         s_exprs = get_mirrors_at(func, float_sup)
@@ -95,12 +96,12 @@ class MirrorRight(types.Transform):
         reduced_name = so_far[0].in_names[0]
 
         bound = self.mirror_point
-        two_bound = float(2 * bound)
+        two_bound = better_float_cast(2 * bound)
 
         il_reduce = lego_blocks.IfLess(numeric_types.fp64(),
                                        [in_name],
                                        [reduced_name],
-                                       float(bound),
+                                       better_float_cast(bound),
                                        in_name,
                                        "({} - {})".format(two_bound, in_name))
 
@@ -113,7 +114,7 @@ class MirrorRight(types.Transform):
         il_recons = lego_blocks.IfLess(numeric_types.fp64(),
                                        [in_name],
                                        [recons_name],
-                                       float(bound),
+                                       better_float_cast(bound),
                                        inner_name,
                                        s_str)
 
@@ -183,10 +184,10 @@ class MirrorRight(types.Transform):
                 continue
 
             # check for [-inf, inf]
-            if (math.isinf(float(out_domain.inf))
-                and math.copysign(1.0, float(out_domain.inf)) == -1.0
-                and math.isinf(float(out_domain.sup))
-                    and math.copysign(1.0, float(out_domain.sup)) == 1.0):
+            if (math.isinf(better_float_cast(out_domain.inf))
+                and math.copysign(1.0, better_float_cast(out_domain.inf)) == -1.0
+                and math.isinf(better_float_cast(out_domain.sup))
+                    and math.copysign(1.0, better_float_cast(out_domain.sup)) == 1.0):
                 new_holes.append(MirrorRight(
                     lambdas.Hole(in_type), s_expr=reconstruction_expr))
                 continue
@@ -197,17 +198,17 @@ class MirrorRight(types.Transform):
 
             # TODO: epsilon comparison
             # match
-            if abs(float(real_out_domain.sup - out_domain.sup)) < 1e-16:
+            if abs(better_float_cast(real_out_domain.sup - out_domain.sup)) < 1e-16:
                 new_holes.append(MirrorRight(
                     lambdas.Hole(in_type), s_expr=reconstruction_expr))
                 continue
 
             # too small
-            if float(real_out_domain.sup) < float(out_domain.sup):
+            if better_float_cast(real_out_domain.sup) < better_float_cast(out_domain.sup):
                 continue
 
             # won't gain anything
-            if abs(float(in_domain.sup - out_domain.sup)) < 1e-16:
+            if abs(better_float_cast(in_domain.sup - out_domain.sup)) < 1e-16:
                 continue
 
             # needs narrowing

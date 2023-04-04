@@ -1,5 +1,6 @@
 
 
+from better_float_cast import better_float_cast
 from fpcore.ast import ASTNode, Variable
 from lego_blocks import forms
 
@@ -36,10 +37,10 @@ def simple_horner_poly(x, mons, coeffs):
     next_part = simple_horner_poly(x, next_mons, coeffs)
 
     if issubclass(type(c), ASTNode):
-        c = float(c)
+        c = better_float_cast(c)
 
     if next_part is None:
-        if float(c) == 1 and part != "":
+        if better_float_cast(c) == 1 and part != "":
             return f"{part[:-1]}"
         return f"{part}{c}"
     return f"{part}({c} + {next_part})"

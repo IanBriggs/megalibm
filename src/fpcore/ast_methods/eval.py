@@ -102,6 +102,7 @@ def eval(self, assignment=None):
 
 @add_method(Number)
 def eval(self, assignment=None):
+    # TODO: this _may_ fail for some number representations
     return mpmath.mpf(self.source)
 
 

@@ -1,6 +1,7 @@
 
 
 import math
+from better_float_cast import better_float_cast
 from error import Error
 from utils.logging import Logger
 from utils.timing import Timer
@@ -31,7 +32,7 @@ class FailedGenError(Exception):
 class Result():
 
     default_config = {
-        "precision": 128,
+        "precision": 512,
         "analysis_bound": 2**-20,
         "minimize_target": "relative",
     }
@@ -129,7 +130,7 @@ class Result():
 
     def _generate_query(self):
         monomials_str = ", ".join([str(m) for m in self.monomials])
-        mid = (float(self.domain.inf) + float(self.domain.sup))/2
+        mid = (better_float_cast(self.domain.inf) + better_float_cast(self.domain.sup))/2
         lines = [
             'prec = {}!;'.format(self.config["precision"]),
             'algo_analysis_bound = {};'.format(self.config["analysis_bound"]),

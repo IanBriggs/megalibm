@@ -1,5 +1,6 @@
 
 
+from better_float_cast import better_float_cast
 import lego_blocks
 import numeric_types
 import interval
@@ -29,7 +30,7 @@ class RepeatExp(types.Transform):
     def type_check(self):
         our_in_type = self.in_node.out_type
         assert (type(our_in_type) == types.Impl)
-        assert (float(our_in_type.domain.inf) == 0.0)
+        assert (better_float_cast(our_in_type.domain.inf) == 0.0)
 #        assert (has_period_function(our_in_type.function, our_in_type.domain.sup))
 
         self.out_type = types.Impl(our_in_type.function,
@@ -62,8 +63,8 @@ class RepeatExp(types.Transform):
         # (Impl (func) 0.0 INFINITY)
         # where (func) is periodic
         if (type(out_type) != types.Impl
-            or float(out_type.domain.inf) != 0.0
-                or float(out_type.domain.sup) != float("inf")):
+            or better_float_cast(out_type.domain.inf) != 0.0
+                or better_float_cast(out_type.domain.sup) != better_float_cast("inf")):
             return list()
 
         # TODO: real periodicity test, for now just guess some pi values
