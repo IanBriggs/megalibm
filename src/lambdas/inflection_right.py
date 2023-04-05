@@ -104,7 +104,7 @@ class InflectionRight(types.Transform):
         reduced_name = so_far[0].in_names[0]
         red_expr = self.reduction.substitute(Variable("x"), Variable(x_in_name))
         if isinstance(numeric_type(), fp32):
-            red_expr = red_expr.substitute_floatop()
+            red_expr = red_expr.substitute_op()
 
         red = lego_blocks.IfLess(numeric_type(),
                                [x_in_name],
@@ -118,7 +118,7 @@ class InflectionRight(types.Transform):
         y_out_name = self.gensym("y_out")
         rec_expr = self.reconstruction.substitute(Variable("y"), Variable(inner_name))
         if isinstance(numeric_type(), fp32):
-            rec_expr = rec_expr.substitute_floatop()
+            rec_expr = rec_expr.substitute_op()
 
         rec = lego_blocks.IfLess(numeric_type(),
                                        [x_in_name],
