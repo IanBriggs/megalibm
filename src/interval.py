@@ -1,6 +1,7 @@
 
 
 import math
+from better_float_cast import better_float_cast
 import fpcore
 import mpmath
 
@@ -23,14 +24,14 @@ class Interval():
         self.sup = parse_bound(sup)
 
         ie = self.inf.eval({})
-        if math.isfinite(float(ie)) and int(ie) == ie:
+        if math.isfinite(better_float_cast(ie)) and int(ie) == ie:
             self.inf = parse_bound(int(ie))
 
         se = self.sup.eval({})
-        if math.isfinite(float(se)) and int(se) == se:
+        if math.isfinite(better_float_cast(se)) and int(se) == se:
             self.sup = parse_bound(int(se))
 
-        assert (float(self.inf) <= float(self.sup))
+        assert (better_float_cast(self.inf) <= better_float_cast(self.sup))
 
     def __str__(self):
         return "[{},{}]".format(self.inf, self.sup)
@@ -42,18 +43,18 @@ class Interval():
         #                 0
         # <---------------+--------------->
         #                    [********]
-        if float(self.inf) >= 0.0:
+        if better_float_cast(self.inf) >= 0.0:
             return Interval(self.inf, self.sup)
         #                 0
         # <---------------+--------------->
         #               [********]
-        if float(self.inf) <= 0.0 and 0.0 <= float(self.sup):
+        if better_float_cast(self.inf) <= 0.0 and 0.0 <= better_float_cast(self.sup):
             abs_max = max(-self.inf, self.sup)
             return Interval(0.0, abs_max)
         #                 0
         # <---------------+--------------->
         #      [********]
-        if float(self.sup) <= 0.0:
+        if better_float_cast(self.sup) <= 0.0:
             return Interval(-self.sup, -self.sup)
 
         assert 0, "Unreachable"
@@ -75,8 +76,8 @@ class Interval():
             sup = str(self.sup).replace("INFINITY", "inf")
             me = mpmath.iv.mpf([inf, sup])
             return point in me
-        f_point = float(point)
-        return float(self.inf) <= f_point and f_point <= float(self.sup)
+        f_point = better_float_cast(point)
+        return better_float_cast(self.inf) <= f_point and f_point <= better_float_cast(self.sup)
 
     def shift(self, k):
         diff = self.sup - self.inf

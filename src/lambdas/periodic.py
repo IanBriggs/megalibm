@@ -1,5 +1,6 @@
 
 
+from better_float_cast import better_float_cast
 from fpcore.ast import Variable
 import lego_blocks
 from numeric_types import fp64 
@@ -50,12 +51,12 @@ class Periodic(types.Transform):
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
 
-        float_period = float(self.period)
+        float_period = better_float_cast(self.period)
 
         #TODO: Turn assert into exception
         assert type(our_in_type) == types.Impl
         assert has_period(our_in_type.function, float_period)
-        assert float(our_in_type.domain.width()) <= float_period
+        assert better_float_cast(our_in_type.domain.width()) <= float_period
 
         self.domain = Interval("(- INFINITY)", "INFINITY")
         self.out_type = types.Impl(our_in_type.function,
@@ -85,8 +86,8 @@ class Periodic(types.Transform):
         # (Impl (func) -INFINITY INFINITY)
         # where (func) is periodic
         if (type(out_type) != types.Impl
-            or float(out_type.domain.inf) != -float("inf")
-                or float(out_type.domain.sup) != float("inf")):
+            or better_float_cast(out_type.domain.inf) != -better_float_cast("inf")
+                or better_float_cast(out_type.domain.sup) != better_float_cast("inf")):
             return list()
 
         # To get this output we need as input
@@ -100,7 +101,7 @@ class Periodic(types.Transform):
         floats = set()
         new_holes = list()
         for p in periods:
-            fp = float(p)
+            fp = better_float_cast(p)
             if fp < 0:
                 fp = -fp
                 p = -p

@@ -1,5 +1,6 @@
 
 import math
+from better_float_cast import better_float_cast
 import lambdas
 
 from numeric_types import fp64 
@@ -41,8 +42,8 @@ class Horner(types.Transform):
         # We only output
         # (Impl (func) low high)
         if (type(out_type) != types.Impl
-            or not math.isfinite(float(out_type.domain.inf))
-                or not math.isfinite(float(out_type.domain.sup))):
+            or not math.isfinite(better_float_cast(out_type.domain.inf))
+                or not math.isfinite(better_float_cast(out_type.domain.sup))):
             return list()
 
         # To get this output we need as input

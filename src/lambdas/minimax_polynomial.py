@@ -1,4 +1,5 @@
 
+from better_float_cast import better_float_cast
 from fpcore.ast import FPCore, Operation, Variable
 from fpcore.ast_methods.decompose_identities import decompose_identities
 from interval import Interval
@@ -66,7 +67,7 @@ class MinimaxPolynomial(types.Source):
         mirrors = decomposed_identities["mirror"]
 
         for s, t_arg in mirrors:
-            if float(t_arg) == 0:
+            if better_float_cast(t_arg) == 0:
                 if s == Variable("x"):
                     monomials += range(2, 2*self.terms+1, 2)
                     break
@@ -94,8 +95,8 @@ class MinimaxPolynomial(types.Source):
         # (Poly (func) low high)
         # where low and high are finite
         if (type(out_type) != types.Poly
-            or not math.isfinite(float(out_type.domain.inf))
-                or not math.isfinite(float(out_type.domain.sup))):
+            or not math.isfinite(better_float_cast(out_type.domain.inf))
+                or not math.isfinite(better_float_cast(out_type.domain.sup))):
             return list()
 
         # To get this output we just need be constructed with given args

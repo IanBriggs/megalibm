@@ -1,5 +1,6 @@
 
 
+from better_float_cast import better_float_cast
 from calculate_cody_waite_constants import calculate_cody_waite_constants
 from dirty_equal import dirty_equal
 import fpcore
@@ -66,7 +67,7 @@ class CodyWaite(types.Transform):
         # Check normal out, when there is mod cases present then this just
         # tells us the type
         target_function = self.in_node
-        float_period = float(self.constant)
+        float_period = better_float_cast(self.constant)
 
         # assert has_period(target_function, float_period)
 
@@ -86,7 +87,7 @@ class CodyWaite(types.Transform):
             #TODO: Turn assert into exception
             assert type(body.out_type) == types.Impl, type(body.out_type)
             #assert has_period(body.out_type.function, float_period)
-            assert float(body.out_type.domain.width()) >= float_period, float(body.out_type.domain.width())
+            assert better_float_cast(body.out_type.domain.width()) >= float_period, better_float_cast(body.out_type.domain.width())
 
             # Prove equality for each mod section
             # Given:

@@ -50,7 +50,7 @@ sys.path.append(SRC_DIR)
 import fpcore
 import lambdas
 
-from lambdas import InflectionLeft, InflectionRight, Horner, FixedPolynomial, SplitDomain, Estrin
+from lambdas import *
 from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
 from interval import Interval
 from utils.logging import Logger
@@ -64,9 +64,7 @@ logger.set_log_level(Logger.HIGH)
 
 asin = fpcore.parse("(FPCore (x) (asin x))")[0]
 # This is the value that corresponds to AMD's code
-linear_cutoff = " 1.38777878078144552145514403413465714614676459320581451695186814276894438080489635467529296875e-17"
-# A much better value is
-# linear_cutoff = " 2.14910850667674987607097081103446623018271566252224147319793701171875e-8"
+linear_cutoff = "1.38777878078144552145514403413465714614676459320581451695186814276894438080489635467529296875e-17"
 
 mlm = \
     InflectionLeft(
@@ -107,6 +105,32 @@ mlm = \
         fpcore.parse("(FPCore (x) (- x))")[0].body,
         fpcore.parse("(FPCore (x) (- y))")[0].body)
 
+better_linear_cutoff = "2.14910850667675e-08"
+better_mlm = \
+    InflectionLeft(
+        SplitDomain({
+            Interval("0", better_linear_cutoff):
+            Horner(
+                FixedPolynomial(
+                    asin,
+                    Interval("0", better_linear_cutoff),
+                    1,
+                    [1],
+                    [1]
+                )),
+            Interval(better_linear_cutoff, "1"):
+            InflectionRight(
+                    Estrin(
+                        MinimaxPolynomial(
+                            asin,
+                            Interval("0", "0.5"),
+                            15),
+                        split=1),
+                fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
+                fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body)}),
+        fpcore.parse("(FPCore (x) (- x))")[0].body,
+        fpcore.parse("(FPCore (x) (- y))")[0].body)
+
 # |                                                                           |
 # +---------------------------------------------------------------------------+
 
@@ -125,6 +149,12 @@ mlm.type_check()
 dsl_func_name = "dsl_amd_fast_asin"
 dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name)
 logger.blog("C function", "\n".join(dsl_src))
+
+# better
+better_mlm.type_check()
+better_dsl_func_name = "better_dsl_amd_fast_asin"
+better_dsl_sig, better_dsl_src = lambdas.generate_c_code(better_mlm, better_dsl_func_name)
+logger.blog("C function", "\n".join(better_dsl_src))
 
 # amd
 libm_func_name = "libm_dsl_amd_fast_asin"
@@ -149,20 +179,20 @@ if not path.isdir(name):
 os.chdir(name)
 
 # header
-header_lines = assemble_header([libm_sig, mpfr_sig, dsl_sig])
+header_lines = assemble_header([libm_sig, mpfr_sig, dsl_sig, better_dsl_sig])
 header_fname = "funcs.h"
 with open(header_fname, "w") as f:
     f.write("\n".join(header_lines))
 
 # all 3 functions
-func_lines = assemble_functions([libm_src, mpfr_src + dsl_src], header_fname)
+func_lines = assemble_functions([libm_src, mpfr_src + dsl_src + better_dsl_src], header_fname)
 func_fname = "funcs.c"
 with open(func_fname, "w") as f:
     f.write("\n".join(func_lines))
 
 domains = [("-1", "1"),
-           ("0", "1"),
-           (float(linear_cutoff) - 1e-8, float(linear_cutoff) + 1e-8),
+           ("0", "0.5"),
+           ("0", float(linear_cutoff) + 3e-8),
            ("0.4375", "0.5625"),]
 func_body = func.to_html()
 generators = [str(mlm)]
@@ -170,7 +200,7 @@ generators = [str(mlm)]
 # Error measurement
 main_lines = assemble_error_main(name, func_body,
                                  mpfr_func_name,
-                                 [libm_func_name, dsl_func_name],
+                                 [libm_func_name, dsl_func_name, better_dsl_func_name],
                                  generators,
                                  header_fname, domains)
 main_fname = "error_main.c"
@@ -179,7 +209,7 @@ with open(main_fname, "w") as f:
 
 # Timing measurement
 main_lines = assemble_timing_main(name, func_body,
-                                  [libm_func_name, dsl_func_name],
+                                  [libm_func_name, dsl_func_name, better_dsl_func_name],
                                   header_fname, domains)
 main_fname = "timing_main.c"
 with open(main_fname, "w") as f:
