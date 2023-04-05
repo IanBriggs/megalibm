@@ -30,6 +30,7 @@ from .ast_methods import (
     simplify,
     sub,
     substitute,
+    unary_op,
     to_html,
     to_libm_c,
     to_mpfr_c,
