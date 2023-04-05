@@ -34,7 +34,7 @@ _UNOP_SET = {
 
 @add_method(Operation)
 def substitute_op(self):
-    new_args = [arg.substitute_floatop() if isinstance(arg, Operation) else arg for arg in self.args]
+    new_args = [arg.substitute_op() if isinstance(arg, Operation) else arg for arg in self.args]
     if self.op in _UNOP_SET:
         return Operation(self.op + 'f', *new_args)
     return Operation(self.op, *new_args)
