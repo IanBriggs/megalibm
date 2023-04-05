@@ -1,5 +1,6 @@
 from fpcore.ast import ASTNode, Atom, Constant, FPCore, Operation
 from utils import add_method
+from numeric_types import fp64, fp32
 
 # TODO: currently only double precision code is produced
 
@@ -30,21 +31,22 @@ def to_libm_c(self, *args, **kwargs):
 
 
 @add_method(Atom)
-def to_libm_c(self):
+def to_libm_c(self, numeric_type = fp64):
     return self.source
 
 
 @add_method(Constant)
-def to_libm_c(self):
+def to_libm_c(self, numeric_type=fp64()):
     try:
-        return _CONST_MAPPING[self.source]
+        is_float = isinstance(numeric_type, fp32)
+        return _CONST_MAPPING[self.source] if not is_float else f"(float) {_CONST_MAPPING[self.source]}"  
     except KeyError:
         raise NotImplementedError(f"Unknown constant '{self.source}'")
 
 
 @add_method(Operation)
-def to_libm_c(self):
-    c_args = [arg.to_libm_c() for arg in self.args]
+def to_libm_c(self, numeric_type = fp64()):
+    c_args = [arg.to_libm_c(numeric_type=numeric_type) for arg in self.args]
 
     if len(c_args) == 1 and self.op in {"+", "-"}:
         return "({}{})".format(self.op, c_args[0])

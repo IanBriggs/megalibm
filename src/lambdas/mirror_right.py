@@ -4,7 +4,7 @@ from better_float_cast import better_float_cast
 from fpcore.ast import Variable
 from lambdas.narrow import Narrow
 import lego_blocks
-import numeric_types
+from numeric_types import fp64 
 import lambdas
 
 
@@ -75,7 +75,7 @@ class MirrorRight(types.Transform):
         self.domain = next_domain
         self.out_type = types.Impl(our_in_type.function, next_domain)
 
-    def generate(self):
+    def generate(self, numeric_type=fp64):
         # in = ...
         # if in < mirror_point:
         #   reduced = 2*mirror_point - in
@@ -89,7 +89,7 @@ class MirrorRight(types.Transform):
         #   recons = inner
 
         # Generate the inner code first
-        so_far = super().generate()
+        so_far = super().generate(numeric_type=numeric_type)
 
         # Reduction
         in_name = self.gensym("in")
@@ -98,7 +98,7 @@ class MirrorRight(types.Transform):
         bound = self.mirror_point
         two_bound = better_float_cast(2 * bound)
 
-        il_reduce = lego_blocks.IfLess(numeric_types.fp64(),
+        il_reduce = lego_blocks.IfLess(numeric_type(),
                                        [in_name],
                                        [reduced_name],
                                        better_float_cast(bound),
@@ -111,7 +111,7 @@ class MirrorRight(types.Transform):
         s_expr = self.s_expr.substitute(Variable("x"), Variable(inner_name))
         s_str = s_expr.to_libm_c()
 
-        il_recons = lego_blocks.IfLess(numeric_types.fp64(),
+        il_recons = lego_blocks.IfLess(numeric_type(),
                                        [in_name],
                                        [recons_name],
                                        better_float_cast(bound),

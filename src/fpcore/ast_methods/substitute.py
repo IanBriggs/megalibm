@@ -1,7 +1,6 @@
 from fpcore.ast import ASTNode, Atom, FPCore, Operation
 from utils import add_method
 
-
 @add_method(ASTNode)
 def substitute(self, *args, **kwargs):
     # Make sure calling substitute leads to an error if not overridden
