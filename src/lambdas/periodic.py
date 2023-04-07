@@ -1,5 +1,6 @@
 
 
+import fpcore
 from fpcore.ast import Variable
 import lego_blocks
 import numeric_types
@@ -7,6 +8,9 @@ import interval
 import lambdas
 
 import snake_egg
+
+# Don't do this, it is bad
+from synthesize import HACK_GLOBAL_USED_IDENTITIES
 
 from interval import Interval
 from lambdas import types
@@ -106,6 +110,7 @@ class Periodic(types.Transform):
                 p = -p
             if fp == 0.0 or fp in floats:
                 continue
+            HACK_GLOBAL_USED_IDENTITIES.add(fpcore.ast.Operation("thefunc", fpcore.ast.Operation("+", fpcore.ast.Variable("x"), p)))
             pos = types.Impl(out_type.function, Interval(0.0, p))
             new_holes.append(Periodic(lambdas.Hole(pos), p))
             cen = types.Impl(out_type.function, Interval(-p/2, p/2))
