@@ -1,6 +1,5 @@
 
 import math
-from dirty_equal import dirty_equal
 import fpcore
 from fpcore.ast import Variable
 from lambdas.narrow import Narrow
