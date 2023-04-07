@@ -1,11 +1,15 @@
 
 import math
+from dirty_equal import dirty_equal
+import fpcore
 from fpcore.ast import Variable
 from lambdas.narrow import Narrow
 import lego_blocks
 import numeric_types
 import lambdas
 
+# Don't do this, it is bad
+from synthesize import HACK_GLOBAL_USED_IDENTITIES
 
 from interval import Interval
 from lambdas import types
@@ -14,7 +18,7 @@ from utils import Logger
 from lambdas.lambda_utils import get_mirrors, get_mirrors_at
 
 
-logger = Logger(level=Logger.HIGH)
+logger = Logger(level=Logger.LOW)
 
 
 class MirrorRight(types.Transform):
@@ -53,6 +57,7 @@ class MirrorRight(types.Transform):
 
         # Its an error if the identity is not present
         s_exprs = get_mirrors_at(func, float_sup)
+        logger("s_exprs: {}", s_exprs)
 
         found_s = False
         for s_expr in s_exprs:
@@ -62,7 +67,7 @@ class MirrorRight(types.Transform):
 
         if not found_s:
             msg = "MirrorRight requires that '{}' is mirrored about x={}"
-            raise TypeError(msg.format(self.function, float_sup))
+            raise TypeError(msg.format(our_in_type.function, float_sup))
 
         # Create out type
         width = our_in_type.domain.sup - our_in_type.domain.inf
@@ -187,6 +192,9 @@ class MirrorRight(types.Transform):
                 and math.copysign(1.0, float(out_domain.inf)) == -1.0
                 and math.isinf(float(out_domain.sup))
                     and math.copysign(1.0, float(out_domain.sup)) == 1.0):
+                hack_inner = fpcore.ast.Operation("thefunc", fpcore.ast.Operation("-", point, fpcore.ast.Variable("x")))
+                hack = reconstruction_expr.substitute(fpcore.ast.Variable("x"), hack_inner)
+                HACK_GLOBAL_USED_IDENTITIES.add(hack)
                 new_holes.append(MirrorRight(
                     lambdas.Hole(in_type), s_expr=reconstruction_expr))
                 continue
@@ -198,6 +206,9 @@ class MirrorRight(types.Transform):
             # TODO: epsilon comparison
             # match
             if abs(float(real_out_domain.sup - out_domain.sup)) < 1e-16:
+                hack_inner = fpcore.ast.Operation("thefunc", fpcore.ast.Operation("-", point, fpcore.ast.Variable("x")))
+                hack = reconstruction_expr.substitute(fpcore.ast.Variable("x"), hack_inner)
+                HACK_GLOBAL_USED_IDENTITIES.add(hack)
                 new_holes.append(MirrorRight(
                     lambdas.Hole(in_type), s_expr=reconstruction_expr))
                 continue
@@ -211,6 +222,9 @@ class MirrorRight(types.Transform):
                 continue
 
             # needs narrowing
+            hack_inner = fpcore.ast.Operation("thefunc", fpcore.ast.Operation("-", point, fpcore.ast.Variable("x")))
+            hack = reconstruction_expr.substitute(fpcore.ast.Variable("x"), hack_inner)
+            HACK_GLOBAL_USED_IDENTITIES.add(hack)
             new_holes.append(
                 Narrow(MirrorRight(lambdas.Hole(in_type), s_expr=reconstruction_expr), out_domain))
 

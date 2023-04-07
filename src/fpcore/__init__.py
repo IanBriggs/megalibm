@@ -33,4 +33,6 @@ from .ast_methods import (
     to_sollya,
     to_wolfram,
     truediv,
+
+    hack_hash,
 )

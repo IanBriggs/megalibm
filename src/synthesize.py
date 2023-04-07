@@ -6,8 +6,13 @@ from utils.logging import Logger
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
 
+# Don't do this, it is bad
+HACK_GLOBAL_USED_IDENTITIES = set()
 
 def synthesize(target, fuel=10):
+    # clear out global set
+    HACK_GLOBAL_USED_IDENTITIES.clear()
+
     transforms = [
         #lambdas.NegMirrorLeft,
         lambdas.MirrorLeft,
@@ -67,5 +72,11 @@ def synthesize(target, fuel=10):
         logger("Type check on: {}", c)
         c.type_check()
         my_lambdas.append(c)
+
+    if len(my_lambdas) > 0:
+        name = {p.name: p.value for p in target.function.properties}.get("name", "NoName")
+        logger("In generating {}, we used the following identities:", name)
+        for iden in HACK_GLOBAL_USED_IDENTITIES:
+            logger(iden)
 
     return my_lambdas

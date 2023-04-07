@@ -1,8 +1,12 @@
 import math
+import fpcore
 from fpcore.ast import Variable
 import lego_blocks
 import numeric_types
 import lambdas
+
+# Don't do this, it is bad
+from synthesize import HACK_GLOBAL_USED_IDENTITIES
 
 from lambdas.narrow import Narrow
 from interval import Interval
@@ -182,6 +186,9 @@ class MirrorLeft(types.Transform):
                 and math.copysign(1.0, float(out_domain.inf)) == -1.0
                 and math.isinf(float(out_domain.sup))
                     and math.copysign(1.0, float(out_domain.sup)) == 1.0):
+                hack_inner = fpcore.ast.Operation("thefunc", fpcore.ast.Operation("-", point, fpcore.ast.Variable("x")))
+                hack = reconstruction_expr.substitute(fpcore.ast.Variable("x"), hack_inner)
+                HACK_GLOBAL_USED_IDENTITIES.add(hack)
                 new_holes.append(MirrorLeft(
                     lambdas.Hole(in_type), s_expr=reconstruction_expr))
                 continue
@@ -193,6 +200,9 @@ class MirrorLeft(types.Transform):
             # TODO: epsilon comparison
             # match
             if abs(float(real_out_domain.inf - out_domain.inf)) < 1e-16:
+                hack_inner = fpcore.ast.Operation("thefunc", fpcore.ast.Operation("-", point, fpcore.ast.Variable("x")))
+                hack = reconstruction_expr.substitute(fpcore.ast.Variable("x"), hack_inner)
+                HACK_GLOBAL_USED_IDENTITIES.add(hack)
                 new_holes.append(MirrorLeft(
                     lambdas.Hole(in_type), s_expr=reconstruction_expr))
                 continue
@@ -206,6 +216,9 @@ class MirrorLeft(types.Transform):
                 continue
 
             # needs narrowing
+            hack_inner = fpcore.ast.Operation("thefunc", fpcore.ast.Operation("-", point, fpcore.ast.Variable("x")))
+            hack = reconstruction_expr.substitute(fpcore.ast.Variable("x"), hack_inner)
+            HACK_GLOBAL_USED_IDENTITIES.add(hack)
             new_holes.append(
                 Narrow(MirrorLeft(lambdas.Hole(in_type), s_expr=reconstruction_expr),
                        out_domain))
