@@ -109,12 +109,14 @@ def assign_to_branch(acc, x):
 
 
 def scrape_and_grab_json():
-    DOMS_TO_COMBINE = ['rational']
-    OPTIONAL_DOMS = ['trig']
+    DOMS_TO_COMBINE = ['rational_best', 'exponential', 'trig']
+    # OPTIONAL_DOMS = ['trig']
 
     # rule_save_path = "ruler_rules/"
     url = "http://nightly.cs.washington.edu/reports/ruler/"
     json_folder = "json/"
+    # baseline_names = ["herbie", "oopsla"]
+    branches_usable = ["main"]
     sep = "%3A"
     page = urlopen(url)
     html = page.read().decode("utf-8")
@@ -137,56 +139,74 @@ def scrape_and_grab_json():
     # print(runs_split_by_branches)
 
     all_rules = [] 
-    for branch_name in branches:   
-        relevant_runs = runs_split_by_branches[branch_name]
-        latest = relevant_runs[-1]    
-        print(f"For branch {branch_name}, found {len(relevant_runs)} runs. Latest at time {latest[0]} with commit {latest[3]}.")    
+    # for branch_name in branches:   
+    #     relevant_runs = runs_split_by_branches[branch_name]
+    #     latest = relevant_runs[-1]    
+    #     print(f"For branch {branch_name}, found {len(relevant_runs)} runs. Latest at time {latest[0]} with commit {latest[3]}.")    
+    
+    runs_split = list(filter(lambda run: run[2] in branches_usable, runs_split))
     latest = runs_split[-1]
-    print(f"Using latest from branch {latest[2]}.")
+
+    print(f"Using latest from branch {latest[2]}, at time {latest[0]} with commit {latest[3]}.")
     current_attempt = 1
     while True:
         try:
             # ensures that all domains are taken from the same commit
+            # TODO: just scrape the json instead 
+            page_to_scrape = page_to_scrape = url + \
+                    sep.join(latest) + "/data/output.js"
+
+            page = urlopen(page_to_scrape).read().decode("utf-8")
+            # remove the first line because it's a js file because wtf?
+            page = page.removeprefix('var data =')
+            
+            json_file = json.loads(page)
+            # json_file = json.load(urlopen(page_to_scrape))
+            # rules = []
             for domain in DOMS_TO_COMBINE:
-                page_to_scrape = url + \
-                    sep.join(latest) + json_folder + domain + ".json"
-                print(f"Scraping json from {domain}, using {page_to_scrape}")    
-                json_file = json.load(urlopen(page_to_scrape))
-                # print(json_file)
-                all_rules.extend(json_file["rules"])
+                print(f"Parsing rules from {domain}, using json at {page_to_scrape}")    
+
+                for item in json_file:
+                    if item["enumo_spec_name"] == domain: #and item["baseline_name"] == baseline_name:
+                        rules_from_domain = item["rules"]["rules"]
+                        all_rules.extend(rules_from_domain)
+                
+            # print(json_file)
+            # all_rules.extend(rules)
             break
-        except HTTPError as err:
-            if err.code == 404:
-                if current_attempt >= len(relevant_runs):
-                    raise Exception(
-                        f"No json appear to be available for any commits on this branch ({branch_name}).")
-                current_attempt += 1
-                print(current_attempt)
-                latest = relevant_runs[-current_attempt]
-                print(
-                    f"This commit failed. Trying again with commit {latest[3]} at time {latest[0]}")
-            else:
-                raise err    
+        except KeyError as err:
+            # if err.code == 404:
+            if current_attempt >= len(runs_split):
+                raise Exception(
+                    f"No json appear to be available for any commits on this branch ({latest[2]}).")
+            current_attempt += 1
+            print(current_attempt)
+            latest = runs_split[-current_attempt]
+            print(
+                f"This commit failed. Trying again with commit {latest[3]} at time {latest[0]}")
+            # else:
+                # raise err    
             
     # we got the right run, let's see if we can get the other optional domains
-    for domain in OPTIONAL_DOMS:
-        try:
-            page_to_scrape = url + \
-                sep.join(latest) + json_folder + domain + ".json"
-            print(f"Scraping json from {domain}, using {page_to_scrape}")    
-            json_file = json.load(urlopen(page_to_scrape))
-            # print(json_file)
-            all_rules.extend(json_file["rules"])
-        except HTTPError as err:
-            if err.code == 404:
-                print(f"Optional domain {domain} was not available for commit {latest[3]} on branch {branch_name}.")
-            else:
-                raise err 
+    # for domain in OPTIONAL_DOMS:
+    #     try:
+    #         page_to_scrape = url + \
+    #             sep.join(latest) + json_folder + domain + ".json"
+    #         print(f"Scraping json from {domain}, using {page_to_scrape}")    
+    #         json_file = json.load(urlopen(page_to_scrape))
+    #         # print(json_file)
+    #         all_rules.extend(json_file["rules"])
+    #     except HTTPError as err:
+    #         if err.code == 404:
+    #             print(f"Optional domain {domain} was not available for commit {latest[3]} on branch {branch_name}.")
+    #         else:
+    #             raise err 
     
     # filename = f'{rule_save_path}{branch_name}-{latest[0]}.txt'
     # with open(filename, 'w') as f:
     #     f.write("\n".join(all_rules))
     #     print(f"Saved collated rules into {filename}.")
+    all_rules = list(set(all_rules))
     print("Collated rules are:")
     print("\n".join(all_rules))
     rule_str = process_rules(all_rules)
