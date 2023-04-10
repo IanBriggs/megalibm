@@ -195,9 +195,9 @@ def scrape_and_grab_json():
                 for item in json_file:
                     if item["enumo_spec_name"] == domain: #and item["baseline_name"] == baseline_name:
                         rules_from_domain = item["rules"]["rules"]
-                        no_div = list(filter(lambda rule: not is_unsafe_div_str(rule), rules_from_domain))
-                        all_rules.extend(no_div) # todo: need to check if div is safe 
-                        # all_rules.extend(rules_from_domain)
+                        # no_div = list(filter(lambda rule: not is_unsafe_div_str(rule), rules_from_domain))
+                        # all_rules.extend(no_div) # todo: need to check if div is safe 
+                        all_rules.extend(rules_from_domain)
                 
             # print(json_file)
             # all_rules.extend(rules)
