@@ -7,8 +7,8 @@ from functools import reduce
 import re
 import json
 
-# from operations import *
-from snake_egg_rules.operations import *
+from operations import *
+# from snake_egg_rules.operations import *
 from snake_egg import EGraph, Rewrite, Var, vars
 
 rules = list() 
@@ -61,6 +61,20 @@ def cleanup(expr):
     expr = replace_all(expr, operator_map)
     return str(lisp_to_c_style(loads(expr))).replace("PI", "CONST_PI()")
 
+def is_if_expr_str(sexpr_str):
+    if len(sexpr_str) < 1:
+        return False
+    sexpr = loads(sexpr_str)
+    return is_if_expr(sexpr)
+
+def is_if_expr(sexpr):
+    if isinstance(sexpr, str) or isinstance(sexpr, int) or len(sexpr) == 1:
+        return False
+    if dumps(car(sexpr)) == "if":
+        return True
+    return any([is_if_expr(x) for x in sexpr]) 
+    
+
 
 def is_unsafe_div(sexpr, was_div_present=False):
     if was_div_present:
@@ -105,7 +119,6 @@ def mk_rules(rules, f):
     f += (repr(rules[len(rules) - 1])) + "]"
     return f
 
-
 def process_rules(content):
     # with open(output, 'w+') as f:
     #     f.write(prelude)
@@ -121,6 +134,8 @@ def process_rules(content):
         else:
             if is_unsafe_div_str(lhs) or is_unsafe_div_str(rhs): # check no unsafe div
                 continue
+            if is_if_expr_str(lhs) or is_if_expr_str(rhs):
+                continue 
             r = RulerRule(str(count), lhs, rhs)
             count += 1
             rules.append(r)
@@ -135,7 +150,7 @@ def assign_to_branch(acc, x):
 
 
 def scrape_and_grab_json():
-    DOMS_TO_COMBINE = ['rational_best', 'exponential', 'trig']
+    DOMS_TO_COMBINE = ['rational-replicate', 'exponential', 'trig']
     # OPTIONAL_DOMS = ['trig']
 
     # rule_save_path = "ruler_rules/"
@@ -239,18 +254,16 @@ def scrape_and_grab_json():
     print("\n".join(all_rules))
     rule_str = process_rules(all_rules)
     evaled_rules = eval(rule_str)
-    # print(rules)
+    # print(all_rules)
     for l in evaled_rules:
         name = l[0]
         frm = l[1]
         to = l[2]
         global rules
         rules.append(Rewrite(frm, to, name))
-
+    
 
 
         # make sure to render them and associate them with the same name
 
 scrape_and_grab_json()
-
-print(loads("(/ ?b ?a) ==> (/ (+ ?b ?b) (+ ?a ?a))"))
