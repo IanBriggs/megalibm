@@ -156,7 +156,7 @@ reference_on_region(size_t samples, mpfr_t *reals,
 }
 
 static void
-run_on_region(unop_fp64 f, size_t samples, double *inputs, mpfr_t *reals,
+run_on_region(void *f, unop_type func_type, size_t samples, double *inputs, mpfr_t *reals,
               double *values, double *absolutes, double *relatives,
               error *ferror)
 {
@@ -170,7 +170,25 @@ run_on_region(unop_fp64 f, size_t samples, double *inputs, mpfr_t *reals,
 
   for (size_t i = 0; i < samples; i++)
   {
-    double actual = f(inputs[i]);
+    double actual;
+    switch (func_type){
+      case UNOP_FP64:
+      {
+        unop_fp64 func = (unop_fp64)f;
+        actual = func(inputs[i]);
+        break;
+      }
+      case UNOP_FP32:
+      {
+        unop_fp32 func = (unop_fp32)f;
+        actual = func(inputs[i]);
+        break;
+      }
+      default:
+      {
+        break;
+      }
+    }
     compare(reals[i], actual, &absolutes[i], &relatives[i]);
     values[i] = actual;
   }
@@ -273,9 +291,10 @@ generate_table(size_t region_count, double *regions, size_t samples,
 
     for (size_t func_idx = 1; func_idx <= func_count; func_idx++)
     {
-      unop_fp64 f = funcs[func_idx - 1].func;
+      void *f = funcs[func_idx - 1].func;
+      unop_type func_type = funcs[func_idx - 1].func_type;
       error *ferror = &errorss[func_idx][region];
-      run_on_region(f, samples, inputs, reals, values, absolutes, relatives,
+      run_on_region(f, func_type, samples, inputs, reals, values, absolutes, relatives,
                     ferror);
     }
   }
