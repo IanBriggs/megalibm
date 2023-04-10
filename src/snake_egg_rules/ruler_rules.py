@@ -62,6 +62,28 @@ def cleanup(expr):
     return str(lisp_to_c_style(loads(expr))).replace("PI", "CONST_PI()")
 
 
+def is_unsafe_div(sexpr, was_div_present=False):
+    if was_div_present:
+        # is there a variable present anywhere left?
+        return any(c in dumps(sexpr) for c in ["a", "b", "c"])
+    if isinstance(sexpr, str) or isinstance(sexpr, int) or len(sexpr) == 1:
+        # we know div was not involved, so return False
+        # could also be a thunk I guess.. but I assume that won't do anything here... that would be crazy
+        return False
+    if dumps(car(sexpr)) == "/":
+        if dumps(sexpr[-1]) in ["a", "b", "c"]:
+            return True
+        elif dumps(sexpr[-1]).isdigit() or isinstance(dumps(sexpr[-1]), int):
+            return is_unsafe_div(sexpr[1], False)
+        elif type(sexpr[-1]) is list:
+            return is_unsafe_div(sexpr[-1], True) or is_unsafe_div(sexpr[1], False)
+    
+    return any([is_unsafe_div(x, False) for x in sexpr]) 
+
+def is_unsafe_div_str(sexpr_str):
+    sexpr = loads(sexpr_str)
+    return is_unsafe_div(sexpr, False)
+
 @dataclass(repr=False)
 class RulerRule:
     name: str
@@ -169,7 +191,7 @@ def scrape_and_grab_json():
                 for item in json_file:
                     if item["enumo_spec_name"] == domain: #and item["baseline_name"] == baseline_name:
                         rules_from_domain = item["rules"]["rules"]
-                        no_div = list(filter(lambda rule: "/" not in rule, rules_from_domain))
+                        no_div = list(filter(lambda rule: not is_unsafe_div_str(rule), rules_from_domain))
                         all_rules.extend(no_div) # todo: need to check if div is safe 
                         # all_rules.extend(rules_from_domain)
                 
@@ -227,3 +249,4 @@ def scrape_and_grab_json():
 
 scrape_and_grab_json()
 
+print(loads("(/ ?b ?a) ==> (/ (+ ?b ?b) (+ ?a ?a))"))
