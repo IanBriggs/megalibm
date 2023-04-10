@@ -92,7 +92,7 @@ logger.blog("C function", "\n".join(dsl_src))
 
 # amd
 libm_func_name = "libm_dsl_amd_fast_asinf"
-libm_sig = "double libm_dsl_amd_fast_asinf(double x);"
+libm_sig = "float libm_dsl_amd_fast_asinf(float x);"
 with open(path.join(GIT_DIR, "examples", "amd_fast_asinf.c"), "r") as f:
     text = f.read()
     text = text.replace("amd_fast_asinf", "libm_dsl_amd_fast_asinf")
@@ -136,7 +136,7 @@ main_lines = assemble_error_main(name, func_body,
                                  mpfr_func_name,
                                  [libm_func_name, dsl_func_name],
                                  generators,
-                                 header_fname, domains)
+                                 header_fname, domains, func_type="UNOP_FP32")
 main_fname = "error_main.c"
 with open(main_fname, "w") as f:
     f.write("\n".join(main_lines))

@@ -127,8 +127,8 @@ static struct {
 
 // float
 // ALM_PROTO_FAST(asinf)
-double
-amd_fast_asinf(double x)
+float
+amd_fast_asinf(float x)
 {
     float Y, G, poly, result, sign =1;
     int32_t n = 0;

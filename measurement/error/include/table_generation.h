@@ -8,12 +8,20 @@
 
 typedef double (*unop_fp64)(double);
 
+typedef float (*unop_fp32)(float);
+
 typedef int (*unop_mpfr)(mpfr_t, double);
+
+typedef enum {
+  UNOP_FP64,
+  UNOP_FP32
+} unop_type;
 
 typedef struct
 {
-  unop_fp64 func;
+  void *func;
   char *name;
+  unop_type func_type;
 } entry;
 
 typedef struct

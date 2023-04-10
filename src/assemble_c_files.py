@@ -20,7 +20,7 @@ def assemble_functions(functions, header_fname):
 
 
 def assemble_error_main(func_name, func_body, mpfr_func, other_funcs,
-                        generators, header_fname, domains):
+                        generators, header_fname, domains, func_type="UNOP_FP64"):
     lines = ["#include \"table_generation.h\"",
              "#include \"xmalloc.h\"",
              "#include \"{}\"".format(header_fname),
@@ -31,7 +31,7 @@ def assemble_error_main(func_name, func_body, mpfr_func, other_funcs,
              "#define ENTRY_COUNT ({})".format(len(other_funcs)),
              "entry ENTRIES[ENTRY_COUNT] = {"]
     for func in other_funcs:
-        lines.append("  {{{}, \"{}\"}},".format(func, func))
+        lines.append("  {{{}, \"{}\", {}}},".format(func, func, func_type))
 
     lines.extend([
         "};",
