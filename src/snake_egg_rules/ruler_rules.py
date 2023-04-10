@@ -119,6 +119,8 @@ def process_rules(content):
         if ("cis " in lhs) or ("cis " in rhs):
             continue
         else:
+            if is_unsafe_div_str(lhs) or is_unsafe_div_str(rhs): # check no unsafe div
+                continue
             r = RulerRule(str(count), lhs, rhs)
             count += 1
             rules.append(r)
