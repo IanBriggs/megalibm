@@ -252,5 +252,3 @@ def scrape_and_grab_json():
         # make sure to render them and associate them with the same name
 
 scrape_and_grab_json()
-
-print(loads("(/ ?b ?a) ==> (/ (+ ?b ?b) (+ ?a ?a))"))
