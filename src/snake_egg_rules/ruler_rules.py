@@ -81,6 +81,8 @@ def is_unsafe_div(sexpr, was_div_present=False):
     return any([is_unsafe_div(x, False) for x in sexpr]) 
 
 def is_unsafe_div_str(sexpr_str):
+    if len(sexpr_str) < 1:
+        return False
     sexpr = loads(sexpr_str)
     return is_unsafe_div(sexpr, False)
 
