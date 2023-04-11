@@ -8,9 +8,9 @@ fast_cody_waite_reduce(double x,
                        const double inv_C,
                        const size_t C_len,
                        const double *C,
-                       uint64_t *ptr_k)
+                       int *ptr_k)
 {
-    *ptr_k = (uint64_t)(x * inv_C + 0.5);
+    *ptr_k = (int)(x * inv_C + 0.5) - ((int)get_sign_double(x));
     const double dk = (double)(*ptr_k);
     double r = x;
     for (size_t i = 0; i < C_len; i++)
@@ -28,7 +28,7 @@ cody_waite_reduce(double x,
                   int *pn,
                   double *perror)
 {
-    double xn = (int)(x * inv_period + 0.5);
+    double xn = (int)(x * inv_period + 0.5) - ((int)get_sign_double(x));
     double error = 0;
     double retval;
     if (xn == 0.0)

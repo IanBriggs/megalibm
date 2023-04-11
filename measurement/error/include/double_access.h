@@ -1,230 +1,308 @@
+/******************************************************************************/
+/*  ____   __   _  _  ____  __    ____                                        */
+/* (    \ /  \ / )( \(  _ \(  )  (  __)                                       */
+/*  ) D ((  O )) \/ ( ) _ (/ (_/\ ) _)                                        */
+/* (____/ \__/ \____/(____/\____/(____)                                       */
+/*           __    ___  ___  ____  ____  ____     _  _                        */
+/*          / _\  / __)/ __)(  __)/ ___)/ ___)   / )( \                       */
+/*    ____ /    \( (__( (__  ) _) \___ \\___ \ _ ) __ (                       */
+/*   (____)\_/\_/ \___)\___)(____)(____/(____/(_)\_)(_/                       */
+/*                                                                            */
+/* Transmute doubles into integer types                                       */
+/*                                                                            */
+/******************************************************************************/
+/*  _    _  ___  ______ _   _ _____ _   _ _____  _____                        */
+/* | |  | |/ _ \ | ___ \ \ | |_   _| \ | |  __ \/  ___|_                      */
+/* | |  | / /_\ \| |_/ /  \| | | | |  \| | |  \/\ `--.(_)                     */
+/* | |/\| |  _  ||    /| . ` | | | | . ` | | __  `--. \                       */
+/* \  /\  / | | || |\ \| |\  |_| |_| |\  | |_\ \/\__/ /_                      */
+/*  \/  \/\_| |_/\_| \_\_| \_/\___/\_| \_/\____/\____/(_)                     */
+/*                                                                            */
+/* 1. Assumes IEEE754 binary double                                           */
+/* 2. Does not care about endianess                                           */
+/* 3. May have undefined behavior depending on language standard and compile  */
+/*    time setting used                                                       */
+/******************************************************************************/
+
 #ifndef DOUBLE_ACCESS_H
 #define DOUBLE_ACCESS_H
 
 #include "asserts.h"
 
+#include <float.h>
 #include <stdint.h>
 #include <string.h>
 #include <limits.h>
 
-// WARNINGS:
-// * NO HEED IS GIVEN TO ENDIANESS!!!
-// * UB may be present
+/******************************************************************************/
+/*   ___  __   _  _  ____  __  __    ____    ____  __  _  _  ____             */
+/*  / __)/  \ ( \/ )(  _ \(  )(  )  (  __)  (_  _)(  )( \/ )(  __)            */
+/* ( (__(  O )/ \/ \ ) __/ )( / (_/\ ) _)     )(   )( / \/ \ ) _)             */
+/*  \___)\__/ \_)(_/(__)  (__)\____/(____)   (__) (__)\_)(_/(____)            */
+/*  ____  ____  ____  ____  __  __ _   ___  ____                              */
+/* / ___)(  __)(_  _)(_  _)(  )(  ( \ / __)/ ___)                             */
+/* \___ \ ) _)   )(    )(   )( /    /( (_ \\___ \                             */
+/* (____/(____) (__)  (__) (__)\_)__) \___/(____/                             */
+/*                                                                            */
+/******************************************************************************/
 
-//   ___  __   _  _  ____  __  __    ____    ____  __  _  _  ____
-//  / __)/  \ ( \/ )(  _ \(  )(  )  (  __)  (_  _)(  )( \/ )(  __)
-// ( (__(  O )/ \/ \ ) __/ )( / (_/\ ) _)     )(   )( / \/ \ ) _)
-//  \___)\__/ \_)(_/(__)  (__)\____/(____)   (__) (__)\_)(_/(____)
-//  ____  ____  ____  ____  __  __ _   ___  ____
-// / ___)(  __)(_  _)(_  _)(  )(  ( \ / __)/ ___)
-// \___ \ ) _)   )(    )(   )( /    /( (_ \\___ \
-// (____/(____) (__)  (__) (__)\_)__) \___/(____/
-//
-// Compile time settings
-//
-
-// Which approach should be used to convert double to bits
-// 0: Type punning
-// 1: Union abuse
-// 2: BitField Union abuse
-// 3. Memcpy
+/* Which approach should be used to convert double to bits                    */
+/* 0: Type punning                                                            */
+/* 1: Union abuse                                                             */
+/* 2: BitField Union abuse                                                    */
+/* 3. Memcpy                                                                  */
 #ifndef TRANSMUTE_VERSION
 #define TRANSMUTE_VERSION 3
 #endif
 
-//  ____  _  _  ____  __    __  ___
-// (  _ \/ )( \(  _ \(  )  (  )/ __)
-//  ) __/) \/ ( ) _ (/ (_/\ )(( (__
-// (__)  \____/(____/\____/(__)\___)
-//   __  __ _  ____  ____  ____  ____  __    ___  ____
-//  (  )(  ( \(_  _)(  __)(  _ \(  __)/ _\  / __)(  __)
-//   )( /    /  )(   ) _)  )   / ) _)/    \( (__  ) _)
-//  (__)\_)__) (__) (____)(__\_)(__) \_/\_/ \___)(____)
-//
-// Public interface
-//
+/******************************************************************************/
+/*  ____  _  _  ____  __    __  ___                                           */
+/* (  _ \/ )( \(  _ \(  )  (  )/ __)                                          */
+/*  ) __/) \/ ( ) _ (/ (_/\ )(( (__                                           */
+/* (__)  \____/(____/\____/(__)\___)                                          */
+/*   __  __ _  ____  ____  ____  ____  __    ___  ____                        */
+/*  (  )(  ( \(_  _)(  __)(  _ \(  __)/ _\  / __)(  __)                       */
+/*   )( /    /  )(   ) _)  )   / ) _)/    \( (__  ) _)                        */
+/*  (__)\_)__) (__) (____)(__\_)(__) \_/\_/ \___)(____)                       */
+/*                                                                            */
+/******************************************************************************/
 
-// Nicer functions:
-
-// Get/set sign/exponent/mantissa
+/**
+ * Get the sign bit from a double.
+ */
 static uint8_t get_sign_double(double d);
+
+/**
+ * Get the unbiased exponent bits from a double.
+ */
 static uint16_t get_exponent_double(double d);
+
+/**
+ * Get the mantissa bits from a double.
+ */
 static uint64_t get_mantissa_double(double d);
 
+/**
+ * Set the sign bit of a double.
+ */
 static double set_sign_double(double d, uint8_t s);
+
+/**
+ * Set the unbiased exponent bits of a double.
+ */
 static double set_exponent_double(double d, uint16_t e);
+
+/**
+ * Set the mantissa bits of a double.
+ */
 static double set_mantissa_double(double d, uint64_t m);
 
-// Do your own bit twiddling functions:
-
-// Reinterpret whole double
+/**
+ * Get all the bits from a double
+ */
 static uint64_t double_to_uint64_t(double d);
+
+/**
+ * Set all the bits of a double
+ */
 static double uint64_t_to_double(uint64_t u);
 
-//  _  _  __  ___    ____  _  _  __ _  ____
-// / )( \(  )/ __)  / ___)/ )( \(  ( \(_  _)
-// ) __ ( )(( (__   \___ \) \/ (/    /  )(
-// \_)(_/(__)\___)  (____/\____/\_)__) (__)
-//  ____  ____   __    ___  __   __ _  ____  ____
-// (    \(  _ \ / _\  / __)/  \ (  ( \(  __)/ ___)
-//  ) D ( )   //    \( (__(  O )/    / ) _) \___ \
-// (____/(__\_)\_/\_/ \___)\__/ \_)__)(____)(____/
-//
-// Here be dragons
-//
+/******************************************************************************/
+/*  _  _  __  ___    ____  _  _  __ _  ____                                   */
+/* / )( \(  )/ __)  / ___)/ )( \(  ( \(_  _)                                  */
+/* ) __ ( )(( (__   \___ \) \/ (/    /  )(                                    */
+/* \_)(_/(__)\___)  (____/\____/\_)__) (__)                                   */
+/*  ____  ____   __    ___  __   __ _  ____  ____                             */
+/* (    \(  _ \ / _\  / __)/  \ (  ( \(  __)/ ___)                            */
+/*  ) D ( )   //    \( (__(  O )/    / ) _) \___ \                            */
+/* (____/(__\_)\_/\_/ \___)\__/ \_)__)(____)(____/                            */
+/*                                                                            */
+/* Here be dragons                                                            */
+/*                                                                            */
+/******************************************************************************/
 
-// These functions all reinterpret the bit pattern of a type as another.
-// Even though they all perform the same actions, due to UB they may be broken.
-// Some may be faster if the compiler decides not to shoot us for our dirty
-// deeds.
+/* These functions all reinterpret the bit pattern of a type as another.      */
+/* Even though they all perform the same actions, due to UB they may be       */
+/*   broken.                                                                  */
+/* Some may be faster if the compiler decides not to shoot us for our dirty   */
+/*   deeds.                                                                   */
 
-// We are assuming the following bit format:
-/*
- s = sign bit
- e = exponent bits
- m = mantissa bits
+/* We are assuming the following bit format:                                  */
+/*  + the sign is bit 63                                                      */
+/*  + the exponent is bits 62-52                                              */
+/*  + the mantissa is bits 51-0                                               */
 
-   byte 0
-   /
- |-------|
- seee eeee  eeee mmmm  mmmm mmmm  mmmm mmmm  mmmm mmmm  mmmm mmmm  mmmm mmmm  mmmm mmmm
- ||            | |
- |bit 1        | bit 12
- bit 0         bit 11
-*/
+/* (hopefully) check that we are using 8 byte IEEE 754 doubles */
+static_assert(CHAR_BIT == 8, "Expected IEEE 754 floating point");
+static_assert(sizeof(double) == 8, "Expected IEEE 754 floating point");
+static_assert(FLT_RADIX == 2, "Expected IEEE 754 floating point");
+static_assert(DBL_MANT_DIG == 53, "Expected IEEE 754 floating point");
+static_assert(DBL_MAX_EXP == 1024, "Expected IEEE 754 floating point");
+static_assert(DBL_MIN_EXP == -1021, "Expected IEEE 754 floating point");
 
-static_assert(CHAR_BIT == 8, "Expected 8 bits per byte");
-static_assert(sizeof(double) == 8, "Expected an 8 byte double");
+/* From high uint8_t how much to shift the sign to the LSB */
+static const size_t DBL_UINT8_SIGN_SHIFT = 7;
 
-static const size_t BYTE_SIGN_OFFSET = 7;
-static const size_t SHORT_EXP_OFFSET = 4;
+/* From high uint16_t how much to shift the exponent to the LSB */
+static const size_t DBL_UINT16_EXP_SHIFT = 4;
 
-static const uint8_t BYTE_SIGN_MASK = UINT8_C(0x80);
-static const uint16_t SHORT_EXP_MASK = UINT16_C(0x7FF0);
-static const uint64_t LONG_MANT_MASK = UINT64_C(0x000FFFFFFFFFFFFF);
+/* From high uint8_t mask used to select sign */
+static const uint8_t DBL_UINT8_SIGN_MASK = UINT8_C(0x80);
 
-static const uint8_t SIGN_MAX = UINT8_C(1);
-static const uint16_t EXP_MAX = UINT16_C(2048);              // 2 ** 11
-static const uint64_t MANT_MAX = UINT64_C(4503599627370495); // 2 ** 52
+/* From high uint16_t mask used to select exponent */
+static const uint16_t DBL_UINT16_EXP_MASK = UINT16_C(0x7FF0);
 
+/* From uint64_t mask used to select mantissa */
+static const uint64_t DBL_UINT64_MANT_MASK = UINT64_C(0x000FFFFFFFFFFFFF);
+
+/* Maximum values for sign, exponent, and mantissa */
+static const uint8_t DBL_SIGN_MAX = DBL_UINT8_SIGN_MASK >> DBL_UINT8_SIGN_SHIFT;
+static const uint16_t DBL_EXP_MAX = DBL_UINT16_EXP_MASK >> DBL_UINT16_EXP_SHIFT;
+static const uint64_t DBL_MANT_MAX = DBL_UINT64_MANT_MASK;
+
+/**
+ * Extract the sign bit from the high uint8_t of a double.
+ */
 static inline uint8_t
-top_byte_extract_sign(uint8_t top_byte)
+dbl_high_uint8_extract_sign(uint8_t high_uint8)
 {
-    // no need to mask before the shift
-    uint8_t sign = top_byte >> BYTE_SIGN_OFFSET;
-    postcondition(sign <= SIGN_MAX);
+    /* no need to mask before the shift */
+    uint8_t sign = high_uint8 >> DBL_UINT8_SIGN_SHIFT;
+    postcondition(sign <= DBL_SIGN_MAX);
     return sign;
 }
 
+/**
+ * Extract the exponent bits from the high uint16_t of a double.
+ */
 static inline uint16_t
-top_short_extract_exp(uint16_t top_short)
+dbl_high_uint16_extract_exp(uint16_t high_uint16)
 {
-    uint16_t shifted_exponent = top_short & SHORT_EXP_MASK;
-    uint16_t exponent = shifted_exponent >> SHORT_EXP_OFFSET;
-    postcondition(exponent <= EXP_MAX);
+    uint16_t shifted_exponent = high_uint16 & DBL_UINT16_EXP_MASK;
+    uint16_t exponent = shifted_exponent >> DBL_UINT16_EXP_SHIFT;
+    postcondition(exponent <= DBL_EXP_MAX);
     return exponent;
 }
 
+/**
+ * Extract the mantissa bits from the uint64_t of a double.
+ */
 static inline uint64_t
-top_long_extract_mant(uint64_t top_long)
+dbl_high_uint64_extract_mant(uint64_t high_uint64)
 {
-    uint64_t mantissa = top_long & LONG_MANT_MASK;
-    // no need for a shift
-    postcondition(mantissa <= MANT_MAX);
+    uint64_t mantissa = high_uint64 & DBL_UINT64_MANT_MASK;
+    /* no need to shift */
+    postcondition(mantissa <= DBL_MANT_MAX);
     return mantissa;
 }
 
+/**
+ * Combine existing high uint8_t of a double with sign bit
+ */
 static inline uint8_t
-combine_top_byte(uint8_t top_byte, uint8_t s)
+dbl_combine_high_uint8(uint8_t high_uint8, uint8_t s)
 {
-    precondition(s <= SIGN_MAX);
-    uint8_t shifted_sign = (uint8_t) (s << BYTE_SIGN_OFFSET); // why is the cast needed????
-    uint8_t masked_top_byte = top_byte & (~BYTE_SIGN_MASK);
-    uint8_t new_top_byte = shifted_sign | masked_top_byte;
-    return new_top_byte;
+    precondition(s <= DBL_SIGN_MAX);
+    /* TODO: why is the cast needed?
+             s, DBL_UINT8_SIGN_SHIFT, and shifted_sign are all uint8_t */
+    uint8_t shifted_sign = (uint8_t)(s << DBL_UINT8_SIGN_SHIFT);
+    uint8_t masked_high_uint8 = high_uint8 & (~DBL_UINT8_SIGN_MASK);
+    uint8_t new_high_uint8 = shifted_sign | masked_high_uint8;
+    return new_high_uint8;
 }
 
+/**
+ * Combine existing high uint16_t of a double with exponent bits
+ */
 static inline uint16_t
-combine_top_short(uint16_t top_short, uint16_t e)
+dbl_combine_high_uint16(uint16_t high_uint16, uint16_t e)
 {
-    precondition(e <= EXP_MAX);
-    uint16_t shifted_exponent = (uint16_t) (e << SHORT_EXP_OFFSET); // why is the cast needed????
-    uint16_t masked_top_short = top_short & (~SHORT_EXP_MASK);
-    uint16_t new_top_short = shifted_exponent | masked_top_short;
-    return new_top_short;
+    precondition(e <= DBL_EXP_MAX);
+    /* TODO: why is the cast needed?
+             e, DBL_UINT16_EXP_SHIFT, and shifted_exponent are all uint8_t */
+    uint16_t shifted_exponent = (uint16_t)(e << DBL_UINT16_EXP_SHIFT);
+    uint16_t masked_high_uint16 = high_uint16 & (~DBL_UINT16_EXP_MASK);
+    uint16_t new_high_uint16 = shifted_exponent | masked_high_uint16;
+    return new_high_uint16;
 }
 
+/**
+ * Combine existing uint64_t of a double with mantissa bits
+ */
 static inline uint64_t
-combine_top_long(uint64_t top_long, uint64_t m)
+dbl_combine_high_uint64(uint64_t high_uint64, uint64_t m)
 {
-    precondition(m <= MANT_MAX);
-    uint64_t masked_top_long = top_long & (~LONG_MANT_MASK);
-    uint64_t new_top_long = m | masked_top_long;
-    return new_top_long;
+    precondition(m <= DBL_MANT_MAX);
+    /* no need to shift */
+    uint64_t masked_high_uint64 = high_uint64 & (~DBL_UINT64_MANT_MASK);
+    uint64_t new_high_uint64 = m | masked_high_uint64;
+    return new_high_uint64;
 }
 
-// Type punning.
-// This is the oldest way, but definitely invokes undefined behavior
+/******************************************************************************/
+/* Approach 0: Type punning                                                   */
+/******************************************************************************/
 
 static inline uint8_t
 pun_get_sign_double(double d)
 {
-    uint8_t top_byte = *(uint8_t *)&d;
-    return top_byte_extract_sign(top_byte);
+    uint8_t high_uint8 = *(((uint8_t *)&d) + 7);
+    return dbl_high_uint8_extract_sign(high_uint8);
 }
 
 static inline uint16_t
 pun_get_exponent_double(double d)
 {
-    uint16_t top_short = *(uint16_t *)&d;
-    return top_short_extract_exp(top_short);
+    uint16_t high_uint16 = *(((uint16_t *)&d) + 3);
+    return dbl_high_uint16_extract_exp(high_uint16);
 }
 
 static inline uint64_t
 pun_get_mantissa_double(double d)
 {
-    uint64_t top_long = *(uint64_t *)&d;
-    return top_long_extract_mant(top_long);
+    uint64_t high_uint64 = *((uint64_t *)&d);
+    return dbl_high_uint64_extract_mant(high_uint64);
 }
 
 static inline double
 pun_set_sign_double(double d, uint8_t s)
 {
-    uint8_t top_byte = *(uint8_t *)&d;
-    *(uint8_t *)&d = combine_top_byte(top_byte, s);
+    uint8_t high_uint8 = *(((uint8_t *)&d) + 7);
+    *(((uint8_t *)&d) + 7) = dbl_combine_high_uint8(high_uint8, s);
     return d;
 }
 
 static inline double
 pun_set_exponent_double(double d, uint16_t e)
 {
-    uint16_t top_short = *(uint16_t *)&d;
-    *(uint16_t *)&d = combine_top_short(top_short, e);
+    uint16_t high_uint16 = *((uint16_t *)&d + 3);
+    *(((uint16_t *)&d) + 3) = dbl_combine_high_uint16(high_uint16, e);
     return d;
 }
 
 static inline double
 pun_set_mantissa_double(double d, uint64_t m)
 {
-    uint64_t top_long = *(uint64_t *)&d;
-    *(uint64_t *)&d = combine_top_long(top_long, m);
+    uint64_t high_uint64 = *(uint64_t *)&d;
+    *((uint64_t *)&d) = dbl_combine_high_uint64(high_uint64, m);
     return d;
 }
 
 static inline uint64_t
 pun_double_to_uint64_t(double d)
 {
-    return *(uint64_t *)&d;
+    return *((uint64_t *)&d);
 }
 
 static inline double
 pun_uint64_t_to_double(uint64_t u)
 {
-    return *(double *)&u;
+    return *((double *)&u);
 }
 
-// Unions.
-// Most people seem to think this is defined, but it is not.
+/******************************************************************************/
+/* Approach 1: Union abuse                                                    */
+/******************************************************************************/
 
 typedef union
 {
@@ -236,7 +314,7 @@ typedef union
         uint16_t b;
         uint16_t c;
         uint16_t d;
-    } shorts;
+    } uint16s;
     struct
     {
         uint8_t a;
@@ -247,70 +325,70 @@ typedef union
         uint8_t f;
         uint8_t g;
         uint8_t h;
-    } bytes;
-} union_caster;
+    } uint8s;
+} dbl_union_caster;
 
 static inline uint8_t
 union_get_sign_double(double d)
 {
-    union_caster b;
+    dbl_union_caster b;
     b.d = d;
-    uint8_t top_byte = b.bytes.a;
-    return top_byte_extract_sign(top_byte);
+    uint8_t high_uint8 = b.uint8s.h;
+    return dbl_high_uint8_extract_sign(high_uint8);
 }
 
 static inline uint16_t
 union_get_exponent_double(double d)
 {
-    union_caster b;
+    dbl_union_caster b;
     b.d = d;
-    uint16_t top_short = b.shorts.a;
-    return top_short_extract_exp(top_short);
+    uint16_t high_uint16 = b.uint16s.d;
+    return dbl_high_uint16_extract_exp(high_uint16);
 }
 
 static inline uint64_t
 union_get_mantissa_double(double d)
 {
-    union_caster b;
+    dbl_union_caster b;
     b.d = d;
-    uint64_t top_long = b.u;
-    return top_long_extract_mant(top_long);
+    uint64_t high_uint64 = b.u;
+    return dbl_high_uint64_extract_mant(high_uint64);
 }
 
 static inline double
 union_set_sign_double(double d, uint8_t s)
 {
-    union_caster b;
+    dbl_union_caster b;
     b.d = d;
-    uint8_t top_byte = b.bytes.a;
-    b.bytes.a = combine_top_byte(top_byte, s);
+    uint8_t high_uint8 = b.uint8s.h;
+    b.uint8s.h = dbl_combine_high_uint8(high_uint8, s);
     return b.d;
 }
 
 static inline double
 union_set_exponent_double(double d, uint16_t e)
 {
-    union_caster b;
+    dbl_union_caster b;
     b.d = d;
-    uint16_t top_short = b.shorts.a;
-    b.shorts.a = combine_top_short(top_short, e);
+    uint16_t high_uint16 = b.uint16s.d;
+    b.uint16s.d = dbl_combine_high_uint16(high_uint16, e);
     return b.d;
 }
 
 static inline double
 union_set_mantissa_double(double d, uint64_t m)
 {
-    union_caster b;
+    dbl_union_caster b;
     b.d = d;
-    uint64_t top_long = b.u;
-    b.u = combine_top_long(top_long, m);
+    uint64_t high_uint64 = b.u;
+    b.u = dbl_combine_high_uint64(high_uint64, m);
     return b.d;
 }
 
 static inline uint64_t
 union_double_to_uint64_t(double d)
 {
-    union_caster b;
+    dbl_union_caster b;
     b.d = d;
     return b.u;
 }
@@ -318,13 +396,14 @@ union_double_to_uint64_t(double d)
 static inline double
 union_uint64_t_to_double(uint64_t u)
 {
-    union_caster b;
+    dbl_union_caster b;
     b.u = u;
     return b.d;
 }
 
-// BitField
-// This is similar to the union approach, without the need for shifts and masks.
+/******************************************************************************/
+/* Approach 2: BitField Union abuse                                           */
+/******************************************************************************/
 
 typedef union
 {
@@ -332,16 +411,16 @@ typedef union
     uint64_t u;
     struct
     {
-        uint8_t sign : 1;
-        uint16_t exponent : 11;
         uint64_t mantissa : 52;
+        uint16_t exponent : 11;
+        uint8_t sign : 1;
     } parts;
-} bitfield_caster;
+} dbl_bitfield_caster;
 
 static inline uint8_t
 bitfield_get_sign_double(double d)
 {
-    bitfield_caster b;
+    dbl_bitfield_caster b;
     b.d = d;
     return b.parts.sign;
 }
@@ -349,7 +428,7 @@ bitfield_get_sign_double(double d)
 static inline uint16_t
 bitfield_get_exponent_double(double d)
 {
-    bitfield_caster b;
+    dbl_bitfield_caster b;
     b.d = d;
     return b.parts.exponent;
 }
@@ -357,7 +436,7 @@ bitfield_get_exponent_double(double d)
 static inline uint64_t
 bitfield_get_mantissa_double(double d)
 {
-    bitfield_caster b;
+    dbl_bitfield_caster b;
     b.d = d;
     return b.parts.mantissa;
 }
@@ -365,8 +444,8 @@ bitfield_get_mantissa_double(double d)
 static inline double
 bitfield_set_sign_double(double d, uint8_t s)
 {
-    precondition(s <= SIGN_MAX);
-    bitfield_caster b;
+    precondition(s <= DBL_SIGN_MAX);
+    dbl_bitfield_caster b;
     b.d = d;
     b.parts.sign = s;
     return b.d;
@@ -375,8 +454,8 @@ bitfield_set_sign_double(double d, uint8_t s)
 static inline double
 bitfield_set_exponent_double(double d, uint16_t e)
 {
-    precondition(e <= EXP_MAX);
-    bitfield_caster b;
+    precondition(e <= DBL_EXP_MAX);
+    dbl_bitfield_caster b;
     b.d = d;
     b.parts.exponent = e;
     return b.d;
@@ -385,8 +464,8 @@ bitfield_set_exponent_double(double d, uint16_t e)
 static inline double
 bitfield_set_mantissa_double(double d, uint64_t m)
 {
-    precondition(m <= MANT_MAX);
-    bitfield_caster b;
+    precondition(m <= DBL_MANT_MAX);
+    dbl_bitfield_caster b;
     b.d = d;
     b.parts.mantissa = m;
     return b.d;
@@ -395,7 +474,7 @@ bitfield_set_mantissa_double(double d, uint64_t m)
 static inline uint64_t
 bitfield_double_to_uint64_t(double d)
 {
-    bitfield_caster b;
+    dbl_bitfield_caster b;
     b.d = d;
     return b.u;
 }
@@ -403,66 +482,68 @@ bitfield_double_to_uint64_t(double d)
 static inline double
 bitfield_uint64_t_to_double(uint64_t u)
 {
-    bitfield_caster b;
+    dbl_bitfield_caster b;
     b.u = u;
     return b.d;
 }
 
-// Mempcy
-// As far as I know this is the only method that does not invoke undefined
-// behavior.
+/******************************************************************************/
+/* Approach 3: Memcpy                                                         */
+/******************************************************************************/
 
 static inline uint8_t
 memcpy_get_sign_double(double d)
 {
-    uint8_t top_byte;
-    memcpy(&top_byte, (void *)&d, sizeof(uint8_t));
-    return top_byte_extract_sign(top_byte);
+    uint8_t buff_uint8[8];
+    memcpy((void *)&buff_uint8, (void *)&d, sizeof(double));
+    return dbl_high_uint8_extract_sign(buff_uint8[7]);
 }
 
 static inline uint16_t
 memcpy_get_exponent_double(double d)
 {
-    uint16_t top_short;
-    memcpy(&top_short, (void *)&d, sizeof(uint16_t));
-    return top_short_extract_exp(top_short);
+    uint16_t buff_uint16[4];
+    memcpy((void *)&buff_uint16, (void *)&d, sizeof(double));
+    return dbl_high_uint16_extract_exp(buff_uint16[3]);
 }
 
 static inline uint64_t
 memcpy_get_mantissa_double(double d)
 {
-    uint64_t top_long;
-    memcpy(&top_long, (void *)&d, sizeof(uint64_t));
-    return top_long_extract_mant(top_long);
+    uint64_t high_uint64;
+    memcpy((void *)&high_uint64, (void *)&d, sizeof(uint64_t));
+    return dbl_high_uint64_extract_mant(high_uint64);
 }
 
 static inline double
 memcpy_set_sign_double(double d, uint8_t s)
 {
-    uint8_t top_byte;
-    memcpy(&top_byte, (void *)&d, sizeof(uint8_t));
-    uint8_t new_top_byte = combine_top_byte(top_byte, s);
-    memcpy(&d, (void *)&new_top_byte, sizeof(uint8_t));
+    uint8_t buff_uint8[8];
+    memcpy((void *)&buff_uint8, (void *)&d, sizeof(double));
+    uint8_t new_high_uint8 = dbl_combine_high_uint8(buff_uint8[7], s);
+    buff_uint8[7] = new_high_uint8;
+    memcpy((void *)&d, (void *)&buff_uint8, sizeof(double));
     return d;
 }
 
 static inline double
 memcpy_set_exponent_double(double d, uint16_t e)
 {
-    uint16_t top_short;
-    memcpy(&top_short, (void *)&d, sizeof(uint16_t));
-    uint16_t new_top_short = combine_top_short(top_short, e);
-    memcpy(&d, (void *)&new_top_short, sizeof(uint16_t));
+    uint16_t buff_uint16[4];
+    memcpy((void *)&buff_uint16, (void *)&d, sizeof(double));
+    uint16_t new_high_uint16 = dbl_combine_high_uint16(buff_uint16[3], e);
+    buff_uint16[3] = new_high_uint16;
+    memcpy((void *)&d, (void *)&buff_uint16, sizeof(double));
     return d;
 }
 
 static inline double
 memcpy_set_mantissa_double(double d, uint64_t m)
 {
-    uint64_t top_long;
-    memcpy(&top_long, (void *)&d, sizeof(uint64_t));
-    uint64_t new_top_long = combine_top_long(top_long, m);
-    memcpy(&d, (void *)&new_top_long, sizeof(uint64_t));
+    uint64_t high_uint64;
+    memcpy((void *)&high_uint64, (void *)&d, sizeof(uint64_t));
+    uint64_t new_high_uint64 = dbl_combine_high_uint64(high_uint64, m);
+    memcpy((void *)&d, (void *)&new_high_uint64, sizeof(uint64_t));
     return d;
 }
 
@@ -470,7 +551,7 @@ static inline uint64_t
 memcpy_double_to_uint64_t(double d)
 {
     uint64_t u;
-    memcpy(&u, (void *)&d, sizeof(uint64_t));
+    memcpy((void *)&u, (void *)&d, sizeof(uint64_t));
     return u;
 }
 
@@ -478,12 +559,13 @@ static inline double
 memcpy_uint64_t_to_double(uint64_t u)
 {
     double d;
-    memcpy(&d, (void *)&u, sizeof(double));
+    memcpy((void *)&d, (void *)&u, sizeof(double));
     return d;
 }
 
-// Switcher
-// This allows us to select among implementations
+/******************************************************************************/
+/* Switcher: This allows us to select among implementations                   */
+/******************************************************************************/
 
 static inline uint8_t
 get_sign_double(double d)
@@ -629,4 +711,4 @@ uint64_t_to_double(uint64_t u)
 #endif
 }
 
-#endif // #ifndef DOUBLE_ACCESS_H
+#endif /* #ifndef DOUBLE_ACCESS_H */
