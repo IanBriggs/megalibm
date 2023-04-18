@@ -40,10 +40,11 @@ import fpcore
 import lambdas
 
 
-from lambdas import InflectionLeft, InflectionRight, Horner, FixedPolynomial
+from lambdas import InflectionLeft, InflectionRight, Estrin, FixedPolynomial
 from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
 from interval import Interval
 from utils.logging import Logger
+from numeric_types import fp32
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
 logger.set_log_level(Logger.HIGH)
@@ -58,22 +59,22 @@ asin = fpcore.parse("(FPCore (x) (asin x))")[0]
 mlm = \
     InflectionLeft(
         InflectionRight(
-            Horner(
+            Estrin(
                 FixedPolynomial(
                     asin,
                     Interval("0", "0.5"),
                     9,
                     [1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
-                    [ 1,
-                      0.1666666666666477004,
-                      0.07500000000417969548,
-                      0.04464285678140855751,
-                      0.03038196065035564039,
-                      0.0223717279703189581,
-                      0.01736009463784134871,
-                      0.01388184285963460496,
-                      0.01218919111033679899,
-                      0.00644940526689945226])),
+                    [ "1.0f",
+                      "0.1666666666666477004f",
+                      "0.07500000000417969548f",
+                      "0.04464285678140855751f",
+                      "0.03038196065035564039f",
+                      "0.0223717279703189581f",
+                      "0.01736009463784134871f",
+                      "0.01388184285963460496f",
+                      "0.01218919111033679899f",
+                      "0.00644940526689945226f"]), split=1),
             fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
             fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body),
         fpcore.parse("(FPCore (x) (- x))")[0].body,
@@ -95,12 +96,12 @@ os.chdir("generated")
 # dsl
 mlm.type_check()
 dsl_func_name = "dsl_amd_optimized_asinf"
-dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name)
+dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name, numeric_type=fp32)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
 libm_func_name = "libm_dsl_amd_optimized_asinf"
-libm_sig = "double libm_dsl_amd_optimized_asinf(double x);"
+libm_sig = "float libm_dsl_amd_optimized_asinf(float x);"
 with open(path.join(GIT_DIR, "examples", "amd_optimized_asinf.c"), "r") as f:
     text = f.read()
     text = text.replace("amd_optimized_asinf", "libm_dsl_amd_optimized_asinf")
@@ -144,7 +145,7 @@ main_lines = assemble_error_main(name, func_body,
                                  mpfr_func_name,
                                  [libm_func_name, dsl_func_name],
                                  generators,
-                                 header_fname, domains)
+                                 header_fname, domains, func_type="UNOP_FP32")
 main_fname = "error_main.c"
 with open(main_fname, "w") as f:
     f.write("\n".join(main_lines))
@@ -152,7 +153,7 @@ with open(main_fname, "w") as f:
 # Timing measurement
 main_lines = assemble_timing_main(name, func_body,
                                   [libm_func_name, dsl_func_name],
-                                  header_fname, domains)
+                                  header_fname, domains, func_type="UNOP_FP32")
 main_fname = "timing_main.c"
 with open(main_fname, "w") as f:
     f.write("\n".join(main_lines))
