@@ -22,7 +22,7 @@ fill_inputs(double low, double high, size_t samples, double *inputs)
   }
 }
 
-static double time_function_using_inputs(unop_fp64 f, size_t samples, double *inputs, size_t iters)
+static double time_function_using_inputs(void *f, unop_type func_type, size_t samples, double *inputs, size_t iters)
 {
   clock_t start, end;
   double cpu_time_used, avg_time_per_sample;
@@ -32,7 +32,25 @@ static double time_function_using_inputs(unop_fp64 f, size_t samples, double *in
   {
     for (size_t i = 0; i < samples; i++)
     {
-      double value = f(inputs[i]);
+      double value;
+      switch (func_type){
+        case UNOP_FP64:
+        {
+          unop_fp64 func = (unop_fp64)f;
+          value = func(inputs[i]);
+          break;
+        }
+        case UNOP_FP32:
+        {
+          unop_fp32 func = (unop_fp32)f;
+          value = func(inputs[i]);
+          break;
+        }
+        default:
+        {
+          break;
+        }
+      }
     }
   }
   end = clock();
@@ -40,6 +58,8 @@ static double time_function_using_inputs(unop_fp64 f, size_t samples, double *in
   avg_time_per_sample = (double)(cpu_time_used / (iters * samples) * MULT_ROUNDING_FACTOR);
   return avg_time_per_sample;
 }
+
+
 
 double *
 time_functions(double low, double high,
@@ -52,8 +72,9 @@ time_functions(double low, double high,
 
   for (size_t fidx = 0; fidx < func_count; fidx++)
   {
-    unop_fp64 f = funcs[fidx].func;
-    function_times[fidx] = time_function_using_inputs(f, samples, inputs, iters);
+    void *f = funcs[fidx].func;
+    unop_type func_type = funcs[fidx - 1].func_type;
+    function_times[fidx] = time_function_using_inputs(f, func_type, samples, inputs, iters);
   }
 
   xfree(inputs);
