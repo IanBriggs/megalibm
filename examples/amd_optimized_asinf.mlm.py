@@ -40,11 +40,11 @@ import fpcore
 import lambdas
 
 
-from lambdas import InflectionLeft, InflectionRight, Estrin, FixedPolynomial
+from lambdas import InflectionLeft, InflectionRight, Estrin, FixedPolynomial, TypeCast
 from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
 from interval import Interval
 from utils.logging import Logger
-from numeric_types import fp32
+from numeric_types import fp32, fp64
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
 logger.set_log_level(Logger.HIGH)
@@ -57,6 +57,7 @@ logger.set_log_level(Logger.HIGH)
 asin = fpcore.parse("(FPCore (x) (asin x))")[0]
 
 mlm = \
+    TypeCast(
     InflectionLeft(
         InflectionRight(
             Estrin(
@@ -78,7 +79,7 @@ mlm = \
             fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
             fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body),
         fpcore.parse("(FPCore (x) (- x))")[0].body,
-        fpcore.parse("(FPCore (x) (- y))")[0].body)
+        fpcore.parse("(FPCore (x) (- y))")[0].body), frm=fp64, to=fp32)
 
 # |                                                                           |
 # +---------------------------------------------------------------------------+
@@ -96,7 +97,7 @@ os.chdir("generated")
 # dsl
 mlm.type_check()
 dsl_func_name = "dsl_amd_optimized_asinf"
-dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name, numeric_type=fp32)
+dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name, numeric_type=fp64, func_type=fp32)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
