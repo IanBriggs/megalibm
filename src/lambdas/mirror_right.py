@@ -1,19 +1,16 @@
 
 import math
+
+import lambdas
+import lego_blocks
 from better_float_cast import better_float_cast
 from fpcore.ast import Variable
-from lambdas.narrow import Narrow
-import lego_blocks
-from numeric_types import fp64 
-import lambdas
-
-
 from interval import Interval
 from lambdas import types
-from utils import Logger
-
 from lambdas.lambda_utils import get_mirrors, get_mirrors_at
-
+from lambdas.narrow import Narrow
+from numeric_types import fp64
+from utils import Logger
 
 logger = Logger(level=Logger.HIGH)
 
@@ -43,6 +40,9 @@ class MirrorRight(types.Transform):
 
     def type_check(self):
         """ Check that '<s_expr> (mirror domain.sup)' is an identity """
+        if self.type_check_done:
+            return
+
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
 
@@ -74,6 +74,7 @@ class MirrorRight(types.Transform):
         self.mirror_point = our_in_type.domain.sup
         self.domain = next_domain
         self.out_type = types.Impl(our_in_type.function, next_domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         # in = ...

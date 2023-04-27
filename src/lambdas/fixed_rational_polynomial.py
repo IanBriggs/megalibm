@@ -1,9 +1,10 @@
 import math
-from fpcore.ast import FPCore, ASTNode
+
+from fpcore.ast import ASTNode, FPCore
 from interval import Interval
 from lambdas import types
 from lego_blocks import forms
-from numeric_types import fp64 
+from numeric_types import fp64
 
 
 class FixedRationalPolynomial(types.Source):
@@ -49,6 +50,9 @@ class FixedRationalPolynomial(types.Source):
                           repr(self.denominator_coefficients))
 
     def type_check(self):
+        if self.type_check_done:
+            return
+
         try:
             if self.function.eval(0) != 0:
                 assert (self.monomials[0] == 0)
@@ -60,6 +64,7 @@ class FixedRationalPolynomial(types.Source):
             raise TypeError("FixedPolynomial must have a finite domain")
 
         self.out_type = types.Poly(self.function, self.domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         return forms.RationalPolynomial(self.function,

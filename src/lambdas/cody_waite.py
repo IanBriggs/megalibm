@@ -1,20 +1,13 @@
 
 
-from better_float_cast import better_float_cast
-from calculate_cody_waite_constants import calculate_cody_waite_constants
-from dirty_equal import dirty_equal
 import fpcore
-from fpcore.ast import Number, Operation, Variable
 import lego_blocks
-from numeric_types import fp64 
-import lambdas
-
+from better_float_cast import better_float_cast
+from fpcore.ast import Number, Operation, Variable
 from interval import Interval
 from lambdas import types
+from numeric_types import fp64
 from utils import Logger
-
-from lambdas.lambda_utils import find_periods, has_period
-
 
 logger = Logger(level=Logger.HIGH)
 
@@ -64,6 +57,9 @@ class CodyWaite(types.Transform):
         Check that the function has the stated period and the implementation
           has the required width.
         """
+        if self.type_check_done:
+            return
+
         # Check normal out, when there is mod cases present then this just
         # tells us the type
         target_function = self.in_node
@@ -131,6 +127,7 @@ class CodyWaite(types.Transform):
         self.domain = Interval("0", "INFINITY")
         self.out_type = types.Impl(target_function,
                                    self.domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         # in = ...

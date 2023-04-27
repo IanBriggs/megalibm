@@ -1,7 +1,7 @@
 
-from interval import Interval
 import lambdas.types as types
-from numeric_types import fp64 
+from interval import Interval
+from numeric_types import fp64
 from utils import Logger
 
 logger = Logger(level=Logger.HIGH)
@@ -41,6 +41,9 @@ class Narrow(types.Transform):
 
     def type_check(self):
         """ Check that the domain covers the narrowed domain """
+        if self.type_check_done:
+            return
+
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
         # TODO: Turn assert into exception
@@ -55,6 +58,7 @@ class Narrow(types.Transform):
         # Set the out types
         self.domain = next_domain
         self.out_type = types.Impl(our_in_type.function, next_domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         return super().generate(numeric_type=numeric_type)

@@ -1,7 +1,7 @@
 
 from better_float_cast import better_float_cast
-from numeric_types import fp64 
-from fpcore.ast import FPCore, Operation, Variable
+from fpcore.ast import FPCore
+from numeric_types import fp64
 
 
 def get_mirrors_at(func: FPCore, point):

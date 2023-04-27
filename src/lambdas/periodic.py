@@ -1,20 +1,13 @@
 
-
+import lambdas
+import lego_blocks
 from better_float_cast import better_float_cast
 from fpcore.ast import Variable
-import lego_blocks
-from numeric_types import fp64 
-import interval
-import lambdas
-
-import snake_egg
-
 from interval import Interval
 from lambdas import types
-from utils import Logger
-
 from lambdas.lambda_utils import find_periods, has_period
-
+from numeric_types import fp64
+from utils import Logger
 
 logger = Logger(level=Logger.HIGH)
 
@@ -48,6 +41,9 @@ class Periodic(types.Transform):
         Check that the function has the stated period and the implementation
           has the required width.
         """
+        if self.type_check_done:
+            return
+
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
 
@@ -61,6 +57,7 @@ class Periodic(types.Transform):
         self.domain = Interval("(- INFINITY)", "INFINITY")
         self.out_type = types.Impl(our_in_type.function,
                                    self.domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         # in = ...
