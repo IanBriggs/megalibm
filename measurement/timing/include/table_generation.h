@@ -8,10 +8,19 @@
 
 typedef double (*unop_fp64)(double);
 
+typedef float (*unop_fp32)(float);
+
+typedef enum {
+  UNOP_FP64,
+  UNOP_FP32
+} unop_type;
+
+
 typedef struct
 {
-  unop_fp64 func;
+  void *func;
   char *name;
+  unop_type func_type;
 } entry;
 
 // Returns how long it takes to run each function on the domain
