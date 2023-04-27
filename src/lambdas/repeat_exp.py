@@ -35,6 +35,8 @@ class RepeatExp(types.Transform):
                                    Interval("0.0", "INFINITY"))
 
     def generate(self):
+        self.type_check()
+
         our_in_type = self.in_node.out_type
         so_far = super().generate()
         in_name = self.gensym("in")

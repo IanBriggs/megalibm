@@ -87,6 +87,7 @@ class MirrorLeft(types.Transform):
         #   recons = s(inner)
         # else:
         #   recons = inner
+        self.type_check()
 
         # Generate the inner code first
         so_far = super().generate(numeric_type=numeric_type)

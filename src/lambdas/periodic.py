@@ -64,6 +64,8 @@ class Periodic(types.Transform):
         # k = floor((in-sup) / period)
         # out = in - period * k
         # ...
+        self.type_check()
+
         so_far = super().generate(numeric_type=numeric_type)
         in_name = self.gensym("in")
         out_name = so_far[0].in_names[0]

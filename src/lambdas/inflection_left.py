@@ -1,18 +1,13 @@
 
-import math
 
 import fpcore
-import lambdas
 import lego_blocks
 from better_float_cast import better_float_cast
 from dirty_equal import dirty_equal
 from fpcore.ast import Variable
 from interval import Interval
 from lambdas import types
-from lambdas.narrow import Narrow
 from numeric_types import fp32, fp64
-from sympy_based_equal import sympy_based_equal
-from utils import Logger
 
 # This operation takes in an implementation of a function on an interval domain.
 # It then produces a new implementation that is valid on a new domain extending
@@ -97,6 +92,7 @@ class InflectionLeft(types.Transform):
         #   y_out = reconstruct(y_out)
         # else:
         #   y_out = inner
+        self.type_check()
 
         # Generate the inner code first
         so_far = super().generate(numeric_type=numeric_type)

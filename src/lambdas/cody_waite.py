@@ -143,6 +143,7 @@ class CodyWaite(types.Transform):
         #       switch_out = ...
         #       break;
         # }
+        self.type_check()
 
         cw_in = self.gensym("cw_in")
         r = self.gensym("r")

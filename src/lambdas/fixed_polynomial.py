@@ -59,6 +59,8 @@ class FixedPolynomial(types.Source):
         self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
+        self.type_check()
+
         return forms.Polynomial(self.function,
                                 self.monomials,
                                 self.coefficients,

@@ -1,11 +1,11 @@
 
 import math
-from better_float_cast import better_float_cast
-import lambdas
 
-from numeric_types import fp64 
+import lambdas
 import lego_blocks.forms as forms
+from better_float_cast import better_float_cast
 from lambdas import types
+from numeric_types import fp64
 
 
 class Horner(types.Transform):
@@ -36,6 +36,8 @@ class Horner(types.Transform):
 
     def generate(self, numeric_type=fp64):
         """ Implement a polynomial using the horner form lego block """
+        self.type_check()
+
         p = super().generate(numeric_type=numeric_type)
         in_name = self.gensym("in")
         out_name = self.gensym("out")

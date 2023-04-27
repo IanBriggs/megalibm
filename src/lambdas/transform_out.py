@@ -46,6 +46,7 @@ class TransformOut(types.Transform):
     def generate(self, numeric_type=fp64):
         # in = ...
         # out = expr(in)
+        self.type_check()
 
         so_far = super().generate()
 
