@@ -144,7 +144,7 @@ with open(main_fname, "w") as f:
 # Timing measurement
 main_lines = assemble_timing_main(name, func_body,
                                   [libm_func_name, dsl_func_name],
-                                  header_fname, domains)
+                                  header_fname, domains, func_type="UNOP_FP32")
 main_fname = "timing_main.c"
 with open(main_fname, "w") as f:
     f.write("\n".join(main_lines))

@@ -225,8 +225,8 @@ static struct {
 
 //float
 // ALM_PROTO_OPT(asinf)
-double
-amd_optimized_asinf(double x)
+float
+amd_optimized_asinf(float x)
 {
     double Y, G, poly, result, sign =1;
     int32_t n = 0;
