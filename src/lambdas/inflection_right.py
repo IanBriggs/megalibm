@@ -92,6 +92,7 @@ class InflectionRight(types.Transform):
         #   y_out = inner
         # else:
         #   y_out = reconstruct(y_out)
+        self.type_check()
 
         # Generate the inner code first
         so_far = super().generate(numeric_type=numeric_type)

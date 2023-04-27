@@ -32,6 +32,8 @@ class Estrin(types.Transform):
 
     def generate(self, numeric_type=fp64):
         """ Implement a polynomial using the estrin form lego block """
+        self.type_check()
+
         p = super().generate(numeric_type=numeric_type)
         in_name = self.gensym("in")
         out_name = self.gensym("out")

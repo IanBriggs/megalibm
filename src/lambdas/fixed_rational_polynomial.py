@@ -67,6 +67,8 @@ class FixedRationalPolynomial(types.Source):
         self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
+        self.type_check()
+
         return forms.RationalPolynomial(self.function,
                                         self.offset,
                                         self.numerator_monomials,

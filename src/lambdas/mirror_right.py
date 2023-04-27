@@ -91,6 +91,7 @@ class MirrorRight(types.Transform):
 
         # Generate the inner code first
         so_far = super().generate(numeric_type=numeric_type)
+        self.type_check()
 
         # Reduction
         in_name = self.gensym("in")

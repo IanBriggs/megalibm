@@ -32,6 +32,8 @@ class PuntToLibm(types.Source):
 
     def generate(self):
         """ Use libm in generated C """
+        self.type_check()
+
         in_name = self.gensym("in")
         out_name = self.gensym("out")
         return [forms.PuntToLibm(numeric_types.fp64(), [in_name], [out_name], self.function)]

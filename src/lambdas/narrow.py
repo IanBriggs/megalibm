@@ -61,4 +61,6 @@ class Narrow(types.Transform):
         self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
+        self.type_check()
+
         return super().generate(numeric_type=numeric_type)

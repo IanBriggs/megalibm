@@ -78,6 +78,8 @@ class SplitDomain(types.Transform):
         # * in the outer scope make a variable to hold our output
         # * each section then needs to set this variable
 
+        self.type_check()
+
         split_in = self.gensym("split_in")
         split_out = self.gensym("split_out")
         domains_to_lego = {dom: impl.generate(numeric_type=numeric_type)

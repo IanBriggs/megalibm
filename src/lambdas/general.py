@@ -35,6 +35,8 @@ class General(types.Transform):
 
     def generate(self):
         """ Implement a polynomial using the general form lego block """
+        self.type_check()
+
         p = super().generate()
         in_name = self.gensym("in")
         out_name = self.gensym("out")

@@ -55,6 +55,8 @@ class MinimaxPolynomial(types.Source):
           be used
         Returns the lego_block form for a polynomial
         """
+        self.type_check()
+
         monomials = list()
 
         # Do we need a constant term?
