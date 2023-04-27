@@ -22,6 +22,9 @@ class Horner(types.Transform):
 
     def type_check(self):
         """ Check that the input is a polynomial """
+        if self.type_check_done:
+            return
+
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
 
@@ -29,6 +32,7 @@ class Horner(types.Transform):
         assert type(our_in_type) == types.Poly
 
         self.out_type = types.Impl(our_in_type.function, our_in_type.domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         """ Implement a polynomial using the horner form lego block """

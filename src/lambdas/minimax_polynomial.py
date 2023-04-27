@@ -1,15 +1,13 @@
 
-from better_float_cast import better_float_cast
-from fpcore.ast import FPCore, Operation, Variable
-from fpcore.ast_methods.decompose_identities import decompose_identities
-from interval import Interval
-
 import math
-from numeric_types import fp64 
+
 import cmd_sollya
 import lego_blocks.forms as forms
-
+from better_float_cast import better_float_cast
+from fpcore.ast import FPCore, Operation, Variable
+from interval import Interval
 from lambdas import types
+from numeric_types import fp64
 
 
 class MinimaxPolynomial(types.Source):
@@ -40,11 +38,15 @@ class MinimaxPolynomial(types.Source):
 
     def type_check(self):
         """ Makes sure the domain is finite """
+        if self.type_check_done:
+            return
+
         if (not math.isfinite(self.domain.inf)
                 or not math.isfinite(self.domain.sup)):
             raise TypeError("MinimaxPolynomial must have a finite domain")
 
         self.out_type = types.Poly(self.function, self.domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         """

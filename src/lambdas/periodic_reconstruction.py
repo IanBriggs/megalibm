@@ -1,23 +1,16 @@
-import os
+
+
+import find_reconstruction
+import lambdas
+import lego_blocks
 from better_float_cast import better_float_cast
 from fpcore.ast import Variable
-import lego_blocks
-from numeric_types import fp64 
-# import interval
-import lambdas
-
-
-import snake_egg
-import snake_egg_rules
-
 from interval import Interval
 from lambdas import types
-from snake_egg_rules import operations, egg_to_fpcore
-from utils import Logger
-import mpmath
 from lambdas.lambda_utils import find_periods, has_period
-import find_reconstruction
-
+from numeric_types import fp64
+from snake_egg_rules import egg_to_fpcore, operations
+from utils import Logger
 
 logger = Logger(level=Logger.HIGH)
 
@@ -52,6 +45,9 @@ class PeriodicRecons(types.Transform):
         Check that the function has the stated period and the implementation
           has the required width.
         """
+        if self.type_check_done:
+            return
+
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
 
@@ -66,6 +62,7 @@ class PeriodicRecons(types.Transform):
         self.domain = Interval("(- INFINITY)", "INFINITY")
         self.out_type = types.Impl(our_in_type.function,
                                    self.domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         # in = ...
@@ -84,9 +81,9 @@ class PeriodicRecons(types.Transform):
         inner_name = so_far[-1].out_names[0]
         recons_name = self.gensym("recons")
         ind_recons = lego_blocks.Expression(numeric_type(),
-                                         [inner_name, k],
-                                         [recons_name],
-                                         self.recons_expr)
+                                            [inner_name, k],
+                                            [recons_name],
+                                            self.recons_expr)
 
         return [add] + so_far + [ind_recons]
 

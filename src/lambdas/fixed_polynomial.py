@@ -3,7 +3,7 @@ from fpcore.ast import FPCore
 from interval import Interval
 from lambdas import types
 from lego_blocks import forms
-from numeric_types import fp64 
+from numeric_types import fp64
 
 
 class FixedPolynomial(types.Source):
@@ -30,7 +30,7 @@ class FixedPolynomial(types.Source):
         inf = self.domain.inf
         sup = self.domain.sup
         terms = self.terms
-        return f"(FixedPolynomial {body} [{inf} {sup}] {terms})" 
+        return f"(FixedPolynomial {body} [{inf} {sup}] {terms})"
 
     def __repr__(self):
         return "FixedPolynomial({}, {}, {})".format(repr(self.function),
@@ -43,6 +43,8 @@ class FixedPolynomial(types.Source):
         #         assert(self.monomials[0] == 0)
         # except ZeroDivisionError:
         #     pass
+        if self.type_check_done:
+            return
 
         if (not math.isfinite(self.domain.inf)
                 or not math.isfinite(self.domain.sup)):
@@ -54,10 +56,10 @@ class FixedPolynomial(types.Source):
             assert(all(term % 2 != 0 for term in self.monomials))
 
         self.out_type = types.Poly(self.function, self.domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         return forms.Polynomial(self.function,
                                 self.monomials,
                                 self.coefficients,
-                                self.domain)                      
-    
+                                self.domain)

@@ -1,20 +1,13 @@
 
-import math
-from better_float_cast import better_float_cast
-from fpcore.ast import Variable
-from lambdas.narrow import Narrow
-import lego_blocks
-from numeric_types import fp64, fp32
-import lambdas
 
 import fpcore
-
+import lego_blocks
+from better_float_cast import better_float_cast
 from dirty_equal import dirty_equal
-
+from fpcore.ast import Variable
 from interval import Interval
 from lambdas import types
-from sympy_based_equal import sympy_based_equal
-from utils import Logger
+from numeric_types import fp32, fp64
 
 # This operation takes in an implementation of a function on an interval domain.
 # It then produces a new implementation that is valid on a new domain extending
@@ -50,6 +43,9 @@ class InflectionRight(types.Transform):
         return InflectionRight(new_in_node, self.reduction, self.reconstruction)
 
     def type_check(self):
+        if self.type_check_done:
+            return
+
         # Make sure the impl we are using can type check
         self.in_node.type_check()
         inner_impl_type = self.in_node.out_type
@@ -79,8 +75,8 @@ class InflectionRight(types.Transform):
         # Set the values that might be used for outer lambda expressions
         self.inflection_point = b
         self.domain = Interval(a, b+(b-a))
-        self.passed_check = True
         self.out_type = types.Impl(f, self.domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         # x_in = ...

@@ -1,8 +1,8 @@
 
+import lego_blocks
 from interval import Interval
 from lambdas import types
-import lego_blocks
-from numeric_types import fp64 
+from numeric_types import fp64
 
 
 class SplitDomain(types.Transform):
@@ -30,6 +30,9 @@ class SplitDomain(types.Transform):
         return SplitDomain(new_d_to_i)
 
     def type_check(self):
+        if self.type_check_done:
+            return
+
         # check that the domains:
         # * are intervals
         # * non-point intervals do not overlap
@@ -60,8 +63,8 @@ class SplitDomain(types.Transform):
 
         # Set the output
         self.domain = Interval(full_span_inf, full_span_sup)
-        self.passed_check = True
         self.out_type = types.Impl(f, self.domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         # There are many ways to do this.

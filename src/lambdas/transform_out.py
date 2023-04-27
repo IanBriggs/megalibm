@@ -1,19 +1,11 @@
 
-import math
-from fpcore.ast import Variable
-from lambdas.narrow import Narrow
-import lego_blocks
-from numeric_types import fp64 
-import lambdas
 
 import fpcore
-
-from dirty_equal import dirty_equal
-
-from interval import Interval
+import lego_blocks
+from fpcore.ast import Variable
 from lambdas import types
-from sympy_based_equal import sympy_based_equal
-from utils import Logger
+from numeric_types import fp64
+
 
 class TransformOut(types.Transform):
 
@@ -34,6 +26,9 @@ class TransformOut(types.Transform):
         return self.__class__(new_in_node, self.reduction, self.reconstruction)
 
     def type_check(self):
+        if self.type_check_done:
+            return
+
         # Make sure the impl we are using can type check
         self.in_node.type_check()
         inner_impl_type = self.in_node.out_type
@@ -44,9 +39,9 @@ class TransformOut(types.Transform):
         # assert self.expr.contains_variable("y")
         new_f = self.expr.substitute(Variable("y"), f.body)
 
-        self.passed_check = True
         self.domain = domain
         self.out_type = types.Impl(new_f, self.domain)
+        self.type_check_done = True
 
     def generate(self, numeric_type=fp64):
         # in = ...

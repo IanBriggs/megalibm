@@ -61,14 +61,7 @@ class Node():
         # replace all instances of `search` with `replace`
         raise NotImplementedError()
 
-    def type_check_forward(self):
-        # check that in_node.out_type matches requirements and set this
-        # out_type
-        raise NotImplementedError()
-
-    def type_check_backward(self):
-        # check that out_type can be created from this Node and set
-        # in_node.out_type
+    def type_check(self):
         raise NotImplementedError()
 
     def generate(self):
@@ -92,7 +85,7 @@ class Source(Node):
         self.function = function
         self.domain = Interval(domain.inf.simplify(), domain.sup.simplify())
         self.numeric_type = numeric_type()
-        #self.type_check()
+        self.type_check_done = False
 
     def find_lambdas(self, pred, _found=None):
         # Setup default args
@@ -123,16 +116,18 @@ class Source(Node):
                                    repr(self.domain))
 
     def type_check(self):
+        if self.type_check_done:
+            return
         assert (type(self.function) == FPCore)
         assert (type(self.domain) == Interval)
-
+        self.type_check_done = True
 
 class Transform(Node):
 
     def __init__(self, in_node: Node, numeric_type: NumericType = fp64):
         self.in_node = in_node
         self.numeric_type = numeric_type()
-        #self.type_check()
+        self.type_check_done = False
 
     def find_lambdas(self, pred, _found=None):
         # Setup default args
@@ -167,9 +162,6 @@ class Transform(Node):
     def __repr__(self):
         class_name = type(self).__name__
         return "{}({})".format(class_name, repr(self.in_node))
-
-    def type_check(self):
-        pass
 
     def generate(self, numeric_type=fp64):
         return self.in_node.generate(numeric_type=numeric_type)

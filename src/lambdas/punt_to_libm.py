@@ -1,13 +1,12 @@
 
+import math
+
+import lego_blocks.forms as forms
+import numeric_types
 from better_float_cast import better_float_cast
 from fpcore.ast import FPCore
 from interval import Interval
-import lambdas
-
-import numeric_types
-import lego_blocks.forms as forms
 from lambdas import types
-import math
 
 
 class PuntToLibm(types.Source):
@@ -25,7 +24,11 @@ class PuntToLibm(types.Source):
 
     def type_check(self):
         """ Type check always passes """
+        if self.type_check_done:
+            return
+
         self.out_type = types.Impl(self.function, self.domain)
+        self.type_check_done = True
 
     def generate(self):
         """ Use libm in generated C """

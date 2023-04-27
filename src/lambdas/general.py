@@ -1,10 +1,10 @@
 
 import math
-from better_float_cast import better_float_cast
-import lambdas
 
+import lambdas
 import lego_blocks.forms as forms
 import numeric_types
+from better_float_cast import better_float_cast
 from lambdas import types
 
 
@@ -21,6 +21,9 @@ class General(types.Transform):
 
     def type_check(self):
         """ Check that the input is a polynomial """
+        if self.type_check_done:
+            return
+
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
 
@@ -28,6 +31,7 @@ class General(types.Transform):
         assert type(our_in_type) == types.Poly
 
         self.out_type = types.Impl(our_in_type.function, our_in_type.domain)
+        self.type_check_done = True
 
     def generate(self):
         """ Implement a polynomial using the general form lego block """
