@@ -1,93 +1,175 @@
 
 
-from better_float_cast import better_float_cast
-from fpcore.ast import ASTNode, Variable
+import fpcore
 from lego_blocks import forms
 
 
-def simple_horner_poly(x, mons, coeffs):
-    assert len(mons) == len(coeffs)
-    if len(mons) == 0:
-        return None
+def tree_pow(x: fpcore.ast.Expr,
+             n: int):
+    """
+    Constructs an FPCore.ast expression representing pow(x, n) as repeated
+    multiplication parenthesized similar to "Ancient Egyptian multiplication"
 
-    c = coeffs[0]
-    coeffs = coeffs[1:]
+    x- base
+    n- exponent, non-negative integer
 
-    if mons[0] == 0:
-        part = ""
-        next_mons = mons[1:]
-    elif mons[0] == 1:
-        part = f"{x}*"
-        next_mons = [m - 1 for m in mons[1:]]
-    elif mons[0] == 2:
-        part = f"({x}*{x})*"
-        next_mons = [m - 2 for m in mons[1:]]
-    elif mons[0] == 3:
-        part = f"(({x}*{x})*{x})*"
-        next_mons = [m - 3 for m in mons[1:]]
-    elif mons[0] == 4:
-        part = f"(({x}*{x})*({x}*{x}))*"
-        next_mons = [m - 4 for m in mons[1:]]
-    elif mons[0] == 5:
-        part = f"((({x}*{x})*({x}*{x}))*{x})*"
-        next_mons = [m - 5 for m in mons[1:]]
-    else:
-        raise ValueError(f"Simple Horner is broken: {mons[0]}")
+    >>> x = fpcore.ast.Variable("g")
+    >>> str(tree_pow(x, 1))
+    'g'
+    >>> str(tree_pow(x, 2))
+    '(* g g)'
+    >>> str(tree_pow(x, 3))
+    '(* (* g g) g)'
+    >>> str(tree_pow(x, 4))
+    '(* (* g g) (* g g))'
+    >>> str(tree_pow(x, 5))
+    '(* (* (* g g) (* g g)) g)'
+    """
+    # Check x
+    if not issubclass(type(x), fpcore.ast.Expr):
+        raise ValueError(f"'x' must be an FPCore.ast.Expr, given: {type(x)}")
 
-    next_part = simple_horner_poly(x, next_mons, coeffs)
+    # Check n
+    if type(n) != int:
+        raise ValueError(f"'n' must be an int, given: {type(n)}")
+    if n < 0:
+        raise ValueError(f"'n' must be non-negative, given: {n}")
 
-    if issubclass(type(c), ASTNode):
-        c = better_float_cast(c)
-
-    if next_part is None:
-        if better_float_cast(c) == 1 and part != "":
-            return f"{part[:-1]}"
-        return f"{part}{c}"
-    return f"{part}({c} + {next_part})"
+    # TODO: Actually do this function.
+    match n:
+        case 0:
+            return fpcore.ast.Number("1")
+        case 1:
+            return x
+        case 2:
+            return x * x
+        case 3:
+            return (x * x) * x
+        case 4:
+            return (x * x) * (x * x)
+        case 5:
+            return ((x * x) * (x * x)) * x
+        case other:
+            raise NotImplementedError("Shame Ian for hard coding this")
 
 
 class Horner(forms.Form):
 
-    def __init__(self, numeric_type, in_names, out_names, polynomial, split=0):
+    def __init__(self,
+                 numeric_type,
+                 in_names: list,
+                 out_names: list,
+                 monomials: list,
+                 coefficients: list,
+                 split: int=0):
+        # Run Form initialization
         super().__init__(numeric_type, in_names, out_names)
-        assert (type(polynomial) in {
-                forms.Polynomial, forms.RationalPolynomial})
 
-        self.polynomial = polynomial
+        # Check in and out names
+        if len(in_names) != 1:
+            msg = f"'in_names' must have a length of 1, found: {len(in_names)}"
+            raise ValueError(msg)
+        if len(out_names) != 1:
+            msg = ("'out_names' must have a length of 1, found:"
+                   f" {len(out_names)}")
+            raise ValueError(msg)
+
+        # No need to run checks here, the lambdas should have done that
+        self.monomials = monomials
+        self.coefficients = [fpcore.parse_expr(str(c)) for c in coefficients]
         self.split = split
 
     def __repr__(self):
-        return "Horner({}, {}, {}, {})".format(repr(self.numeric_type),
-                                               repr(self.in_names),
-                                               repr(self.out_names),
-                                               repr(self.polynomial))
+        return ("Horner("
+                f"{repr(self.numeric_type)}, "
+                f"[{fpcore.ast.list_to_repr(self.in_names)}], "
+                f"[{fpcore.ast.list_to_repr(self.out_names)}], "
+                f"[{fpcore.ast.list_to_repr(self.monomials)}], "
+                f"[{fpcore.ast.list_to_repr(self.coefficients)}], "
+                f"{self.split}"
+                ")")
 
     def to_c(self):
-        c_type = self.numeric_type.c_type()
-        out = self.out_names[0]
-        x = self.in_names[0]
+        """
+        Create a list of strings representing C source code for this block
 
+        >>> import numeric_types
+        >>> doit = lambda m, c, s: \
+        Horner(numeric_types.fp64(), ["x"], ["poly"], m, c, s).to_c()
+        >>> doit([0], ["1.23"], 0)
+        ['double poly = 1.23;']
+        >>> doit([1], [1], 0)
+        ['double poly = x;']
+        >>> doit([2], [-1], 0)
+        ['double poly = (-(x*x));']
+        >>> doit([0, 1], ["1.23", "4.56"], 0)
+        ['double poly = (1.23+(x*4.56));']
+        >>> doit([0], ["1.23"], 0)
+        ['double poly = 1.23;']
+        """
+        # Build the horner polynomial as an fpcore ast expression
 
-        if type(self.polynomial) == forms.Polynomial:
-            mons = self.polynomial.monomials
-            coeffs = self.polynomial.coefficients
-            start = ""
-            for i in range(self.split):
-                start += simple_horner_poly(x, [mons[i]], [coeffs[i]])
-                start += " + "
-            mons = mons[self.split:]
-            coeffs = coeffs[self.split:]
-            body = start + simple_horner_poly(x, mons, coeffs)
-        elif type(self.polynomial) == forms.RationalPolynomial:
-            num_mons = self.polynomial.numerator_monomials
-            num_coeffs = self.polynomial.numerator_coefficients
-            p = simple_horner_poly(x, num_mons, num_coeffs)
-            den_mons = self.polynomial.denominator_monomials
-            den_coeffs = self.polynomial.denominator_coefficients
-            q = simple_horner_poly(x, den_mons, den_coeffs)
-            o = self.polynomial.offset.substitute(Variable("x"), x)
-            body = f"{o} + ({p}) / ({q})"
+        # Local names for things
+        x = fpcore.ast.Variable(self.in_names[0])
+        mons = self.monomials.copy()
+        coeffs = self.coefficients.copy()
 
-        code = "{} {} = {};".format(c_type, out, body)
+        # Handle length 1
+        if len(mons) == 1:
+            poly = coeffs.pop() * tree_pow(x, mons.pop())
 
+            # Use the fpcore C generation
+            poly = poly.constant_propagate()
+            c_type = self.numeric_type.c_type()
+            body = poly.to_libm_c(numeric_type=self.numeric_type)
+            code = f"{c_type} {self.out_names[0]} = {body};"
+            return [code]
+
+        # We want 'split' terms in general form
+        general_mons = mons[0:self.split]
+        general_coeffs = coeffs[0:self.split]
+        mons = mons[self.split:]
+        coeffs = coeffs[self.split:]
+
+        # Build the polynomial expression from the inside out
+        poly = coeffs.pop()
+        old_mon = mons.pop()
+        while len(mons) > 0:
+            # Figure out the power of x needed for this term
+            mon = mons.pop()
+            mon_diff = old_mon - mon
+            x_pow = tree_pow(x, mon_diff)
+
+            # Multiply it then add the next coefficient
+            poly = x_pow * poly
+            poly = coeffs.pop() + poly
+
+            # Update old monomial
+            old_mon = mon
+
+        # The last pow isn't based on a difference of monomials
+        if mon != 0:
+            x_pow = tree_pow(x, mon)
+            poly = x_pow * poly
+
+        # Now build up the general form
+        while len(general_mons) > 0:
+            # Build x**mon
+            mon = general_mons.pop()
+            x_pow = tree_pow(x, mon)
+
+            # Add new term
+            new_term = general_coeffs.pop() * x_pow
+            poly = new_term + poly
+
+        # Use the fpcore C generation
+        poly = poly.constant_propagate()
+        c_type = self.numeric_type().c_type()
+        body = poly.to_libm_c(numeric_type=self.numeric_type)
+        code = f"{c_type} {self.out_names[0]} = {body};"
         return [code]
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
