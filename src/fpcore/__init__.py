@@ -1,7 +1,8 @@
 
 
 from .lexer import FPCoreLexError
-from .parser import FPCoreParseError, parse
+from .parser import FPCoreParseError, parse, parse_many, parse_expr
+from .ast import list_to_repr, list_to_str
 from . import ast
 
 from .ast_methods import (
@@ -9,6 +10,7 @@ from .ast_methods import (
     copy,
     cross,
     contains_op,
+    constant_propagate,
     decompose_identities,
     dunder_lt,
     dunder_le,
