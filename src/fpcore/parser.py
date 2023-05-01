@@ -129,8 +129,10 @@ class FPCoreParser(Parser):
     #     | {rational}
     @_("RATIONAL")
     def number(self, p):
-        return ast.Number(p[0])
-        # return ast.Rational(p[0])
+        source = p[0]
+        if source[0] == "-":
+            return ast.Operation("-", ast.Number(source[1:]))
+        return ast.Number(source)
 
     #     | {decnum}
     @_("DECNUM")
@@ -139,20 +141,19 @@ class FPCoreParser(Parser):
         if source[0] == "-":
             return ast.Operation("-", ast.Number(source[1:]))
         return ast.Number(source)
-        # return ast.Decnum(p[0])
 
     #     | {hexnum}
     @_("HEXNUM")
     def number(self, p):
-        return ast.Number(p[0])
-        # return ast.Hexnum(p[0])
+        source = p[0]
+        if source[0] == "-":
+            return ast.Operation("-", ast.Number(source[1:]))
+        return ast.Number(source)
 
     #     | ( digits {decnum} {decnum} {decnum} )
     @_("LP DIGITS DECNUM DECNUM DECNUM RP")
     def number(self, p):
-        assert (0)
-        return None
-        # return ast.Digits(p[2], p[3], p[4])
+        raise NotImplementedError("Digits construct not supported yet")
 
     # property :=
     #     | : {symbol} <data>
@@ -278,12 +279,20 @@ class FPCoreParser(Parser):
 _parser = FPCoreParser()
 
 
-def parse(text):
+def parse_many(text):
     tokens = fpcore_lexer.lex(text)
     timer.start()
     parsed = _parser.parse(tokens)
     timer.stop()
     return parsed
+
+def parse(text):
+    # TODO: handle exceptional circumstances
+    return parse_many(text)[0]
+
+def parse_expr(text):
+    # TODO: handle exceptional circumstances
+    return parse(f"(FPCore () {text})").body
 
 
 def main(argv):

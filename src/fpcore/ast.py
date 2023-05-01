@@ -68,6 +68,8 @@ class Expr(ASTNode):
 # | Atom                                                                      |
 # +---------------------------------------------------------------------------+
 class Atom(Expr):
+    __match_args__ = ("source",)
+
     def __init__(self, source):
         super().__init__()
         self.source = source
@@ -112,7 +114,8 @@ class Variable(Atom):
 
 class Number(Atom):
     def __init__(self, source):
-        assert source[0] != "-"
+        if source[0] == "-":
+            raise ValueError(f"'Number' must be positive, given: {source}")
         super().__init__(source)
 
 
