@@ -13,7 +13,7 @@ logger = Logger(level=Logger.EXTRA)
 
 def parse_bound(something):
     wrapped = "(FPCore () {})".format(something)
-    fpc = fpcore.parse(wrapped)[0]
+    fpc = fpcore.parse(wrapped)
     return fpc.simplify().body
 
 
@@ -65,6 +65,10 @@ class Interval():
         if items == 1:
             return self.sup
         raise IndexError(items)
+
+    def isfinite(self):
+        return (math.isfinite(better_float_cast(self.inf))
+                and math.isfinite(better_float_cast(self.sup)))
 
     def width(self):
         return self.sup - self.inf
