@@ -7,7 +7,7 @@ from dirty_equal import dirty_equal
 from fpcore.ast import Variable
 from interval import Interval
 from lambdas import types
-from numeric_types import fp32, fp64
+from numeric_types import FP32, FP64
 
 # This operation takes in an implementation of a function on an interval domain.
 # It then produces a new implementation that is valid on a new domain extending
@@ -56,9 +56,9 @@ class InflectionRight(types.Transform):
 
         # Using f(x)'s domain [a,b] we need to check that:
         #   for x in [b, b+(b-a)] that red(x) is in [a,b]
-        upper_domain = Interval(b, b+(b-a))
-        reduced = self.reduction.interval_eval({"x":upper_domain})
-        assert(domain.contains(reduced))
+        upper_domain = Interval(b, b + (b - a))
+        reduced = self.reduction.interval_eval({"x": upper_domain})
+        assert (domain.contains(reduced))
 
         # We also need to check that:
         #  rec(f(red(x))) == f(x)
@@ -68,17 +68,17 @@ class InflectionRight(types.Transform):
         rec_f_red = rec_f.substitute(x, self.reduction)
 
         # For now let's use a sympy based equality (egg??) ((mpmath???))
-        assert(dirty_equal(f, rec_f_red, domain))
-        #assert(f.egg_equal(rec_f_red))
+        assert (dirty_equal(f, rec_f_red, domain))
+        # assert(f.egg_equal(rec_f_red))
         #assert(sympy_based_equal(rec_f_red, f))
 
         # Set the values that might be used for outer lambda expressions
         self.inflection_point = b
-        self.domain = Interval(a, b+(b-a))
+        self.domain = Interval(a, b + (b - a))
         self.out_type = types.Impl(f, self.domain)
         self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         # x_in = ...
         # if x_in < inflection_point:
         #   reduced = x_in
@@ -100,30 +100,31 @@ class InflectionRight(types.Transform):
         # Reduction
         x_in_name = self.gensym("x_in")
         reduced_name = so_far[0].in_names[0]
-        red_expr = self.reduction.substitute(Variable("x"), Variable(x_in_name))
-        if isinstance(numeric_type(), fp32):
+        red_expr = self.reduction.substitute(
+            Variable("x"), Variable(x_in_name))
+        if numeric_type == FP32:
             red_expr = red_expr.substitute_op()
 
-        red = lego_blocks.IfLess(numeric_type(),
-                               [x_in_name],
-                               [reduced_name],
-                               better_float_cast(self.inflection_point),
-                               x_in_name,
-                               red_expr.to_libm_c(numeric_type=numeric_type()))
+        red = lego_blocks.IfLess(numeric_type,
+                                 [x_in_name],
+                                 [reduced_name],
+                                 better_float_cast(self.inflection_point),
+                                 x_in_name,
+                                 red_expr.to_libm_c(numeric_type=numeric_type))
 
         # Reconstruction
         inner_name = so_far[-1].out_names[0]
         y_out_name = self.gensym("y_out")
-        rec_expr = self.reconstruction.substitute(Variable("y"), Variable(inner_name))
-        if isinstance(numeric_type(), fp32):
+        rec_expr = self.reconstruction.substitute(
+            Variable("y"), Variable(inner_name))
+        if numeric_type == FP32:
             rec_expr = rec_expr.substitute_op()
 
-        rec = lego_blocks.IfLess(numeric_type(),
-                                       [x_in_name],
-                                       [y_out_name],
-                                       better_float_cast(self.inflection_point),
-                                       inner_name,
-                                       rec_expr.to_libm_c(numeric_type=numeric_type()))
+        rec = lego_blocks.IfLess(numeric_type,
+                                 [x_in_name],
+                                 [y_out_name],
+                                 better_float_cast(self.inflection_point),
+                                 inner_name,
+                                 rec_expr.to_libm_c(numeric_type=numeric_type))
 
         return [red] + so_far + [rec]
-

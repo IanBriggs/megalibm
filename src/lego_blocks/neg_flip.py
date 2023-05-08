@@ -15,7 +15,7 @@ class NegFlip(lego_blocks.LegoBlock):
             "in": self.in_names[0],
             "out": self.out_names[0],
             "sign": self.in_names[1],
-            "type": self.numeric_type.c_type(),
+            "type": self.numeric_type.c_type,
         }
 
         lines = [

@@ -13,7 +13,7 @@ class Multiply(lego_blocks.LegoBlock):
     def to_c(self):
         fmt = {
             "out": self.out_names[0],
-            "type": self.numeric_type.c_type(),
+            "type": self.numeric_type.c_type,
         }
         fmt["prods"] = "*".join(["(({}){})".format(fmt["type"], n)
                                  for n in self.in_names])

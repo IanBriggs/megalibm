@@ -13,7 +13,7 @@ class TransformOut(lego_blocks.LegoBlock):
         self.expr = expr
 
     def to_c(self):
-        cdecl = self.numeric_type.c_type()
+        cdecl = self.numeric_type.c_type
 
         in_name = self.in_names[0]
         out = self.out_names[0]

@@ -7,7 +7,7 @@ from better_float_cast import better_float_cast
 from fpcore.ast import FPCore, Operation, Variable
 from interval import Interval
 from lambdas import types
-from numeric_types import fp64
+from numeric_types import FP64
 
 
 class MinimaxPolynomial(types.Source):
@@ -48,7 +48,7 @@ class MinimaxPolynomial(types.Source):
         self.out_type = types.Poly(self.function, self.domain)
         self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         """
         Uses Sollya to fit a polynomial to the function choosing whether a
           constant term is needed and whether even, odd, or all degrees should
@@ -85,7 +85,7 @@ class MinimaxPolynomial(types.Source):
         res = cmd_sollya.Result(self.function,
                                 self.domain,
                                 monomials,
-                                numeric_type())
+                                numeric_type)
 
         # Return the lego_block.form
         return forms.Polynomial(self.function,

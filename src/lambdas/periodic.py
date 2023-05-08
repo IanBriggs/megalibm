@@ -6,7 +6,7 @@ from fpcore.ast import Variable
 from interval import Interval
 from lambdas import types
 from lambdas.lambda_utils import find_periods, has_period
-from numeric_types import fp64
+from numeric_types import FP64
 from utils import Logger
 
 logger = Logger(level=Logger.HIGH)
@@ -59,7 +59,7 @@ class Periodic(types.Transform):
                                    self.domain)
         self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         # in = ...
         # k = floor((in-sup) / period)
         # out = in - period * k
@@ -71,7 +71,7 @@ class Periodic(types.Transform):
         out_name = so_far[0].in_names[0]
 
         k = self.gensym("k")
-        add = lego_blocks.SimpleAdditive(numeric_type(),
+        add = lego_blocks.SimpleAdditive(numeric_type,
                                          [in_name],
                                          [out_name, k],
                                          self.in_node.domain.inf,

@@ -6,7 +6,7 @@ from better_float_cast import better_float_cast
 from fpcore.ast import Number, Operation, Variable
 from interval import Interval
 from lambdas import types
-from numeric_types import fp64
+from numeric_types import FP64
 from utils import Logger
 
 logger = Logger(level=Logger.HIGH)
@@ -129,7 +129,7 @@ class CodyWaite(types.Transform):
                                    self.domain)
         self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         # in = ...
         # r = cody_waite_reduce(in, inv_period, period_c, period, &k, NULL);
         # switch_out;
@@ -150,7 +150,7 @@ class CodyWaite(types.Transform):
         k = self.gensym("r")
 
         part_0 = lego_blocks.CodyWaite(
-            numeric_type(),
+            numeric_type,
             [cw_in], [r, k],
             self.constant,
             self.bits_per,
@@ -172,7 +172,7 @@ class CodyWaite(types.Transform):
             mod_to_lego[n] = genned
 
         part_1 = lego_blocks.ModSwitch(
-            numeric_type(),
+            numeric_type,
             [r, k], [switch_out],
             mod_to_lego
         )

@@ -8,7 +8,7 @@ from interval import Interval
 from lambdas import types
 from lambdas.lambda_utils import get_mirrors, get_mirrors_at
 from lambdas.narrow import Narrow
-from numeric_types import fp64
+from numeric_types import FP64
 from utils import Logger
 
 logger = Logger(level=Logger.HIGH, color=Logger.cyan)
@@ -75,7 +75,7 @@ class MirrorLeft(types.Transform):
         self.out_type = types.Impl(our_in_type.function, next_domain)
         self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         # in = ...
         # if in < mirror_point:
         #   out = in
@@ -98,7 +98,7 @@ class MirrorLeft(types.Transform):
 
         bound = self.mirror_point
 
-        il_reduce = lego_blocks.IfLess(numeric_type(),
+        il_reduce = lego_blocks.IfLess(numeric_type,
                                        [in_name],
                                        [reduced_name],
                                        better_float_cast(bound),
@@ -111,7 +111,7 @@ class MirrorLeft(types.Transform):
         s_expr = self.s_expr.substitute(Variable("x"), Variable(inner_name))
         s_str = s_expr.to_libm_c()
 
-        il_recons = lego_blocks.IfLess(numeric_type(),
+        il_recons = lego_blocks.IfLess(numeric_type,
                                        [in_name],
                                        [recons_name],
                                        better_float_cast(bound),

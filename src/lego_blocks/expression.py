@@ -19,7 +19,7 @@ class Expression(lego_blocks.LegoBlock):
 
         fmt = {
             "out": self.out_names[0],
-            "type": self.numeric_type.c_type(),
+            "type": self.numeric_type.c_type,
             "expr": s_str
         }
 

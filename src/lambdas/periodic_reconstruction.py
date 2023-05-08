@@ -8,7 +8,7 @@ from fpcore.ast import Variable
 from interval import Interval
 from lambdas import types
 from lambdas.lambda_utils import find_periods, has_period
-from numeric_types import fp64
+from numeric_types import FP64
 from snake_egg_rules import egg_to_fpcore, operations
 from utils import Logger
 
@@ -64,7 +64,7 @@ class PeriodicRecons(types.Transform):
                                    self.domain)
         self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         # in = ...
         # k = floor((in-sup) / period)
         # out = in - period * k
@@ -76,13 +76,16 @@ class PeriodicRecons(types.Transform):
         out_name = so_far[0].in_names[0]
 
         k = self.gensym("k")
-        add = lego_blocks.SimpleAdditive(numeric_type(), [in_name],
-                                         [out_name, k], self.in_node.domain.inf, self.period)
+        add = lego_blocks.SimpleAdditive(numeric_type,
+                                         [in_name],
+                                         [out_name, k],
+                                         self.in_node.domain.inf,
+                                         self.period)
 
         # Inductive reconstruction to map the output according to its s function | (s(f(t(x))))
         inner_name = so_far[-1].out_names[0]
         recons_name = self.gensym("recons")
-        ind_recons = lego_blocks.Expression(numeric_type(),
+        ind_recons = lego_blocks.Expression(numeric_type,
                                             [inner_name, k],
                                             [recons_name],
                                             self.recons_expr)

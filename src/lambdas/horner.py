@@ -3,7 +3,7 @@ import lambdas
 import lego_blocks
 import lego_blocks.forms as forms
 from lambdas import types
-from numeric_types import fp64
+from numeric_types import FP64
 
 
 class Horner(types.Transform):
@@ -47,13 +47,13 @@ class Horner(types.Transform):
         self.out_type = types.Impl(our_in_type.function, our_in_type.domain)
         self.type_check_done = True
 
-    def generate(self, numeric_type=fp64()):
+    def generate(self, numeric_type=FP64):
         # Make sure we type check
         self.type_check()
-        legos = list()
+        block_list = list()
 
         # Call inner generate which is needed for Sollya based polys
-        self.in_node.generate()
+        self.in_node.generate(numeric_type)
 
         # Create the first polynomial
         g_name = self.gensym("g")
@@ -64,7 +64,7 @@ class Horner(types.Transform):
                          monomials=self.in_node.p_monomials,
                          coefficients=self.in_node.p_coefficients,
                          split=self.split)
-        legos.append(p)
+        block_list.append(p)
 
         # If there is a second polynomial create it
         if len(self.in_node.q_monomials) != 0:
@@ -75,7 +75,7 @@ class Horner(types.Transform):
                              monomials=self.in_node.q_monomials,
                              coefficients=self.in_node.q_coefficients,
                              split=self.split)
-            legos.append(q)
+            block_list.append(q)
 
             # Combine polynomials
             r_name = self.gensym("r_poly")
@@ -83,9 +83,9 @@ class Horner(types.Transform):
                                        in_names=[g_name, p_name, q_name],
                                        out_names=[r_name],
                                        fpc=self.in_node.combiner)
-            legos.append(r)
+            block_list.append(r)
 
-        return legos
+        return block_list
 
     @classmethod
     def generate_hole(cls, out_type):

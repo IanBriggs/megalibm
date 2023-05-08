@@ -14,7 +14,7 @@ class Estrin(forms.Form):
         self.split = split
 
     def __repr__(self):
-        return "Estrin({}, {}, {}, {}, {}, {})".format(repr(self.numeric_type),
+        return "Estrin({}, {}, {}, {}, {}, {})".format(repr(self.numeric_type.name),
                                                        repr(self.in_names),
                                                        repr(self.out_names),
                                                        repr(self.polynomial))
@@ -92,7 +92,7 @@ class Estrin(forms.Form):
         return rhs
 
     def to_c(self):
-        c_type = self.numeric_type.c_type()
+        c_type = self.numeric_type.c_type
         out = self.out_names[0]
         mons = self.polynomial.monomials
         cast_coeff = [c for c

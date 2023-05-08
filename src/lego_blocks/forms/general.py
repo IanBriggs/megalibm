@@ -18,7 +18,7 @@ class General(forms.Form):
                                                         repr(self.polynomial))
 
     def to_c(self):
-        c_type = self.numeric_type.c_type()
+        c_type = self.numeric_type.c_type
         cast_in = "(({}){})".format(c_type, self.in_names[0])
         expanded_powers = ["*".join([cast_in for _ in range(m)])
                            for m in self.polynomial.monomials]

@@ -1,7 +1,7 @@
 
 import lambdas.types as types
 from interval import Interval
-from numeric_types import fp64
+from numeric_types import FP64
 from utils import Logger
 
 logger = Logger(level=Logger.HIGH)
@@ -60,7 +60,7 @@ class Narrow(types.Transform):
         self.out_type = types.Impl(our_in_type.function, next_domain)
         self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         self.type_check()
 
         return super().generate(numeric_type=numeric_type)

@@ -4,7 +4,7 @@ from fpcore.ast import ASTNode, FPCore
 from interval import Interval
 from lambdas import types
 from lego_blocks import forms
-from numeric_types import fp64
+from numeric_types import FP64
 
 
 class FixedRationalPolynomial(types.Source):
@@ -66,7 +66,7 @@ class FixedRationalPolynomial(types.Source):
         self.out_type = types.Poly(self.function, self.domain)
         self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         self.type_check()
 
         return forms.RationalPolynomial(self.function,

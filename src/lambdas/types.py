@@ -2,7 +2,7 @@
 
 from fpcore.ast import FPCore
 from interval import Interval
-from numeric_types import NumericType, fp64
+from numeric_types import NumericType, FP64
 
 
 # Return types
@@ -81,10 +81,13 @@ class Node():
 
 class Source(Node):
 
-    def __init__(self, function: FPCore, domain: Interval, numeric_type: NumericType = fp64):
+    def __init__(self,
+                 function: FPCore,
+                 domain: Interval,
+                 numeric_type: NumericType = FP64):
         self.function = function
         self.domain = Interval(domain.inf.simplify(), domain.sup.simplify())
-        self.numeric_type = numeric_type()
+        self.numeric_type = numeric_type
         self.type_check_done = False
 
     def find_lambdas(self, pred, _found=None):
@@ -124,9 +127,9 @@ class Source(Node):
 
 class Transform(Node):
 
-    def __init__(self, in_node: Node, numeric_type: NumericType = fp64):
+    def __init__(self, in_node: Node, numeric_type: NumericType = FP64):
         self.in_node = in_node
-        self.numeric_type = numeric_type()
+        self.numeric_type = numeric_type
         self.type_check_done = False
 
     def find_lambdas(self, pred, _found=None):
@@ -163,5 +166,5 @@ class Transform(Node):
         class_name = type(self).__name__
         return "{}({})".format(class_name, repr(self.in_node))
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         return self.in_node.generate(numeric_type=numeric_type)

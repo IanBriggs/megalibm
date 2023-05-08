@@ -30,7 +30,7 @@ class Case(lego_blocks.LegoBlock):
             "k": self.in_names[1],
             "mod": self.mod,
             "out": self.out_names[0],
-            "type": self.numeric_type.c_type(),
+            "type": self.numeric_type.c_type,
         }
 
         lines = [

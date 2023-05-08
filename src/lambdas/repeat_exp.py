@@ -3,7 +3,7 @@
 import interval
 import lambdas
 import lego_blocks
-import numeric_types
+from numeric_types import FP64
 from better_float_cast import better_float_cast
 from interval import Interval
 from lambdas import types
@@ -34,7 +34,7 @@ class RepeatExp(types.Transform):
         self.out_type = types.Impl(our_in_type.function,
                                    Interval("0.0", "INFINITY"))
 
-    def generate(self):
+    def generate(self, numeric_type=FP64):
         self.type_check()
 
         our_in_type = self.in_node.out_type
@@ -42,14 +42,14 @@ class RepeatExp(types.Transform):
         in_name = self.gensym("in")
         out_red = so_far[0].in_names[0]
         k = self.gensym("k")
-        add = lego_blocks.SimpleAdditive(numeric_types.fp64(),
+        add = lego_blocks.SimpleAdditive(numeric_type,
                                          [in_name],
                                          [out_red, k],
                                          our_in_type.domain.sup)
 
         out_name = self.gensym("out")
         in_red = so_far[0].out_names[0]
-        ldexp = lego_blocks.Ldexp(numeric_types.fp64(),
+        ldexp = lego_blocks.Ldexp(numeric_type,
                                   [in_red, k],
                                   [out_name])
 

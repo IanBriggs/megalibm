@@ -3,7 +3,7 @@ import math
 
 import lambdas
 import lego_blocks.forms as forms
-import numeric_types
+from numeric_types import FP64
 from better_float_cast import better_float_cast
 from lambdas import types
 
@@ -33,14 +33,14 @@ class General(types.Transform):
         self.out_type = types.Impl(our_in_type.function, our_in_type.domain)
         self.type_check_done = True
 
-    def generate(self):
+    def generate(self, numeric_type=FP64):
         """ Implement a polynomial using the general form lego block """
         self.type_check()
 
         p = super().generate()
         in_name = self.gensym("in")
         out_name = self.gensym("out")
-        return [forms.General(numeric_types.fp64(), [in_name], [out_name], p)]
+        return [forms.General(numeric_type, [in_name], [out_name], p)]
 
     @classmethod
     def generate_hole(cls, out_type):

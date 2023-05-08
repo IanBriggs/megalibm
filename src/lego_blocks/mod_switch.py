@@ -13,7 +13,7 @@ class ModSwitch(lego_blocks.LegoBlock):
         self.mod_to_lego = mod_to_lego
 
     def to_c(self):
-        cdecl = self.numeric_type.c_type()
+        cdecl = self.numeric_type.c_type
 
         r = self.in_names[0]
         k = self.in_names[1]
