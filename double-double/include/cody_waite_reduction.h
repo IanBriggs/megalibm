@@ -20,39 +20,42 @@ fast_cody_waite_reduce(double x,
     return r;
 }
 
+// Based on the extended Cody-Waite style reduction by in Nelson Beebe in
+// "The Mathematical-Function Computation Handbook"
+
 static inline double
 cody_waite_reduce(double x,
-                  const double inv_period,
-                  int period_c,
-                  double *period,
-                  int *pn,
-                  double *perror)
+                  const double inv_C,
+                  const size_t C_len,
+                  const double *C,
+                  int *ptr_k,
+                  double *ptr_error)
 {
-    double xn = (int)(x * inv_period + 0.5) - ((int)get_sign_double(x));
+    double dk = (int)(x * inv_C + 0.5) - ((int)get_sign_double(x));
     double error = 0;
     double retval;
-    if (xn == 0.0)
+    if (dk == 0.0)
     {
         retval = x;
     }
     else
     {
         int k;
-        double sum = x - xn * period[0];
-        double period_hi = period[0];
+        double sum = x - dk * C[0];
+        double period_hi = C[0];
         double period_lo = 0.0;
         error = 0.0;
 
-        for (k = 1; k < period_c; ++k)
+        for (k = 1; k < C_len; ++k)
         {
             double t, new_sum;
 
-            t = -xn * period[k];
+            t = -dk * C[k];
             new_sum = sum + t;
             error += sum - new_sum;
             error += t;
             sum = new_sum;
-            period_lo += period[k];
+            period_lo += C[k];
         }
 
         double retval_hi = sum;
@@ -65,7 +68,7 @@ cody_waite_reduce(double x,
 
         if (retval < -period_half)
         {
-            xn--;
+            dk--;
             retval += period_hi;
             retval += period_lo;
             if (retval > period_half)
@@ -75,7 +78,7 @@ cody_waite_reduce(double x,
         }
         else if (period_half < retval)
         {
-            xn++;
+            dk++;
             retval -= period_hi;
             retval -= period_lo;
             if (retval < -period_half)
@@ -85,14 +88,14 @@ cody_waite_reduce(double x,
         }
     }
 
-    if (perror != NULL)
+    if (ptr_error != NULL)
     {
-        *perror = error;
+        *ptr_error = error;
     }
 
-    if (pn != NULL)
+    if (ptr_k != NULL)
     {
-        *pn = (int)xn;
+        *ptr_k = (int)dk;
     }
 
     return retval;
