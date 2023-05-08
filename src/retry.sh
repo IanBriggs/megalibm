@@ -12,9 +12,9 @@ NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
 CORES="$(getconf _NPROCESSORS_ONLN)"
 
 # check args
-if [ $# != 1 ] ; then
-echo "retry must be given a nightly directory"
-exit 1
+if [ $# != 1 ]; then
+    echo "retry must be given a nightly directory"
+    exit 1
 fi
 
 THIS_NIGHTLY_LOCATION="${PWD}/${1}"

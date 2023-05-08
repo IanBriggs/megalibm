@@ -1,19 +1,15 @@
 
 
-import math
-from better_float_cast import better_float_cast
-from error import Error
-from utils.logging import Logger
-from utils.timing import Timer
-
-from os import path
-
-import fpcore
 import json
 import shlex
 import subprocess
 import tempfile
+from os import path
+
+import fpcore
 from interval import Interval
+from utils.logging import Logger
+from utils.timing import Timer
 
 logger = Logger(level=Logger.HIGH, color=Logger.green)
 timer = Timer()
@@ -50,6 +46,7 @@ class Result():
         self.returncode = None
 
         timer.start()
+
         # Default query
         self._generate_query()
         have_res = self._try_cache()
@@ -59,7 +56,6 @@ class Result():
         # Try [inf - small, sup]
         if not have_res:
             logger.warning("Sollya call failed, trying [inf - small, sup] ")
-            diff = domain.sup - domain.inf
             new_domain = Interval(domain.inf - fpcore.ast.Number("0.00390625"),
                                   domain.sup)
             self.domain = new_domain
@@ -71,7 +67,6 @@ class Result():
         # Try [inf, sup + small]
         if not have_res:
             logger.warning("Sollya call failed, trying [inf, sup + small]")
-            diff = domain.sup - domain.inf
             new_domain = Interval(domain.inf,
                                   domain.sup + fpcore.ast.Number("0.00390625"))
             self.domain = new_domain
@@ -83,7 +78,6 @@ class Result():
         # Try [inf-small, sup + small]
         if not have_res:
             logger.warning("Sollya call failed, trying [inf, sup + small]")
-            diff = domain.sup - domain.inf
             new_domain = Interval(domain.inf - fpcore.ast.Number("0.00390625"),
                                   domain.sup + fpcore.ast.Number("0.00390625"))
             self.domain = new_domain
@@ -102,7 +96,7 @@ class Result():
         return "Result({}, {}, {}, {}, {})".format(repr(self.func),
                                                    repr(self.domain),
                                                    repr(self.monomials),
-                                                   repr(self.numeric_type),
+                                                   repr(self.numeric_type.name),
                                                    repr(self.config))
 
     def _try_cache(self):
@@ -130,7 +124,6 @@ class Result():
 
     def _generate_query(self):
         monomials_str = ", ".join([str(m) for m in self.monomials])
-        mid = (better_float_cast(self.domain.inf) + better_float_cast(self.domain.sup))/2
         lines = [
             'prec = {}!;'.format(self.config["precision"]),
             'algo_analysis_bound = {};'.format(self.config["analysis_bound"]),
@@ -138,7 +131,7 @@ class Result():
                 self.domain.inf.to_sollya(), self.domain.sup.to_sollya()),
             'f = {};'.format(self.func.to_sollya()),
             'monomials = [|{}|];'.format(monomials_str),
-            'formats = [|{}...|];'.format(self.numeric_type.sollya_type()),
+            'formats = [|{}...|];'.format(self.numeric_type.sollya_type),
             'p = remez(f, monomials, I);',
         ]
 

@@ -1,6 +1,5 @@
 
 
-from error import Error
 from interval import Interval
 
 

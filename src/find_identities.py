@@ -2,7 +2,6 @@ import z3
 import snake_egg
 import fpcore
 import snake_egg_rules
-from pprint import pprint
 from utils import Logger, Timer
 
 logger = Logger(Logger.LOW, color=Logger.blue, def_color=Logger.cyan)

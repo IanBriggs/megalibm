@@ -1,7 +1,5 @@
 
 import lambdas
-import snake_egg_rules
-import snake_egg
 from utils.logging import Logger
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
@@ -9,7 +7,7 @@ logger = Logger(color=Logger.green, level=Logger.LOW)
 
 def synthesize(target, fuel=10):
     transforms = [
-        #lambdas.NegMirrorLeft,
+        # lambdas.NegMirrorLeft,
         lambdas.MirrorLeft,
         lambdas.MirrorRight,
         lambdas.MinimaxPolynomial,
@@ -58,9 +56,8 @@ def synthesize(target, fuel=10):
         if len(old_partials) == 0:
             break
 
-        if i == fuel-1:
+        if i == fuel - 1:
             logger.warning("Ran out of fuel!")
-
 
     my_lambdas = list()
     for c in completed:
