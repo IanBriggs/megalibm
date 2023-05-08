@@ -18,6 +18,8 @@ from .mirror_right import MirrorRight
 from .periodic import Periodic
 from .periodic_reconstruction import PeriodicRecons
 from .punt_to_libm import PuntToLibm
+from .recharacterize import Recharacterize
 from .repeat_exp import RepeatExp
 from .split_domain import SplitDomain
 from .transform_out import TransformOut
+from .multiplicative import Multiplicative
