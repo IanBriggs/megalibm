@@ -82,25 +82,28 @@ color_cycle = [
     "xkcd:light pink",
 ]
 
+
 def determine_emoji(gen_speedup_s, gen_errup_s):
     # libm beat us for everything
     if (all(s < 1.0 for s in gen_speedup_s)
-    and all(a > 1.0 for a in gen_errup_s)):
+            and all(a > 1.0 for a in gen_errup_s)):
         return emoji_meter[0]
 
     # We have some batter points, but libm is still above the pareto front
-    pareto_xs, pareto_ys = pareto_front_points(gen_errup_s+[1.0],
-                                               gen_speedup_s+[1.0])
+    pareto_xs, pareto_ys = pareto_front_points(gen_errup_s + [1.0],
+                                               gen_speedup_s + [1.0])
     if (1.0, 1.0) in zip(pareto_xs, pareto_ys):
         return emoji_meter[1]
 
     # We beat libm
     return emoji_meter[2]
 
+
 def domain_name(data):
     low = data["error"]["regions"][0]
     high = data["error"]["regions"][-1]
     return f"[{low}, {high}]"
+
 
 def double_list(l):
     ret = list()
@@ -247,10 +250,11 @@ def plot_line(title, benchmark_data, data_type):
 
     # Plot all lines sets
     errors = benchmark_data["error"]["functions"]
-    ax1.plot(xs, errors["reference"][data_type], label="correctly rounded", color=reference_color)
+    ax1.plot(xs, errors["reference"][data_type],
+             label="correctly rounded", color=reference_color)
     ax1.plot(xs, errors[libm_name][data_type], label="libm", color=libm_color)
     for i, name in enumerate(gen_names):
-        color = color_cycle[i%len(color_cycle)]
+        color = color_cycle[i % len(color_cycle)]
         ax1.plot(xs, errors[name][data_type], label=name, color=color)
 
     # Label the graph.
@@ -316,7 +320,7 @@ def plot_eps_del(title, benchmark_data):
     ax1.plot(ref_del, ref_eps, label="correctly rounded", color=reference_color)
     ax1.plot(libm_del, libm_eps, label="libm", color=libm_color)
     for i, gd, ge, name in zip(range(len(gen_names)), gen_del_s, gen_eps_s, gen_names):
-        color = color_cycle[i%len(color_cycle)]
+        color = color_cycle[i % len(color_cycle)]
         ax1.plot(gd, ge, label=name, color=color)
 
     # Scale
@@ -370,7 +374,7 @@ def make_benchmark_page(benchmark_data,
     """.replace("\n    ", "\n").strip()]
 
     for i, gen in enumerate(benchmark_data[0]["error"]["generators"]):
-        color = color_cycle[i%len(color_cycle)]
+        color = color_cycle[i % len(color_cycle)]
         hex_color = colors.to_hex(color)
         parts.append(f"""
         <li class=legend>
@@ -468,7 +472,7 @@ def make_main_page(generation_dir, benchmark_names, pareto_images, emojis):
     m = today.month
     d = today.day
 
-    emoji_counts = {e:0 for e in emoji_meter}
+    emoji_counts = {e: 0 for e in emoji_meter}
     for idxs in emojis.values():
         for e in idxs.values():
             emoji_counts[e] += 1
@@ -531,10 +535,9 @@ def make_main_page(generation_dir, benchmark_names, pareto_images, emojis):
         </div>
     """.replace("\n    ", "\n").strip()]
 
-
-
     for bench_name in benchmark_names:
-        parts.append(make_main_part(generation_dir, bench_name, pareto_images, emojis))
+        parts.append(make_main_part(generation_dir,
+                     bench_name, pareto_images, emojis))
 
     parts.append("""
     </body>
@@ -612,6 +615,7 @@ def parse_arguments(argv):
     logger.dlog("   log-file: {}", args.log_file)
 
     return args
+
 
 def make_css():
     return """
@@ -705,6 +709,7 @@ def make_css():
     }
     """.replace("\n    ", "\n").strip()
 
+
 def main(argv):
     args = parse_arguments(argv)
 
@@ -784,6 +789,7 @@ def main(argv):
     css = make_css()
     with open("style.css", "w") as f:
         f.write(css)
+
 
 if __name__ == "__main__":
     return_code = 0

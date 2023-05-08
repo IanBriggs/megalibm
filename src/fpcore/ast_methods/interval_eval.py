@@ -103,7 +103,6 @@ def interval_eval(self, assignment):
             inf = inf.eval()
         if hasattr(sup, "eval"):
             sup = sup.eval()
-        print(f"[{inf}, {sup}]")
         return iv.mpf([inf, sup])
     return iv.mpf(val)
 
@@ -127,7 +126,8 @@ def interval_eval(self, assignment):
     if self.op == "thefunc":
         return iv.mpf("NaN")
 
-    msg = f"Operation not yet supported for interval_eval: '{self.op}'"
+    msg = ("Operation not yet supported for interval_eval with"
+           f" {len(f_args)} arguments: '{self.op}'")
     raise NotImplementedError(msg)
 
 
