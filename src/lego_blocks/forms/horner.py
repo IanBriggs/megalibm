@@ -95,7 +95,7 @@ class Horner(forms.Form):
 
         >>> import numeric_types
         >>> doit = lambda m, c, s: \
-        Horner(numeric_types.fp64(), ["x"], ["poly"], m, c, s).to_c()
+        Horner(numeric_types.FP64, ["x"], ["poly"], m, c, s).to_c()
         >>> doit([0], ["1.23"], 0)
         ['double poly = 1.23;']
         >>> doit([1], [1], 0)
@@ -120,9 +120,9 @@ class Horner(forms.Form):
 
             # Use the fpcore C generation
             poly = poly.constant_propagate()
-            c_type = self.numeric_type.c_type()
+            cdecl = self.numeric_type.c_type
             body = poly.to_libm_c(numeric_type=self.numeric_type)
-            code = f"{c_type} {self.out_names[0]} = {body};"
+            code = f"{cdecl} {self.out_names[0]} = {body};"
             return [code]
 
         # We want 'split' terms in general form
@@ -164,9 +164,9 @@ class Horner(forms.Form):
 
         # Use the fpcore C generation
         poly = poly.constant_propagate()
-        c_type = self.numeric_type().c_type()
+        cdecl = self.numeric_type.c_type
         body = poly.to_libm_c(numeric_type=self.numeric_type)
-        code = f"{c_type} {self.out_names[0]} = {body};"
+        code = f"{cdecl} {self.out_names[0]} = {body};"
         return [code]
 
 
