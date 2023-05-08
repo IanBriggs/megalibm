@@ -20,6 +20,7 @@ from .ast_methods import (
     extract_domain,
     float,
     get_any_name,
+    get_variables,
     interval_eval,
     is_constant,
     mul,
