@@ -1,67 +1,38 @@
-import math
+
+import fpcore
 from fpcore.ast import FPCore
 from interval import Interval
-from lambdas import types
-from lego_blocks import forms
-from numeric_types import fp64
+from lambdas.fixed_multi_polynomial import FixedMultiPolynomial
 
 
-class FixedPolynomial(types.Source):
+class FixedPolynomial(FixedMultiPolynomial):
 
-    def __init__(self, function: FPCore, domain: Interval, terms: int,
-                 monomials: list, coefficients: list, symmetry = None):
-        """
-        User defined polynomial approximation for the function on the domain
-
-        function: FPCore representing the function
-        domain: Interval domain, must be finite
-        terms: the number of terms in the expression including the constant term
-        monomials: list of monomials in ascending order
-        coefficients: list of coefficients for the monomials
-        """
-        super().__init__(function, domain)
-        self.terms = terms
-        self.monomials = monomials
-        self.coefficients = coefficients
-        self.symmetry = symmetry
+    def __init__(self,
+                 function: FPCore,
+                 domain: Interval,
+                 monomials: list,
+                 coefficients: list):
+        # Run FixedMultiPolynomial initialization
+        super().__init__(function=function,
+                         domain=domain,
+                         combiner=fpcore.parse("(FPCore (x p q) p)"),
+                         p_monomials=monomials,
+                         p_coefficients=coefficients,
+                         q_monomials=list(),
+                         q_coefficients=list())
 
     def __str__(self):
-        body = self.function.body
-        inf = self.domain.inf
-        sup = self.domain.sup
-        terms = self.terms
-        return f"(FixedPolynomial {body} [{inf} {sup}] {terms})"
+        return ("(FixedPolynomial"
+                f" {self.function}"
+                f" {self.domain}"
+                f" [{fpcore.list_to_str(self.p_monomials)}]"
+                f" [{fpcore.list_to_str(self.p_coefficients)}]"
+                ")")
 
     def __repr__(self):
-        return "FixedPolynomial({}, {}, {})".format(repr(self.function),
-                                                      repr(self.domain),
-                                                      repr(self.terms))
-
-    def type_check(self):
-        # try:
-        #     if self.function.eval(0) != 0:
-        #         assert(self.monomials[0] == 0)
-        # except ZeroDivisionError:
-        #     pass
-        if self.type_check_done:
-            return
-
-        if (not math.isfinite(self.domain.inf)
-                or not math.isfinite(self.domain.sup)):
-            raise TypeError("FixedPolynomial must have a finite domain")
-
-        if self.symmetry == 0:
-            assert(all(term % 2 == 0 for term in self.monomials))
-        elif self.symmetry == 1:
-            assert(all(term % 2 != 0 for term in self.monomials))
-
-        self.out_type = types.Poly(self.function, self.domain)
-        self.type_check_done = True
-
-    def generate(self, numeric_type=fp64):
-        self.type_check()
-
-        return forms.Polynomial(self.function,
-                                self.monomials,
-                                self.coefficients,
-                                self.domain)
+        return ("FixedPolynomial("
+                f"{repr(self.function)}, "
+                f"{repr(self.domain)}, "
+                f"[{fpcore.list_to_repr(self.p_monomials)}], "
+                f"[{fpcore.list_to_repr(self.p_coefficients)}], "
+                ")")
