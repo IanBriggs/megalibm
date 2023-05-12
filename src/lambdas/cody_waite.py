@@ -124,9 +124,8 @@ class CodyWaite(types.Transform):
             #print(f"vs: {g_n}")
             #assert dirty_equal(target_function, g_n, z)
 
-        self.domain = Interval("0", "INFINITY")
         self.out_type = types.Impl(target_function,
-                                   self.domain)
+                                   Interval("0", "INFINITY"))
         self.type_check_done = True
 
     def generate(self, numeric_type=FP64):

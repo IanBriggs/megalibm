@@ -19,6 +19,10 @@ class FixedMultiPolynomial(types.Source):
         # Run Source initialization
         super().__init__(function, domain)
 
+        # This is a Poly, not an Impl as assumed for other Source nodes
+        self.out_type = types.Poly(self.out_type.function,
+                                   self.out_type.domain)
+
         # Polynomials require a finite domain
         if not domain.isfinite():
             raise ValueError("'domain' must be finite, given: {domain}")
@@ -95,8 +99,8 @@ class FixedMultiPolynomial(types.Source):
 
     def __str__(self):
         return ("(FixedMultiPolynomial"
-                f" {self.function}"
-                f" {self.domain}"
+                f" {self.out_type.function}"
+                f" {self.out_type.domain}"
                 f" {self.combiner}"
                 f" [{fpcore.list_to_str(self.p_monomials)}]"
                 f" [{fpcore.list_to_str(self.p_coefficients)}]"
@@ -106,8 +110,8 @@ class FixedMultiPolynomial(types.Source):
 
     def __repr__(self):
         return ("FixedMultiPolynomial("
-                f"{repr(self.function)}, "
-                f"{repr(self.domain)}, "
+                f"{repr(self.out_type.function)}, "
+                f"{repr(self.out_type.domain)}, "
                 f"{repr(self.combiner)}, "
                 f"[{fpcore.list_to_repr(self.p_monomials)}], "
                 f"[{fpcore.list_to_repr(self.p_coefficients)}], "
@@ -122,8 +126,6 @@ class FixedMultiPolynomial(types.Source):
 
         # TODO: Is there anything to check here?
 
-        # Set out_type and indicate that type_check has completed
-        self.out_type = types.Poly(self.function, self.domain)
         self.type_check_done = True
 
     def generate(self, numeric_type=FP64):

@@ -17,7 +17,6 @@ class General(types.Transform):
         in_node: A polynomial
         """
         super().__init__(in_node)
-        self.domain = self.in_node.domain
 
     def type_check(self):
         """ Check that the input is a polynomial """
@@ -30,7 +29,8 @@ class General(types.Transform):
         # TODO: turn into an exception
         assert type(our_in_type) == types.Poly
 
-        self.out_type = types.Impl(our_in_type.function, our_in_type.domain)
+        self.out_type = types.Impl(our_in_type.out_type.function,
+                                   our_in_type.out_type.domain)
         self.type_check_done = True
 
     def generate(self, numeric_type=FP64):
@@ -46,13 +46,10 @@ class General(types.Transform):
     def generate_hole(cls, out_type):
         # We only output
         # (Impl (func) low high)
-        if (type(out_type) != types.Impl
-            or not math.isfinite(better_float_cast(out_type.domain.inf))
-                or not math.isfinite(better_float_cast(out_type.domain.sup))):
+        if type(out_type) != types.Impl or not out_type.isfinite():
             return list()
 
         # To get this output we need as input
         # (Poly (func) low high)
-        in_type = types.Poly(out_type.function,
-                             out_type.domain)
+        in_type = types.Poly(out_type.function, out_type.domain)
         return [General(lambdas.Hole(in_type)), ]

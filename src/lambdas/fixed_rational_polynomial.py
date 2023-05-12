@@ -24,6 +24,7 @@ class FixedRationalPolynomial(types.Source):
         denominator_monomials: list of monomials in ascending order
         denominator_coefficients: list of coefficients for the monomials
         """
+
         super().__init__(function, domain)
         self.offset = offset
         assert len(numerator_monomials) == len(numerator_coefficients)
@@ -35,14 +36,14 @@ class FixedRationalPolynomial(types.Source):
 
     def __str__(self):
         body = self.function.body
-        inf = self.domain.inf
-        sup = self.domain.sup
+        inf = self.out_type.domain.inf
+        sup = self.out_type.domain.sup
         return f"(FixedRationalPolynomial {body} [{inf} {sup}])"
 
     def __repr__(self):
         msg = "FixedPolynomial({}, {}, {}, {}, {}, {}, {})"
-        return msg.format(repr(self.function),
-                          repr(self.domain),
+        return msg.format(repr(self.out_type.function),
+                          repr(self.out_type.domain),
                           repr(self.offset),
                           repr(self.numerator_monomials),
                           repr(self.numerator_coefficients),
@@ -59,20 +60,19 @@ class FixedRationalPolynomial(types.Source):
         except ZeroDivisionError:
             pass
 
-        if (not math.isfinite(self.domain.inf)
-                or not math.isfinite(self.domain.sup)):
+        if not self.out_type.domain.isfinite():
             raise TypeError("FixedPolynomial must have a finite domain")
 
-        self.out_type = types.Poly(self.function, self.domain)
+        self.out_type = types.Poly(self.function, self.out_type.domain)
         self.type_check_done = True
 
     def generate(self, numeric_type=FP64):
         self.type_check()
 
-        return forms.RationalPolynomial(self.function,
+        return forms.RationalPolynomial(self.out_type.function,
                                         self.offset,
                                         self.numerator_monomials,
                                         self.numerator_coefficients,
                                         self.denominator_monomials,
                                         self.denominator_coefficients,
-                                        self.domain)
+                                        self.out_type.domain)

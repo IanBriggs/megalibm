@@ -1,10 +1,12 @@
 
 
 import fpcore
+from interval import Interval
 import lego_blocks
 from fpcore.ast import Variable
 from lambdas import types
 from numeric_types import FP64
+
 
 
 class TransformOut(types.Transform):
@@ -39,8 +41,7 @@ class TransformOut(types.Transform):
         # assert self.expr.contains_variable("y")
         new_f = self.expr.substitute(Variable("y"), f.body)
 
-        self.domain = domain
-        self.out_type = types.Impl(new_f, self.domain)
+        self.out_type = types.Impl(new_f, domain)
         self.type_check_done = True
 
     def generate(self, numeric_type=FP64):

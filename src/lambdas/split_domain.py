@@ -67,8 +67,7 @@ class SplitDomain(types.Transform):
             assert f == impl.out_type.function
 
         # Set the output
-        self.domain = Interval(full_span_inf, full_span_sup)
-        self.out_type = types.Impl(f, self.domain)
+        self.out_type = types.Impl(f, Interval(full_span_inf, full_span_sup))
         self.type_check_done = True
 
     def generate(self, numeric_type=FP64):

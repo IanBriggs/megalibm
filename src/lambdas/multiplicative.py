@@ -60,9 +60,8 @@ class Multiplicative(types.Transform):
         # The domain [1.0, 1.5] wouldn't work either since there is no easy way
         # to map the starting range of `m` to this domain.
 
-        self.domain = Interval("0.0", "INFINITY")
         self.out_type = types.Impl(our_in_type.function,
-                                   self.domain)
+                                   Interval("0.0", "INFINITY"))
         self.type_check_done = True
 
     def generate(self, numeric_type=FP64):

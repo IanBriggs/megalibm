@@ -23,16 +23,16 @@ class FixedPolynomial(FixedMultiPolynomial):
 
     def __str__(self):
         return ("(FixedPolynomial"
-                f" {self.function}"
-                f" {self.domain}"
+                f" {self.out_type.function}"
+                f" {self.out_type.domain}"
                 f" [{fpcore.list_to_str(self.p_monomials)}]"
                 f" [{fpcore.list_to_str(self.p_coefficients)}]"
                 ")")
 
     def __repr__(self):
         return ("FixedPolynomial("
-                f"{repr(self.function)}, "
-                f"{repr(self.domain)}, "
+                f"{repr(self.out_type.function)}, "
+                f"{repr(self.out_type.domain)}, "
                 f"[{fpcore.list_to_repr(self.p_monomials)}], "
                 f"[{fpcore.list_to_repr(self.p_coefficients)}], "
                 ")")

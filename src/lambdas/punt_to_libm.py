@@ -22,14 +22,6 @@ class PuntToLibm(types.Source):
         """
         super().__init__(function, domain)
 
-    def type_check(self):
-        """ Type check always passes """
-        if self.type_check_done:
-            return
-
-        self.out_type = types.Impl(self.function, self.domain)
-        self.type_check_done = True
-
     def generate(self, numeric_type=FP64):
         """ Use libm in generated C """
         self.type_check()

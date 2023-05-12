@@ -72,7 +72,6 @@ class MirrorRight(types.Transform):
 
         # Remember the mirror point
         self.mirror_point = our_in_type.domain.sup
-        self.domain = next_domain
         self.out_type = types.Impl(our_in_type.function, next_domain)
         self.type_check_done = True
 

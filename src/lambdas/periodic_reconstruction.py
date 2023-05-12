@@ -59,9 +59,8 @@ class PeriodicRecons(types.Transform):
         assert has_period(our_in_type.function, float_period)
         assert better_float_cast(our_in_type.domain.width()) <= float_period
 
-        self.domain = Interval("(- INFINITY)", "INFINITY")
         self.out_type = types.Impl(our_in_type.function,
-                                   self.domain)
+                                   Interval("(- INFINITY)", "INFINITY"))
         self.type_check_done = True
 
     def generate(self, numeric_type=FP64):
@@ -79,7 +78,7 @@ class PeriodicRecons(types.Transform):
         add = lego_blocks.SimpleAdditive(numeric_type,
                                          [in_name],
                                          [out_name, k],
-                                         self.in_node.domain.inf,
+                                         self.in_node.out_type.domain.inf,
                                          self.period)
 
         # Inductive reconstruction to map the output according to its s function | (s(f(t(x))))

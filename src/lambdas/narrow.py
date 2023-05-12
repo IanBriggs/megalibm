@@ -56,7 +56,6 @@ class Narrow(types.Transform):
         next_domain = self.narrow_to
 
         # Set the out types
-        self.domain = next_domain
         self.out_type = types.Impl(our_in_type.function, next_domain)
         self.type_check_done = True
 

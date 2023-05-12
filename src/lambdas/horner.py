@@ -14,9 +14,6 @@ class Horner(types.Transform):
         # Run Transform initialization
         super().__init__(in_node)
 
-        # TODO: This member variable probably shouldn't be here.
-        self.domain = self.in_node.domain
-
         # Check and save split
         if type(split) != int:
             raise ValueError(f"'split' must be an int, given: {type(split)}")
@@ -44,7 +41,8 @@ class Horner(types.Transform):
         # for instance, a polynomial of 10 terms cannot have a split of 100
 
         # Set out_type and indicate that type_check has completed
-        self.out_type = types.Impl(our_in_type.function, our_in_type.domain)
+        self.out_type = types.Impl(our_in_type.function,
+                                   our_in_type.domain)
         self.type_check_done = True
 
     def generate(self, numeric_type=FP64):
