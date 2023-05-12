@@ -1,4 +1,4 @@
-from fpcore.ast import ASTNode, Atom, Constant, FPCore, Operation
+from fpcore.ast import ASTNode, Atom, Constant, FPCore, Number, Operation
 from utils import add_method
 from numeric_types import FP64, FP32
 
@@ -49,6 +49,11 @@ def to_libm_c(self, *args, **kwargs):
 @add_method(Atom)
 def to_libm_c(self, numeric_type=FP64):
     return self.source
+
+
+@add_method(Number)
+def to_libm_c(self, numeric_type=FP64):
+    return numeric_type.num_to_str(self.source)
 
 
 @add_method(Constant)

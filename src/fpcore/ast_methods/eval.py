@@ -1,6 +1,8 @@
 import mpmath
 from fpcore.ast import ASTNode, Constant, FPCore, Number, Operation, Variable
-from utils import add_method
+from utils import add_method, Logger
+
+logger = Logger()
 
 mpmath.mp.prec = 2**14
 
@@ -93,8 +95,10 @@ def eval(self, assignment=None):
 @add_method(Variable)
 def eval(self, assignment=None):
     if assignment is not None and self.source not in assignment:
+        logger.warning("{} not in evaluation environment", self.source)
+        logger.warning("env contains '{}'", " ".join(assignment.keys()))
         raise NameError("{} not in evaluation environment".format(self.source))
-    val =  assignment[self.source]
+    val = assignment[self.source]
     if type(val) == mpmath.mpf:
         return val
     return mpmath.mpf(val)

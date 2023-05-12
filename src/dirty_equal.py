@@ -52,7 +52,7 @@ def dirty_equal(a: fpcore.ast.ASTNode,
         sup = mpmath.mpf("1e300") * mpmath.sign(inf)
 
     # This should not occur, but check it anyway
-    assert inf < sup, "Domain was upside down"
+    assert inf <= sup, "Domain was upside down"
 
     # Test the endpoints (this gets messed up with infinity)
     if not try_point(a, b, variable_name, inf):

@@ -56,9 +56,8 @@ class Result():
         # Try [inf - small, sup]
         if not have_res:
             logger.warning("Sollya call failed, trying [inf - small, sup] ")
-            new_domain = Interval(domain.inf - fpcore.ast.Number("0.00390625"),
+            self.domain = Interval(domain.inf - fpcore.ast.Number("0.00390625"),
                                   domain.sup)
-            self.domain = new_domain
             self._generate_query()
             have_res = self._try_cache()
         if not have_res:
@@ -67,9 +66,8 @@ class Result():
         # Try [inf, sup + small]
         if not have_res:
             logger.warning("Sollya call failed, trying [inf, sup + small]")
-            new_domain = Interval(domain.inf,
+            self.domain = Interval(domain.inf,
                                   domain.sup + fpcore.ast.Number("0.00390625"))
-            self.domain = new_domain
             self._generate_query()
             have_res = self._try_cache()
         if not have_res:
@@ -78,9 +76,8 @@ class Result():
         # Try [inf-small, sup + small]
         if not have_res:
             logger.warning("Sollya call failed, trying [inf, sup + small]")
-            new_domain = Interval(domain.inf - fpcore.ast.Number("0.00390625"),
+            self.domain = Interval(domain.inf - fpcore.ast.Number("0.00390625"),
                                   domain.sup + fpcore.ast.Number("0.00390625"))
-            self.domain = new_domain
             self._generate_query()
             have_res = self._try_cache()
         if not have_res:
