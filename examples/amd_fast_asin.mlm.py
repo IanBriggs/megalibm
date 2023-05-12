@@ -62,7 +62,7 @@ logger.set_log_level(Logger.HIGH)
 # | Should be handled by a new parser                                         |
 # |                                                                           |
 
-asin = fpcore.parse("(FPCore (x) (asin x))")[0]
+asin = fpcore.parse("(FPCore (x) (asin x))")
 # This is the value that corresponds to AMD's code
 linear_cutoff = "1.38777878078144552145514403413465714614676459320581451695186814276894438080489635467529296875e-17"
 
@@ -74,7 +74,6 @@ mlm = \
                 FixedPolynomial(
                     asin,
                     Interval("0", linear_cutoff),
-                    1,
                     [1],
                     [1]
                 )),
@@ -84,7 +83,6 @@ mlm = \
                     FixedPolynomial(
                         asin,
                         Interval("0", "0.5"),
-                        13,
                         [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25],
                         [1,
                          0.1666666666666477004,
@@ -100,10 +98,10 @@ mlm = \
                          -0.01651175205874840998,
                          0.03209627299824770186, ]),
                          split=1),
-                fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
-                fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body)}),
-        fpcore.parse("(FPCore (x) (- x))")[0].body,
-        fpcore.parse("(FPCore (x) (- y))")[0].body)
+                fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
+                fpcore.parse_expr("(- (/ PI 2) (* 2 y))"))}),
+        fpcore.parse_expr("(- x)"),
+        fpcore.parse_expr("(- y)"))
 
 better_linear_cutoff = "2.14910850667675e-08"
 better_mlm = \
@@ -114,7 +112,6 @@ better_mlm = \
                 FixedPolynomial(
                     asin,
                     Interval("0", better_linear_cutoff),
-                    1,
                     [1],
                     [1]
                 )),
@@ -126,10 +123,10 @@ better_mlm = \
                             Interval("0", "0.5"),
                             15),
                         split=1),
-                fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
-                fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body)}),
-        fpcore.parse("(FPCore (x) (- x))")[0].body,
-        fpcore.parse("(FPCore (x) (- y))")[0].body)
+                fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
+                fpcore.parse_expr("(- (/ PI 2) (* 2 y))"))}),
+        fpcore.parse_expr("(- x)"),
+        fpcore.parse_expr("(- y)"))
 
 # |                                                                           |
 # +---------------------------------------------------------------------------+
@@ -165,7 +162,7 @@ with open(path.join(GIT_DIR, "examples", "amd_fast_asin.c"), "r") as f:
     libm_src = [line.rstrip() for line in text.splitlines()]
 
 # oracle
-func = fpcore.parse("(FPCore (x) (asin x))")[0]
+func = fpcore.parse("(FPCore (x) (asin x))")
 domain = Interval(-1, 1)
 target = lambdas.types.Impl(func, domain)
 mpfr_func_name = "mpfr_dsl_amd_fast_asin"

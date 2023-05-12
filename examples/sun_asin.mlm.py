@@ -48,7 +48,7 @@ sys.path.append(SRC_DIR)
 import fpcore
 import lambdas
 
-from lambdas import InflectionLeft, InflectionRight, Horner, FixedRationalPolynomial, SplitDomain, FixedPolynomial
+from lambdas import *
 from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
 from interval import Interval
 from utils.logging import Logger
@@ -60,25 +60,25 @@ logger.set_log_level(Logger.HIGH)
 # | Should be handled by a new parser                                         |
 # |                                                                           |
 
-asin = fpcore.parse("(FPCore (x) (asin x))")[0]
+asin = fpcore.parse("(FPCore (x) (asin x))")
 
 one_i = Interval("1", "1")
 linear_cutoff = "7.450580596923828125e-9"
 linear_i = Interval("0", linear_cutoff)
-HPI = fpcore.parse("(FPCore () PI_2)")[0].body
+HPI = fpcore.parse_expr("PI_2")
 
 mlm = \
     InflectionLeft(
         SplitDomain({
-            one_i: Horner(FixedPolynomial(asin, one_i, 1, [0], [HPI])),
-            linear_i: Horner(FixedPolynomial(asin, linear_i, 1, [1], [1])),
+            one_i: Horner(FixedPolynomial(asin, one_i, [0], [HPI])),
+            linear_i: Horner(FixedPolynomial(asin, linear_i, [1], [1])),
             Interval(linear_cutoff, "1"):
                 InflectionRight(
                     Horner(
-                        FixedRationalPolynomial(
+                        FixedMultiPolynomial(
                             asin,
                             Interval("0", "0.5"),
-                            fpcore.parse("(FPCore (x) x)")[0].body,
+                            fpcore.parse("(FPCore (x p q) (+ x (/ p q)))"),
                             [3, 5, 7, 9, 11, 13],
                             [ 1.66666666666666657415e-01,
                              -3.25565818622400915405e-01,
@@ -92,11 +92,11 @@ mlm = \
                               2.02094576023350569471e+00,
                              -6.88283971605453293030e-01,
                               7.70381505559019352791e-02])),
-                    fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
-                    fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body),
+                    fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
+                    fpcore.parse_expr("(- (/ PI 2) (* 2 y))")),
         }),
-        fpcore.parse("(FPCore (x) (- x))")[0].body,
-        fpcore.parse("(FPCore (x) (- y))")[0].body)
+        fpcore.parse_expr("(- x)"),
+        fpcore.parse_expr("(- y)"))
 
 # |                                                                           |
 # +---------------------------------------------------------------------------+
@@ -126,7 +126,7 @@ with open(path.join(GIT_DIR, "examples", "sun_asin.c"), "r") as f:
     libm_src = [line.rstrip() for line in text.splitlines()]
 
 # oracle
-func = fpcore.parse("(FPCore (x) (asin x))")[0]
+func = fpcore.parse("(FPCore (x) (asin x))")
 domain = Interval(-1, 1)
 target = lambdas.types.Impl(func, domain)
 mpfr_func_name = "mpfr_dsl_sun_asin"

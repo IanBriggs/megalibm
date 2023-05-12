@@ -35,8 +35,8 @@ import fpcore
 import lambdas
 
 
-from lambdas import InflectionLeft, InflectionRight, Horner, FixedPolynomial, Estrin
-from numeric_types import fp32
+from lambdas import *
+from numeric_types import FP32
 from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
 from interval import Interval
 from utils.logging import Logger
@@ -49,7 +49,7 @@ logger.set_log_level(Logger.HIGH)
 # |
 
 
-asin = fpcore.parse("(FPCore (x) (asin x))")[0]
+asin = fpcore.parse("(FPCore (x) (asin x))")
 
 mlm = \
     InflectionLeft(
@@ -58,18 +58,18 @@ mlm = \
                 FixedPolynomial(
                     asin,
                     Interval("0", "0.5"),
-                    6,
                     [1, 3, 5, 7, 9, 11],
-                    [ "1.0f",
-                      "0.1666679084300994873f",
-                      "0.07494434714317321777f",
-                      "0.04555018618702888489f",
-                      "0.02385816909372806549f",
-                      "0.04263564199209213257f"]), split=1),
-            fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
-            fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body),
-        fpcore.parse("(FPCore (x) (- x))")[0].body,
-        fpcore.parse("(FPCore (x) (- y))")[0].body)
+                    ["1.0",
+                     "0.1666679084300994873",
+                     "0.07494434714317321777",
+                     "0.04555018618702888489",
+                     "0.02385816909372806549",
+                     "0.04263564199209213257"]),
+                split=1),
+            fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
+            fpcore.parse_expr("(- (/ PI 2) (* 2 y))")),
+        fpcore.parse_expr("(- x)"),
+        fpcore.parse_expr("(- y)"))
 
 # |                                                                           |
 # +---------------------------------------------------------------------------+
@@ -87,7 +87,8 @@ os.chdir("generated")
 # dsl
 mlm.type_check()
 dsl_func_name = "dsl_amd_fast_asinf"
-dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name, numeric_type=fp32)
+dsl_sig, dsl_src = lambdas.generate_c_code(
+    mlm, dsl_func_name, numeric_type=FP32)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
@@ -99,7 +100,7 @@ with open(path.join(GIT_DIR, "examples", "amd_fast_asinf.c"), "r") as f:
     libm_src = [line.rstrip() for line in text.splitlines()]
 
 # oracle
-func = fpcore.parse("(FPCore (x) (asin x))")[0]
+func = fpcore.parse("(FPCore (x) (asin x))")
 domain = Interval(-1, 1)
 target = lambdas.types.Impl(func, domain)
 mpfr_func_name = "mpfr_dsl_amd_fast_asinf"
