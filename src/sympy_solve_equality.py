@@ -74,6 +74,15 @@ def sympy_to_fpcore(sym):
             num = fpcore.ast.Operation("-", num)
         return num
 
+    # Rational
+    if sym.func == sympy.core.numbers.Rational:
+        num = fpcore.ast.Number(str(abs(sym.numerator)))
+        den = fpcore.ast.Number(str(sym.denominator))
+        rat = fpcore.ast.Operation("/", num, den)
+        if sym.numerator < 0:
+            rat = fpcore.ast.Operation("-", rat)
+        return rat
+
     # The constant 1 ??
     if sym.func == sympy.core.numbers.One:
         return fpcore.ast.Number("1")
@@ -81,6 +90,12 @@ def sympy_to_fpcore(sym):
     # The constant -1 ??
     if sym.func == sympy.core.numbers.NegativeOne:
         return fpcore.ast.Operation("-", fpcore.ast.Number("1"))
+
+    # The constant 1/2 ??
+    if sym.func == sympy.core.numbers.Half:
+        return fpcore.ast.Operation("/",
+                                    fpcore.ast.Number("1"),
+                                    fpcore.ast.Number("2"))
 
     # Others get translated directly
     try:
@@ -116,6 +131,14 @@ if __name__ == "__main__":
 
     lhs = fpcore.parse_expr("s")
     rhs = fpcore.parse_expr("(/ x (+ 2 x))")
+    var = fpcore.ast.Variable("x")
+
+    ans = sympy_solve_equality(lhs, rhs, var)
+
+    print(ans)
+
+    lhs = fpcore.parse_expr("s")
+    rhs = fpcore.parse_expr("(+ (/ 1 2) x)")
     var = fpcore.ast.Variable("x")
 
     ans = sympy_solve_equality(lhs, rhs, var)
