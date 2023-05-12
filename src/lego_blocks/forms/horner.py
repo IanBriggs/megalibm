@@ -35,22 +35,18 @@ def tree_pow(x: fpcore.ast.Expr,
     if n < 0:
         raise ValueError(f"'n' must be non-negative, given: {n}")
 
-    # TODO: Actually do this function.
-    match n:
-        case 0:
+    def _tree_pow(x, n):
+        if n == 0:
             return fpcore.ast.Number("1")
-        case 1:
+        if n == 1:
             return x
-        case 2:
-            return x * x
-        case 3:
-            return (x * x) * x
-        case 4:
-            return (x * x) * (x * x)
-        case 5:
-            return ((x * x) * (x * x)) * x
-        case other:
-            raise NotImplementedError("Shame Ian for hard coding this")
+        if n % 2 == 1:
+            return tree_pow(x, n-1) * x
+        else:
+            part = tree_pow(x, n // 2)
+            return part * part
+
+    return _tree_pow(x, n)
 
 
 class Horner(forms.Form):
@@ -81,7 +77,7 @@ class Horner(forms.Form):
 
     def __repr__(self):
         return ("Horner("
-                f"{repr(self.numeric_type)}, "
+                f"{self.numeric_type.name}, "
                 f"[{fpcore.ast.list_to_repr(self.in_names)}], "
                 f"[{fpcore.ast.list_to_repr(self.out_names)}], "
                 f"[{fpcore.ast.list_to_repr(self.monomials)}], "
