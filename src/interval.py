@@ -1,9 +1,12 @@
 
 
 import math
+
+import sympy
 from better_float_cast import better_float_cast
 import fpcore
 import mpmath
+from sympy_solve_equality import sympy_to_fpcore
 
 from utils.logging import Logger
 
@@ -12,6 +15,10 @@ logger = Logger(level=Logger.EXTRA)
 
 
 def parse_bound(something):
+    if "+inf" == something:
+        return fpcore.ast.Constant("INFINITY")
+    if "-inf" == something:
+        return fpcore.ast.Operation("-", fpcore.ast.Constant("INFINITY"))
     fpc = fpcore.parse_expr(something)
     return fpc.simplify()
 
@@ -22,16 +29,14 @@ class Interval():
         self.sup = parse_bound(sup)
 
         fi = self.float_inf
-        if (math.isfinite(fi)
-                and int(fi) == fi):
+        if (math.isfinite(fi) and int(fi) == fi):
             self.inf = parse_bound(int(fi))
 
         fs = self.float_sup
-        if (math.isfinite(fs)
-                and int(fs) == fs):
+        if (math.isfinite(fs) and int(fs) == fs):
             self.sup = parse_bound(int(fs))
 
-        if self.float_inf > self.float_sup:
+        if not self.float_inf <= self.float_sup:
             raise ValueError(f"Upside down interval: [{inf}, {sup}]")
 
     @property
@@ -89,6 +94,12 @@ class Interval():
             sup = str(self.sup).replace("INFINITY", "inf")
             me = mpmath.iv.mpf([inf, sup])
             return other in me
+        if type(other) == Interval:
+            me = mpmath.iv.mpf([str(self.inf).replace("INFINITY", "inf"),
+                                str(self.sup).replace("INFINITY", "inf")])
+            other = mpmath.iv.mpf([str(other.inf).replace("INFINITY", "inf"),
+                                   str(other.sup).replace("INFINITY", "inf")])
+            return other in me
         f_point = better_float_cast(other)
         return self.float_inf <= f_point and f_point <= self.float(sup)
 
@@ -103,4 +114,30 @@ class Interval():
         if self.float_sup < other.float_sup:
             sup = other.sup
         return Interval(inf, sup)
+
+    @staticmethod
+    def try_symbolic_interval_eval(fpc, in_domain):
+        # What is the input's name?
+        vars = fpc.get_variables()
+        if len(vars) != 1:
+            raise ValueError("Only single variable functions are supported")
+        in_var = fpcore.ast.Variable(vars.pop())
+
+        # Determine if the func in monotonic on this interval
+        diff_fpc = sympy_to_fpcore(sympy.diff(fpc.to_sympy(),
+                                                      in_var.to_sympy()))
+        diff_on_interval = diff_fpc.interval_eval({in_var.source:
+                                                          in_domain})
+        if diff_on_interval >= 0:
+            # Yay, we can just use the endpoints
+            inf = fpc.substitute(in_var, in_domain.inf)
+            sup = fpc.substitute(in_var, in_domain.sup)
+            return Interval(inf, sup)
+
+        # Hopefully just interval arith makes a tight answer
+        # (doubtful)
+        mpf_domain = fpc.interval_eval({in_var.source: in_domain})
+        inf, sup = mpf_domain._mpi_  # Don't do this
+        return Interval(mpmath.nstr(mpmath.mpf(inf), 4096),
+                              mpmath.nstr(mpmath.mpf(sup), 4096))
 

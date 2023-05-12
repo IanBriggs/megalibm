@@ -86,23 +86,7 @@ class Recharacterize(types.Transform):
         inverse_map = sympy_solve_equality(in_var, remap, out_var)
         logger("Inverse of {} is {}", remap, inverse_map)
 
-        # Determine if the func in monotonic on this interval
-        diff_inverse_map = sympy_to_fpcore(sympy.diff(inverse_map.to_sympy(),
-                                                      in_var))
-        diff_on_interval = diff_inverse_map.interval_eval({in_var.source:
-                                                          in_domain})
-        if diff_on_interval >= 0:
-            # Yay, we can just use the endpoints
-            inf = inverse_map.substitute(in_var, in_domain.inf)
-            sup = inverse_map.substitute(in_var, in_domain.sup)
-            out_domain = Interval(inf, sup)
-        else:
-            # Hopefully just interval arith makes a tight answer
-            # (doubtful)
-            mpf_domain = inverse_map.interval_eval({in_var.source: in_domain})
-            inf, sup = mpf_domain._mpi_  # Don't do this
-            out_domain = Interval(mpmath.nstr(mpmath.mpf(inf), 4096),
-                                  mpmath.nstr(mpmath.mpf(sup), 4096))
+        out_domain = Interval.try_symbolic_interval_eval(inverse_map, in_domain)
         logger("{} has domain of [{}, {}]",
                out_var,
                out_domain.float_inf,
