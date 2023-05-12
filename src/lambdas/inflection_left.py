@@ -8,6 +8,9 @@ from fpcore.ast import Variable
 from interval import Interval
 from lambdas import types
 from numeric_types import FP32, FP64
+from utils import Logger
+
+logger = Logger(level=Logger.LOW)
 
 # This operation takes in an implementation of a function on an interval domain.
 # It then produces a new implementation that is valid on a new domain extending
@@ -57,7 +60,9 @@ class InflectionLeft(types.Transform):
         # Using f(x)'s domain [a,b] we need to check that:
         #   for x in [a-(b-a), a] that red(x) is in [a,b]
         lower_domain = Interval(a - (b - a), a)
-        reduced = self.reduction.interval_eval({"x": lower_domain})
+        logger("Evaluating: {}", self.reduction)
+        reduced = Interval.try_symbolic_interval_eval(self.reduction,
+                                                      lower_domain)
         assert (domain.contains(reduced))
 
         # We also need to check that:
@@ -70,12 +75,12 @@ class InflectionLeft(types.Transform):
         # For now let's use a sympy based equality (egg??) ((mpmath???))
         assert (dirty_equal(f, rec_f_red, domain))
         # assert(f.egg_equal(rec_f_red))
-        #assert(sympy_based_equal(rec_f_red, f))
+        # assert(sympy_based_equal(rec_f_red, f))
 
         # Set the values that might be used for outer lambda expressions
         self.inflection_point = a
-        self.domain = Interval(a - (b - a), b)
-        self.out_type = types.Impl(f, self.domain)
+        out_domain = Interval(lower_domain.inf, domain.sup)
+        self.out_type = types.Impl(f, out_domain)
         self.type_check_done = True
 
     def generate(self, numeric_type=FP64):
@@ -102,8 +107,6 @@ class InflectionLeft(types.Transform):
         reduced_name = so_far[0].in_names[0]
         red_expr = self.reduction.substitute(
             Variable("x"), Variable(x_in_name))
-        if numeric_type == FP32:
-            red_expr = red_expr.substitute_op()
 
         red = lego_blocks.IfLess(numeric_type,
                                  [x_in_name],
@@ -118,8 +121,6 @@ class InflectionLeft(types.Transform):
         y_out_name = self.gensym("y_out")
         rec_expr = self.reconstruction.substitute(
             Variable("y"), Variable(inner_name))
-        if numeric_type == FP32:
-            rec_expr = rec_expr.substitute_op()
 
         rec = lego_blocks.IfLess(numeric_type,
                                  [x_in_name],

@@ -57,7 +57,8 @@ class InflectionRight(types.Transform):
         # Using f(x)'s domain [a,b] we need to check that:
         #   for x in [b, b+(b-a)] that red(x) is in [a,b]
         upper_domain = Interval(b, b + (b - a))
-        reduced = self.reduction.interval_eval({"x": upper_domain})
+        reduced = Interval.try_symbolic_interval_eval(self.reduction,
+                                                      upper_domain)
         assert (domain.contains(reduced))
 
         # We also need to check that:
@@ -74,8 +75,7 @@ class InflectionRight(types.Transform):
 
         # Set the values that might be used for outer lambda expressions
         self.inflection_point = b
-        self.domain = Interval(a, b + (b - a))
-        self.out_type = types.Impl(f, self.domain)
+        self.out_type = types.Impl(f, Interval(domain.inf, upper_domain.sup))
         self.type_check_done = True
 
     def generate(self, numeric_type=FP64):
@@ -102,8 +102,6 @@ class InflectionRight(types.Transform):
         reduced_name = so_far[0].in_names[0]
         red_expr = self.reduction.substitute(
             Variable("x"), Variable(x_in_name))
-        if numeric_type == FP32:
-            red_expr = red_expr.substitute_op()
 
         red = lego_blocks.IfLess(numeric_type,
                                  [x_in_name],
@@ -117,8 +115,6 @@ class InflectionRight(types.Transform):
         y_out_name = self.gensym("y_out")
         rec_expr = self.reconstruction.substitute(
             Variable("y"), Variable(inner_name))
-        if numeric_type == FP32:
-            rec_expr = rec_expr.substitute_op()
 
         rec = lego_blocks.IfLess(numeric_type,
                                  [x_in_name],
