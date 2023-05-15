@@ -1,15 +1,13 @@
 
 
-from better_float_cast import better_float_cast
-import lego_blocks
-import numeric_types
 import interval
 import lambdas
-
+import lego_blocks
+import numeric_types
+from better_float_cast import better_float_cast
 from interval import Interval
 from lambdas import types
 from utils import Logger
-
 
 logger = Logger(level=Logger.HIGH)
 
@@ -45,6 +43,7 @@ class RepeatExp(types.Transform):
                                    Interval("0.0", "INFINITY"))
 
     def generate(self, numeric_type=numeric_types.FP64):
+        self.type_check()
         our_in_type = self.in_node.out_type
         so_far = super().generate()
         in_name = self.gensym("in")
@@ -65,6 +64,14 @@ class RepeatExp(types.Transform):
                                    [out_name])
 
         return [add] + so_far + [ldexp]
+
+    def type_check(self):
+        if self.type_check_done:
+            return
+
+        # TODO: actually type check
+
+        self.type_check_done = True
 
     @classmethod
     def generate_hole(cls, out_type, egraph):

@@ -52,6 +52,7 @@ logger.set_log_level(Logger.HIGH)
 asin = fpcore.parse("(FPCore (x) (asin x))")
 
 mlm = \
+    TypeCast(
     InflectionLeft(
         InflectionRight(
             Estrin(
