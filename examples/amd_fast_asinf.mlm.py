@@ -53,24 +53,24 @@ asin = fpcore.parse("(FPCore (x) (asin x))")
 
 mlm = \
     TypeCast(
-    InflectionLeft(
-        InflectionRight(
-            Estrin(
-                FixedPolynomial(
-                    asin,
-                    Interval("0", "0.5"),
-                    [1, 3, 5, 7, 9, 11],
-                    ["1.0",
-                     "0.1666679084300994873",
-                     "0.07494434714317321777",
-                     "0.04555018618702888489",
-                     "0.02385816909372806549",
-                     "0.04263564199209213257"]),
-                split=1),
-            fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
-            fpcore.parse_expr("(- (/ PI 2) (* 2 y))")),
-        fpcore.parse_expr("(- x)"),
-        fpcore.parse_expr("(- y)"))
+        InflectionLeft(
+            InflectionRight(
+                Estrin(
+                    FixedPolynomial(
+                        asin,
+                        Interval("0", "0.5"),
+                        [1, 3, 5, 7, 9, 11],
+                        ["1.0",
+                         "0.1666679084300994873",
+                         "0.07494434714317321777",
+                         "0.04555018618702888489",
+                         "0.02385816909372806549",
+                         "0.04263564199209213257"]),
+                    split=1),
+                fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
+                fpcore.parse_expr("(- (/ PI 2) (* 2 y))")),
+            fpcore.parse_expr("(- x)"),
+            fpcore.parse_expr("(- y)")), frm=FP32, to=FP32)
 
 # |                                                                           |
 # +---------------------------------------------------------------------------+
@@ -89,7 +89,7 @@ os.chdir("generated")
 mlm.type_check()
 dsl_func_name = "dsl_amd_fast_asinf"
 dsl_sig, dsl_src = lambdas.generate_c_code(
-    mlm, dsl_func_name, numeric_type=FP32)
+    mlm, dsl_func_name, numeric_type=FP32, func_type=FP32)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd

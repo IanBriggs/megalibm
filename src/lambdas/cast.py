@@ -3,7 +3,6 @@ import numeric_types
 from lambdas import types
 
 
-
 class TypeCast(types.Transform):
 
     def __init__(self, in_node: types.Node, frm: numeric_types.NumericType, to: numeric_types.NumericType):
@@ -23,8 +22,8 @@ class TypeCast(types.Transform):
 
         assert type(our_in_type) == types.Impl
 
-        assert(isinstance(self.cast_in(), (numeric_types.FP32, numeric_types.FP64)))
-        assert(isinstance(self.cast_out(), (numeric_types.FP32, numeric_types.FP64)))
+        assert self.cast_in in (numeric_types.FP32, numeric_types.FP64)
+        assert self.cast_out in (numeric_types.FP32, numeric_types.FP64)
 
         self.out_type = types.Impl(our_in_type.function, our_in_type.domain)
 
@@ -35,19 +34,17 @@ class TypeCast(types.Transform):
         x_in_name = self.gensym("x_in")
         out_name = so_far[0].in_names[0]
 
-
-        inp = GenerateCast(numeric_type(),
-                             [x_in_name],
-                             [out_name],
-                             self.cast_in().c_type())
-
+        inp = GenerateCast(numeric_type,
+                           [x_in_name],
+                           [out_name],
+                           self.cast_in.c_type)
 
         inner_name = so_far[-1].out_names[0]
         y_out_name = self.gensym("y_out")
 
-        out = GenerateCast(numeric_type(),
-                                [inner_name],
-                                [y_out_name],
-                                self.cast_out().c_type())
+        out = GenerateCast(numeric_type,
+                           [inner_name],
+                           [y_out_name],
+                           self.cast_out.c_type)
 
-        return  [inp] + so_far + [out]
+        return [inp] + so_far + [out]

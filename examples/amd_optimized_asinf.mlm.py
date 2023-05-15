@@ -40,7 +40,7 @@ import fpcore
 import lambdas
 
 
-from lambdas import InflectionLeft, InflectionRight, Estrin, FixedPolynomial, TypeCast
+from lambdas import *
 from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
 from interval import Interval
 from utils.logging import Logger
@@ -59,27 +59,27 @@ asin = fpcore.parse("(FPCore (x) (asin x))")
 
 mlm = \
     TypeCast(
-    InflectionLeft(
-        InflectionRight(
-            Estrin(
-                FixedPolynomial(
-                    asin,
-                    Interval("0", "0.5"),
-                    [1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
-                    [ "1.0",
-                      "0.1666666666666477004",
-                      "0.07500000000417969548",
-                      "0.04464285678140855751",
-                      "0.03038196065035564039",
-                      "0.0223717279703189581",
-                      "0.01736009463784134871",
-                      "0.01388184285963460496",
-                      "0.01218919111033679899",
-                      "0.00644940526689945226"]), split=1),
-            fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
-            fpcore.parse_expr("(- (/ PI 2) (* 2 y))")),
-        fpcore.parse_expr("(- x)"),
-        fpcore.parse_expr("(- y)"))
+        InflectionLeft(
+            InflectionRight(
+                Estrin(
+                    FixedPolynomial(
+                        asin,
+                        Interval("0", "0.5"),
+                        [1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
+                        ["1.0",
+                         "0.1666666666666477004",
+                         "0.07500000000417969548",
+                         "0.04464285678140855751",
+                         "0.03038196065035564039",
+                         "0.0223717279703189581",
+                         "0.01736009463784134871",
+                         "0.01388184285963460496",
+                         "0.01218919111033679899",
+                         "0.00644940526689945226"]), split=1),
+                fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
+                fpcore.parse_expr("(- (/ PI 2) (* 2 y))")),
+            fpcore.parse_expr("(- x)"),
+            fpcore.parse_expr("(- y)")), frm=FP64, to=FP32)
 
 # |                                                                           |
 # +---------------------------------------------------------------------------+
@@ -97,7 +97,8 @@ os.chdir("generated")
 # dsl
 mlm.type_check()
 dsl_func_name = "dsl_amd_optimized_asinf"
-dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name, numeric_type=FP64, func_type=FP32)
+dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name,
+                                           numeric_type=FP64, func_type=FP32)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
