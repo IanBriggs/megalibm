@@ -1,20 +1,13 @@
 
-
+import lambdas
+import lego_blocks
 from better_float_cast import better_float_cast
 from fpcore.ast import Variable
-import lego_blocks
-from numeric_types import fp64 
-import interval
-import lambdas
-
-import snake_egg
-
 from interval import Interval
 from lambdas import types
-from utils import Logger
-
 from lambdas.lambda_utils import find_periods, has_period
-
+from numeric_types import FP64
+from utils import Logger
 
 logger = Logger(level=Logger.HIGH)
 
@@ -48,6 +41,9 @@ class Periodic(types.Transform):
         Check that the function has the stated period and the implementation
           has the required width.
         """
+        if self.type_check_done:
+            return
+
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
 
@@ -58,24 +54,26 @@ class Periodic(types.Transform):
         assert has_period(our_in_type.function, float_period)
         assert better_float_cast(our_in_type.domain.width()) <= float_period
 
-        self.domain = Interval("(- INFINITY)", "INFINITY")
         self.out_type = types.Impl(our_in_type.function,
-                                   self.domain)
+                                   Interval("(- INFINITY)", "INFINITY"))
+        self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         # in = ...
         # k = floor((in-sup) / period)
         # out = in - period * k
         # ...
+        self.type_check()
+
         so_far = super().generate(numeric_type=numeric_type)
         in_name = self.gensym("in")
         out_name = so_far[0].in_names[0]
 
         k = self.gensym("k")
-        add = lego_blocks.SimpleAdditive(numeric_type(),
+        add = lego_blocks.SimpleAdditive(numeric_type,
                                          [in_name],
                                          [out_name, k],
-                                         self.in_node.domain.inf,
+                                         self.in_node.out_type.domain.inf,
                                          self.period)
 
         return [add] + so_far

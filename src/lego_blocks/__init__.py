@@ -4,17 +4,18 @@ from .lego_block import LegoBlock
 
 from .abs import Abs
 from .case import Case
+from .cast import GenerateCast
+from .cody_waite import CodyWaite
 from .divide import Divide
+from .expression import Expression
 from .if_less import IfLess
+from .ldexp import Ldexp
+from .lego_fpcore import LegoFPCore
+from .mod_switch import ModSwitch
 from .multiply import Multiply
 from .neg_flip import NegFlip
+from .power import Pow
+from .set_exp import SetExp
 from .simple_additive import SimpleAdditive
 from .split_domain import SplitDomain
-from .power import Pow
-from .ldexp import Ldexp
-from .expression import Expression
-
-from .mod_switch import ModSwitch
-from .cody_waite import CodyWaite
 from .transform_out import TransformOut
-from .cast import GenerateCast

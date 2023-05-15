@@ -1,9 +1,12 @@
 
 
 import math
+
+import sympy
 from better_float_cast import better_float_cast
 import fpcore
 import mpmath
+from sympy_solve_equality import sympy_to_fpcore
 
 from utils.logging import Logger
 
@@ -12,10 +15,12 @@ logger = Logger(level=Logger.EXTRA)
 
 
 def parse_bound(something):
-    wrapped = "(FPCore () {})".format(something)
-    fpc = fpcore.parse(wrapped)[0]
-    return fpc.simplify().body
-
+    if "+inf" == something:
+        return fpcore.ast.Constant("INFINITY")
+    if "-inf" == something:
+        return fpcore.ast.Operation("-", fpcore.ast.Constant("INFINITY"))
+    fpc = fpcore.parse_expr(something)
+    return fpc.simplify()
 
 class Interval():
 
@@ -23,18 +28,27 @@ class Interval():
         self.inf = parse_bound(inf)
         self.sup = parse_bound(sup)
 
-        ie = self.inf.eval({})
-        if math.isfinite(better_float_cast(ie)) and int(ie) == ie:
-            self.inf = parse_bound(int(ie))
+        fi = self.float_inf
+        if (math.isfinite(fi) and int(fi) == fi):
+            self.inf = parse_bound(int(fi))
 
-        se = self.sup.eval({})
-        if math.isfinite(better_float_cast(se)) and int(se) == se:
-            self.sup = parse_bound(int(se))
+        fs = self.float_sup
+        if (math.isfinite(fs) and int(fs) == fs):
+            self.sup = parse_bound(int(fs))
 
-        assert (better_float_cast(self.inf) <= better_float_cast(self.sup))
+        if not self.float_inf <= self.float_sup:
+            raise ValueError(f"Upside down interval: [{inf}, {sup}]")
+
+    @property
+    def float_inf(self):
+        return better_float_cast(self.inf.eval({}))
+
+    @property
+    def float_sup(self):
+        return better_float_cast(self.sup.eval({}))
 
     def __str__(self):
-        return "[{},{}]".format(self.inf, self.sup)
+        return f"[{self.inf}, {self.sup}]"
 
     def __repr__(self):
         return 'Interval("{}", "{}")'.format(self.inf, self.sup)
@@ -43,71 +57,87 @@ class Interval():
         #                 0
         # <---------------+--------------->
         #                    [********]
-        if better_float_cast(self.inf) >= 0.0:
+        if self.float_inf >= 0.0:
             return Interval(self.inf, self.sup)
         #                 0
         # <---------------+--------------->
         #               [********]
-        if better_float_cast(self.inf) <= 0.0 and 0.0 <= better_float_cast(self.sup):
+        if self.float_inf <= 0.0 and 0.0 <= self.float_sup:
             abs_max = max(-self.inf, self.sup)
             return Interval(0.0, abs_max)
         #                 0
         # <---------------+--------------->
         #      [********]
-        if better_float_cast(self.sup) <= 0.0:
-            return Interval(-self.sup, -self.sup)
+        if self.float_sup <= 0.0:
+            return Interval(-self.sup, -self.inf)
 
-        assert 0, "Unreachable"
+        raise ValueError(f"Internal error: unable to abs {self}")
 
-    def __getitem__(self, items):
-        if items == 0:
+    def __getitem__(self, key):
+        if key == 0:
             return self.inf
-        if items == 1:
+        if key == 1:
             return self.sup
-        raise IndexError(items)
+        raise IndexError(f"Interval cannot be indexed with '{key}'")
+
+    def isfinite(self):
+        return (math.isfinite(self.float_inf)
+                and math.isfinite(self.float_sup))
 
     def width(self):
         return self.sup - self.inf
 
-    def contains(self, point):
-        logger.log("Testing if {} is in [{}, {}]", point, self.inf, self.sup)
-        if type(point) == mpmath.iv.mpf:
+    def contains(self, other):
+        logger.log("Testing if {} is in [{}, {}]", other, self.inf, self.sup)
+        if type(other) == mpmath.iv.mpf:
             inf = str(self.inf).replace("INFINITY", "inf")
             sup = str(self.sup).replace("INFINITY", "inf")
             me = mpmath.iv.mpf([inf, sup])
-            return point in me
-        f_point = better_float_cast(point)
-        return better_float_cast(self.inf) <= f_point and f_point <= better_float_cast(self.sup)
+            return other in me
+        if type(other) == Interval:
+            me = mpmath.iv.mpf([str(self.inf).replace("INFINITY", "inf"),
+                                str(self.sup).replace("INFINITY", "inf")])
+            other = mpmath.iv.mpf([str(other.inf).replace("INFINITY", "inf"),
+                                   str(other.sup).replace("INFINITY", "inf")])
+            return other in me
+        f_point = better_float_cast(other)
+        return self.float_inf <= f_point and f_point <= self.float(sup)
 
-    def shift(self, k):
-        diff = self.sup - self.inf
-        shift_by = k*diff
-        return Interval(self.inf+shift_by, self.sup+shift_by)
-
-    def split(self, p):
-        return self.aligned_split(p, self.inf)
-
-    def aligned_split(self, p, edge):
-        assert (0.0 < p)
-        assert (self.inf <= edge and edge <= self.sup)
-
+    def join(self, other):
+        if self.sup < other.inf:
+            msg = f"Intervals do not overlap:\nself = {self}\nother = {other}"
+            raise ValueError(msg)
         inf = self.inf
-        lower = edge - self.inf
-        k = math.floor(lower/p)
-        sup = edge - k*p
-        sup = min(sup, self.sup)
-        assert (0.0 <= sup-inf and sup-inf <= p)
-        periods = list()
-        if sup-inf != 0:
-            periods.append(Interval(inf, sup))
+        if self.float_inf > other.float_inf:
+            inf = other.inf
+        sup = self.sup
+        if self.float_sup < other.float_sup:
+            sup = other.sup
+        return Interval(inf, sup)
 
-        start = sup
-        i = 0
-        while sup < self.sup:
-            inf = start + i*p
-            sup = start + (i+1)*p
-            sup = min(sup, self.sup)
-            assert (self.inf <= inf and sup <= self.sup)
-            periods.append(Interval(inf, sup))
+    @staticmethod
+    def try_symbolic_interval_eval(fpc, in_domain):
+        # What is the input's name?
+        vars = fpc.get_variables()
+        if len(vars) != 1:
+            raise ValueError("Only single variable functions are supported")
+        in_var = fpcore.ast.Variable(vars.pop())
 
-        return periods
+        # Determine if the func in monotonic on this interval
+        diff_fpc = sympy_to_fpcore(sympy.diff(fpc.to_sympy(),
+                                                      in_var.to_sympy()))
+        diff_on_interval = diff_fpc.interval_eval({in_var.source:
+                                                          in_domain})
+        if diff_on_interval >= 0:
+            # Yay, we can just use the endpoints
+            inf = fpc.substitute(in_var, in_domain.inf)
+            sup = fpc.substitute(in_var, in_domain.sup)
+            return Interval(inf, sup)
+
+        # Hopefully just interval arith makes a tight answer
+        # (doubtful)
+        mpf_domain = fpc.interval_eval({in_var.source: in_domain})
+        inf, sup = mpf_domain._mpi_  # Don't do this
+        return Interval(mpmath.nstr(mpmath.mpf(inf), 4096),
+                              mpmath.nstr(mpmath.mpf(sup), 4096))
+

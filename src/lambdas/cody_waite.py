@@ -1,20 +1,13 @@
 
 
-from better_float_cast import better_float_cast
-from calculate_cody_waite_constants import calculate_cody_waite_constants
-from dirty_equal import dirty_equal
 import fpcore
-from fpcore.ast import Number, Operation, Variable
 import lego_blocks
-from numeric_types import fp64 
-import lambdas
-
+from better_float_cast import better_float_cast
+from fpcore.ast import Number, Operation, Variable
 from interval import Interval
 from lambdas import types
+from numeric_types import FP64
 from utils import Logger
-
-from lambdas.lambda_utils import find_periods, has_period
-
 
 logger = Logger(level=Logger.HIGH)
 
@@ -64,6 +57,9 @@ class CodyWaite(types.Transform):
         Check that the function has the stated period and the implementation
           has the required width.
         """
+        if self.type_check_done:
+            return
+
         # Check normal out, when there is mod cases present then this just
         # tells us the type
         target_function = self.in_node
@@ -128,11 +124,11 @@ class CodyWaite(types.Transform):
             #print(f"vs: {g_n}")
             #assert dirty_equal(target_function, g_n, z)
 
-        self.domain = Interval("0", "INFINITY")
         self.out_type = types.Impl(target_function,
-                                   self.domain)
+                                   Interval("0", "INFINITY"))
+        self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         # in = ...
         # r = cody_waite_reduce(in, inv_period, period_c, period, &k, NULL);
         # switch_out;
@@ -146,13 +142,14 @@ class CodyWaite(types.Transform):
         #       switch_out = ...
         #       break;
         # }
+        self.type_check()
 
         cw_in = self.gensym("cw_in")
         r = self.gensym("r")
         k = self.gensym("r")
 
         part_0 = lego_blocks.CodyWaite(
-            numeric_type(),
+            numeric_type,
             [cw_in], [r, k],
             self.constant,
             self.bits_per,
@@ -174,7 +171,7 @@ class CodyWaite(types.Transform):
             mod_to_lego[n] = genned
 
         part_1 = lego_blocks.ModSwitch(
-            numeric_type(),
+            numeric_type,
             [r, k], [switch_out],
             mod_to_lego
         )

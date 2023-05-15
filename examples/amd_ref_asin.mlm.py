@@ -42,7 +42,7 @@ sys.path.append(SRC_DIR)
 import fpcore
 import lambdas
 
-from lambdas import InflectionLeft, InflectionRight, Horner, FixedRationalPolynomial, SplitDomain
+from lambdas import *
 from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
 from interval import Interval
 from utils.logging import Logger
@@ -54,7 +54,7 @@ logger.set_log_level(Logger.HIGH)
 # | Should be handled by a new parser                                         |
 # |                                                                           |
 
-asin = fpcore.parse("(FPCore (x) (asin x))")[0]
+asin = fpcore.parse("(FPCore (x) (asin x))")
 # This is the value that corresponds to AMD's code
 linear_cutoff = " 1.38777878078144552145514403413465714614676459320581451695186814276894438080489635467529296875e-17"
 # A much better value is
@@ -64,10 +64,10 @@ mlm = \
     InflectionLeft(
         InflectionRight(
             Horner(
-                FixedRationalPolynomial(
+                FixedMultiPolynomial(
                     asin,
                     Interval("0", "0.5"),
-                    fpcore.parse("(FPCore (x) x)")[0].body,
+                    fpcore.parse("(FPCore (x p q) (+ x (/ p q)))"),
                     [3, 5, 7, 9, 11, 13],
                     [ 0.227485835556935010735943483075,
                      -0.445017216867635649900123110649,
@@ -81,10 +81,10 @@ mlm = \
                       2.76568859157270989520376345954,
                      -0.943639137032492685763471240072,
                       0.105869422087204370341222318533])),
-            fpcore.parse("(FPCore (x) (sqrt (/ (- 1 x) 2)))")[0].body,
-            fpcore.parse("(FPCore (x) (- (/ PI 2) (* 2 y)))")[0].body),
-        fpcore.parse("(FPCore (x) (- x))")[0].body,
-        fpcore.parse("(FPCore (x) (- y))")[0].body)
+            fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
+            fpcore.parse_expr("(- (/ PI 2) (* 2 y))")),
+        fpcore.parse_expr("(- x)"),
+        fpcore.parse_expr("(- y)"))
 
 # |                                                                           |
 # +---------------------------------------------------------------------------+
@@ -114,7 +114,7 @@ with open(path.join(GIT_DIR, "examples", "amd_ref_asin.c"), "r") as f:
     libm_src = [line.rstrip() for line in text.splitlines()]
 
 # oracle
-func = fpcore.parse("(FPCore (x) (asin x))")[0]
+func = fpcore.parse("(FPCore (x) (asin x))")
 domain = Interval(-1, 1)
 target = lambdas.types.Impl(func, domain)
 mpfr_func_name = "mpfr_dsl_amd_ref_asin"

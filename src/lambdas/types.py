@@ -2,7 +2,7 @@
 
 from fpcore.ast import FPCore
 from interval import Interval
-from numeric_types import NumericType, fp64
+from numeric_types import NumericType, FP64
 
 
 # Return types
@@ -50,8 +50,10 @@ class Node():
       as well as the C code generation through lego blocks.
     """
 
-    def __init__(self):
-        raise NotImplementedError()
+    def __init__(self, numeric_type: NumericType):
+        self.numeric_type = numeric_type
+        self.type_check_done = False
+        self.out_type = None
 
     def find_lambdas(self, pred, _found=None):
         # look for all things that make `pred` True
@@ -61,18 +63,17 @@ class Node():
         # replace all instances of `search` with `replace`
         raise NotImplementedError()
 
-    def type_check_forward(self):
-        # check that in_node.out_type matches requirements and set this
-        # out_type
-        raise NotImplementedError()
-
-    def type_check_backward(self):
-        # check that out_type can be created from this Node and set
-        # in_node.out_type
+    def type_check(self):
         raise NotImplementedError()
 
     def generate(self):
         # select lego blocks to use
+        raise NotImplementedError()
+
+    @classmethod
+    def generate_hole(cls, out_type):
+        # Given an out_type, return possible in types that this Transform
+        # could use to reach that out_type
         raise NotImplementedError()
 
     def gensym(self, prefix):
@@ -88,19 +89,22 @@ class Node():
 
 class Source(Node):
 
-    def __init__(self, function: FPCore, domain: Interval, numeric_type: NumericType = fp64):
-        self.function = function
-        self.domain = Interval(domain.inf.simplify(), domain.sup.simplify())
-        self.numeric_type = numeric_type()
-        #self.type_check()
+    def __init__(self,
+                 function: FPCore,
+                 domain: Interval,
+                 numeric_type: NumericType = FP64):
+        super().__init__(numeric_type)
+        self.out_type = Impl(function,
+                             Interval(domain.inf.simplify(),
+                                      domain.sup.simplify()))
 
-    def find_lambdas(self, pred, _found=None):
+    def find_lambdas(self, predicate, _found=None):
         # Setup default args
         if _found is None:
             _found = set()
 
         # Mark this node
-        if pred(self):
+        if predicate(self):
             _found.add(self)
 
         return _found
@@ -110,29 +114,21 @@ class Source(Node):
             return replace
         return self.copy()
 
-    def __str__(self):
-        class_name = type(self).__name__
-        return "({} {} {})".format(class_name,
-                                   str(self.function),
-                                   str(self.domain))
-
-    def __repr__(self):
-        class_name = type(self).__name__
-        return "{}({}, {})".format(class_name,
-                                   repr(self.function),
-                                   repr(self.domain))
-
     def type_check(self):
-        assert (type(self.function) == FPCore)
-        assert (type(self.domain) == Interval)
+        if self.type_check_done:
+            return
 
+        # TODO: determine if function is valid on domain
+
+        self.type_check_done = True
 
 class Transform(Node):
 
-    def __init__(self, in_node: Node, numeric_type: NumericType = fp64):
+    def __init__(self,
+                 in_node: Node,
+                 numeric_type: NumericType = FP64):
+        super().__init__(numeric_type)
         self.in_node = in_node
-        self.numeric_type = numeric_type()
-        #self.type_check()
 
     def find_lambdas(self, pred, _found=None):
         # Setup default args
@@ -154,12 +150,6 @@ class Transform(Node):
         new_in_node = self.in_node.replace_lambda(search, replace)
         return self.__class__(new_in_node)
 
-    @classmethod
-    def generate_hole(cls, out_type):
-        # Given an out_type, return possible in types that this Transform
-        # could use to reach that out_type
-        raise NotImplementedError()
-
     def __str__(self):
         class_name = type(self).__name__
         return "({} {})".format(class_name, str(self.in_node))
@@ -168,8 +158,5 @@ class Transform(Node):
         class_name = type(self).__name__
         return "{}({})".format(class_name, repr(self.in_node))
 
-    def type_check(self):
-        pass
-
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         return self.in_node.generate(numeric_type=numeric_type)

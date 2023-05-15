@@ -16,7 +16,7 @@ class Abs(lego_blocks.LegoBlock):
             "c_sign": self.numeric_type.c_sign(),
             "out": self.out_names[0],
             "sign": self.out_names[1],
-            "type": self.numeric_type.c_type(),
+            "type": self.numeric_type.c_type,
         }
         fmt["cast_in"] = "(({}){})".format(fmt["type"], self.in_names[0])
 

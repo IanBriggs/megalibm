@@ -26,8 +26,8 @@ ITERS = [
 period, inflection = snake_egg.vars("period inflection")
 
 raw_template_rules = [
-     ["capture-mirror",    thefunc(sub(inflection, "x")),      mirror(inflection)],
-     ["capture-periodic",  thefunc(sub("x", period)),          periodic(period)],
+    ["capture-mirror", thefunc(sub(inflection, "x")), mirror(inflection)],
+    ["capture-periodic", thefunc(sub("x", period)), periodic(period)],
 ]
 template_rules = list()
 for l in raw_template_rules:
@@ -108,7 +108,7 @@ def filter_deduplication(exprs, max_iters, use_simple):
         egraph.add(expr)
 
     # Run with standard mathematical rules
-    egraph.run(snake_egg_rules.rules+template_rules,
+    egraph.run(snake_egg_rules.rules + template_rules,
                iter_limit=max_iters,
                time_limit=600,
                node_limit=10_000,
@@ -159,6 +159,7 @@ def filter_keep_thefunc_and_templates(exprs):
                 len(exprs), len(new_exprs), elapsed)
 
     return new_exprs
+
 
 def filter_defs_sub(exprs, func, max_iters):
     timer = Timer()
@@ -257,6 +258,7 @@ def expr_size(expr, _cache=dict()):
     _cache[expr] = size
     return size
 
+
 def extract_identities(func):
     logger.dlog("Name: {}", func.get_any_name())
     logger.dlog("f(x): {}", func.body)
@@ -275,7 +277,8 @@ def extract_identities(func):
     exprs = filter_defs_div(exprs, func, ITERS[4])
 
     exprs = [snake_egg_rules.egg_to_fpcore(expr) for expr in exprs]
-    exprs = [expr.substitute(periodic(Number("0")), thefunc(Variable("x"))) for expr in exprs]
+    exprs = [expr.substitute(periodic(Number("0")), thefunc(
+        Variable("x"))) for expr in exprs]
     # exprs = list({expr.simplify() for expr in exprs})
     # exprs = deduplication_generators(exprs, ITERS[5])
 

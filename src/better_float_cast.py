@@ -7,17 +7,17 @@ def better_float_cast(x):
         if type(x) != str:
             raise e
 
-    x = x.strip()     # cleanup
-    x = x.rstrip("f") # drop C float suffix
-    x = x.rstrip("d") # drop C double suffix
+    x = x.strip()      # cleanup
+    x = x.rstrip("f")  # drop C float suffix
+    x = x.rstrip("d")  # drop C double suffix
 
     if x.startswith("0x"):
         try:
-            return float.fromhex(x) # read as C's %a format
+            return float.fromhex(x)  # read as C's %a format
         except ValueError as e:
             raise e
     else:
         try:
-            return float(x) # try again
+            return float(x)  # try again
         except ValueError as e:
             raise e

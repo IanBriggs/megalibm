@@ -1,20 +1,16 @@
 
-import math
-from better_float_cast import better_float_cast
-from fpcore.ast import Variable
-from lambdas.narrow import Narrow
-import lego_blocks
-from numeric_types import fp64, fp32
-import lambdas
 
 import fpcore
-
+import lego_blocks
+from better_float_cast import better_float_cast
 from dirty_equal import dirty_equal
-
+from fpcore.ast import Variable
 from interval import Interval
 from lambdas import types
-from sympy_based_equal import sympy_based_equal
+from numeric_types import FP32, FP64
 from utils import Logger
+
+logger = Logger(level=Logger.LOW)
 
 # This operation takes in an implementation of a function on an interval domain.
 # It then produces a new implementation that is valid on a new domain extending
@@ -50,6 +46,9 @@ class InflectionLeft(types.Transform):
         return InflectionLeft(new_in_node, self.reduction, self.reconstruction)
 
     def type_check(self):
+        if self.type_check_done:
+            return
+
         # Make sure the impl we are using can type check
         self.in_node.type_check()
         inner_impl_type = self.in_node.out_type
@@ -60,9 +59,11 @@ class InflectionLeft(types.Transform):
 
         # Using f(x)'s domain [a,b] we need to check that:
         #   for x in [a-(b-a), a] that red(x) is in [a,b]
-        lower_domain = Interval(a-(b-a), a)
-        reduced = self.reduction.interval_eval({"x": lower_domain})
-        assert(domain.contains(reduced))
+        lower_domain = Interval(a - (b - a), a)
+        logger("Evaluating: {}", self.reduction)
+        reduced = Interval.try_symbolic_interval_eval(self.reduction,
+                                                      lower_domain)
+        assert (domain.contains(reduced))
 
         # We also need to check that:
         #  rec(f(red(x))) == f(x)
@@ -72,18 +73,17 @@ class InflectionLeft(types.Transform):
         rec_f_red = rec_f.substitute(x, self.reduction)
 
         # For now let's use a sympy based equality (egg??) ((mpmath???))
-        assert(dirty_equal(f, rec_f_red, domain))
-        #assert(f.egg_equal(rec_f_red))
-        #assert(sympy_based_equal(rec_f_red, f))
+        assert (dirty_equal(f, rec_f_red, domain))
+        # assert(f.egg_equal(rec_f_red))
+        # assert(sympy_based_equal(rec_f_red, f))
 
         # Set the values that might be used for outer lambda expressions
         self.inflection_point = a
-        self.domain = Interval(a-(b-a), b)
-        self.passed_check = True
-        self.out_type = types.Impl(f, self.domain)
+        out_domain = Interval(lower_domain.inf, domain.sup)
+        self.out_type = types.Impl(f, out_domain)
+        self.type_check_done = True
 
-
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         # x_in = ...
         # if x_in < inflection_point:
         #   reduced = reduce(x_in)
@@ -97,6 +97,7 @@ class InflectionLeft(types.Transform):
         #   y_out = reconstruct(y_out)
         # else:
         #   y_out = inner
+        self.type_check()
 
         # Generate the inner code first
         so_far = super().generate(numeric_type=numeric_type)
@@ -104,30 +105,29 @@ class InflectionLeft(types.Transform):
         # Reduction
         x_in_name = self.gensym("x_in")
         reduced_name = so_far[0].in_names[0]
-        red_expr = self.reduction.substitute(Variable("x"), Variable(x_in_name))
-        if isinstance(numeric_type(), fp32):
-            red_expr = red_expr.substitute_op()
+        red_expr = self.reduction.substitute(
+            Variable("x"), Variable(x_in_name))
 
-        red = lego_blocks.IfLess(numeric_type(),
-                               [x_in_name],
-                               [reduced_name],
-                               better_float_cast(self.inflection_point),
-                               red_expr.to_libm_c(numeric_type=numeric_type()),
-                               x_in_name)
+        red = lego_blocks.IfLess(numeric_type,
+                                 [x_in_name],
+                                 [reduced_name],
+                                 better_float_cast(self.inflection_point),
+                                 red_expr.to_libm_c(
+                                     numeric_type=numeric_type),
+                                 x_in_name)
 
         # Reconstruction
         inner_name = so_far[-1].out_names[0]
         y_out_name = self.gensym("y_out")
-        rec_expr = self.reconstruction.substitute(Variable("y"), Variable(inner_name))
-        if isinstance(numeric_type(), fp32):
-            rec_expr = rec_expr.substitute_op()
+        rec_expr = self.reconstruction.substitute(
+            Variable("y"), Variable(inner_name))
 
-        rec = lego_blocks.IfLess(numeric_type(),
-                                       [x_in_name],
-                                       [y_out_name],
-                                       better_float_cast(self.inflection_point),
-                                       rec_expr.to_libm_c(numeric_type=numeric_type()),
-                                       inner_name)
+        rec = lego_blocks.IfLess(numeric_type,
+                                 [x_in_name],
+                                 [y_out_name],
+                                 better_float_cast(self.inflection_point),
+                                 rec_expr.to_libm_c(
+                                     numeric_type=numeric_type),
+                                 inner_name)
 
         return [red] + so_far + [rec]
-

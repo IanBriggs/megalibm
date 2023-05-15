@@ -29,16 +29,24 @@ logger.set_log_level(Logger.HIGH)
 # | Should be handled by a new parser                                         |
 # |                                                                           |
 
-cos = fpcore.parse("(FPCore (x) (cos x))")[0]
-sin = fpcore.parse("(FPCore (x) (sin x))")[0]
+cos = fpcore.parse("(FPCore (x) (cos x))")
+sin = fpcore.parse("(FPCore (x) (sin x))")
+
+pi_over_4 = fpcore.parse_expr("(/ PI 4)")
+pi_over_2 = fpcore.parse_expr("(/ PI 2)")
+
+neg_pi_over_4 = - pi_over_4
+
+negate_x = fpcore.parse_expr("(- x)")
+negate_y = fpcore.parse_expr("(- y)")
+id_y = fpcore.parse_expr("y")
 
 cos_poly = \
     Horner(
         FixedPolynomial(
             cos,
-            Interval("(- (+ (/ PI 4) 3.24128e-11))",
-                     "(+ (/ PI 4) 3.24128e-11)"),
-            8,
+            Interval(neg_pi_over_4,
+                     pi_over_4),
             [0, 2, 4, 6, 8, 10, 12, 14],
             ["1",
              "-0.5",
@@ -54,9 +62,8 @@ sin_poly = \
     Horner(
         FixedPolynomial(
             sin,
-            Interval("(- (+ (/ PI 4) 3.24128e-11))",
-                     "(+ (/ PI 4) 3.24128e-11)"),
-            7,
+            Interval(neg_pi_over_4,
+                     pi_over_4),
             [1, 3, 5, 7, 9, 11, 13],
             ["1",
              "-1.66666666666666307295E-1",
@@ -66,14 +73,6 @@ sin_poly = \
              "-2.50507477628578072866E-8",
              "1.58962301576546568060E-10"]),
         split=1)
-
-
-pi_over_4 = fpcore.parse("(FPCore (y) (/ PI 4))")[0].body
-pi_over_2 = fpcore.parse("(FPCore (y) (/ PI 2))")[0].body
-
-negate_x = fpcore.parse("(FPCore (x) (- x))")[0].body
-negate_y = fpcore.parse("(FPCore (y) (- y))")[0].body
-id_y = fpcore.parse("(FPCore (y) y)")[0].body
 
 periodic_cases = {
     0: cos_poly,
@@ -120,7 +119,7 @@ with open(path.join(GIT_DIR, "examples", "vdt_cos.c"), "r") as f:
     libm_src = [line.rstrip() for line in text.splitlines()]
 
 # oracle
-func = fpcore.parse("(FPCore (x) (cos x))")[0]
+func = fpcore.parse("(FPCore (x) (cos x))")
 domain = Interval(-1, 1)
 target = lambdas.types.Impl(func, domain)
 mpfr_func_name = "mpfr_dsl_vdt_cos"

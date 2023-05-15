@@ -27,31 +27,42 @@ def has_period_function(func, egraph, period):
 
 class RepeatExp(types.Transform):
 
+    def __init__(self,
+                 in_node: types.Node,
+                 bits_per: int,
+                 entries: int):
+        super().__init__(in_node)
+        self.bits_per = bits_per
+        self.entries = entries
+
     def type_check(self):
+        self.in_node.type_check()
         our_in_type = self.in_node.out_type
         assert (type(our_in_type) == types.Impl)
         assert (better_float_cast(our_in_type.domain.inf) == 0.0)
-#        assert (has_period_function(our_in_type.function, our_in_type.domain.sup))
 
         self.out_type = types.Impl(our_in_type.function,
                                    Interval("0.0", "INFINITY"))
 
-    def generate(self):
+    def generate(self, numeric_type=numeric_types.FP64):
         our_in_type = self.in_node.out_type
         so_far = super().generate()
         in_name = self.gensym("in")
         out_red = so_far[0].in_names[0]
         k = self.gensym("k")
-        add = lego_blocks.SimpleAdditive(numeric_types.fp64(),
-                                         [in_name],
-                                         [out_red, k],
-                                         our_in_type.domain.sup)
+        add = lego_blocks.CodyWaite(numeric_type,
+                                    [in_name],
+                                    [out_red, k],
+                                    our_in_type.domain.sup,
+                                    self.bits_per,
+                                    self.entries,
+                                    self.gensym)
 
         out_name = self.gensym("out")
-        in_red = so_far[0].out_names[0]
-        ldexp = lego_blocks.Ldexp(numeric_types.fp64(),
-                                  [in_red, k],
-                                  [out_name])
+        in_red = so_far[-1].out_names[0]
+        ldexp = lego_blocks.SetExp(numeric_type,
+                                   [in_red, k],
+                                   [out_name])
 
         return [add] + so_far + [ldexp]
 

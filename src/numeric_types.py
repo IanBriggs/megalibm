@@ -1,105 +1,62 @@
 
+from better_float_cast import better_float_cast
+from mpmath_hex_str import mpmath_hex_str
+
+import mpmath
+
 
 class NumericType():
 
     def __init__(self):
         raise NotImplementedError()
 
-    def __repr__(self):
-        raise NotImplementedError()
+    sollya_type = "NotImplemented"
+    c_type = "NotImplemented"
+    name = "NotImplemented"
 
-    def c_abs(self):
-        raise NotImplementedError()
-
-    def c_const_suffix(self):
-        raise NotImplementedError()
-
-    def c_sign(self):
-        raise NotImplementedError()
-
-    def c_type(self):
-        raise NotImplementedError()
-
-    def half_pi(self):
-        raise NotImplementedError()
-
-    def pi(self):
-        raise NotImplementedError()
-
-    def quarter_pi(self):
-        raise NotImplementedError()
-
-    def sollya_type(self):
+    @classmethod
+    def num_to_str(self, bound):
         raise NotImplementedError()
 
 
-class fp32(NumericType):
+class FP32(NumericType):
+    sollya_type = "single"
+    c_type = "float"
+    name = "FP32"
 
-    def __init__(self):
-        pass
+    @classmethod
+    def num_to_str(self, x):
+        # Keep integer values since they are easy to read
+        double_x = better_float_cast(x)
+        int_x = int(double_x)
+        if double_x == int_x:
+            lead_nonzero = bin(int_x).lstrip("0b").rstrip("0")
+            if len(lead_nonzero) > 24:
+                raise ValueError(f"Int too large for 32 bit float: {int_x}")
+            return f"{int_x}.0f"
 
-    def __repr__(self):
-        return "fp32()"
-
-    def c_abs(self):
-        return "fabsf"
-
-    def c_const_suffix(self):
-        return "f"
-
-    def c_sign(self):
-        return "signbit"
-
-    def half_pi(self):
-        return "0x1.921fb6p+0"
-
-    def pi(self):
-        return "0x1.921fb6p+1"
-
-    def quarter_pi(self):
-        return "0x1.921fb6p-1"
-
-    def sollya_type(self):
-        return "single"
-
-    def c_type(self):
-        return "float"
+        # Others become %a form
+        with mpmath.workprec(24):
+            mpf_x = mpmath.mpf(x)
+            hex_str = mpmath_hex_str(mpf_x)
+            return f"{hex_str}f"
 
 
-class fp64(NumericType):
+class FP64(NumericType):
+    sollya_type = "double"
+    c_type = "double"
+    name = "FP64"
 
-    def __init__(self):
-        pass
+    @classmethod
+    def num_to_str(self, x):
+        # Keep integer values since they are easy to read
+        double_x = better_float_cast(x)
+        int_x = int(double_x)
+        if double_x == int_x:
+            lead_nonzero = bin(int_x).lstrip("0b").rstrip("0")
+            if len(lead_nonzero) > 53:
+                raise ValueError(f"Int too large for 64 bit float: {int_x}")
+            return f"{int_x}.0"
 
-    def __repr__(self):
-        return "fp64()"
-
-    def c_abs(self):
-        return "fabs"
-
-    def c_const_suffix(self):
-        return ""
-
-    def c_sign(self):
-        return "signbit"
-
-    def half_pi(self):
-        return "0x1.921fb54442d18p+0"
-
-    def pi(self):
-        return "0x1.921fb54442d18p+1"
-
-    def quarter_pi(self):
-        return "0x1.921fb54442d18p-1"
-
-    def sollya_type(self):
-        return "double"
-
-    def c_type(self):
-        return "double"
-
-    def c_pow(self):
-        return "pow"
-
-    def c_ldexp(self):
-        return "ldexp"
+        # Others become %a form
+        return float.hex(double_x)

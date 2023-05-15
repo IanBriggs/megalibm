@@ -19,7 +19,7 @@ class CodyWaite(lego_blocks.LegoBlock):
         self.gensym = gensym
 
     def to_c(self):
-        cdecl = self.numeric_type.c_type()
+        cdecl = self.numeric_type.c_type
 
         cw_in = self.in_names[0]
         r = self.out_names[0]

@@ -11,7 +11,7 @@ class PuntToLibm(forms.Form):
         self.func = func
 
     def to_c(self):
-        c_type = self.numeric_type.c_type()
+        c_type = self.numeric_type.c_type
         in_var = Variable(self.in_names[0])
         out = self.out_names[0]
 

@@ -150,6 +150,6 @@ def extract_domain(self, *args, **kwargs):
 
 @add_method(FPCore)
 def extract_domain(self):
-    self.domains = properties_to_argument_domains(self.arguments,
+    domains = properties_to_argument_domains(self.arguments,
                                                   self.properties)
-    return self.domains
+    return domains

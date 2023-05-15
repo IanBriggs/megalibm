@@ -58,8 +58,8 @@ def parse_arguments(argv):
             args.fnames.append(dn)
         else:
             args.fnames.extend([path.join(dn, fn)
-            for fn in os.listdir(dn)
-            if fn.endswith(".fpcore")])
+                                for fn in os.listdir(dn)
+                                if fn.endswith(".fpcore")])
 
     args.fnames.sort()
 
@@ -161,22 +161,23 @@ def write_identity_webpage(filename, identities):
 def c_ize_name(function):
     name = {p.name: p.value for p in function.properties}.get("name", "NoName")
     replace_chars = {
-        '"' : "",
-        "'" : "",
-        "(" : "",
-        ")" : "",
-        "," : "_",
-        " " : "_",
-        "." : "_",
-        "-" : "_",
-        ":" : "_",
-        "+" : "plus",
+        '"': "",
+        "'": "",
+        "(": "",
+        ")": "",
+        ",": "_",
+        " ": "_",
+        ".": "_",
+        "-": "_",
+        ":": "_",
+        "+": "plus",
     }
     for frm, to in replace_chars.items():
         name = name.replace(frm, to)
     while "__" in name:
         name = name.replace("__", "_")
     return name
+
 
 def generate_all_code(function, domain):
     name = c_ize_name(function)
@@ -299,15 +300,15 @@ def generate_all_code(function, domain):
 
     # Timing measurement
     main_lines = assemble_timing_main(name, func_body,
-                                     [libm_func_name] + gen_func_names,
-                                     header_fname, domains)
+                                      [libm_func_name] + gen_func_names,
+                                      header_fname, domains)
     main_fname = "timing_main.c"
     with open(main_fname, "w") as f:
         f.write("\n".join(main_lines))
 
-
     os.chdir(start)
     return True
+
 
 def handle_work_item(func):
     logger("Working on: {}", c_ize_name(func))

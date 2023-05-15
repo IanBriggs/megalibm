@@ -1,7 +1,7 @@
 
 from better_float_cast import better_float_cast
-from numeric_types import fp64 
-from fpcore.ast import FPCore, Operation, Variable
+from fpcore.ast import FPCore
+from numeric_types import FP32, FP64
 
 
 def get_mirrors_at(func: FPCore, point):
@@ -20,6 +20,7 @@ def get_mirrors_at(func: FPCore, point):
             s_exprs.append(s)
 
     return s_exprs
+
 
 def has_period(func: FPCore, period):
     # Get all period identities
@@ -53,13 +54,11 @@ def find_periods(func: FPCore):
     return periods
 
 
-def generate_c_code(lam, name, numeric_type=fp64, func_type=fp64):
+def generate_c_code(lam, name, numeric_type=FP64):
     passes = lam.generate(numeric_type=numeric_type)
-    # in_type = passes[0].numeric_type.c_type()
-    in_type = func_type().c_type()
+    in_type = numeric_type.c_type
     in_name = passes[0].in_names[0]
-    # out_type = passes[-1].numeric_type.c_type()
-    out_type = func_type().c_type()
+    out_type = numeric_type.c_type
     out_name = passes[-1].out_names[0]
     signature = "{} {}({} {})".format(out_type, name, in_type, in_name)
     signature_h = signature + ";"
@@ -71,18 +70,18 @@ def generate_c_code(lam, name, numeric_type=fp64, func_type=fp64):
     ]
 
     for p in passes:
-        lines += ["    "+l for l in p.to_c()]
+        lines += ["    " + l for l in p.to_c()]
     lines.append("    return {};".format(out_name))
     lines.append("}")
 
     return signature_h, lines
 
 
-def generate_libm_c_code(typ, name):
+def generate_libm_c_code(typ, name, numeric_type=FP64):
     func = typ.function
-    in_type = fp64().c_type()
+    in_type = numeric_type.c_type
     in_name = func.arguments[0]
-    out_type = fp64().c_type()
+    out_type = numeric_type.c_type
     signature = "{} {}({} {})".format(out_type, name, in_type, in_name)
     signature_h = signature + ";"
 
@@ -96,14 +95,15 @@ def generate_libm_c_code(typ, name):
     return signature_h, lines
 
 
-def generate_mpfr_c_code(typ, name):
+def generate_mpfr_c_code(typ, name, numeric_type=FP64):
     func = typ.function
 
     func_lines, temps = func.to_mpfr_c("out")
 
     in_name = func.arguments[0]
 
-    signature = "int {}(mpfr_t out, double dx)".format(name)
+    cdecl = numeric_type.c_type
+    signature = f"int {name}(mpfr_t out, {cdecl} fpx)"
     signature_h = signature + ";"
 
     lines = [signature,
@@ -124,7 +124,12 @@ def generate_mpfr_c_code(typ, name):
     lines.append("    init_called = 1;")
     lines.append("  }")
 
-    lines.append("  mpfr_set_d({}, dx, MPFR_RNDN);".format(in_name))
+    if numeric_type == FP64:
+        lines.append("  mpfr_set_d({}, fpx, MPFR_RNDN);".format(in_name))
+    elif numeric_type == FP32:
+        lines.append("  mpfr_set_f({}, fpx, MPFR_RNDN);".format(in_name))
+    else:
+        raise NotImplementedError(f"Unknown numeric type '{numeric_type}'")
 
     lines.extend(func_lines)
 

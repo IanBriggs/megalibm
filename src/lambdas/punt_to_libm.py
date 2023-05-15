@@ -1,13 +1,12 @@
 
+import math
+
+import lego_blocks.forms as forms
+from numeric_types import FP64
 from better_float_cast import better_float_cast
 from fpcore.ast import FPCore
 from interval import Interval
-import lambdas
-
-import numeric_types
-import lego_blocks.forms as forms
 from lambdas import types
-import math
 
 
 class PuntToLibm(types.Source):
@@ -23,15 +22,13 @@ class PuntToLibm(types.Source):
         """
         super().__init__(function, domain)
 
-    def type_check(self):
-        """ Type check always passes """
-        self.out_type = types.Impl(self.function, self.domain)
-
-    def generate(self):
+    def generate(self, numeric_type=FP64):
         """ Use libm in generated C """
+        self.type_check()
+
         in_name = self.gensym("in")
         out_name = self.gensym("out")
-        return [forms.PuntToLibm(numeric_types.fp64(), [in_name], [out_name], self.function)]
+        return [forms.PuntToLibm(numeric_type, [in_name], [out_name], self.function)]
 
     @classmethod
     def generate_hole(cls, out_type):

@@ -1,15 +1,13 @@
 
-from better_float_cast import better_float_cast
-from fpcore.ast import FPCore, Operation, Variable
-from fpcore.ast_methods.decompose_identities import decompose_identities
-from interval import Interval
-
 import math
-from numeric_types import fp64 
+
 import cmd_sollya
 import lego_blocks.forms as forms
-
+from better_float_cast import better_float_cast
+from fpcore.ast import FPCore, Operation, Variable
+from interval import Interval
 from lambdas import types
+from numeric_types import FP64
 
 
 class MinimaxPolynomial(types.Source):
@@ -23,36 +21,47 @@ class MinimaxPolynomial(types.Source):
         terms: the number of terms in the generated expression not counting
                    the possible constant term
         """
-        self.terms = terms
         super().__init__(function, domain)
 
+        # This is a Poly, not an Impl as assumed for other Source nodes
+        self.out_type = types.Poly(self.out_type.function,
+                                   self.out_type.domain)
+
+        self.terms = terms
+
     def __str__(self):
-        body = self.function.body
-        inf = self.domain.inf
-        sup = self.domain.sup
+        body = self.out_type.function.body
+        inf = self.out_type.domain.inf
+        sup = self.out_type.domain.sup
         terms = self.terms
         return f"(MinimaxPolynomial {body} [{inf} {sup}] {terms})"
 
     def __repr__(self):
-        return "MinimaxPolynomial({}, {}, {})".format(repr(self.function),
-                                                      repr(self.domain),
-                                                      repr(self.terms))
+        return ("MinimaxPolynomial",
+                f"{repr(self.out_type.function)}, ",
+                f"{repr(self.out_type.domain)}, ",
+                f"{repr(self.terms)}, ",
+                ")")
 
     def type_check(self):
         """ Makes sure the domain is finite """
-        if (not math.isfinite(self.domain.inf)
-                or not math.isfinite(self.domain.sup)):
+        if self.type_check_done:
+            return
+
+        if not self.out_type.domain.isfinite():
             raise TypeError("MinimaxPolynomial must have a finite domain")
 
-        self.out_type = types.Poly(self.function, self.domain)
+        self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         """
         Uses Sollya to fit a polynomial to the function choosing whether a
           constant term is needed and whether even, odd, or all degrees should
           be used
         Returns the lego_block form for a polynomial
         """
+        self.type_check()
+
         monomials = list()
 
         # Do we need a constant term?
@@ -63,7 +72,7 @@ class MinimaxPolynomial(types.Source):
             pass
 
         # Is the function even, odd, or neither?
-        decomposed_identities = self.function.decompose_identities()
+        decomposed_identities = self.out_type.function.decompose_identities()
         mirrors = decomposed_identities["mirror"]
 
         for s, t_arg in mirrors:
@@ -78,25 +87,21 @@ class MinimaxPolynomial(types.Source):
             monomials += range(1, self.terms+1)
 
         # Run generation (this may fail since Sollya is picky)
-        res = cmd_sollya.Result(self.function,
-                                self.domain,
+        res = cmd_sollya.Result(self.out_type.function,
+                                self.out_type.domain,
                                 monomials,
-                                numeric_type())
-
-        # Return the lego_block.form
-        return forms.Polynomial(self.function,
-                                monomials,
-                                res.coefficients,
-                                self.domain)
+                                numeric_type)
+        self.p_monomials = monomials
+        self.p_coefficients = res.coefficients
+        self.q_monomials = list()
+        self.q_coefficients = list()
 
     @classmethod
     def generate_hole(cls, out_type):
         # We only output
         # (Poly (func) low high)
         # where low and high are finite
-        if (type(out_type) != types.Poly
-            or not math.isfinite(better_float_cast(out_type.domain.inf))
-                or not math.isfinite(better_float_cast(out_type.domain.sup))):
+        if type(out_type) != types.Poly or not out_type.domain.isfinite():
             return list()
 
         # To get this output we just need be constructed with given args

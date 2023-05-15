@@ -21,7 +21,7 @@ class SplitDomain(lego_blocks.LegoBlock):
 
     def to_c(self):
         source_lines = [
-            f"{self.numeric_type.c_type()} {self.out_names[0]};",
+            f"{self.numeric_type.c_type} {self.out_names[0]};",
         ]
 
         points = [(dom, lego) for dom, lego in self.domains_to_lego.items()
@@ -29,8 +29,9 @@ class SplitDomain(lego_blocks.LegoBlock):
         points.sort(key=lambda tup: tup[0].inf)
         for tup in points:
             dom, lego = tup
-            source_lines.append(f"if ({self.in_names[0]} == {dom.inf}) {{")
-            source_lines.append(f"    {self.numeric_type.c_type()} {lego[0].in_names[0]} = {self.in_names[0]};")
+            inf = self.numeric_type.num_to_str(dom.inf)
+            source_lines.append(f"if ({self.in_names[0]} == {inf}) {{")
+            source_lines.append(f"    {self.numeric_type.c_type} {lego[0].in_names[0]} = {self.in_names[0]};")
             for le in lego:
                 source_lines += ["    " + l for l in le.to_c()]
             source_lines.append(f"    {self.out_names[0]} = {lego[-1].out_names[0]};")
@@ -41,13 +42,19 @@ class SplitDomain(lego_blocks.LegoBlock):
         points.sort(key=lambda tup: tup[0].inf)
         for tup in non_points:
             dom, lego = tup
-            source_lines.append(f"if ({self.in_names[0]} <= {dom.sup}) {{")
-            source_lines.append(f"    {self.numeric_type.c_type()} {lego[0].in_names[0]} = {self.in_names[0]};")
+            inf = self.numeric_type.num_to_str(dom.inf)
+            sup = self.numeric_type.num_to_str(dom.sup)
+            source_lines.append(f"if ({inf} <= {self.in_names[0]} && {self.in_names[0]} <= {sup}) {{")
+            source_lines.append(f"    {self.numeric_type.c_type} {lego[0].in_names[0]} = {self.in_names[0]};")
             for le in lego:
                 source_lines += ["    " + l for l in le.to_c()]
             source_lines.append(f"    {self.out_names[0]} = {lego[-1].out_names[0]};")
             source_lines.append("} else")
 
+        for i in range(len(source_lines)-1, 0, -1):
+            if source_lines[i].startswith("if"):
+                source_lines[i] = "{"
+                break
         source_lines[-1] = "}"
 
         return source_lines

@@ -63,7 +63,6 @@ _COMP_MAPPING = {
 }
 
 
-
 @add_method(ASTNode)
 def to_sympy(self, *args, **kwargs):
     # Make sure calling to_sympy leads to an error if not overridden
@@ -81,12 +80,16 @@ def to_sympy(self):
 
 
 @add_method(Variable)
-def to_sympy(self):
-    return sympy.symbols(self.source)
+def to_sympy(self, _variable_cache = dict()):
+    assert type(self.source) == str
+    sym = sympy.symbols(self.source)
+    assert type(sym) == sympy.core.symbol.Symbol
+    return sym
 
 
 @add_method(Number)
 def to_sympy(self):
+    assert type(self.source) == str
     return sympy.Number(self.source)
 
 

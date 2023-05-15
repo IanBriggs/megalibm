@@ -1,16 +1,15 @@
 import math
+
+import lambdas
+import lego_blocks
 from better_float_cast import better_float_cast
 from fpcore.ast import Variable
-import lego_blocks
-from numeric_types import fp64 
-import lambdas
-
-from lambdas.narrow import Narrow
 from interval import Interval
 from lambdas import types
-from utils import Logger
-
 from lambdas.lambda_utils import get_mirrors, get_mirrors_at
+from lambdas.narrow import Narrow
+from numeric_types import FP64
+from utils import Logger
 
 logger = Logger(level=Logger.HIGH, color=Logger.cyan)
 
@@ -40,6 +39,9 @@ class MirrorLeft(types.Transform):
 
     def type_check(self):
         """ Check that (mirror domain.inf) is an identity """
+        if self.type_check_done:
+            return
+
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
 
@@ -69,10 +71,11 @@ class MirrorLeft(types.Transform):
 
         # Remember the mirror point
         self.mirror_point = our_in_type.domain.inf
-        self.domain = next_domain
-        self.out_type = types.Impl(our_in_type.function, next_domain)
+        self.out_type = types.Impl(our_in_type.out_type.function,
+                                   next_domain)
+        self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
+    def generate(self, numeric_type=FP64):
         # in = ...
         # if in < mirror_point:
         #   out = in
@@ -84,6 +87,7 @@ class MirrorLeft(types.Transform):
         #   recons = s(inner)
         # else:
         #   recons = inner
+        self.type_check()
 
         # Generate the inner code first
         so_far = super().generate(numeric_type=numeric_type)
@@ -94,7 +98,7 @@ class MirrorLeft(types.Transform):
 
         bound = self.mirror_point
 
-        il_reduce = lego_blocks.IfLess(numeric_type(),
+        il_reduce = lego_blocks.IfLess(numeric_type,
                                        [in_name],
                                        [reduced_name],
                                        better_float_cast(bound),
@@ -107,7 +111,7 @@ class MirrorLeft(types.Transform):
         s_expr = self.s_expr.substitute(Variable("x"), Variable(inner_name))
         s_str = s_expr.to_libm_c()
 
-        il_recons = lego_blocks.IfLess(numeric_type(),
+        il_recons = lego_blocks.IfLess(numeric_type,
                                        [in_name],
                                        [recons_name],
                                        better_float_cast(bound),

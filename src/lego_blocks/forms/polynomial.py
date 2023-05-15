@@ -1,6 +1,5 @@
 
 
-from error import Error
 from interval import Interval
 
 
@@ -20,8 +19,3 @@ class Polynomial():
         self.coefficients = [paired[m] for m in self.monomials]
         self.domain = domain
         self.algorithmic_errors = list()
-
-    def add_algorithmic_error(self, error):
-        assert (type(error) == Error)
-
-        self.algorithmic_errors.append(error)

@@ -30,7 +30,7 @@ class IfLess(lego_blocks.LegoBlock):
             "true_val": self.true_val,
             "false_val": self.false_val,
             "out": self.out_names[0],
-            "type": self.numeric_type.c_type(),
+            "type": self.numeric_type.c_type,
         }
 
         lines = [

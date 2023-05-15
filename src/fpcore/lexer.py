@@ -84,7 +84,8 @@ class FPCoreLexer(Lexer):
     HEXNUM = r"[+-]?0[xX]([0-9a-fA-F]+(\.[0-9a-fA-F]+)?|\.[0-9a-fA-F]+)([pP][-+]?[0-9]+)?"
 
     # From https://fpbench.org/spec/fpcore-2.0.html
-    DECNUM = r"[-+]?([0-9]+(\.[0-9]+)?|\.[0-9]+)(e[-+]?[0-9]+)?"
+    #   allow e to be capital
+    DECNUM = r"[-+]?([0-9]+(\.[0-9]+)?|\.[0-9]+)([eE][-+]?[0-9]+)?"
 
     # From https://fpbench.org/spec/fpcore-2.0.html
     #   added general whitespace to catch newlines

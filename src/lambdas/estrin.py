@@ -2,48 +2,97 @@
 import math
 from better_float_cast import better_float_cast
 import lambdas
+import lego_blocks
 
-from numeric_types import fp64
+from numeric_types import FP64
 import lego_blocks.forms as forms
 from lambdas import types
 
 
 class Estrin(types.Transform):
 
-    def __init__(self, in_node: types.Node, split=0):
-        """
-        Takes a polynomial and implements it using estrin form
-
-        in_node: A polynomial
-        """
+    def __init__(self,
+                 in_node: types.Node,
+                 split: int = 0):
+        # Run Transform initialization
         super().__init__(in_node)
-        self.domain = self.in_node.domain
+
+        # Check and save split
+        if type(split) != int:
+            raise ValueError(f"'split' must be an int, given: {type(split)}")
+        if split < 0:
+            raise ValueError(f"'split' must be positive, given: {split}")
         self.split = split
 
     def type_check(self):
-        """ Check that the input is a polynomial """
+        # Only check once
+        if self.type_check_done:
+            return
+
+        # Make sure the inner lambda expression type checks first
         self.in_node.type_check()
+
+        # Make sure that our input is a polynomial
         our_in_type = self.in_node.out_type
+        if type(our_in_type) != types.Poly:
+            msg = ("Estrin only applies to polynomial lambda expressions,"
+                   f" given: {type(our_in_type)}")
+            raise ValueError(msg)
 
-        # TODO: turn into an exception
-        assert type(our_in_type) == types.Poly
+        # Check that split is logical
+        # TODO: check that split can fit in the polynomial
+        # for instance, a polynomial of 10 terms cannot have a split of 100
 
-        self.out_type = types.Impl(our_in_type.function, our_in_type.domain)
+        # Set out_type and indicate that type_check has completed
+        self.out_type = types.Impl(our_in_type.function,
+                                   our_in_type.domain)
+        self.type_check_done = True
 
-    def generate(self, numeric_type=fp64):
-        """ Implement a polynomial using the estrin form lego block """
-        p = super().generate(numeric_type=numeric_type)
-        in_name = self.gensym("in")
-        out_name = self.gensym("out")
-        return [forms.Estrin(numeric_type(), [in_name], [out_name], p, self.split)]
+    def generate(self, numeric_type=FP64):
+        # Make sure we type check
+        self.type_check()
+        block_list = list()
+
+        # Call inner generate which is needed for Sollya based polys
+        self.in_node.generate(numeric_type)
+
+        # Create the first polynomial
+        g_name = self.gensym("g")
+        p_name = self.gensym("p_poly")
+        p = forms.Estrin(numeric_type=numeric_type,
+                             in_names=[g_name],
+                             out_names=[p_name],
+                             monomials=self.in_node.p_monomials,
+                             coefficients=self.in_node.p_coefficients,
+                             split=self.split)
+        block_list.append(p)
+
+        # If there is a second polynomial create it
+        if len(self.in_node.q_monomials) != 0:
+            q_name = self.gensym("q_poly")
+            q = forms.Estrin(numeric_type=numeric_type,
+                            in_names=[g_name],
+                            out_names=[q_name],
+                            monomials=self.in_node.q_monomials,
+                            coefficients=self.in_node.q_coefficients,
+                            split=self.split)
+            block_list.append(q)
+
+            # Combine polynomials
+            r_name = self.gensym("r_poly")
+            r = lego_blocks.LegoFPCore(numeric_type=numeric_type,
+                                       in_names=[g_name, p_name, q_name],
+                                       out_names=[r_name],
+                                       fpc=self.in_node.combiner)
+            block_list.append(r)
+
+        return block_list
 
     @classmethod
     def generate_hole(cls, out_type):
         # We only output
         # (Impl (func) low high)
-        if (type(out_type) != types.Impl
-            or not math.isfinite(better_float_cast(out_type.domain.inf))
-                or not math.isfinite(better_float_cast(out_type.domain.sup))):
+        if type(out_type) != types.Impl or not out_type.domain.isfinite():
             return list()
 
         # To get this output we need as input
