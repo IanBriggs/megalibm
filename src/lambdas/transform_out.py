@@ -8,7 +8,6 @@ from lambdas import types
 from numeric_types import FP64
 
 
-
 class TransformOut(types.Transform):
 
     def __init__(self,

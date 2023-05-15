@@ -84,6 +84,10 @@ class Interval():
         return (math.isfinite(self.float_inf)
                 and math.isfinite(self.float_sup))
 
+    def isfinite(self):
+        return (math.isfinite(better_float_cast(self.inf))
+                and math.isfinite(better_float_cast(self.sup)))
+
     def width(self):
         return self.sup - self.inf
 

@@ -116,9 +116,9 @@ class Horner(forms.Form):
 
             # Use the fpcore C generation
             poly = poly.constant_propagate()
-            cdecl = self.numeric_type.c_type
+            c_type = self.numeric_type.c_type
             body = poly.to_libm_c(numeric_type=self.numeric_type)
-            code = f"{cdecl} {self.out_names[0]} = {body};"
+            code = f"{c_type} {self.out_names[0]} = {body};"
             return [code]
 
         # We want 'split' terms in general form
@@ -160,9 +160,9 @@ class Horner(forms.Form):
 
         # Use the fpcore C generation
         poly = poly.constant_propagate()
-        cdecl = self.numeric_type.c_type
+        c_type = self.numeric_type().c_type
         body = poly.to_libm_c(numeric_type=self.numeric_type)
-        code = f"{cdecl} {self.out_names[0]} = {body};"
+        code = f"{c_type} {self.out_names[0]} = {body};"
         return [code]
 
 

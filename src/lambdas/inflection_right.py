@@ -9,6 +9,7 @@ from interval import Interval
 from lambdas import types
 from numeric_types import FP32, FP64
 
+
 # This operation takes in an implementation of a function on an interval domain.
 # It then produces a new implementation that is valid on a new domain extending
 #   past the right edge of the old domain, doubling the width of the domain.

@@ -120,6 +120,9 @@ class Source(Node):
 
         # TODO: determine if function is valid on domain
 
+        assert (type(self.function) == FPCore)
+        assert (type(self.domain) == Interval)
+
         self.type_check_done = True
 
 class Transform(Node):
