@@ -100,81 +100,81 @@ typedef struct double_double
  */
 static dd
 Add12(
-      double a,
-      double b);
+    double a,
+    double b);
 
 /**
  * double-double = double - double
  */
 static dd
 Sub12(
-      double a,
-      double b);
+    double a,
+    double b);
 
 /**
  * double-double = double * double
  */
 static dd
 Mul12(
-      double a,
-      double b);
+    double a,
+    double b);
 
 /**
  * double-double = sqrt(double)
  */
 static dd
 Sqrt12(
-       double x);
+    double x);
 
 /**
  * double-double = double-double + double-double
  */
 static dd
 Add22(
-      dd a,
-      dd b);
+    dd a,
+    dd b);
 
 /**
  * double-double = double-double - double-double
  */
 static dd
 Sub22(
-      dd a,
-      dd b);
+    dd a,
+    dd b);
 
 /**
  * double-double = double-double * double-double
  */
 static dd
 Mul22(
-      dd a,
-      dd b);
+    dd a,
+    dd b);
 
 /**
  * double-double = double * double-double
  */
 static dd
 Mul122(
-       double a,
-       dd b);
+    double a,
+    dd b);
 
 /**
  * double-double = fma(double, double-double, double-double)
  */
 static dd
 MulAdd212(
-          double a,
-          dd b,
-          dd c);
+    double a,
+    dd b,
+    dd c);
 
 /**
  * double-double = fma(double-double, double-double, double-double)
  */
 static dd
-MulAdd22(double *fma_hi, double *fma_lo,
-         dd a,
-         dd b,
-         dd c);
+MulAdd22(
+    dd a,
+    dd b,
+    dd c);
 
 /******************************************************************************/
 /*  _  _  ____  __    ____  ____  ____  ____                                  */
@@ -188,8 +188,8 @@ MulAdd22(double *fma_hi, double *fma_lo,
 
 static inline dd
 TwoSum(
-       double a,
-       double b)
+    double a,
+    double b)
 {
     dd result;
     double a_prime, b_prime, delta_a, delta_b;
@@ -204,8 +204,8 @@ TwoSum(
 
 static inline dd
 FastTwoSum(
-           double a,
-           double b)
+    double a,
+    double b)
 {
     /* "... under the assumption that the exponent of a is at least as large  */
     /*  as the exponent of b" - wikipedia                                     */
@@ -220,8 +220,8 @@ FastTwoSum(
 
 static inline dd
 DoubleSafeFastTwoSum(
-                     double a,
-                     double b)
+    double a,
+    double b)
 {
     if (a >= b)
     {
@@ -235,8 +235,8 @@ DoubleSafeFastTwoSum(
 
 static inline dd
 IntegerSafeFastTwoSum(
-                      double a,
-                      double b)
+    double a,
+    double b)
 {
     /* "Note that if it is more efficient on a given architecture, the test   */
     /*  can be replaced with a test on the exponents of a and b" - CRLibm     */
@@ -252,8 +252,8 @@ IntegerSafeFastTwoSum(
 
 static inline dd
 UsedTwoSum(
-           double a,
-           double b)
+    double a,
+    double b)
 {
 #ifndef TWO_SUM_ALGO
 #error "TWO_SUM_ALGO must be set"
@@ -276,7 +276,7 @@ UsedTwoSum(
 
 static inline dd
 Split(
-      double a)
+    double a)
 {
     dd res;
     double t, u;
@@ -289,8 +289,8 @@ Split(
 
 static inline dd
 TwoProd(
-        double a,
-        double b)
+    double a,
+    double b)
 {
     dd result, a_sp, b_sp;
     double F, O, I, L, combine_0, combine_1, combine_2;
@@ -310,8 +310,8 @@ TwoProd(
 
 static inline dd
 FastTwoProd(
-            double a,
-            double b)
+    double a,
+    double b)
 {
     dd result;
     double neg_prod;
@@ -323,8 +323,8 @@ FastTwoProd(
 
 static inline dd
 UsedTwoProd(
-            double a,
-            double b)
+    double a,
+    double b)
 {
 #ifndef TWO_PROD_ALGO
 #error "TWO_PROD_ALGO must be set"
@@ -339,8 +339,8 @@ UsedTwoProd(
 
 static inline dd
 FastAdd22(
-          dd a,
-          dd b)
+    dd a,
+    dd b)
 {
     precondition(helper_abs(a.hi) > helper_abs(b.hi));
     dd result;
@@ -364,31 +364,31 @@ FastAdd22(
 
 static inline dd
 Add12(
-      double a,
-      double b)
+    double a,
+    double b)
 {
     return UsedTwoSum(a, b);
 }
 
 static inline dd
 Sub12(
-      double a,
-      double b)
+    double a,
+    double b)
 {
     return UsedTwoSum(a, -b);
 }
 
 static inline dd
 Mul12(
-      double a,
-      double b)
+    double a,
+    double b)
 {
     return UsedTwoProd(a, b);
 }
 
 static inline dd
 Sqrt12(
-       double x)
+    double x)
 {
     double s, s2_hi, s2_lo, e;
     s = sqrt(x);
@@ -398,8 +398,8 @@ Sqrt12(
 
 static inline dd
 Add22(
-      dd a,
-      dd b)
+    dd a,
+    dd b)
 {
     if (helper_abs(a.hi) > helper_abs(b.hi))
     {
@@ -413,8 +413,8 @@ Add22(
 
 static inline dd
 Sub22(
-      dd a,
-      dd b)
+    dd a,
+    dd b)
 {
     b.hi = -b.hi;
     b.lo = -b.lo;
@@ -423,8 +423,8 @@ Sub22(
 
 static inline dd
 Mul22(
-      dd a,
-      dd b)
+    dd a,
+    dd b)
 {
     dd m, result;
     m = FastTwoProd(a.hi, b.hi);
@@ -436,8 +436,8 @@ Mul22(
 
 static inline dd
 Mul122(
-       double a,
-       dd b)
+    double a,
+    dd b)
 {
     dd result, t;
     double t3, t4;
@@ -450,9 +450,9 @@ Mul122(
 
 static inline dd
 MulAdd212(
-          double a,
-          dd b,
-          dd c)
+    double a,
+    dd b,
+    dd c)
 {
     dd fma, t, t1;
     double t5, t6, t7, t8;
@@ -468,9 +468,9 @@ MulAdd212(
 
 static inline dd
 MulAdd22(
-         dd a,
-         dd b,
-         dd c)
+    dd a,
+    dd b,
+    dd c)
 {
     dd fma, t, t1;
     double t5, t6, t7, t8, t9, t10;

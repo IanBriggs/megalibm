@@ -1,3 +1,29 @@
+/******************************************************************************/
+/*  ____   __   _  _  ____  __    ____                                        */
+/* (    \ /  \ / )( \(  _ \(  )  (  __)                                       */
+/*  ) D ((  O )) \/ ( ) _ (/ (_/\ ) _)                                        */
+/* (____/ \__/ \____/(____/\____/(____)                                       */
+/*          ____   __   _  _  ____  __    ____     _  _                       */
+/*         (    \ /  \ / )( \(  _ \(  )  (  __)   / )( \                      */
+/*    ____  ) D ((  O )) \/ ( ) _ (/ (_/\ ) _)  _ ) __ (                      */
+/*   (____)(____/ \__/ \____/(____/\____/(____)(_)\_)(_/                      */
+/*                                                                            */
+/* Compute in extra precision!                                                */
+/*                                                                            */
+/******************************************************************************/
+/*  _    _  ___  ______ _   _ _____ _   _ _____  _____                        */
+/* | |  | |/ _ \ | ___ \ \ | |_   _| \ | |  __ \/  ___|_                      */
+/* | |  | / /_\ \| |_/ /  \| | | | |  \| | |  \/\ `--.(_)                     */
+/* | |/\| |  _  ||    /| . ` | | | | . ` | | __  `--. \                       */
+/* \  /\  / | | || |\ \| |\  |_| |_| |\  | |_\ \/\__/ /_                      */
+/*  \/  \/\_| |_/\_| \_\_| \_/\___/\_| \_/\____/\____/(_)                     */
+/* (inherited from double_access.h)                                           */
+/* 1. Assumes IEEE754 binary double                                           */
+/* 2. Does not care about endianess                                           */
+/* 3. May have undefined behavior depending on language standard and compile  */
+/*    time setting used                                                       */
+/******************************************************************************/
+
 #ifndef DOUBLE_DOUBLE_H
 #define DOUBLE_DOUBLE_H
 
@@ -5,370 +31,459 @@
 #include "double_access.h"
 #include "double_helpers.h"
 
-#include <math.h> // for fma()
+#include <math.h> /* for fma() */
 
-// Based on:
-// "CR-LIBM A library of correctly rounded elementary functions in double-precision"
-// https://en.wikipedia.org/wiki/2Sum
-// "Library for Double-Double and Quad-Double Arithmetic"
+/* Based on:                                                                  */
+/* "CR-LIBM A library of correctly rounded elementary functions in            */
+/*   double-precision"                                                        */
+/* https://en.wikipedia.org/wiki/2Sum                                         */
+/* "Library for Double-Double and Quad-Double Arithmetic"                     */
 
-// WARNINGS: (inherited from double-access.h)
-// * NO HEED IS GIVEN TO ENDIANESS!!!
-// * UB may be present
+/******************************************************************************/
+/*   ___  __   _  _  ____  __  __    ____    ____  __  _  _  ____             */
+/*  / __)/  \ ( \/ )(  _ \(  )(  )  (  __)  (_  _)(  )( \/ )(  __)            */
+/* ( (__(  O )/ \/ \ ) __/ )( / (_/\ ) _)     )(   )( / \/ \ ) _)             */
+/*  \___)\__/ \_)(_/(__)  (__)\____/(____)   (__) (__)\_)(_/(____)            */
+/*  ____  ____  ____  ____  __  __ _   ___  ____                              */
+/* / ___)(  __)(_  _)(_  _)(  )(  ( \ / __)/ ___)                             */
+/* \___ \ ) _)   )(    )(   )( /    /( (_ \\___ \                             */
+/* (____/(____) (__)  (__) (__)\_)__) \___/(____/                             */
+/*                                                                            */
+/******************************************************************************/
 
-//   ___  __   _  _  ____  __  __    ____    ____  __  _  _  ____
-//  / __)/  \ ( \/ )(  _ \(  )(  )  (  __)  (_  _)(  )( \/ )(  __)
-// ( (__(  O )/ \/ \ ) __/ )( / (_/\ ) _)     )(   )( / \/ \ ) _)
-//  \___)\__/ \_)(_/(__)  (__)\____/(____)   (__) (__)\_)(_/(____)
-//  ____  ____  ____  ____  __  __ _   ___  ____
-// / ___)(  __)(_  _)(_  _)(  )(  ( \ / __)/ ___)
-// \___ \ ) _)   )(    )(   )( /    /( (_ \\___ \
-// (____/(____) (__)  (__) (__)\_)__) \___/(____/
-//
-// Compile time settings
-//
-
-// Which TwoSum algorithm to use
-// 0: 6 addition/subtractions
-// 1: 2 bit extractions, 1 integer conditional, 3 addition/subtractions
+/* Which TwoSum algorithm to use                                              */
+/* 0: 6 addition/subtractions                                                 */
+/* 1: 2 bit extractions, 1 conditional, 3 addition/subtractions               */
 #ifndef TWO_SUM_ALGO
 #define TWO_SUM_ALGO 1
 #endif
 
-// Which TwoProd algorithm to use
-// 0: 2 constant multiplies, 4 multiplies, 10 addition/subtractions
-// 1: 1 multiply, 1 negation, 1 fma
+/* Which conditional to use if TWO_SUM_ALGO == 1                              */
+/* 0: 1 double compare                                                        */
+/* 1: 2 integer extract, 1 integer compare                                    */
+#ifndef TWO_SUM_ONE_COND
+#define TWO_SUM_ONE_COND 1
+#endif
+
+/* Which TwoProd algorithm to use                                             */
+/* 0: 2 constant multiplies, 4 multiplies, 10 addition/subtractions           */
+/* 1: 1 multiply, 1 negation, 1 fma                                           */
 #ifndef TWO_PROD_ALGO
-#ifdef FP_FAST_FMA
+#ifdef FP_FAST_FMA /* If FMA is fast then use it by default */
 #define TWO_PROD_ALGO 1
 #else
 #define TWO_PROD_ALGO 0
 #endif
 #endif
 
-//  ____  _  _  ____  __    __  ___
-// (  _ \/ )( \(  _ \(  )  (  )/ __)
-//  ) __/) \/ ( ) _ (/ (_/\ )(( (__
-// (__)  \____/(____/\____/(__)\___)
-//   __  __ _  ____  ____  ____  ____  __    ___  ____
-//  (  )(  ( \(_  _)(  __)(  _ \(  __)/ _\  / __)(  __)
-//   )( /    /  )(   ) _)  )   / ) _)/    \( (__  ) _)
-//  (__)\_)__) (__) (____)(__\_)(__) \_/\_/ \___)(____)
-//
-// Public interface
-//
-
-static void
-Add12(double *sum, double *error,
-      double a,
-      double b);
-
-static void
-Sub12(double *diff, double *error,
-      double a,
-      double b);
-
-static void
-Mul12(double *prod, double *error,
-      double a,
-      double b);
-
-static void
-Sqrt12(double *ans, double *error,
-       double x);
-
-static void
-Add22(double *sum_hi, double *sum_lo,
-      double a_hi, double a_lo,
-      double b_hi, double b_lo);
-
-static void
-Sub22(double *diff_hi, double *diff_lo,
-      double a_hi, double a_lo,
-      double b_hi, double b_lo);
-
-static void
-Mul22(double *prod_hi, double *prod_lo,
-      double a_hi, double a_lo,
-      double b_hi, double b_lo);
-
-static void
-Mul122(double *prod_hi, double *prod_lo,
-       double a,
-       double b_hi, double b_lo);
-
-static void
-MulAdd212(double *fma_hi, double *fma_lo,
-          double a,
-          double b_hi, double b_lo,
-          double c_hi, double c_lo);
-
-static void
-MulAdd22(double *fma_hi, double *fma_lo,
-         double a_hi, double a_lo,
-         double b_hi, double b_lo,
-         double c_hi, double c_lo);
-
-//  _  _  ____  __    ____  ____  ____  ____
-// / )( \(  __)(  )  (  _ \(  __)(  _ \/ ___)
-// ) __ ( ) _) / (_/\ ) __/ ) _)  )   /\___ \
-// \_)(_/(____)\____/(__)  (____)(__\_)(____/
-//
-// Helpers
-//
-
-static inline void
-TwoSum(double *sum, double *error,
-       double a,
-       double b)
+typedef struct double_double
 {
+    /* double-double hi and lo */
+    double hi;
+    double lo;
+} dd;
+
+/******************************************************************************/
+/*  ____  _  _  ____  __    __  ___                                           */
+/* (  _ \/ )( \(  _ \(  )  (  )/ __)                                          */
+/*  ) __/) \/ ( ) _ (/ (_/\ )(( (__                                           */
+/* (__)  \____/(____/\____/(__)\___)                                          */
+/*   __  __ _  ____  ____  ____  ____  __    ___  ____                        */
+/*  (  )(  ( \(_  _)(  __)(  _ \(  __)/ _\  / __)(  __)                       */
+/*   )( /    /  )(   ) _)  )   / ) _)/    \( (__  ) _)                        */
+/*  (__)\_)__) (__) (____)(__\_)(__) \_/\_/ \___)(____)                       */
+/*                                                                            */
+/******************************************************************************/
+
+/**
+ * double-double = double + double
+ */
+static dd
+Add12(
+    double a,
+    double b);
+
+/**
+ * double-double = double - double
+ */
+static dd
+Sub12(
+    double a,
+    double b);
+
+/**
+ * double-double = double * double
+ */
+static dd
+Mul12(
+    double a,
+    double b);
+
+/**
+ * double-double = sqrt(double)
+ */
+static dd
+Sqrt12(
+    double x);
+
+/**
+ * double-double = double-double + double-double
+ */
+static dd
+Add22(
+    dd a,
+    dd b);
+
+/**
+ * double-double = double-double - double-double
+ */
+static dd
+Sub22(
+    dd a,
+    dd b);
+
+/**
+ * double-double = double-double * double-double
+ */
+static dd
+Mul22(
+    dd a,
+    dd b);
+
+/**
+ * double-double = double * double-double
+ */
+static dd
+Mul122(
+    double a,
+    dd b);
+
+/**
+ * double-double = fma(double, double-double, double-double)
+ */
+static dd
+MulAdd212(
+    double a,
+    dd b,
+    dd c);
+
+/**
+ * double-double = fma(double-double, double-double, double-double)
+ */
+static dd
+MulAdd22(
+    dd a,
+    dd b,
+    dd c);
+
+/******************************************************************************/
+/*  _  _  ____  __    ____  ____  ____  ____                                  */
+/* / )( \(  __)(  )  (  _ \(  __)(  _ \/ ___)                                 */
+/* ) __ ( ) _) / (_/\ ) __/ ) _)  )   /\___ \                                 */
+/* \_)(_/(____)\____/(__)  (____)(__\_)(____/                                 */
+/*                                                                            */
+/* Helpers                                                                    */
+/*                                                                            */
+/******************************************************************************/
+
+static inline dd
+TwoSum(
+    double a,
+    double b)
+{
+    dd result;
     double a_prime, b_prime, delta_a, delta_b;
-    *sum = a + b;
-    a_prime = *sum - b;
-    b_prime = *sum - a_prime;
+    result.hi = a + b;
+    a_prime = result.hi - b;
+    b_prime = result.hi - a_prime;
     delta_a = a - a_prime;
     delta_b = b - b_prime;
-    *error = delta_a + delta_b;
+    result.lo = delta_a + delta_b;
+    return result;
 }
 
-static inline void
-FastTwoSum(double *sum, double *error,
-           double a,
-           double b)
+static inline dd
+FastTwoSum(
+    double a,
+    double b)
 {
-    // "... under the assumption that the exponent of a is at least as large as
-    // the exponent of b" - wikipedia
+    /* "... under the assumption that the exponent of a is at least as large  */
+    /*  as the exponent of b" - wikipedia                                     */
     precondition(get_exponent_double(a) >= get_exponent_double(b));
+    dd result;
     double z;
-    *sum = a + b;
-    z = *sum - a;
-    *error = b - z;
+    result.hi = a + b;
+    z = result.hi - a;
+    result.lo = b - z;
+    return result;
 }
 
-static inline void
-SafeFastTwoSum(double *sum, double *error,
-               double a,
-               double b)
+static inline dd
+DoubleSafeFastTwoSum(
+    double a,
+    double b)
 {
-    // "Note that if it is more efficient on a given architecture, the test can
-    // be replaced with a test on the exponents of a and b" - CRLibm
-    if (get_exponent_double(a) >= get_exponent_double(b))
+    if (a >= b)
     {
-        FastTwoSum(sum, error, a, b);
+        return FastTwoSum(a, b);
     }
     else
     {
-        FastTwoSum(sum, error, b, a);
+        return FastTwoSum(b, a);
     }
 }
 
-static inline void
-UsedTwoSum(double *sum, double *error,
-           double a,
-           double b)
+static inline dd
+IntegerSafeFastTwoSum(
+    double a,
+    double b)
+{
+    /* "Note that if it is more efficient on a given architecture, the test   */
+    /*  can be replaced with a test on the exponents of a and b" - CRLibm     */
+    if (get_exponent_double(a) >= get_exponent_double(b))
+    {
+        return FastTwoSum(a, b);
+    }
+    else
+    {
+        return FastTwoSum(b, a);
+    }
+}
+
+static inline dd
+UsedTwoSum(
+    double a,
+    double b)
 {
 #ifndef TWO_SUM_ALGO
 #error "TWO_SUM_ALGO must be set"
 #elif TWO_SUM_ALGO == 0
-    TwoSum(sum, error, a, b);
+    return TwoSum(a, b);
 #elif TWO_SUM_ALGO == 1
-    SafeFastTwoSum(sum, error, a, b);
+#ifndef TWO_SUM_ONE_COND
+#error "Since TWO_SUM_ALGO == 1, TWO_SUM_ONE_COND must be set"
+#elif TWO_SUM_ONE_COND == 0
+    return DoubleSafeFastTwoSum(a, b);
+#elif TWO_SUM_ONE_COND == 1
+    return IntegerSafeFastTwoSum(a, b);
+#else
+#error "Invalid TWO_SUM_ONE_COND selection"
+#endif /* ifndef TWO_SUM_ONE_COND */
 #else
 #error "Invalid TWO_SUM_ALGO selection"
-#endif
+#endif /* ifndef TWO_SUM_ALGO */
 }
 
-static inline void
-Split(double *hi, double *lo,
-      double a)
+static inline dd
+Split(
+    double a)
 {
+    dd res;
     double t, u;
-    t = 134217729.0 * a; // 2**27 + 1
+    t = 134217729.0 * a; /* 2**27 + 1 */
     u = t - a;
-    *hi = t - u;
-    *lo = a - *hi;
+    res.hi = t - u;
+    res.lo = a - res.hi;
+    return res;
 }
 
-static inline void
-TwoProd(double *prod, double *error,
-        double a,
-        double b)
+static inline dd
+TwoProd(
+    double a,
+    double b)
 {
-    double a_hi, a_lo, b_hi, b_lo, F, O, I, L, combine_0, combine_1, combine_2;
-    *prod = a * b;
-    Split(&a_hi, &a_lo, a);
-    Split(&b_hi, &b_lo, b);
-    F = a_hi * b_hi;
-    O = a_hi * b_lo;
-    I = a_lo * b_hi;
-    L = a_lo * b_lo;
-    combine_0 = F - *prod;
+    dd result, a_sp, b_sp;
+    double F, O, I, L, combine_0, combine_1, combine_2;
+    result.hi = a * b;
+    a_sp = Split(a);
+    b_sp = Split(b);
+    F = a_sp.hi * b_sp.hi;
+    O = a_sp.hi * b_sp.lo;
+    I = a_sp.lo * b_sp.hi;
+    L = a_sp.lo * b_sp.lo;
+    combine_0 = F - result.hi;
     combine_1 = combine_0 + O;
     combine_2 = combine_1 + I;
-    *error = combine_2 + L;
+    result.lo = combine_2 + L;
+    return result;
 }
 
-static inline void
-FastTwoProd(double *prod, double *error,
-            double a,
-            double b)
+static inline dd
+FastTwoProd(
+    double a,
+    double b)
 {
+    dd result;
     double neg_prod;
-    *prod = a * b;
-    neg_prod = -(*prod);
-    *error = fma(a, b, neg_prod);
+    result.hi = a * b;
+    neg_prod = -(result.hi);
+    result.lo = fma(a, b, neg_prod);
+    return result;
 }
 
-static inline void
-UsedTwoProd(double *prod, double *error,
-            double a,
-            double b)
+static inline dd
+UsedTwoProd(
+    double a,
+    double b)
 {
 #ifndef TWO_PROD_ALGO
 #error "TWO_PROD_ALGO must be set"
 #elif TWO_PROD_ALGO == 0
-    TwoPROD(prod, error, a, b);
+    return TwoProd(a, b);
 #elif TWO_PROD_ALGO == 1
-    FastTwoProd(prod, error, a, b);
+    return FastTwoProd(a, b);
 #else
 #error "Invalid TWO_PROD_ALGO selection"
 #endif
 }
 
-static inline void
-FastAdd22(double *sum_hi, double *sum_lo,
-          double a_hi, double a_lo,
-          double b_hi, double b_lo)
+static inline dd
+FastAdd22(
+    dd a,
+    dd b)
 {
-    precondition(helper_abs(a_hi) > helper_abs(b_hi));
+    precondition(helper_abs(a.hi) > helper_abs(b.hi));
+    dd result;
     double r, s;
-    r = a_hi + b_hi;
-    s = a_hi - r + b_hi + b_lo + a_lo;
-    *sum_hi = r + s;
-    *sum_lo = r - (*sum_hi) + s;
+    r = a.hi + b.hi;
+    s = a.hi - r + b.hi + b.lo + a.lo;
+    result.hi = r + s;
+    result.lo = r - (result.hi) + s;
+    return result;
 }
 
-//  ____  _  _  __ _   ___  ____  __  __   __ _  ____
-// (  __)/ )( \(  ( \ / __)(_  _)(  )/  \ (  ( \/ ___)
-//  ) _) ) \/ (/    /( (__   )(   )((  O )/    /\___ \
-// (__)  \____/\_)__) \___) (__) (__)\__/ \_)__)(____/
-//
-// Functions
-//
+/******************************************************************************/
+/*  ____  _  _  __ _   ___  ____  __  __   __ _  ____                         */
+/* (  __)/ )( \(  ( \ / __)(_  _)(  )/  \ (  ( \/ ___)                        */
+/*  ) _) ) \/ (/    /( (__   )(   )((  O )/    /\___ \                        */
+/* (__)  \____/\_)__) \___) (__) (__)\__/ \_)__)(____/                        */
+/*                                                                            */
+/* Functions                                                                  */
+/*                                                                            */
+/******************************************************************************/
 
-static inline void
-Add12(double *sum, double *error,
-      double a,
-      double b)
+static inline dd
+Add12(
+    double a,
+    double b)
 {
-    UsedTwoSum(sum, error, a, b);
+    return UsedTwoSum(a, b);
 }
 
-static inline void
-Sub12(double *diff, double *error,
-      double a,
-      double b)
+static inline dd
+Sub12(
+    double a,
+    double b)
 {
-    UsedTwoSum(diff, error, a, -b);
+    return UsedTwoSum(a, -b);
 }
 
-static inline void
-Mul12(double *prod, double *error,
-      double a,
-      double b)
+static inline dd
+Mul12(
+    double a,
+    double b)
 {
-    UsedTwoProd(prod, error, a, b);
+    return UsedTwoProd(a, b);
 }
 
-static inline void
-Sqrt12(double *ans, double *error,
-       double x)
+static inline dd
+Sqrt12(
+    double x)
 {
     double s, s2_hi, s2_lo, e;
     s = sqrt(x);
-    e = (x - s*s) / (x + s);
-    UsedTwoSum(ans, error, s, e);
+    e = (x - s * s) / (x + s);
+    return UsedTwoSum(s, e);
 }
 
-static inline void
-Add22(double *sum_hi, double *sum_lo,
-      double a_hi, double a_lo,
-      double b_hi, double b_lo)
+static inline dd
+Add22(
+    dd a,
+    dd b)
 {
-    if (helper_abs(a_hi) > helper_abs(b_hi))
+    if (helper_abs(a.hi) > helper_abs(b.hi))
     {
-        FastAdd22(sum_hi, sum_lo, a_hi, a_lo, b_hi, b_lo);
+        return FastAdd22(a, b);
     }
     else
     {
-        FastAdd22(sum_hi, sum_lo, b_hi, b_lo, a_hi, a_lo);
+        return FastAdd22(b, a);
     }
 }
 
-static inline void
-Sub22(double *diff_hi, double *diff_lo,
-      double a_hi, double a_lo,
-      double b_hi, double b_lo)
+static inline dd
+Sub22(
+    dd a,
+    dd b)
 {
-    Add22(diff_hi, diff_lo, a_hi, a_lo, -b_hi, -b_lo);
+    b.hi = -b.hi;
+    b.lo = -b.lo;
+    return Add22(a, b);
 }
 
-static inline void
-Mul22(double *prod_hi, double *prod_lo,
-      double a_hi, double a_lo,
-      double b_hi, double b_lo)
+static inline dd
+Mul22(
+    dd a,
+    dd b)
 {
-    double m_hi, m_lo;
-    FastTwoProd(&m_hi, &m_lo, a_hi, b_hi);
-    m_lo += a_hi * b_lo + a_lo * b_hi;
-    *prod_hi = m_hi + m_lo;
-    *prod_lo = m_hi - (*prod_hi) + m_lo;
+    dd m, result;
+    m = FastTwoProd(a.hi, b.hi);
+    m.lo += a.hi * b.lo + a.lo * b.hi;
+    result.hi = m.hi + m.lo;
+    result.lo = m.hi - (result.hi) + m.lo;
+    return result;
 }
 
-static inline void
-Mul122(double *prod_hi, double *prod_lo,
-       double a,
-       double b_hi, double b_lo)
+static inline dd
+Mul122(
+    double a,
+    dd b)
 {
-    double t1, t2, t3, t4;
-    Mul12(&t1, &t2, a, b_hi);
-    t3 = a * b_lo;
-    t4 = t2 + t3;
-    Add12(prod_hi, prod_lo, t1, t4);
+    dd result, t;
+    double t3, t4;
+    t = Mul12(a, b.hi);
+    t3 = a * b.lo;
+    t4 = t.lo + t3;
+    result = Add12(t.hi, t4);
+    return result;
 }
 
-static inline void
-MulAdd212(double *fma_hi, double *fma_lo,
-          double a,
-          double b_hi, double b_lo,
-          double c_hi, double c_lo)
+static inline dd
+MulAdd212(
+    double a,
+    dd b,
+    dd c)
 {
-    double t1, t2, t3, t4, t5, t6, t7, t8;
-    Mul12(&t1, &t2, a, b_hi);
-    Add12(&t3, &t4, c_hi, t1);
-    t5 = b_lo * a;
-    t6 = c_lo + t2;
+    dd fma, t, t1;
+    double t5, t6, t7, t8;
+    t = Mul12(a, b.hi);
+    t1 = Add12(c.hi, t.hi);
+    t5 = b.lo * a;
+    t6 = c.lo + t.lo;
     t7 = t5 + t6;
-    t8 = t7 + t4;
-    Add12(fma_hi, fma_lo, t3, t8);
+    t8 = t7 + t1.lo;
+    fma = Add12(t1.hi, t8);
+    return fma;
 }
 
-static inline void
-MulAdd22(double *fma_hi, double *fma_lo,
-         double a_hi, double a_lo,
-         double b_hi, double b_lo,
-         double c_hi, double c_lo)
+static inline dd
+MulAdd22(
+    dd a,
+    dd b,
+    dd c)
 {
-    double t1, t2, t3, t4, t5, t6, t7, t8, t9, t10;
-    Mul12(&t1, &t2, a_hi, b_hi);
-    Add12(&t3, &t4, c_hi, t1);
-    t5 = a_hi * b_lo;
-    t6 = a_lo * b_hi;
-    t7 = t2 + c_lo;
-    t8 = t4 + t7;
+    dd fma, t, t1;
+    double t5, t6, t7, t8, t9, t10;
+    t = Mul12(a.hi, b.hi);
+    t1 = Add12(c.hi, t.hi);
+    t5 = a.hi * b.lo;
+    t6 = a.lo * b.hi;
+    t7 = t.lo + c.lo;
+    t8 = t1.lo + t7;
     t9 = t5 + t6;
     t10 = t8 + t9;
-    Add12(fma_hi, fma_lo, t3, t10);
+    fma = Add12(t1.hi, t10);
+    return fma;
 }
 
-#endif // #ifndef DOUBLE_DOUBLE_H
+#endif /* #ifndef DOUBLE_DOUBLE_H */
