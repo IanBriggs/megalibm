@@ -40,9 +40,39 @@ s_domain = Interval(
     fpcore.parse_expr("(/ (- (sqrt 2) 1) (+ 2 (- (sqrt 2) 1)))"))
 
 zero_point = Interval(0, 0)
+zero_polynomial = Horner(FixedPolynomial(f_log, zero_point, [0], [0]))
 
 mac_domain = Interval(-9.5367431640625e-7,
                       9.536743161842053950749686919152736663818359375e-7)
+mac_polynomial = \
+    Horner(
+        FixedPolynomial(f_log, mac_domain,
+                        [1, 2, 3], [1, -1 / 2, 1 / 3]),
+        split=1)
+
+extra_domain = Interval(0.3799991607666015625,
+                        f_domain.sup)
+
+f_polynomial = \
+    Recharacterize(
+        f_log,
+        f_to_s_remap,
+        Horner(
+            FixedMultiPolynomial(
+                s_log,
+                s_domain,
+                fpcore.parse(
+                    "(FPCore (x p q) (+ (* 2 x) (* x (+ p q))))"),
+                [4, 8, 12],
+                ["3.999999999940941908e-01",
+                 "2.222219843214978396e-01",
+                 "1.531383769920937332e-01",],
+                [2, 6, 10, 14],
+                ["6.666666666666735130e-01",
+                 "2.857142874366239149e-01",
+                 "1.818357216161805012e-01",
+                 "1.479819860511658591e-01"]),
+            split=0))
 
 mlm = \
     Multiplicative(
@@ -50,34 +80,11 @@ mlm = \
             log,
             x_to_f_remap,
             SplitDomain({
-                zero_point:
-                Horner(FixedPolynomial(f_log, zero_point, [0], [0])),
-                mac_domain:
-                Horner(
-                    FixedPolynomial(f_log, mac_domain,
-                                    [1, 2, 3],
-                                    [1, -1 / 2, 1 / 3]),
-                                    split=1),
-                f_domain:
-                Recharacterize(
-                    f_log,
-                    f_to_s_remap,
-                    Horner(
-                        FixedMultiPolynomial(
-                            s_log,
-                            s_domain,
-                            fpcore.parse(
-                                "(FPCore (x p q) (+ (* 2 x) (* x (+ p q))))"),
-                            [4, 8, 12],
-                            ["3.999999999940941908e-01",
-                             "2.222219843214978396e-01",
-                             "1.531383769920937332e-01",],
-                            [2, 6, 10, 14],
-                            ["6.666666666666735130e-01",
-                             "2.857142874366239149e-01",
-                             "1.818357216161805012e-01",
-                             "1.479819860511658591e-01"]),
-                        split=0))})))
+                zero_point: zero_polynomial,
+                mac_domain: mac_polynomial,
+                extra_domain: f_polynomial,
+                f_domain: f_polynomial,
+            })))
 
 
 # |                                                                           |

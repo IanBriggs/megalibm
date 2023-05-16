@@ -1,4 +1,5 @@
 
+from better_float_cast import better_float_cast
 import lego_blocks
 from interval import Interval
 from lambdas import types
@@ -50,8 +51,18 @@ class SplitDomain(types.Transform):
             except ValueError as e:
                 raise ValueError(f"There is a gap in the covered domains.")
 
-        assert full_span_inf == covered_interval.inf, [full_span_inf, covered_interval.inf]
-        assert full_span_sup == covered_interval.sup, [full_span_sup, covered_interval.sup]
+        # TODO: compare in a better way than casting to float64
+        if (better_float_cast(full_span_inf)
+            != better_float_cast(covered_interval.inf)):
+            msg = (f"Expected to cover lower bound '{full_span_inf}',"
+                   f" but only got to '{covered_interval.inf}'")
+            raise ValueError(msg)
+
+        if (better_float_cast(full_span_sup)
+            != better_float_cast(covered_interval.sup)):
+            msg = (f"Expected to cover upper bound '{full_span_sup}',"
+                   f" but only got to '{covered_interval.sup}'")
+            raise ValueError(msg)
 
         # check that the corresponding impls
         # * typecheck
@@ -60,8 +71,11 @@ class SplitDomain(types.Transform):
         f = None
         for dom, impl in self.domains_to_impls.items():
             impl.type_check()
-            assert impl.out_type.domain.inf <= dom.inf
-            assert dom.sup <= impl.out_type.domain.sup
+            o_dom = impl.out_type.domain
+            if o_dom.inf > dom.inf or dom.sup > o_dom.sup:
+                msg = ("Expected an implementation that covers"
+                       f" [{dom.inf}, {dom.sup}], but it only covered"
+                       f" [{o_dom.inf}, {o_dom.sup}]")
             if f is None:
                 f = impl.out_type.function
             assert f == impl.out_type.function

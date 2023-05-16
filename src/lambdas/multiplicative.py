@@ -175,7 +175,7 @@ class FoldTop(lego_blocks.LegoBlock):
         bound = self.numeric_type.num_to_str(self.bound)
 
         source_lines = [
-            f"if ({m} < {bound}) {{",
+            f"if ({m} > {bound}) {{",
             f"    {k} += 1;",
             f"    {m} /= 2;",
             "}"
