@@ -6,14 +6,12 @@ from .ast import list_to_repr, list_to_str
 from . import ast
 
 from .ast_methods import (
-    add,
     copy,
     cross,
     contains_op,
     constant_propagate,
     decompose_identities,
-    dunder_lt,
-    dunder_le,
+    dunder_methods,
     egg_equal,
     equals,
     eval,
@@ -23,15 +21,8 @@ from .ast_methods import (
     get_variables,
     interval_eval,
     is_constant,
-    mul,
-    neg,
-    radd,
     remove_let,
-    rmul,
-    rsub,
-    rtruediv,
     simplify,
-    sub,
     substitute,
     unary_op,
     to_html,
@@ -41,5 +32,6 @@ from .ast_methods import (
     to_sollya,
     to_sympy,
     to_wolfram,
-    truediv,
 )
+
+from .interface import *
