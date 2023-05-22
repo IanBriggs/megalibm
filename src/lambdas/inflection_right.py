@@ -7,7 +7,7 @@ from dirty_equal import dirty_equal
 from fpcore.ast import Variable
 from interval import Interval
 from lambdas import types
-from numeric_types import FP32, FP64
+from numeric_types import FP32, FP64, FPDD
 
 
 # This operation takes in an implementation of a function on an interval domain.
@@ -28,9 +28,11 @@ class InflectionRight(types.Transform):
     def __init__(self,
                  in_node: types.Node,
                  reduction: fpcore.ast.Expr,
-                 reconstruction: fpcore.ast.Expr):
+                 reconstruction: fpcore.ast.Expr,
+                 useDD=False):
         self.reduction = reduction
         self.reconstruction = reconstruction
+        self.useDD = useDD
         super().__init__(in_node)
 
     def __str__(self):
@@ -116,12 +118,21 @@ class InflectionRight(types.Transform):
         y_out_name = self.gensym("y_out")
         rec_expr = self.reconstruction.substitute(
             Variable("y"), Variable(inner_name))
+        
+        # simp = rec_expr.simplify()
+        # a = rec_expr.to_libm_c(numeric_type=numeric_type)
+        # recc = rec_expr.constant_propagate()
+        recons_str = ""
+        if self.useDD:
+           recons_str =  rec_expr.to_libm_c(numeric_type= FPDD) + ".hi"
+        else:
+            recons_str = rec_expr.to_libm_c(numeric_type)
 
         rec = lego_blocks.IfLess(numeric_type,
                                  [x_in_name],
                                  [y_out_name],
                                  better_float_cast(self.inflection_point),
                                  inner_name,
-                                 rec_expr.to_libm_c(numeric_type=numeric_type))
+                                 recons_str)
 
         return [red] + so_far + [rec]

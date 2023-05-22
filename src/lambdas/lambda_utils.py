@@ -56,7 +56,7 @@ def find_periods(func: FPCore):
 
 def generate_c_code(lam, name, numeric_type=FP64, func_type=FP64):
     passes = lam.generate(numeric_type=numeric_type)
-    in_type = numeric_type.c_type
+    in_type = func_type.c_type
     in_name = passes[0].in_names[0]
     out_type = func_type.c_type
     out_name = passes[-1].out_names[0]

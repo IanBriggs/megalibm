@@ -151,6 +151,15 @@ Mul22(
     dd b);
 
 /**
+ * double-double = double-double * double-double
+ */
+static dd
+Div22(
+    dd a,
+    dd b);
+
+
+/**
  * double-double = double * double-double
  */
 static dd
@@ -431,6 +440,21 @@ Mul22(
     m.lo += a.hi * b.lo + a.lo * b.hi;
     result.hi = m.hi + m.lo;
     result.lo = m.hi - (result.hi) + m.lo;
+    return result;
+}
+
+static inline dd
+Div22(
+    dd a,
+    dd b)
+{
+    double ch, cl;
+    dd u, result;
+    ch = (a.hi) / (b.hi);
+    u = Mul12(ch, b.hi);
+    cl = ((((a.hi - u.hi) - u.lo) + a.lo) - ch*(b.lo))/(b.hi);
+    result.hi = ch + cl;
+    result.lo = (ch - (result.hi)) + cl;
     return result;
 }
 

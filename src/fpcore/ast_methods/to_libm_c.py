@@ -1,6 +1,6 @@
 from fpcore.ast import ASTNode, Atom, Constant, FPCore, Number, Operation
 from utils import add_method
-from numeric_types import FP64, FP32
+from numeric_types import FP64, FP32, FPDD
 
 _CONST_MAPPING = {
     FP32: {
@@ -34,6 +34,9 @@ _CONST_MAPPING = {
         "PI": "0x1.921fb54442d18p+1",
         "SQRT1_2": "0x1.6a09e667f3bcdp-1",
         "SQRT2": "0x1.6a09e667f3bcdp+0",
+    },
+    FPDD: {
+        "PI": "{0x1.921fb54442d18p+1, 0x1.a62633145c06ep-57}"
     }
 }
 
@@ -48,7 +51,7 @@ def to_libm_c(self, *args, **kwargs):
 
 @add_method(Atom)
 def to_libm_c(self, numeric_type=FP64):
-    return self.source
+    return self.source if numeric_type in (FP32, FP64) else "{" + self.source + ", 0.0}"
 
 
 @add_method(Number)
@@ -68,19 +71,46 @@ def to_libm_c(self, numeric_type=FP64):
 
 @add_method(Operation)
 def to_libm_c(self, numeric_type=FP64):
-    c_args = [arg.to_libm_c(numeric_type=numeric_type) for arg in self.args]
+    if numeric_type in (FP32, FP64):
+        c_args = [arg.to_libm_c(numeric_type=numeric_type) for arg in self.args]
 
-    if len(c_args) == 1 and self.op in {"+", "-"}:
-        return "({}{})".format(self.op, c_args[0])
+        if len(c_args) == 1 and self.op in {"+", "-"}:
+            return "({}{})".format(self.op, c_args[0])
 
-    if len(c_args) == 2 and self.op in {"+", "-", "*", "/"}:
-        return "({} {} {})".format(c_args[0], self.op, c_args[1])
+        if len(c_args) == 2 and self.op in {"+", "-", "*", "/"}:
+            return "({} {} {})".format(c_args[0], self.op, c_args[1])
 
-    if numeric_type == FP64:
-        return "{}({})".format(self.op, ", ".join(c_args))
-    elif numeric_type == FP32:
-        return "{}f({})".format(self.op, ", ".join(c_args))
+        if numeric_type == FP64:
+            return "{}({})".format(self.op, ", ".join(c_args))
+        elif numeric_type == FP32:
+            return "{}f({})".format(self.op, ", ".join(c_args))
+        else:
+            raise NotImplementedError(f"Unknown numeric type '{numeric_type}'")
     else:
+        c_args = [arg.to_libm_c(numeric_type=numeric_type) for arg in self.args]
+
+        if len(c_args) == 1 and self.op in {"+", "-"}:
+            neg = [f"{self.op}{x.strip()}" for x in c_args[0].strip("{}").split(",")]
+            return "{" + ", ".join(neg) + "}"
+
+        if len(c_args) == 2 and self.op in {"+", "-", "*", "/"}:
+            # if self.op in {"+", "-"}:
+            op_map = {
+                "+": "Add22",
+                "-": "Sub22",
+                "*": "Mul22",
+                "/": "Div22",
+            }
+            return f"{op_map[self.op]}((dd){c_args[0]}, (dd){c_args[1]})"
+            # else:
+            #     # TODO: need to handle * and / orders
+            #     if "{" not in c_args[0]:
+            #         c_args[0], c_args[1] = c_args[1], c_args[0]
+            #     op = [f"{x.strip()} {self.op} {c_args[1]}" for x in c_args[0].strip("{}").split(",")]
+            #     return "{" + ", ".join(op) + "}"
+
+        #TODO: Maybe need double-double divide and handling sqrt()
+
         raise NotImplementedError(f"Unknown numeric type '{numeric_type}'")
 
 
