@@ -77,16 +77,12 @@ def add_binary_dunder(dunder_name, fpcore_name):
     setattr(ASTNode, dunder_name, default)
 
     def expr(self, other):
-        try:
-            return Operation(fpcore_name, self, cast_to_astnode(other))
-        except:
-            raise NotImplemented()
+        return Operation(fpcore_name, self, cast_to_astnode(other))
     setattr(Expr, dunder_name, expr)
 
     def rexpr(self, other):
         return Operation(fpcore_name, cast_to_astnode(other), self)
     setattr(Expr, dunder_name.replace("__", "__r", 1), rexpr)
-
 
 add_unary_dunder("__pos__", "")
 add_unary_dunder("__neg__", "-")
@@ -106,6 +102,24 @@ add_binary_dunder("__pow__", "pow") # TODO: lacks support for math.pow
 # https://docs.python.org/3/reference/datamodel.html
 # Note that __pow__() should be defined to accept an optional third argument if
 # the ternary version of the built-in pow() function is to be supported.
+
+# This is not the best design, but just eval comparison operators instead of
+#  building an ast
+def eager_eval_dunder(dunder_name, op_lambda):
+    def default(self, *args, **kwargs):
+        class_name = type(self).__name__
+        msg = f"{dunder_name} not implemented for class '{class_name}'"
+        raise NotImplementedError(msg)
+    setattr(ASTNode, dunder_name, default)
+
+    def expr(self, other):
+        return op_lambda(float(self), float(other))
+    setattr(Expr, dunder_name, expr)
+
+eager_eval_dunder("__lt__", lambda a, b: a < b)
+eager_eval_dunder("__le__", lambda a, b: a <= b)
+eager_eval_dunder("__gt__", lambda a, b: a > b)
+eager_eval_dunder("__ge__", lambda a, b: a >= b)
 
 
 def dummy():
