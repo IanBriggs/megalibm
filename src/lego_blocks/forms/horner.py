@@ -1,5 +1,6 @@
 
 
+from expect import expect_subclass, expect_type
 import fpcore
 from lego_blocks import forms
 
@@ -26,12 +27,10 @@ def tree_pow(x: fpcore.ast.Expr,
     '(* (* (* g g) (* g g)) g)'
     """
     # Check x
-    if not issubclass(type(x), fpcore.ast.Expr):
-        raise ValueError(f"'x' must be an FPCore.ast.Expr, given: {type(x)}")
+    expect_subclass("x", x, fpcore.ast.Expr)
 
     # Check n
-    if type(n) != int:
-        raise ValueError(f"'n' must be an int, given: {type(n)}")
+    expect_type("n", n, int)
     if n < 0:
         raise ValueError(f"'n' must be non-negative, given: {n}")
 

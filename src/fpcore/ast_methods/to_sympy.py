@@ -1,3 +1,4 @@
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Constant, FPCore, Number, Operation, Variable
 from utils import add_method
 import sympy
@@ -65,10 +66,7 @@ _COMP_MAPPING = {
 
 @add_method(ASTNode)
 def to_sympy(self, *args, **kwargs):
-    # Make sure calling to_sympy leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = "to_sympy not implemented for class {}".format(class_name)
-    raise NotImplementedError(msg)
+    expect_implemented("to_sympy", self)
 
 
 @add_method(Constant)
@@ -81,15 +79,12 @@ def to_sympy(self):
 
 @add_method(Variable)
 def to_sympy(self, _variable_cache = dict()):
-    assert type(self.source) == str
     sym = sympy.symbols(self.source)
-    assert type(sym) == sympy.core.symbol.Symbol
     return sym
 
 
 @add_method(Number)
 def to_sympy(self):
-    assert type(self.source) == str
     return sympy.Number(self.source)
 
 

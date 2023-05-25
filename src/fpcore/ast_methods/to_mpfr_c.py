@@ -1,3 +1,4 @@
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Constant, FPCore, Number, Operation, Variable
 from utils import add_method
 
@@ -65,10 +66,7 @@ _COMP_MAPPING = {
 
 @add_method(ASTNode)
 def to_mpfr_c(self, *args, **kwargs):
-    # Make sure calling to_mpfr_c leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = "to_mpfr_c not implemented for class {}".format(class_name)
-    raise NotImplementedError(msg)
+    expect_implemented("to_mpfr_c", self)
 
 
 @add_method(Constant)

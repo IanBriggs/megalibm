@@ -1,4 +1,5 @@
 from mpmath import iv
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Constant, FPCore, Number, Operation, Variable
 from interval import Interval
 from utils import add_method
@@ -77,10 +78,7 @@ _BINOP_MAPPING = {
 
 @add_method(ASTNode)
 def interval_eval(self, *args, **kwargs):
-    # Make sure calling interval_eval leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = "interval_eval not implemented for class {}".format(class_name)
-    raise NotImplementedError(msg)
+    expect_implemented("interval_eval", self)
 
 
 @add_method(Constant)
@@ -93,8 +91,8 @@ def interval_eval(self, assignment):
 
 @add_method(Variable)
 def interval_eval(self, assignment):
-    if self.source not in assignment:
-        raise NameError("{} not in interval_evaluation environment".format(self.source))
+    if assignment is not None and self.source not in assignment:
+        raise NameError("{} not in evaluation environment".format(self.source))
     val = assignment[self.source]
     if type(val) == Interval:
         inf = val[0]

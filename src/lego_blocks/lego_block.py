@@ -1,5 +1,6 @@
 
 
+from expect import expect_implemented
 from numeric_types import NumericType
 
 
@@ -20,4 +21,4 @@ class LegoBlock():
                                        repr(self.out_names))
 
     def to_c(self):
-        raise NotImplementedError()
+        expect_implemented("to_c", self)

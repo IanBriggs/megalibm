@@ -1,6 +1,7 @@
 
 
 from math import floor
+from expect import expect_subclass, expect_type
 
 import fpcore
 from fpcore.ast import (ASTNode, Atom, Constant, FPCore, Number, Operation,
@@ -39,12 +40,10 @@ def expr_estrin(x: fpcore.ast.Expr,
     """
     # TODO: figure out how to fit doctest within 80 columns
     # Check x
-    if not issubclass(type(x), fpcore.ast.Expr):
-        raise ValueError(f"'x' must be an FPCore.ast.Expr, given: {type(x)}")
+    expect_subclass("x", x, fpcore.ast.FPCore)
 
     # Check mons
-    if type(mons) != list:
-        raise ValueError(f"'mons' must be a list, given: {type(mons)}")
+    expect_type("mons", mons, list)
     if not all(type(m) == int for m in mons):
         bad = [m for m in mons if type(m) != int][0]
         raise ValueError(f"'mons' must be all int, given: {type(bad)}")
@@ -52,8 +51,7 @@ def expr_estrin(x: fpcore.ast.Expr,
         raise ValueError(f"'mons' must be full rank, given: {mons}")
 
     # Check coeffs
-    if type(coeffs) != list:
-        raise ValueError(f"'coeffs' must be a list, given: {type(n)}")
+    expect_type("coeffs", coeffs, list)
     if not all(issubclass(type(c), fpcore.ast.Expr) for c in coeffs):
         bad = [c for c in coeffs if not issubclass(
             type(c), fpcore.ast.Expr)][0]

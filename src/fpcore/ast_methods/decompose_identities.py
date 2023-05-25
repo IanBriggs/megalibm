@@ -1,3 +1,4 @@
+from expect import expect_implemented
 import template_identities
 from fpcore.ast import ASTNode, FPCore, Operation, Variable
 from utils import Logger, add_method
@@ -48,10 +49,7 @@ def extract_templates(iden, templates: set):
 
 @add_method(ASTNode)
 def decompose_identities(self, *args, **kwargs):
-    # Make sure calling identities leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"identities not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("decompose_identity", self)
 
 
 @add_method(FPCore)

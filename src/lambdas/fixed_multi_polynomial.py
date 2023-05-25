@@ -1,4 +1,5 @@
 
+from expect import expect_type
 import fpcore
 from fpcore.ast import FPCore
 from interval import Interval
@@ -30,26 +31,21 @@ class FixedMultiPolynomial(types.Source):
         # TODO: check that the function is defined on the entire domain
 
         # Check and save combiner
-        if type(combiner) != FPCore:
-            msg = f"'combiner' must be an FPCore, given: {type(combiner)}"
-            raise ValueError(msg)
+        expect_type("combiner", combiner, FPCore)
         if len(combiner.arguments) != 3:
             msg = ("'combiner' FPCore must take in 3 arguments, given: "
                    f"{len(combiner.arguments)} arguments")
             raise ValueError(msg)
-        # TODO: Maybe we should also check that the variables are used in
-        #       the body?
         self.combiner = combiner
 
         # Check p_monomials
-        if type(p_monomials) != list:
-            msg = f"'p_monomials' must be a list, given: {type(p_monomials)}"
-            raise ValueError(msg)
+        expect_type("p_monomials", p_monomials, list)
         if not all(type(m) == int for m in p_monomials):
             bad = [m for m in p_monomials if type(m) != int][0]
             msg = f"'p_monomials' must be all integers, given: {type(bad)}"
 
         # Check p_coefficients
+        expect_type("p_coefficients", p_coefficients, list)
         if type(p_coefficients) != list:
             msg = ("'p_coefficients' must be a list, given:"
                    f" {type(p_coefficients)}")
@@ -70,21 +66,13 @@ class FixedMultiPolynomial(types.Source):
         self.p_coefficients = [p[1] for p in paired]
 
         # Check q_monomials
-        if type(q_monomials) != list:
-            msg = f"'q_monomials' must be a list, given: {type(q_monomials)}"
-            raise ValueError(msg)
+        expect_type("q_monomials", q_monomials, list)
         if not all(type(m) == int for m in q_monomials):
             bad = [m for m in q_monomials if type(m) != int][0]
             msg = f"'q_monomials' must be all integers, found: {type(bad)}"
 
         # Check q_coefficients
-        if type(q_coefficients) != list:
-            msg = ("'q_coefficients' must be a list, given:"
-                   f" {type(q_coefficients)}")
-            raise ValueError(msg)
-        # TODO: Establish a way to determine that the coefficients are the
-        #       right type. Currently they can be str (if the str represents
-        #       a number), float, and mpmath.mpf
+        expect_type("q_coefficients", q_coefficients, list)
         if len(q_monomials) != len(q_coefficients):
             msg = ("'q_monomials' and 'q_coefficients' must have the same"
                    f" length, received: {len(q_monomials)}"

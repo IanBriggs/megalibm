@@ -1,4 +1,5 @@
 from functools import cache
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Atom, FPCore, Operation
 from utils import add_method
 import snake_egg
@@ -21,10 +22,7 @@ def simplify_with_egraph(expr):
 
 @add_method(ASTNode)
 def simplify(self, *args, **kwargs):
-    # Make sure calling simplify leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"simplify not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("simplify", self)
 
 
 @add_method(Atom)

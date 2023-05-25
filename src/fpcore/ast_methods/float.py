@@ -1,13 +1,11 @@
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Constant, FPCore, Number, Operation, Variable
 from utils import add_method
 
 
 @add_method(ASTNode)
 def __float__(self, *args, **kwargs):
-    # Make sure calling __float__ leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"__float__ not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("__float__", self)
 
 
 @add_method(Constant)

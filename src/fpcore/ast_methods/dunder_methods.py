@@ -2,6 +2,7 @@
 
 import re
 from better_float_cast import better_float_cast
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Expr, FPCore, Number, Operation, Property
 from utils import add_method, Logger
 
@@ -55,9 +56,7 @@ def cast_to_astnode(x):
 
 def add_unary_dunder(dunder_name, fpcore_name):
     def default(self, *args, **kwargs):
-        class_name = type(self).__name__
-        msg = f"{dunder_name} not implemented for class '{class_name}'"
-        raise NotImplementedError(msg)
+        expect_implemented(dunder_name, self)
     setattr(ASTNode, dunder_name, default)
 
     if fpcore_name == "":
@@ -71,9 +70,7 @@ def add_unary_dunder(dunder_name, fpcore_name):
 
 def add_binary_dunder(dunder_name, fpcore_name):
     def default(self, *args, **kwargs):
-        class_name = type(self).__name__
-        msg = f"{dunder_name} not implemented for class '{class_name}'"
-        raise NotImplementedError(msg)
+        expect_implemented("dunder_name", self)
     setattr(ASTNode, dunder_name, default)
 
     def expr(self, other):
@@ -107,9 +104,7 @@ add_binary_dunder("__pow__", "pow") # TODO: lacks support for math.pow
 #  building an ast
 def eager_eval_dunder(dunder_name, op_lambda):
     def default(self, *args, **kwargs):
-        class_name = type(self).__name__
-        msg = f"{dunder_name} not implemented for class '{class_name}'"
-        raise NotImplementedError(msg)
+        expect_implemented(dunder_name, self)
     setattr(ASTNode, dunder_name, default)
 
     def expr(self, other):

@@ -1,3 +1,4 @@
+from expect import expect_implemented, expect_subclass
 from fpcore.ast import ASTNode, Atom, FPCore, Number, Operation
 from utils import add_method
 import snake_egg
@@ -17,13 +18,9 @@ def typecast_and_check_equality(a, b):
     if type(b) in {int, float}:
         b = Number(str(b))
 
-    # Error if no AST Nodes
-    if not issubclass(type(a), ASTNode):
-        msg = "FPCore does not support equality by type '{}' (value = {})"
-        raise TypeError(msg.format(type(a), a))
-    if not issubclass(type(b), ASTNode):
-        msg = "FPCore does not support equality by type '{}' (value = {})"
-        raise TypeError(msg.format(type(b), a))
+    # Error if not AST Nodes
+    expect_subclass("a", a, ASTNode)
+    expect_subclass("b", b, ASTNode)
 
     egraph = snake_egg.EGraph(snake_egg_rules.eval)
     a = a.to_snake_egg(to_rule=False)
@@ -43,10 +40,7 @@ def typecast_and_check_equality(a, b):
 
 @add_method(ASTNode)
 def egg_equal(self, *args, **kwargs):
-    # Make sure calling egg_equal leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"egg_equal not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("egg_equal", self)
 
 
 @add_method(Atom)

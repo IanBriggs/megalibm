@@ -1,3 +1,4 @@
+from expect import expect_implemented
 from fpcore.ast import ASTNode, FPCore, Operation, Variable
 from interval import Interval
 from utils import Logger, add_method
@@ -142,10 +143,7 @@ def properties_to_argument_domains(arguments, properties):
 
 @add_method(ASTNode)
 def extract_domain(self, *args, **kwargs):
-    # Make sure calling extract_domain leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"extract_domain not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("extract_domain", self)
 
 
 @add_method(FPCore)

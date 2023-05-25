@@ -1,4 +1,5 @@
 import copy
+from expect import expect_implemented
 
 from fpcore.ast import ASTNode, Atom, FPCore, Let, LetStar, Operation, Variable
 from utils import add_method
@@ -9,16 +10,13 @@ class FPCoreNameError(Exception):
 
     def __init__(self, name):
         self.name = name
-        msg = f"name '{name}' is note defined in the FPCore"
+        msg = f"name '{name}' is not defined in the FPCore"
         super(FPCoreNameError, self).__init__(msg)
 
 
 @add_method(ASTNode)
 def remove_let(self, *args, **kwargs):
-    # Make sure calling remove_let leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"remove_let not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("remove_let", self)
 
 
 @add_method(Atom)

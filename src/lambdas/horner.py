@@ -1,4 +1,5 @@
 
+from expect import expect_type
 import lambdas
 import lego_blocks
 import lego_blocks.forms as forms
@@ -15,8 +16,7 @@ class Horner(types.Transform):
         super().__init__(in_node)
 
         # Check and save split
-        if type(split) != int:
-            raise ValueError(f"'split' must be an int, given: {type(split)}")
+        expect_type("split", split, int)
         if split < 0:
             raise ValueError(f"'split' must be positive, given: {split}")
         self.split = split
@@ -31,10 +31,7 @@ class Horner(types.Transform):
 
         # Make sure that our input is a polynomial
         our_in_type = self.in_node.out_type
-        if type(our_in_type) != types.Poly:
-            msg = ("Horner only applies to polynomial lambda expressions,"
-                   f" given: {type(our_in_type)}")
-            raise ValueError(msg)
+        expect_type("our_in_type", our_in_type, types.Poly)
 
         # Check that split is logical
         # TODO: check that split can fit in the polynomial

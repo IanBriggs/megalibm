@@ -394,7 +394,7 @@ def dedup_generators(identities, iters):
     optimizer.from_string(query)
     state = optimizer.check()
     if str(state) != "sat":
-        assert False, "Impossible!"
+        raise "An error which was thought to be unable to occur has occurred"
     z3_model = optimizer.model()
     model = {d.name(): z3_model[d] for d in z3_model}
     for I, iden in enumerate(identities):

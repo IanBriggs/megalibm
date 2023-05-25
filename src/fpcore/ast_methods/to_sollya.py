@@ -1,3 +1,4 @@
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Atom, Constant, FPCore, Operation
 from utils import add_method
 
@@ -10,10 +11,7 @@ _CONST_MAPPING = {
 
 @add_method(ASTNode)
 def to_sollya(self, *args, **kwargs):
-    # Make sure calling to_sollya leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"to_sollya not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("is_sollya", self)
 
 
 @add_method(Atom)

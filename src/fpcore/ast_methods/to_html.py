@@ -1,13 +1,11 @@
+from expect import expect_implemented
 from fpcore.ast import ASTNode, FPCore, list_to_str
 from utils import add_method
 
 
 @add_method(ASTNode)
 def to_html(self, *args, **kwargs):
-    # Make sure calling to_html leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"to_html not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("to_html", self)
 
 
 @add_method(FPCore)

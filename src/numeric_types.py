@@ -1,5 +1,6 @@
 
 from better_float_cast import better_float_cast
+from expect import expect_implemented_class
 from mpmath_hex_str import mpmath_hex_str
 
 import mpmath
@@ -8,15 +9,15 @@ import mpmath
 class NumericType():
 
     def __init__(self):
-        raise NotImplementedError()
+        raise NotImplementedError("This class should never be instantiated")
 
     sollya_type = "NotImplemented"
     c_type = "NotImplemented"
     name = "NotImplemented"
 
     @classmethod
-    def num_to_str(self, bound):
-        raise NotImplementedError()
+    def num_to_str(cls, bound):
+        expect_implemented_class("num_to_str", self)
 
 
 class FP32(NumericType):

@@ -1,13 +1,11 @@
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Atom, FPCore, Operation
 from utils import add_method
 
 
 @add_method(ASTNode)
 def contains_op(self, *args, **kwargs):
-    # Make sure calling contains_op leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"contains_op not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("contains_op", self)
 
 
 @add_method(Atom)

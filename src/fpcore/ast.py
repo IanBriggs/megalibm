@@ -1,5 +1,6 @@
 
 
+from expect import expect_implemented
 from utils import Logger
 
 
@@ -29,9 +30,7 @@ class ASTNode:
         pass
 
     def __str__(self):
-        class_name = type(self).__name__
-        msg = "__str__ is not defined for {}".format(class_name)
-        raise NotImplementedError(msg)
+        expect_implemented("__str__", self)
 
     def __repr__(self):
         class_name = type(self).__name__

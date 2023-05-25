@@ -1,4 +1,5 @@
 import fractions
+from expect import expect_implemented
 
 from fpcore.ast import ASTNode, Constant, FPCore, Number, Operation, Variable
 from snake_egg import Var
@@ -73,10 +74,7 @@ _TRIOP_MAPPING = {
 
 @add_method(ASTNode)
 def to_snake_egg(self, *args, **kwargs):
-    # Make sure calling to_snake_egg leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"to_snake_egg not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("to_snake_egg", self)
 
 
 @add_method(Variable)

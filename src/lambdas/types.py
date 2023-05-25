@@ -1,11 +1,12 @@
 
 
+from expect import expect_implemented, expect_implemented_class, expect_subclass, expect_type
 from fpcore.ast import FPCore
 from interval import Interval
 from numeric_types import NumericType, FP64
 
 
-# Return types
+# Each lambda has an out type of either an implantation or a polynomial
 
 class Poly():
 
@@ -15,8 +16,8 @@ class Poly():
 
     def __str__(self):
         return "(Poly {} [{} {}])".format(str(self.function),
-                                         self.domain.inf,
-                                         self.domain.sup)
+                                          self.domain.inf,
+                                          self.domain.sup)
 
     def __repr__(self):
         return "Poly({}, {})".format(repr(self.function),
@@ -31,15 +32,15 @@ class Impl():
 
     def __str__(self):
         return "(Impl {} [{}, {}])".format(str(self.function),
-                                         self.domain.inf,
-                                         self.domain.sup)
+                                           self.domain.inf,
+                                           self.domain.sup)
 
     def __repr__(self):
         return "Impl({}, {})".format(repr(self.function),
                                      repr(self.domain))
 
 
-# lambda object types
+# We want to be able to generate unique C level names
 USED_NAMES = set()
 
 
@@ -57,24 +58,24 @@ class Node():
 
     def find_lambdas(self, pred, _found=None):
         # look for all things that make `pred` True
-        raise NotImplementedError()
+        expect_implemented("find_lambdas", self)
 
     def replace_lambda(self, search, replace):
         # replace all instances of `search` with `replace`
-        raise NotImplementedError()
+        expect_implemented("replace_lambda", self)
 
     def type_check(self):
-        raise NotImplementedError()
+        expect_implemented("_type_check", self)
 
     def generate(self):
         # select lego blocks to use
-        raise NotImplementedError()
+        expect_implemented("generate", self)
 
     @classmethod
     def generate_hole(cls, out_type):
         # Given an out_type, return possible in types that this Transform
         # could use to reach that out_type
-        raise NotImplementedError()
+        expect_implemented_class("generate_hole", cls)
 
     def gensym(self, prefix):
         matched = {vn for vn in USED_NAMES if vn.startswith(prefix)}
@@ -94,6 +95,12 @@ class Source(Node):
                  domain: Interval,
                  numeric_type: NumericType = FP64):
         super().__init__(numeric_type)
+        expect_type("function", function, FPCore)
+        expect_type("domain", domain, Interval)
+        expect_subclass("numeric_type", numeric_type, NumericType)
+
+        # TODO: determine if function is valid on domain
+
         self.out_type = Impl(function,
                              Interval(domain.inf.simplify(),
                                       domain.sup.simplify()))
@@ -120,10 +127,8 @@ class Source(Node):
 
         # TODO: determine if function is valid on domain
 
-        assert (type(self.function) == FPCore)
-        assert (type(self.domain) == Interval)
-
         self.type_check_done = True
+
 
 class Transform(Node):
 

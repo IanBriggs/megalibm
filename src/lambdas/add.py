@@ -1,4 +1,5 @@
 
+from expect import expect_subclass
 from fpcore.ast import Variable
 from lambdas import types
 import lego_blocks
@@ -13,12 +14,10 @@ class Add(types.Transform):
     def __init__(self,
                  expr: fpcore.ast.Expr,
                  in_node: types.Node):
-        # Run Transform initialization
         super().__init__(in_node)
 
         # Check and save expr
-        if not issubclass(type(expr), fpcore.ast.Expr):
-            raise ValueError(f"'expr' must be an Expr, given: {type(expr)}")
+        expect_subclass("expr", expr, fpcore.ast.Expr)
         self.expr = expr
 
     def __str__(self):
@@ -35,8 +34,7 @@ class Add(types.Transform):
         if self == search:
             return replace
         new_in_node = self.in_node.replace_lambda(search, replace)
-        return Add(self.in_node,
-                   self.expr)
+        return Add(self.expr, self.in_node)
 
     def type_check(self):
         if self.type_check_done:

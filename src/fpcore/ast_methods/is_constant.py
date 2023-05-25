@@ -1,13 +1,11 @@
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Atom, FPCore, Operation, Variable
 from utils import add_method
 
 
 @add_method(ASTNode)
 def is_constant(self, *args, **kwargs):
-    # Make sure calling is_constant leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"is_constant not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("is_constant", self)
 
 
 @add_method(Atom)

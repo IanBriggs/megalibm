@@ -1,3 +1,4 @@
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Atom, Constant, FPCore, Operation
 from utils import add_method
 
@@ -18,10 +19,7 @@ _UNOP_MAPPING = {
 
 @add_method(ASTNode)
 def to_wolfram(self, *args, **kwargs):
-    # Make sure calling to_wolfram leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"to_wolfram not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("to_wolfram", self)
 
 
 @add_method(Atom)

@@ -1,3 +1,4 @@
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Atom, Constant, FPCore, Number, Operation
 from utils import add_method
 from numeric_types import FP64, FP32
@@ -40,10 +41,7 @@ _CONST_MAPPING = {
 
 @add_method(ASTNode)
 def to_libm_c(self, *args, **kwargs):
-    # Make sure calling to_libm_c leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"to_libm_c not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("to_libm_c", self)
 
 
 @add_method(Atom)

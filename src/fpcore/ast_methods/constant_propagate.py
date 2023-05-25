@@ -1,5 +1,6 @@
 
 from better_float_cast import better_float_cast
+from expect import expect_implemented
 from fpcore.ast import ASTNode, Atom, FPCore, Number, Operation
 from utils import add_method
 
@@ -35,10 +36,7 @@ def doctester():
 
 @add_method(ASTNode)
 def constant_propagate(self, *args, **kwargs):
-    # Make sure calling constant_propagate leads to an error if not overridden
-    class_name = type(self).__name__
-    msg = f"constant_propagate not implemented for class '{class_name}'"
-    raise NotImplementedError(msg)
+    expect_implemented("constant_propagate", self)
 
 
 @add_method(Atom)
