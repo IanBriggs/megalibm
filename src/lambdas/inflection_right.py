@@ -119,9 +119,6 @@ class InflectionRight(types.Transform):
         rec_expr = self.reconstruction.substitute(
             Variable("y"), Variable(inner_name))
         
-        # simp = rec_expr.simplify()
-        # a = rec_expr.to_libm_c(numeric_type=numeric_type)
-        # recc = rec_expr.constant_propagate()
         recons_str = ""
         if self.useDD:
            recons_str =  rec_expr.to_libm_c(numeric_type= FPDD) + ".hi"
