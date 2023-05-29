@@ -69,16 +69,16 @@ class FPDD(NumericType):
 
     @classmethod
     def num_to_str(self, x):
-        # TODO
+        # Cast num to double-double struct
         double_x = better_float_cast(x)
         int_x = int(double_x)
         if double_x == int_x:
             lead_nonzero = bin(int_x).lstrip("0b").rstrip("0")
             if len(lead_nonzero) > 53:
                 raise ValueError(f"Int too large for 64 bit float: {int_x}")
-            return "{" + f"{int_x}.0" + ", 0.0}"
+            return "(dd){" + f"{int_x}.0" +  ", 0.0}"
 
         # Others become %a form
-        return "{" + float.hex(double_x) + ", 0.0}"
+        return "(dd){" + float.hex(double_x) + ", 0.0}"
 
 

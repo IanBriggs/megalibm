@@ -58,7 +58,7 @@ rm -rf "${GIT_LOCATION}/measurement/error/generated"
 
 # Run the generation in the final directory
 cd "${THIS_NIGHTLY_LOCATION}"
-for e in "${GIT_LOCATION}"/examples/amd_ref_asin.mlm.py ; do
+for e in "${GIT_LOCATION}"/examples/*.mlm.py ; do
   time python3 "${e}"
 done
 
@@ -83,7 +83,7 @@ mv "${GIT_LOCATION}/measurement/error/generated" "${THIS_NIGHTLY_LOCATION}/gener
 
 # Generate website
 cd "${THIS_NIGHTLY_LOCATION}"
-"${SCRIPT_LOCATION}"/make_website.py generated
+"${SCRIPT_LOCATION}"/make_website generated
 
 # Copy data and send notification if on the nightly runner
 if [ "$(hostname)" = "nightly" ]; then
