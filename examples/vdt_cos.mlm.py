@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-#
-# Eventually input should look like this:
-#  * we might want to wrap it as an FPCore and highjack the fpcore parser
-#
-
 
 import os
 import os.path as path
@@ -14,12 +9,7 @@ GIT_DIR = path.split(EXAMPLE_DIR)[0]
 SRC_DIR = path.join(GIT_DIR, "src")
 sys.path.append(SRC_DIR)
 
-import fpcore
-import lambdas
-
-from lambdas import *
-from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
-from interval import Interval
+from assemble_c_files import *
 from utils.logging import Logger
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
@@ -28,6 +18,12 @@ logger.set_log_level(Logger.HIGH)
 # +---------------------------------------------------------------------------+
 # | Should be handled by a new parser                                         |
 # |                                                                           |
+
+import fpcore
+import lambdas
+
+from interval import Interval
+from lambdas import *
 
 cos = fpcore.parse("(FPCore (x) (cos x))")
 sin = fpcore.parse("(FPCore (x) (sin x))")
@@ -81,7 +77,8 @@ periodic_cases = {
     3: sin_poly,
 }
 
-mlm = \
+reference_impl = "vdt_cos.c"
+lambda_expression = \
     InflectionLeft(
         CodyWaite(cos,
                   pi_over_2,
@@ -105,9 +102,9 @@ if not path.isdir("generated"):
 os.chdir("generated")
 
 # dsl
-mlm.type_check()
+lambda_expression.type_check()
 dsl_func_name = "dsl_vdt_cos"
-dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name)
+dsl_sig, dsl_src = lambdas.generate_c_code(lambda_expression, dsl_func_name)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
@@ -151,7 +148,7 @@ domains = [("-7", "7"),
            ("0", "32"),
            ("-0.75", "0.75")]
 func_body = func.to_html()
-generators = [str(mlm)]
+generators = [str(lambda_expression)]
 
 # Error measurement
 main_lines = assemble_error_main(name, func_body,

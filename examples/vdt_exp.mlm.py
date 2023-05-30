@@ -9,12 +9,7 @@ GIT_DIR = path.split(EXAMPLE_DIR)[0]
 SRC_DIR = path.join(GIT_DIR, "src")
 sys.path.append(SRC_DIR)
 
-import fpcore
-import lambdas
-
-from lambdas import *
-from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
-from interval import Interval
+from assemble_c_files import *
 from utils.logging import Logger
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
@@ -23,6 +18,13 @@ logger.set_log_level(Logger.HIGH)
 # +---------------------------------------------------------------------------+
 # | Should be handled by a new parser                                         |
 # |                                                                           |
+
+import fpcore
+import lambdas
+
+from interval import Interval
+from lambdas import *
+
 
 exp = fpcore.parse("(FPCore (x) (exp x))")
 
@@ -44,6 +46,7 @@ exp_poly = \
              "3.00198505138664455042E-6"]),
         split=0)
 
+reference_impl = "vdt_exp.c"
 mlm = \
     RepeatExp(exp_poly, 18, 1)
 

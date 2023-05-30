@@ -1,33 +1,4 @@
 #!/usr/bin/env python3
-#
-# Eventually input should look like this:
-#  * we might want to wrap it as an FPCore and highjack the fpcore parser
-#
-# (InflectionLeft
-#   (- x)
-#   (- y)
-#   (InflectionRight
-#     (sqrt (\ (- 1 x) 2))
-#     (- (\ PI 2) 2 y)
-#     (Horner
-#       (RationalPolynomial
-#         (asin x)
-#         (Interval 0 0.5)
-#         x
-#         [3 5 7 9 11 13]
-#         [ 0.227485835556935010735943483075
-#          -0.445017216867635649900123110649
-#           0.275558175256937652532686256258
-#          -0.0549989809235685841612020091328
-#           0.00109242697235074662306043804220
-#           0.0000482901920344786991880522822991]
-#         [2 4 6 8 10]
-#         [ 1.36491501334161032038194214209
-#          -3.28431505720958658909889444194
-#           2.76568859157270989520376345954
-#          -0.943639137032492685763471240072
-#           0.105869422087204370341222318533]))))
-
 
 import os
 import os.path as path
@@ -39,12 +10,7 @@ GIT_DIR = path.split(EXAMPLE_DIR)[0]
 SRC_DIR = path.join(GIT_DIR, "src")
 sys.path.append(SRC_DIR)
 
-import fpcore
-import lambdas
-
-from lambdas import *
-from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
-from interval import Interval
+from assemble_c_files import *
 from utils.logging import Logger
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
@@ -54,13 +20,17 @@ logger.set_log_level(Logger.HIGH)
 # | Should be handled by a new parser                                         |
 # |                                                                           |
 
-asin = fpcore.parse("(FPCore (x) (asin x))")
-# This is the value that corresponds to AMD's code
-linear_cutoff = " 1.38777878078144552145514403413465714614676459320581451695186814276894438080489635467529296875e-17"
-# A much better value is
-# linear_cutoff = " 2.14910850667674987607097081103446623018271566252224147319793701171875e-8"
+import fpcore
+import lambdas
 
-mlm = \
+from interval import Interval
+from lambdas import *
+
+asin = fpcore.parse("(FPCore (x) (asin x))")
+linear_cutoff = "1.38777878078144552146e-17"
+
+reference_impl = "amd_ref_asin.c"
+lambda_expression = \
     InflectionLeft(
         InflectionRight(
             Horner(
@@ -69,18 +39,18 @@ mlm = \
                     Interval("0", "0.5"),
                     fpcore.parse("(FPCore (x p q) (+ x (/ p q)))"),
                     [3, 5, 7, 9, 11, 13],
-                    [ 0.227485835556935010735943483075,
-                     -0.445017216867635649900123110649,
-                      0.275558175256937652532686256258,
-                     -0.0549989809235685841612020091328,
-                      0.00109242697235074662306043804220,
-                      0.0000482901920344786991880522822991],
+                    [" 0.227485835556935010735943483075",
+                     "-0.445017216867635649900123110649",
+                     " 0.275558175256937652532686256258",
+                     "-0.0549989809235685841612020091328",
+                     " 0.00109242697235074662306043804220",
+                     " 0.0000482901920344786991880522822991"],
                     [0, 2, 4, 6, 8],
-                    [ 1.36491501334161032038194214209,
-                     -3.28431505720958658909889444194,
-                      2.76568859157270989520376345954,
-                     -0.943639137032492685763471240072,
-                      0.105869422087204370341222318533])),
+                    [" 1.36491501334161032038194214209",
+                     "-3.28431505720958658909889444194",
+                     " 2.76568859157270989520376345954",
+                     "-0.943639137032492685763471240072",
+                     " 0.105869422087204370341222318533"])),
             fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
             fpcore.parse_expr("(- (/ PI 2) (* 2 y))"), useDD=True),
         fpcore.parse_expr("(- x)"),
@@ -100,9 +70,9 @@ if not path.isdir("generated"):
 os.chdir("generated")
 
 # dsl
-mlm.type_check()
+lambda_expression.type_check()
 dsl_func_name = "dsl_amd_ref_asin"
-dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name)
+dsl_sig, dsl_src = lambdas.generate_c_code(lambda_expression, dsl_func_name)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
@@ -144,7 +114,7 @@ domains = [("-1", "1"),
            (float(linear_cutoff) - 1e-8, float(linear_cutoff) + 1e-8),
            ("0.4375", "0.5625"),]
 func_body = func.to_html()
-generators = [str(mlm)]
+generators = [str(lambda_expression)]
 
 # Error measurement
 main_lines = assemble_error_main(name, func_body,

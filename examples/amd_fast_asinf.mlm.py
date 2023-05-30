@@ -1,44 +1,16 @@
 #!/usr/bin/env python3
-#
-# Eventually input should look like this:
-#  * we might want to wrap it as an FPCore and highjack the fpcore parser
-#
-# (InflectionLeft
-#   (- x)
-#   (- y)
-#   (InflectionRight
-#     (sqrt (\ (- 1 x) 2))
-#     (- (\ PI 2) (* 2 y))
-#     (EstrinForm
-#       (Polynomial
-#         (asin x)
-#         (Interval 0 0.5)
-#         [1 3 5 7 9 11]
-#         [ 1
-#           0.1666679084300994873
-#           0.07494434714317321777
-#           0.04555018618702888489
-#           0.02385816909372806549
-#           0.04263564199209213257]))))
 
 import os
 import os.path as path
 import sys
-
 
 EXAMPLE_DIR = path.abspath(path.dirname(__file__))
 GIT_DIR = path.split(EXAMPLE_DIR)[0]
 SRC_DIR = path.join(GIT_DIR, "src")
 sys.path.append(SRC_DIR)
 
-import fpcore
-import lambdas
-
-
-from lambdas import *
 from numeric_types import FP32
-from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
-from interval import Interval
+from assemble_c_files import *
 from utils.logging import Logger
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
@@ -48,10 +20,17 @@ logger.set_log_level(Logger.HIGH)
 # | Should be handled by a new parser                                         |
 # |
 
+import fpcore
+import lambdas
+
+from interval import Interval
+from lambdas import *
+
 
 asin = fpcore.parse("(FPCore (x) (asin x))")
 
-mlm = \
+reference_impl = "amd_fast_asinf.c"
+lambda_expression = \
     TypeCast(
         InflectionLeft(
             InflectionRight(
@@ -86,10 +65,10 @@ if not path.isdir("generated"):
 os.chdir("generated")
 
 # dsl
-mlm.type_check()
+lambda_expression.type_check()
 dsl_func_name = "dsl_amd_fast_asinf"
 dsl_sig, dsl_src = lambdas.generate_c_code(
-    mlm, dsl_func_name, numeric_type=FP32, func_type=FP32)
+    lambda_expression, dsl_func_name, numeric_type=FP32, func_type=FP32)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
@@ -131,7 +110,7 @@ domains = [("-1", "1"),
            ("0", "0.5"),
            ("0.4375", "0.5625"),]
 func_body = func.to_html()
-generators = [str(mlm)]
+generators = [str(lambda_expression)]
 
 # Error measurement
 main_lines = assemble_error_main(name, func_body,

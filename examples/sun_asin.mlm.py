@@ -1,56 +1,15 @@
 #!/usr/bin/env python3
-#
-# Eventually input should look like this:
-#  * we might want to wrap it as an FPCore and highjack the fpcore parser
-#
-# (InflectionLeft
-#   (- x)
-#   (- y)
-#   (SplitDomain
-#      [(Interval 1 1)
-#        (Horner (Polynomial (asin x)
-#          (Interval 1 1) [0] [PI_2])]
-#      [(Interval 0  7.450580596923828125e-9)
-#        (Horner (Polynomial (asin x)
-#          (Interval 0 7.450580596923828125e-9) [1] [1])]
-#      [(Interval 7.450580596923828125e-9 1.0)
-#         (InflectionRight
-#           (sqrt (/ (- 1 x) 2))
-#           (- (/ PI 2) (* 2 y))
-#           (Horner (RationalPolynomial (asin x)
-#              (Interval 0 0.5)
-#              x
-#              [3 5 7 9 11 13]
-#              [ 1.66666666666666657415e-01
-#               -3.25565818622400915405e-01
-#                2.01212532134862925881e-01
-#               -4.00555345006794114027e-02
-#                7.91534994289814532176e-04
-#                3.47933107596021167570e-05]
-#              [0 2 4 6 8]
-#              [ 1
-#               -2.40339491173441421878e+00
-#                2.02094576023350569471e+00
-#               -6.88283971605453293030e-01
-#                7.70381505559019352791e-02]))]))
-
 
 import os
 import os.path as path
 import sys
-
 
 EXAMPLE_DIR = path.abspath(path.dirname(__file__))
 GIT_DIR = path.split(EXAMPLE_DIR)[0]
 SRC_DIR = path.join(GIT_DIR, "src")
 sys.path.append(SRC_DIR)
 
-import fpcore
-import lambdas
-
-from lambdas import *
-from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
-from interval import Interval
+from assemble_c_files import *
 from utils.logging import Logger
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
@@ -60,6 +19,12 @@ logger.set_log_level(Logger.HIGH)
 # | Should be handled by a new parser                                         |
 # |                                                                           |
 
+import fpcore
+import lambdas
+
+from interval import Interval
+from lambdas import *
+
 asin = fpcore.parse("(FPCore (x) (asin x))")
 
 one_i = Interval("1", "1")
@@ -67,7 +32,8 @@ linear_cutoff = "7.450580596923828125e-9"
 linear_i = Interval("0", linear_cutoff)
 HPI = fpcore.parse_expr("PI_2")
 
-mlm = \
+reference_impl = "sun_asin.c"
+lambda_expression = \
     InflectionLeft(
         SplitDomain({
             one_i: Horner(FixedPolynomial(asin, one_i, [0], [HPI])),
@@ -80,18 +46,18 @@ mlm = \
                             Interval("0", "0.5"),
                             fpcore.parse("(FPCore (x p q) (+ x (/ p q)))"),
                             [3, 5, 7, 9, 11, 13],
-                            [ 1.66666666666666657415e-01,
-                             -3.25565818622400915405e-01,
-                              2.01212532134862925881e-01,
-                             -4.00555345006794114027e-02,
-                              7.91534994289814532176e-04,
-                              3.47933107596021167570e-05],
+                            [" 1.66666666666666657415e-01",
+                             "-3.25565818622400915405e-01",
+                             " 2.01212532134862925881e-01",
+                             "-4.00555345006794114027e-02",
+                             " 7.91534994289814532176e-04",
+                             " 3.47933107596021167570e-05"],
                             [0, 2, 4, 6, 8],
-                            [ 1,
-                             -2.40339491173441421878e+00,
-                              2.02094576023350569471e+00,
-                             -6.88283971605453293030e-01,
-                              7.70381505559019352791e-02])),
+                            [" 1",
+                             "-2.40339491173441421878e+00",
+                             " 2.02094576023350569471e+00",
+                             "-6.88283971605453293030e-01",
+                             " 7.70381505559019352791e-02"])),
                     fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
                     fpcore.parse_expr("(- (/ PI 2) (* 2 y))"), useDD=True),
         }),
@@ -112,9 +78,9 @@ if not path.isdir("generated"):
 os.chdir("generated")
 
 # dsl
-mlm.type_check()
+lambda_expression.type_check()
 dsl_func_name = "dsl_sun_asin"
-dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name)
+dsl_sig, dsl_src = lambdas.generate_c_code(lambda_expression, dsl_func_name)
 logger.blog("C function", "\n".join(dsl_src))
 
 # amd
@@ -156,7 +122,7 @@ domains = [("-1", "1"),
            (float(linear_cutoff) - 1e-8, float(linear_cutoff) + 1e-8),
            ("0.4375", "0.5625"),]
 func_body = func.to_html()
-generators = [str(mlm)]
+generators = [str(lambda_expression)]
 
 # Error measurement
 main_lines = assemble_error_main(name, func_body,

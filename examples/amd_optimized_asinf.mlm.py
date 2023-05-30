@@ -1,48 +1,15 @@
 #!/usr/bin/env python3
-#
-# Eventually input should look like this:
-#  * we might want to wrap it as an FPCore and highjack the fpcore parser
-#
-# (InflectionLeft
-#   (- x)
-#   (- y)
-#   (InflectionRight
-#     (sqrt (\ (- 1 x) 2))
-#     (- (\ PI 2) (* 2 y))
-#     (EstrinForm
-#       (Polynomial
-#         (asin x)
-#         (Interval 0 0.5)
-#         [0 3 5 7 9 11 13 15 17 19]
-#         [1
-#          0.1666666666666477004
-#          0.07500000000417969548
-#          0.04464285678140855751
-#          0.03038196065035564039
-#          0.0223717279703189581
-#          0.01736009463784134871
-#          0.01388184285963460496
-#          0.01218919111033679899
-#          0.00644940526689945226]))))
-
 
 import os
 import os.path as path
 import sys
-
 
 EXAMPLE_DIR = path.abspath(path.dirname(__file__))
 GIT_DIR = path.split(EXAMPLE_DIR)[0]
 SRC_DIR = path.join(GIT_DIR, "src")
 sys.path.append(SRC_DIR)
 
-import fpcore
-import lambdas
-
-
-from lambdas import *
-from assemble_c_files import assemble_timing_main, assemble_error_main, assemble_functions, assemble_header
-from interval import Interval
+from assemble_c_files import *
 from utils.logging import Logger
 from numeric_types import FP32, FP64
 
@@ -54,10 +21,17 @@ logger.set_log_level(Logger.HIGH)
 # | Should be handled by a new parser                                         |
 # |
 
+import fpcore
+import lambdas
+
+from interval import Interval
+from lambdas import *
+
 
 asin = fpcore.parse("(FPCore (x) (asin x))")
 
-mlm = \
+reference_impl = "amd_optimized_asinf.c"
+lambda_expression = \
     TypeCast(
         InflectionLeft(
             InflectionRight(
@@ -95,9 +69,9 @@ if not path.isdir("generated"):
 os.chdir("generated")
 
 # dsl
-mlm.type_check()
+lambda_expression.type_check()
 dsl_func_name = "dsl_amd_optimized_asinf"
-dsl_sig, dsl_src = lambdas.generate_c_code(mlm, dsl_func_name,
+dsl_sig, dsl_src = lambdas.generate_c_code(lambda_expression, dsl_func_name,
                                            numeric_type=FP64, func_type=FP32)
 logger.blog("C function", "\n".join(dsl_src))
 
@@ -140,7 +114,7 @@ domains = [("-1", "1"),
            ("0", "0.5"),
            ("0.4375", "0.5625"),]
 func_body = func.to_html()
-generators = [str(mlm)]
+generators = [str(lambda_expression)]
 
 # Error measurement
 main_lines = assemble_error_main(name, func_body,
