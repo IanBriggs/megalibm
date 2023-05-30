@@ -76,6 +76,10 @@ _BINOP_MAPPING = {
     "pow": lambda a, b: mpmath.power(a, b),
 }
 
+_TRIOP_MAPPING = {
+    "fma": lambda a, b, c: a*b + c, # mpmath doesn't have an fma
+}
+
 
 @add_method(ASTNode)
 def eval(self, *args, **kwargs):
@@ -117,6 +121,9 @@ def eval(self, assignment=None):
 
     if len(f_args) == 2 and self.op in _BINOP_MAPPING:
         return _BINOP_MAPPING[self.op](f_args[0], f_args[1])
+
+    if len(f_args) == 3 and self.op in _TRIOP_MAPPING:
+        return _TRIOP_MAPPING[self.op](f_args[0], f_args[1], f_args[2])
 
     # TODO: What if we want the function to be evaluated?
     if self.op == "thefunc":

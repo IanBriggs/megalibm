@@ -22,5 +22,6 @@ from .periodic_reconstruction import PeriodicRecons
 from .punt_to_libm import PuntToLibm
 from .recharacterize import Recharacterize
 from .repeat_exp import RepeatExp
+from .rewrite import Rewrite
 from .split_domain import SplitDomain
 from .transform_out import TransformOut

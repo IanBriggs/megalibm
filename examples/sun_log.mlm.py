@@ -62,22 +62,25 @@ f_polynomial = \
     Recharacterize(
         f_log,
         f_to_s_remap,
-        Add(fpcore.parse_expr("(* 2 s)"),
-            Horner(
-            FixedMultiPolynomial(
-                s_log_sub_two_s,
-                s_domain,
-                fpcore.parse(
-                    "(FPCore (x p q) (* x (+ p q)))"),
-                [4, 8, 12],
-                ["3.999999999940941908e-01",
-                 "2.222219843214978396e-01",
-                 "1.531383769920937332e-01",],
-                [2, 6, 10, 14],
-                ["6.666666666666735130e-01",
-                 "2.857142874366239149e-01",
-                 "1.818357216161805012e-01",
-                 "1.479819860511658591e-01"]))))
+        Rewrite(
+            fpcore.parse_expr("(* 2 s)"),
+            fpcore.parse_expr("(fma (- s) f f)"),
+            Add(fpcore.parse_expr("(* 2 s)"),
+                Horner(
+                FixedMultiPolynomial(
+                    s_log_sub_two_s,
+                    s_domain,
+                    fpcore.parse(
+                        "(FPCore (x p q) (* x (+ p q)))"),
+                    [4, 8, 12],
+                    ["3.999999999940941908e-01",
+                     "2.222219843214978396e-01",
+                     "1.531383769920937332e-01",],
+                    [2, 6, 10, 14],
+                    ["6.666666666666735130e-01",
+                     "2.857142874366239149e-01",
+                     "1.818357216161805012e-01",
+                     "1.479819860511658591e-01"])))))
 
 mlm = \
     Multiplicative(
