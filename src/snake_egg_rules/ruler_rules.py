@@ -74,11 +74,12 @@ def is_if_expr(sexpr):
         return True
     return any([is_if_expr(x) for x in sexpr]) 
     
-
-
+#TODO: div by exp(a) should be allowed though 
 def is_unsafe_div(sexpr, was_div_present=False):
     if was_div_present:
         # is there a variable present anywhere left?
+        # todo - this needs to be changed to allow div by exp(a)
+        # maybe we make another recursive call and only deal with single items 
         return any(c in dumps(sexpr) for c in ["a", "b", "c"])
     if isinstance(sexpr, str) or isinstance(sexpr, int) or len(sexpr) == 1:
         # we know div was not involved, so return False
@@ -150,7 +151,8 @@ def assign_to_branch(acc, x):
 
 
 def scrape_and_grab_json():
-    DOMS_TO_COMBINE = ['rational-replicate', 'exponential', 'trig']
+    DOMS_TO_COMBINE = ['rational_replicate', 'exponential', 'trig']
+    TYPE_NAME = "baseline"
     # OPTIONAL_DOMS = ['trig']
 
     # rule_save_path = "ruler_rules/"
@@ -195,7 +197,7 @@ def scrape_and_grab_json():
             # ensures that all domains are taken from the same commit
             # TODO: just scrape the json instead 
             page_to_scrape = page_to_scrape = url + \
-                    sep.join(latest) + "/data/output.js"
+                    sep.join(latest) + "data/output.js"
 
             page = urlopen(page_to_scrape).read().decode("utf-8")
             # remove the first line because it's a js file because wtf?
@@ -205,20 +207,24 @@ def scrape_and_grab_json():
             # json_file = json.load(urlopen(page_to_scrape))
             # rules = []
             for domain in DOMS_TO_COMBINE:
-                print(f"Parsing rules from {domain}, using json at {page_to_scrape}")    
+                print(f"Parsing rules from {domain}, using json at {page_to_scrape}")  
+                print(len(json_file))  
 
                 for item in json_file:
-                    if item["enumo_spec_name"] == domain: #and item["baseline_name"] == baseline_name:
-                        rules_from_domain = item["rules"]["rules"]
-                        # no_div = list(filter(lambda rule: not is_unsafe_div_str(rule), rules_from_domain))
-                        # all_rules.extend(no_div) # todo: need to check if div is safe 
-                        all_rules.extend(rules_from_domain)
+                    # print(item)
+                    if item["TYPE"] == TYPE_NAME: #and item["baseline_name"] == baseline_name:
+                        if item["spec_name"] == domain:
+                            rules_from_domain = item["rules"]
+                            # no_div = list(filter(lambda rule: not is_unsafe_div_str(rule), rules_from_domain))
+                            # all_rules.extend(no_div) # todo: need to check if div is safe 
+                            all_rules.extend(rules_from_domain)
                 
             # print(json_file)
             # all_rules.extend(rules)
             break
         except KeyError as err:
             # if err.code == 404:
+            # if current_attempt >= 2:
             if current_attempt >= len(runs_split):
                 raise Exception(
                     f"No json appear to be available for any commits on this branch ({latest[2]}).")
@@ -226,7 +232,7 @@ def scrape_and_grab_json():
             print(current_attempt)
             latest = runs_split[-current_attempt]
             print(
-                f"This commit failed. Trying again with commit {latest[3]} at time {latest[0]}")
+                f"This commit failed: {err}. Trying again with commit {latest[3]} at time {latest[0]}")
             # else:
                 # raise err    
             
