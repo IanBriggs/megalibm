@@ -26,4 +26,4 @@ def get_variables(self):
 
 @add_method(FPCore)
 def get_variables(self):
-    return self.body.get_variables(target_op)
+    return self.body.get_variables()

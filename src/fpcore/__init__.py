@@ -8,6 +8,7 @@ from . import ast
 from .ast_methods import (
     copy,
     cross,
+    contains,
     contains_op,
     constant_propagate,
     decompose_identities,

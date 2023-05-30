@@ -29,6 +29,36 @@ class Recharacterize(types.Transform):
                 f" {self.remapping_function}"
                 f" {self.in_node})")
 
+    def rewrite_to_use_var(self, expr, var):
+        vars = expr.get_variables()
+        if vars == {var.source}:
+            return expr
+
+        # See if we can remove an extra variable using the remapping
+        in_var = self.in_node.out_type.function.arguments[0]
+        remap = self.remapping_function.body
+        if var != in_var and in_var.source in vars:
+            expr = expr.substitute(in_var, remap)
+
+        # See if the inverse mapping can be used
+        out_var = self.out_function.arguments[0]
+        if var != out_var and out_var.source in vars:
+            inverse_map = sympy_solve_equality(in_var, remap, out_var)
+            expr = expr.substitute(out_var, inverse_map)
+            pass
+
+        # Did this reach the goal?
+        vars = expr.get_variables()
+        if vars == {var.source}:
+            return expr
+
+        # Try up a level if possible
+        if self.parent is None:
+            msg = (f"Unable to rewrite expression to just use `{var}`:\n"
+                   f" expr: '{expr}'")
+            raise ValueError(msg)
+        return self.parent.rewrite_to_use_var(expr, var)
+
     def replace_lambda(self, search, replace):
         if self == search:
             return replace
@@ -44,7 +74,7 @@ class Recharacterize(types.Transform):
         # Make sure the impl we are using can type check
         self.in_node.type_check()
 
-        # Each function may have it's own variable name, so we need to keep
+        # Each function will have it's own variable name, so we need to keep
         # this straight.
         # Make sure that the input and output functions have different variable
         # names, and that the remapping function uses the input function's
@@ -86,7 +116,8 @@ class Recharacterize(types.Transform):
         inverse_map = sympy_solve_equality(in_var, remap, out_var)
         logger("Inverse of {} is {}", remap, inverse_map)
 
-        out_domain = Interval.try_symbolic_interval_eval(inverse_map, in_domain)
+        out_domain = Interval.try_symbolic_interval_eval(
+            inverse_map, in_domain)
         logger("{} has domain of [{}, {}]",
                out_var,
                out_domain.float_inf,
@@ -123,4 +154,12 @@ class Recharacterize(types.Transform):
                                            [x],
                                            [z],
                                            self.remapping_function)
+
+        # See if any inner blocks use the recharacterize name
+        out_var = self.out_function.arguments[0]
+        for i, b in enumerate(so_far):
+            for j, n in enumerate(b.in_names):
+                if type(n) == types.VariableRequest and n.var == out_var:
+                    so_far[i].in_names[j] = x
+
         return [remapping] + so_far

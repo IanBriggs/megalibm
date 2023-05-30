@@ -1,6 +1,7 @@
 
 
 from expect import expect_implemented, expect_implemented_class, expect_subclass, expect_type
+import fpcore
 from fpcore.ast import FPCore
 from interval import Interval
 from numeric_types import NumericType, FP64
@@ -55,6 +56,7 @@ class Node():
         self.numeric_type = numeric_type
         self.type_check_done = False
         self.out_type = None
+        self.parent = None
 
     def find_lambdas(self, pred, _found=None):
         # look for all things that make `pred` True
@@ -137,6 +139,17 @@ class Transform(Node):
                  numeric_type: NumericType = FP64):
         super().__init__(numeric_type)
         self.in_node = in_node
+        in_node.parent = self
+
+    def rewrite_to_use_var(self, expr, var):
+        vars = expr.get_variables()
+        if vars == {var.source}:
+            return expr
+        if self.parent is None:
+            msg = (f"Unable to rewrite expression to just use `{var}`:\n"
+                   f" expr: '{expr}'")
+            raise ValueError(msg)
+        return self.parent.rewrite_to_use_var(expr, var)
 
     def find_lambdas(self, pred, _found=None):
         # Setup default args
@@ -168,3 +181,8 @@ class Transform(Node):
 
     def generate(self, numeric_type=FP64):
         return self.in_node.generate(numeric_type=numeric_type)
+
+
+class VariableRequest:
+    def __init__(self, var: fpcore.ast.Variable):
+        self.var = var

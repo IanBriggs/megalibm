@@ -66,24 +66,35 @@ class Add(types.Transform):
 
         so_far = super().generate(numeric_type=numeric_type)
 
-        x = so_far[0].in_names[0]
-        p = so_far[-1].out_names[0]
-
         expr_vars = self.expr.get_variables()
-        assert len(expr_vars) == 1
-        expr_var = expr_vars.pop()
-        poly_var = "p"
-        if expr_var == poly_var:
-            poly_var = "pp"
+        fpcore_arguments = list()
+        lego_arguments = list()
 
-        expr = self.expr + Variable(poly_var)
+        # TODO: Currently hoping the name "p" doesn't clash
+        assert "p" not in expr_vars
+        p_var = fpcore.ast.Variable("p")
+        fpcore_arguments.append(p_var)
+        lego_arguments.append(so_far[-1].out_names[0])
+
+        x_var = self.out_type.function.arguments[0]
+        if x_var.source in expr_vars:
+            fpcore_arguments.append(x_var)
+            lego_arguments.append(so_far[0].in_names[0])
+            expr_vars.remove(x_var.source)
+
+        for fpcore_var_str in expr_vars:
+            var = fpcore.ast.Variable(fpcore_var_str)
+            fpcore_arguments.append(var)
+            lego_arguments.append(types.VariableRequest(var))
+
+        expr = self.expr + p_var
         fpc = fpcore.ast.FPCore(None,
-                                [Variable(expr_var), Variable(poly_var)],
+                                fpcore_arguments,
                                 [],
                                 expr)
 
         sum = lego_blocks.LegoFPCore(numeric_type=numeric_type,
-                                     in_names=[x, p],
+                                     in_names=lego_arguments,
                                      out_names=[self.gensym("add_out")],
                                      fpc=fpc)
         return so_far + [sum]
