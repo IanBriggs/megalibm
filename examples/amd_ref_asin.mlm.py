@@ -82,7 +82,7 @@ mlm = \
                      -0.943639137032492685763471240072,
                       0.105869422087204370341222318533])),
             fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
-            fpcore.parse_expr("(- (/ PI 2) (* 2 y))")),
+            fpcore.parse_expr("(- (/ PI 2) (* 2 y))"), useDD=True),
         fpcore.parse_expr("(- x)"),
         fpcore.parse_expr("(- y)"))
 
