@@ -92,20 +92,20 @@ typedef union
 #define GET_DOUBLE_WORDS(ix0,ix1,d)				\
 {								\
   const ieee_double_shape_type *ew_u = (const ieee_double_shape_type *)&(d);					\
-  (ix0) = ew_u->parts.msw;					\
-  (ix1) = ew_u->parts.lsw;					\
+  (ix0) = (typeof(ix0)) ew_u->parts.msw;					\
+  (ix1) = (typeof(ix1)) ew_u->parts.lsw;					\
 }
 /* Set the more significant 32 bits of a double from an int.  */
 #define SET_HIGH_WORD(d,v)                                      \
 {                                                               \
   ieee_double_shape_type *sh_u = (ieee_double_shape_type *)&(d);\
-  sh_u->parts.msw = (v);                                        \
+  sh_u->parts.msw = (uint32_t) (v);                                        \
 }
 /* Get the more significant 32 bit int from a double.  */
 #define GET_HIGH_WORD(i,d)					\
 {								\
   const ieee_double_shape_type *gh_u = (const ieee_double_shape_type *)&(d);					\
-  (i) = gh_u->parts.msw;						\
+  (i) = (typeof(i)) gh_u->parts.msw;						\
 }
 
 // #ifndef __have_fpu_log

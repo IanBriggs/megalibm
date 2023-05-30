@@ -74,12 +74,12 @@ typedef union
 #define GET_HIGH_WORD(i,d)					\
 {								\
   const ieee_double_shape_type *gh_u = (const ieee_double_shape_type *)&(d);					\
-  (i) = gh_u->parts.msw;						\
+  (i) = (typeof(i)) gh_u->parts.msw;						\
 }
 #define GET_LOW_WORD(i,d)					\
 {								\
   const ieee_double_shape_type *gl_u = (const ieee_double_shape_type *)&(d);					\
-  (i) = gl_u->parts.lsw;						\
+  (i) = (typeof(i)) gl_u->parts.lsw;						\
 }
 #define SET_LOW_WORD(d,v)                                       \
 {                                                               \
@@ -119,7 +119,7 @@ double sun_asin(double x)
 		uint32_t lx;
 
 		GET_LOW_WORD(lx, x);
-		if (((ix - IC(0x3ff00000)) | lx) == 0)
+		if (((uint32_t) (ix - IC(0x3ff00000)) | lx) == 0)
 			/* asin(1)=+-pi/2 with inexact */
 			return x * pio2_hi + x * pio2_lo;
 		return (x - x) / (x - x);		/* asin(|x|>1) is NaN */

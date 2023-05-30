@@ -57,7 +57,7 @@ inline double fpfloor(const double x)
 {
     // no problem since exp is defined between -708 and 708. Int is enough for it!
     int32_t ret = (int32_t) x;
-    ret -= (sp2uint32(x) >> 31);
+    ret -= (sp2uint32((float)x) >> 31);
     return ret;
 }
 /// Converts an unsigned long long to a double
