@@ -59,6 +59,30 @@ mac_polynomial = \
 extra_domain = Interval(0.3799991607666015625,
                         f_domain.sup)
 
+extra_polynomial = \
+    Recharacterize(
+        f_log,
+        f_to_s_remap,
+        Rewrite(
+            fpcore.parse_expr("(* 2 s)"),
+            fpcore.parse_expr("(+ (- f (* (* f f) 0.5)) (* s (* (* f f) 0.5)))"),
+            Add(fpcore.parse_expr("(* 2 s)"),
+                Horner(
+                FixedMultiPolynomial(
+                    s_log_sub_two_s,
+                    s_domain,
+                    fpcore.parse(
+                        "(FPCore (x p q) (* x (+ p q)))"),
+                    [4, 8, 12],
+                    ["3.999999999940941908e-01",
+                     "2.222219843214978396e-01",
+                     "1.531383769920937332e-01",],
+                    [2, 6, 10, 14],
+                    ["6.666666666666735130e-01",
+                     "2.857142874366239149e-01",
+                     "1.818357216161805012e-01",
+                     "1.479819860511658591e-01"])))))
+
 f_polynomial = \
     Recharacterize(
         f_log,
@@ -92,7 +116,7 @@ lambda_expression = \
             SplitDomain({
                 zero_point: zero_polynomial,
                 mac_domain: mac_polynomial,
-                extra_domain: f_polynomial,
+                extra_domain: extra_polynomial,
                 f_domain: f_polynomial,
             })))
 
