@@ -26,6 +26,7 @@ operator_map = {
   "tan ": "tan ",
   "cos ": "cos ",
   "sin ": "sin ",
+  "if": "if",
 }
 
 
@@ -80,7 +81,17 @@ def is_unsafe_div(sexpr, was_div_present=False):
         # is there a variable present anywhere left?
         # todo - this needs to be changed to allow div by exp(a)
         # maybe we make another recursive call and only deal with single items 
-        return any(c in dumps(sexpr) for c in ["a", "b", "c"])
+        # return any(c in dumps(sexpr) for c in ["a", "b", "c"])
+        if dumps(car(sexpr)) == "exp":
+            return False 
+        elif isinstance(sexpr, str) and sexpr in ["a", "b", "c"]:
+            return True
+        elif type(sexpr) is list:
+            print(sexpr)
+            return any(is_unsafe_div(c, True) for c in dumps(sexpr))
+        else:
+            return False
+        
     if isinstance(sexpr, str) or isinstance(sexpr, int) or len(sexpr) == 1:
         # we know div was not involved, so return False
         # could also be a thunk I guess.. but I assume that won't do anything here... that would be crazy
@@ -256,7 +267,7 @@ def scrape_and_grab_json():
     #     f.write("\n".join(all_rules))
     #     print(f"Saved collated rules into {filename}.")
     all_rules = list(set(all_rules))
-    print("Collated rules are:")
+    print("Collated rules before filtering are:")
     print("\n".join(all_rules))
     rule_str = process_rules(all_rules)
     evaled_rules = eval(rule_str)
