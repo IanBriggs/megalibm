@@ -1,4 +1,4 @@
-from sexpdata import loads, dumps, car, cdr
+from sexpdata import loads, dumps, car, cdr, Symbol
 from dataclasses import dataclass
 import sys
 from urllib.request import urlopen
@@ -77,19 +77,26 @@ def is_if_expr(sexpr):
     
 #TODO: div by exp(a) should be allowed though 
 def is_unsafe_div(sexpr, was_div_present=False):
+    # print(sexpr)
     if was_div_present:
         # is there a variable present anywhere left?
         # todo - this needs to be changed to allow div by exp(a)
         # maybe we make another recursive call and only deal with single items 
         # return any(c in dumps(sexpr) for c in ["a", "b", "c"])
-        if dumps(car(sexpr)) == "exp":
-            return False 
-        elif isinstance(sexpr, str) and sexpr in ["a", "b", "c"]:
-            return True
+        # print(f"sexpr is {sexpr}")
+        if (isinstance(sexpr, str) and sexpr in ["a", "b", "c"]) or isinstance(sexpr, Symbol):
+            # print("uh oh!")
+            # print(sexpr)
+            return True 
+        elif type(sexpr) is list and dumps(car(sexpr)) == "exp":
+            # print("it's exp")
+            # print(sexpr)
+            return False
         elif type(sexpr) is list:
-            print(sexpr)
+            # print(dumps(sexpr))
             return any(is_unsafe_div(c, True) for c in dumps(sexpr))
         else:
+            # print(f"hmm: {type(sexpr)}")
             return False
         
     if isinstance(sexpr, str) or isinstance(sexpr, int) or len(sexpr) == 1:
@@ -97,16 +104,24 @@ def is_unsafe_div(sexpr, was_div_present=False):
         # could also be a thunk I guess.. but I assume that won't do anything here... that would be crazy
         return False
     if dumps(car(sexpr)) == "/":
-        if dumps(sexpr[-1]) in ["a", "b", "c"]:
-            return True
-        elif dumps(sexpr[-1]).isdigit() or isinstance(dumps(sexpr[-1]), int):
+        # if dumps(sexpr[-1]) in ["a", "b", "c"]:
+        #     print("yay")
+        #     return True
+        if dumps(sexpr[-1]).isdigit() or isinstance(sexpr[-1], int):
             return is_unsafe_div(sexpr[1], False)
         elif type(sexpr[-1]) is list:
             return is_unsafe_div(sexpr[-1], True) or is_unsafe_div(sexpr[1], False)
+        else:
+            # print("huh?")
+            # print(dumps(sexpr[-1]))
+            # print(type(dumps(sexpr[-1])))
+            # print("found pteontially bad")
+            return is_unsafe_div(sexpr[-1], True)
     
     return any([is_unsafe_div(x, False) for x in sexpr]) 
 
 def is_unsafe_div_str(sexpr_str):
+    # print(sexpr_str)
     if len(sexpr_str) < 1:
         return False
     sexpr = loads(sexpr_str)
@@ -267,11 +282,12 @@ def scrape_and_grab_json():
     #     f.write("\n".join(all_rules))
     #     print(f"Saved collated rules into {filename}.")
     all_rules = list(set(all_rules))
-    print("Collated rules before filtering are:")
-    print("\n".join(all_rules))
+    # print("Collated rules before filtering are:")
+    # print("\n".join(all_rules))
     rule_str = process_rules(all_rules)
     evaled_rules = eval(rule_str)
     # print(all_rules)
+    print(rule_str)
     for l in evaled_rules:
         name = l[0]
         frm = l[1]
