@@ -1,7 +1,8 @@
 
 from better_float_cast import better_float_cast
 from fpcore.ast import FPCore
-from numeric_types import FP32, FP64
+import lambdas
+from numeric_types import FP32, FP64, NumericType
 
 
 def get_mirrors_at(func: FPCore, point):
@@ -95,8 +96,10 @@ def generate_libm_c_code(typ, name, numeric_type=FP64):
     return signature_h, lines
 
 
-def generate_mpfr_c_code(typ, name, numeric_type=FP64):
-    func = typ.function
+def generate_mpfr_c_code(impl: lambdas.types.Impl,
+                         name: str,
+                         numeric_type: NumericType=FP64):
+    func = impl.function
 
     func_lines, temps = func.to_mpfr_c("out")
 
