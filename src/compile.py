@@ -9,8 +9,8 @@ logger = Logger(level=Logger.HIGH, color=Logger.green)
 
 
 def compile_file(filename: str,
-                  compiler: str=None,
-                  flags: list=None):
+                 compiler: str = None,
+                 flags: list = None):
     # Defaults
     if compiler is None:
         compiler = "gcc"
@@ -23,9 +23,9 @@ def compile_file(filename: str,
 
     objectname = filename.replace(".c", ".o")
     command = "{} {} {} -c -o {}".format(compiler,
-                                      " ".join(flags),
-                                      filename,
-                                      objectname)
+                                         " ".join(flags),
+                                         filename,
+                                         objectname)
 
     p = subprocess.run(shlex.split(command), capture_output=True)
 
@@ -41,8 +41,8 @@ def compile_file(filename: str,
 
 def link_files(filenames: list,
                binary_name: str,
-               compiler: str=None,
-               link_flags: list=None,
+               compiler: str = None,
+               link_flags: list = None,
                ):
     # Defaults
     if compiler is None:
