@@ -93,8 +93,8 @@ class MirrorRight(types.Transform):
         self.type_check()
 
         # Reduction
-        in_name = self.gensym("in")
-        reduced_name = so_far[0].in_names[0]
+        in_name = Variable(self.gensym("in"))
+        reduced_name = Variable(so_far[0].in_names[0])
 
         bound = self.mirror_point
         two_bound = better_float_cast(2 * bound)
@@ -103,12 +103,12 @@ class MirrorRight(types.Transform):
                                        [in_name],
                                        [reduced_name],
                                        better_float_cast(bound),
-                                       in_name,
+                                       in_name.to_libm_c(),
                                        "({} - {})".format(two_bound, in_name))
 
         # Reconstruction
-        inner_name = so_far[-1].out_names[0]
-        recons_name = self.gensym("recons")
+        inner_name = Variable(so_far[-1].out_names[0])
+        recons_name = Variable(self.gensym("recons"))
         s_expr = self.s_expr.substitute(Variable("x"), Variable(inner_name))
         s_str = s_expr.to_libm_c()
 
@@ -116,7 +116,7 @@ class MirrorRight(types.Transform):
                                        [in_name],
                                        [recons_name],
                                        better_float_cast(bound),
-                                       inner_name,
+                                       inner_name.to_libm_c(),
                                        s_str)
 
         return [il_reduce] + so_far + [il_recons]

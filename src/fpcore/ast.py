@@ -88,10 +88,15 @@ class Variable(Atom):
     def __init__(self, source):
         super().__init__(source)
         self.dimension = None
+        self.isDD = False
 
     def set_dimension(self, *dimension):
         self.dimension = dimension
         return self
+    
+    def setDD(self, isDD):
+        self.isDD = isDD
+        return self 
 
     def __str__(self):
         if self.dimension is None:

@@ -74,7 +74,13 @@ def to_libm_c(self, *args, **kwargs):
 
 @add_method(Atom)
 def to_libm_c(self, numeric_type=FP64):
-    return self.source if numeric_type in (FP32, FP64) else "(dd){" + self.source + ", 0.0}"
+    if numeric_type != FPDD:
+        return self.source
+    else:
+        if self.isDD:
+            return self.source
+        else:
+            return "(dd){" + self.source + ", 0.0}"
 
 
 @add_method(Number)
@@ -125,7 +131,7 @@ def to_libm_c(self, numeric_type=FP64):
                     "{}").split(",")]
                 return "(dd){" + ", ".join(neg) + "}"
             elif self.op in single_op_map:
-                return f"{single_op_map[self.op]}({c_args})"
+                return "{}({})".format(single_op_map[self.op], ", ".join(c_args) + ".hi")
             else:
                 raise NotImplementedError(f"Unknown single operation: {self.op}")
 

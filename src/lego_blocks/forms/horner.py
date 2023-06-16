@@ -56,13 +56,14 @@ class Horner(forms.Form):
                  out_names: list,
                  monomials: list,
                  coefficients: list,
-                 split: int=0):
+                 split: int=0,
+                 split_expr=None):
         # Run Form initialization
         super().__init__(numeric_type, in_names, out_names)
 
         # Check in and out names
-        if len(in_names) != 1:
-            msg = f"'in_names' must have a length of 1, found: {len(in_names)}"
+        if len(in_names) not in [1,2]:
+            msg = f"'in_names' must have a length of 1 or 2, found: {len(in_names)}"
             raise ValueError(msg)
         if len(out_names) != 1:
             msg = ("'out_names' must have a length of 1, found:"
@@ -73,6 +74,7 @@ class Horner(forms.Form):
         self.monomials = monomials
         self.coefficients = [fpcore.parse_expr(str(c)) for c in coefficients]
         self.split = split
+        self.split_expr = split_expr
 
     def __repr__(self):
         return ("Horner("
@@ -105,7 +107,7 @@ class Horner(forms.Form):
         # Build the horner polynomial as an fpcore ast expression
 
         # Local names for things
-        x = fpcore.ast.Variable(self.in_names[0])
+        x = self.in_names[-1]
         mons = self.monomials.copy()
         coeffs = self.coefficients.copy()
 
@@ -129,6 +131,7 @@ class Horner(forms.Form):
         # Build the polynomial expression from the inside out
         poly = coeffs.pop()
         old_mon = mons.pop()
+
         while len(mons) > 0:
             # Figure out the power of x needed for this term
             mon = mons.pop()
@@ -145,6 +148,13 @@ class Horner(forms.Form):
         # The last pow isn't based on a difference of monomials
         if mon != 0:
             x_pow = tree_pow(x, mon)
+            if self.split_expr:
+                for i in range(len(self.in_names)):
+                    sub_name = self.in_names[i]
+                    if sub_name.isDD:
+                        sub_name = fpcore.ast.Variable(sub_name.to_libm_c() + "_hi")
+                    self.split_expr = self.split_expr.substitute(self.split_expr.args[i], sub_name)
+                x_pow = self.split_expr
             poly = x_pow * poly
 
         # Now build up the general form

@@ -2,7 +2,7 @@
 
 from expect import expect_implemented, expect_implemented_class, expect_subclass, expect_type
 import fpcore
-from fpcore.ast import FPCore
+from fpcore.ast import FPCore, Variable
 from interval import Interval
 from numeric_types import NumericType, FP64
 
@@ -150,6 +150,15 @@ class Transform(Node):
                    f" expr: '{expr}'")
             raise ValueError(msg)
         return self.parent.rewrite_to_use_var(expr, var)
+    
+    def getInnerVariable(self, var):
+        typ = type(var)
+        if typ == Variable:
+            return var
+        elif typ == str:
+            return Variable(var)
+        else:
+            raise ValueError(f"Unknown variable type: {typ}")
 
     def find_lambdas(self, pred, _found=None):
         # Setup default args

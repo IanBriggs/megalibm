@@ -93,8 +93,8 @@ class MirrorLeft(types.Transform):
         so_far = super().generate(numeric_type=numeric_type)
 
         # Reduction
-        in_name = self.gensym("in")
-        reduced_name = so_far[0].in_names[0]
+        in_name = Variable(self.gensym("in"))
+        reduced_name = Variable(so_far[0].in_names[0])
 
         bound = self.mirror_point
 
@@ -102,12 +102,12 @@ class MirrorLeft(types.Transform):
                                        [in_name],
                                        [reduced_name],
                                        better_float_cast(bound),
-                                       "({} - {})".format(better_float_cast(bound), in_name),
+                                       "({} - {})".format(better_float_cast(bound), in_name.to_libm_c()),
                                        in_name)
 
         # Reconstruction
-        inner_name = so_far[-1].out_names[0]
-        recons_name = self.gensym("recons")
+        inner_name = Variable(so_far[-1].out_names[0])
+        recons_name = Variable(self.gensym("recons"))
         s_expr = self.s_expr.substitute(Variable("x"), Variable(inner_name))
         s_str = s_expr.to_libm_c()
 
@@ -116,7 +116,7 @@ class MirrorLeft(types.Transform):
                                        [recons_name],
                                        better_float_cast(bound),
                                        s_str,
-                                       inner_name)
+                                       inner_name.to_libm_c())
 
         return [il_reduce] + so_far + [il_recons]
 

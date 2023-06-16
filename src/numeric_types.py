@@ -17,7 +17,7 @@ class NumericType():
 
     @classmethod
     def num_to_str(cls, bound):
-        expect_implemented_class("num_to_str", self)
+        expect_implemented_class("num_to_str", cls)
 
 
 class FP32(NumericType):
