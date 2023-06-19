@@ -14,7 +14,7 @@ def error_function(numeric_type: NumericType,
                    c_code: str,
                    oracle_function_name: str,
                    oracle_code: str,
-                   range: Interval) -> dict:
+                   domain: Interval) -> dict:
     if c_function_name is None:
         return None
 
@@ -22,28 +22,33 @@ def error_function(numeric_type: NumericType,
                                 samples,
                                 oracle_function_name,
                                 oracle_code,
-                                range)
+                                domain)
 
     data["oracle"] = (
         data["correctly_rounded"].map(lambda d: mpmath.mpf(d))
         + data["diff"].map(lambda d: mpmath.mpf(d))
         )
+    data.drop(columns=["diff"])
 
     function_data = function_values(numeric_type,
                                     samples,
                                     c_function_name,
                                     c_code,
-                                    range)
+                                    domain)
 
-    assert data["input"] == function_data["input"]
+    assert data["input"].equals(function_data["input"])
 
     data["function"] = function_data["function"]
 
-    data["f_error"] = data["oracle"] - data["function"]
-    data["f_error"] = data["f_error"].map(lambda mp: abs(float(mp)))
+    data["f_abs_error"] = data["oracle"] - data["function"]
+    data["f_abs_error"] = data["f_abs_error"].map(lambda mp: abs(float(mp)))
+    data["f_rel_error"] = data["f_abs_error"] / data["oracle"]
+    data["f_rel_error"] = data["f_rel_error"].map(lambda mp: abs(float(mp)))
 
-    data["cr_error"] = data["oracle"] - data["correctly_rounded"]
-    data["cr_error"] = data["cr_error"].map(lambda mp: abs(float(mp)))
+    data["cr_abs_error"] = data["oracle"] - data["correctly_rounded"]
+    data["cr_abs_error"] = data["cr_abs_error"].map(lambda mp: abs(float(mp)))
+    data["cr_rel_error"] = data["cr_abs_error"] / data["oracle"]
+    data["cr_rel_error"] = data["cr_rel_error"].map(lambda mp: abs(float(mp)))
 
     return data
 
@@ -60,9 +65,9 @@ def any_values(is_oracle: bool,
     value_type = "oracle" if is_oracle else "function"
 
     if numeric_type == FP64:
-        gen = f"generate_{value_type}_values_f64"
+        gen = f"generate_{value_type}_values_fp64"
     elif numeric_type == FP32:
-        gen = f"generate_{value_type}_values_f32"
+        gen = f"generate_{value_type}_values_fp32"
 
     lines = [
         '#include "error_measurement.h"',
@@ -80,16 +85,19 @@ def any_values(is_oracle: bool,
         f.write(c_source)
 
     run_name = f"{function_name}_runner"
-    obj = compile_file(fname, main=True)
+    obj = compile_file(fname)
     runner = link_files([obj], run_name)
 
     tsv_name = f"{function_name}.tsv"
-    subprocess.run(f"./{runner} > {tsv_name}")
-
+    p = subprocess.run(f"./{runner}", capture_output=True)
+    with open(tsv_name, "wb") as f:
+        f.write(p.stdout)
     data = pandas.read_csv(tsv_name, sep='\t')
 
     for c in data.columns:
         data[c] = data[c].map(lambda s: float.fromhex(s))
+
+    data.sort_values("input", inplace=True)
 
     return data
 

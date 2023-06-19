@@ -1,6 +1,12 @@
 from expect import expect_subclass
 import fpcore
 
+def var(s: str):
+    return fpcore.ast.Variable(s)
+
+def make_function(args, body):
+    return fpcore.ast.FPCore(None, args, list(), body)
+
 E = fpcore.ast.Constant("E")
 LOG2E = fpcore.ast.Constant("LOG2E")
 LOG10E = fpcore.ast.Constant("LOG10E")

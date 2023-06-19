@@ -11,7 +11,7 @@ from utils import Logger, Timer
 
 from fpcore.ast import Number, Variable
 
-logger = Logger(Logger.LOW, color=Logger.blue, def_color=Logger.cyan)
+logger = Logger(Logger.HIGH, color=Logger.blue, def_color=Logger.cyan)
 timer = Timer()
 
 ITERS = [

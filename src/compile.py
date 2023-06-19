@@ -7,6 +7,9 @@ from utils import Logger
 
 logger = Logger(level=Logger.HIGH, color=Logger.green)
 
+EXAMPLE_DIR = path.abspath("")
+GIT_DIR = path.split(EXAMPLE_DIR)[0]
+SRC_DIR = path.join(GIT_DIR, "src")
 
 def compile_file(filename: str,
                  compiler: str = None,
@@ -20,6 +23,12 @@ def compile_file(filename: str,
     # brew puts things in weird places
     if path.exists("/opt/homebrew/include"):
         flags.insert(0, "-I/opt/homebrew/include")
+
+    # add our local dir
+    if "GIT_DIR" in globals():
+        flags.insert(0, f"-I{GIT_DIR}/include")
+    else:
+        flags.insert(0, "-Iinclude")
 
     objectname = filename.replace(".c", ".o")
     command = "{} {} {} -c -o {}".format(compiler,
@@ -56,7 +65,7 @@ def link_files(filenames: list,
 
     command = "{} {} {} -o {}".format(compiler,
                                       " ".join(filenames),
-                                      link_flags,
+                                      " ".join(link_flags),
                                       binary_name)
 
     p = subprocess.run(shlex.split(command), capture_output=True)
