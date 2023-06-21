@@ -10,7 +10,7 @@ from .general import General
 from .hole import Hole
 from .horner import Horner
 from .inflection_left import InflectionLeft
-from .inflection_right import InflectionRight
+from .inflection_right import InflectionRight, ExprIfLess
 from .lambda_utils import (generate_c_code, generate_libm_c_code,
                            generate_mpfr_c_code)
 from .minimax_polynomial import MinimaxPolynomial

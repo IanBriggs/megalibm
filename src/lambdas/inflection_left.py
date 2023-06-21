@@ -50,6 +50,7 @@ class InflectionLeft(types.Transform):
             return
 
         # Make sure the impl we are using can type check
+        #TODO
         self.in_node.type_check()
         inner_impl_type = self.in_node.out_type
         f = inner_impl_type.function
@@ -103,31 +104,31 @@ class InflectionLeft(types.Transform):
         so_far = super().generate(numeric_type=numeric_type)
 
         # Reduction
-        x_in_name = self.gensym("x_in")
-        reduced_name = so_far[0].in_names[0]
+        x_in_name = Variable(self.gensym("x_in"))
+        reduced_name = self.get_inner_variable(so_far[0].in_names[0])
         red_expr = self.reduction.substitute(
-            Variable("x"), Variable(x_in_name))
+            Variable("x"), x_in_name)
 
         red = lego_blocks.IfLess(numeric_type,
                                  [x_in_name],
                                  [reduced_name],
                                  better_float_cast(self.inflection_point),
-                                 red_expr.to_libm_c(
-                                     numeric_type=numeric_type),
-                                 x_in_name)
+                                 red_expr.to_libm_c(numeric_type=numeric_type),
+                                 x_in_name.to_libm_c(numeric_type=numeric_type),
+                                 return_type=numeric_type.c_type)
 
         # Reconstruction
-        inner_name = so_far[-1].out_names[0]
-        y_out_name = self.gensym("y_out")
+        inner_name = self.get_inner_variable(so_far[-1].out_names[0])
+        y_out_name = Variable(self.gensym("y_out"))
         rec_expr = self.reconstruction.substitute(
-            Variable("y"), Variable(inner_name))
+            Variable("y"), inner_name)
 
         rec = lego_blocks.IfLess(numeric_type,
                                  [x_in_name],
                                  [y_out_name],
                                  better_float_cast(self.inflection_point),
-                                 rec_expr.to_libm_c(
-                                     numeric_type=numeric_type),
-                                 inner_name)
+                                 rec_expr.to_libm_c(numeric_type=numeric_type),
+                                 inner_name.to_libm_c(numeric_type=numeric_type),
+                                 return_type=numeric_type.c_type)
 
         return [red] + so_far + [rec]

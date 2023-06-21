@@ -12,6 +12,7 @@ sys.path.append(SRC_DIR)
 
 from assemble_c_files import *
 from utils.logging import Logger
+from utils import ExprIfLess
 
 logger = Logger(color=Logger.green, level=Logger.LOW)
 logger.set_log_level(Logger.HIGH)
@@ -29,6 +30,9 @@ from lambdas import *
 asin = fpcore.parse("(FPCore (x) (asin x))")
 linear_cutoff = "1.38777878078144552146e-17"
 
+
+
+
 reference_impl = "amd_ref_asin.c"
 lambda_expression = \
     InflectionLeft(
@@ -38,21 +42,22 @@ lambda_expression = \
                     asin,
                     Interval("0", "0.5"),
                     fpcore.parse("(FPCore (x p q) (+ x (/ p q)))"),
-                    [3, 5, 7, 9, 11, 13],
+                    [1, 2, 3, 4, 5, 6],
                     [" 0.227485835556935010735943483075",
                      "-0.445017216867635649900123110649",
                      " 0.275558175256937652532686256258",
                      "-0.0549989809235685841612020091328",
                      " 0.00109242697235074662306043804220",
                      " 0.0000482901920344786991880522822991"],
-                    [0, 2, 4, 6, 8],
+                    [0, 1, 2, 3, 4],
                     [" 1.36491501334161032038194214209",
                      "-3.28431505720958658909889444194",
                      " 2.76568859157270989520376345954",
                      "-0.943639137032492685763471240072",
-                     " 0.105869422087204370341222318533"])),
-            fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
-            fpcore.parse_expr("(- (/ PI 2) (* 2 y))"), useDD=True),
+                     " 0.105869422087204370341222318533"]), useDD = True, split_expr=fpcore.parse_expr("(* x y)")),
+            [ExprIfLess(None, fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"), return_type="dd", compute="dd"),
+             ExprIfLess(fpcore.parse_expr("(* x x)"), fpcore.parse_expr("(/ (- 1 x) 2)"), "double")],
+            [ExprIfLess(None, fpcore.parse_expr("(- (/ PI 2) (* 2 y))"), "double", compute="dd")], useDD=True),
         fpcore.parse_expr("(- x)"),
         fpcore.parse_expr("(- y)"))
 
@@ -70,6 +75,7 @@ if not path.isdir("generated"):
 os.chdir("generated")
 
 # dsl
+#TODO
 lambda_expression.type_check()
 dsl_func_name = "dsl_amd_ref_asin"
 dsl_sig, dsl_src = lambdas.generate_c_code(lambda_expression, dsl_func_name)

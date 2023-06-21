@@ -1,18 +1,21 @@
 
 from expect import expect_type
+from fpcore.ast import Variable
 import lambdas
 import lego_blocks
 import lego_blocks.forms as forms
 from lambdas import types
-from numeric_types import FP64, NumericType
+from numeric_types import FP64, FPDD, NumericType
 
 
 class Horner(types.Transform):
 
     def __init__(self,
                  in_node: types.Node,
-                 numeric_type: NumericType = FP64,
-                 split: int = 0):
+                 split: int = 0,
+                 numeric_type: NumericType = FP64,                 
+                 useDD: bool = False,
+                 split_expr=None):
         # Run Transform initialization
         super().__init__(in_node, numeric_type)
 
@@ -21,6 +24,9 @@ class Horner(types.Transform):
         if split < 0:
             raise ValueError(f"'split' must be positive, given: {split}")
         self.split = split
+        self.useDD = useDD
+        self.split_expr = split_expr
+
 
     def type_check(self):
         # Only check once
@@ -52,33 +58,45 @@ class Horner(types.Transform):
         self.in_node.generate(numeric_type)
 
         # Create the first polynomial
-        g_name = self.gensym("g")
-        p_name = self.gensym("p_poly")
+        g = self.gensym("g")
+        g_name = Variable(g)
+        if self.useDD:
+            gg = self.get_inner_variable(self.gensym("gg"))
+            g_name = g_name.setDD(True)
+        
+        p = self.gensym("p_poly")
+        p_name = Variable(p)
         p = forms.Horner(numeric_type=numeric_type,
-                         in_names=[g_name],
-                         out_names=[p_name],
+                         in_names=[g_name] if not self.useDD else [g_name, gg],
+                         out_names=[p],
                          monomials=self.in_node.p_monomials,
                          coefficients=self.in_node.p_coefficients,
-                         split=self.split)
+                         split=self.split,
+                         split_expr=self.split_expr)
         block_list.append(p)
 
         # If there is a second polynomial create it
         if len(self.in_node.q_monomials) != 0:
-            q_name = self.gensym("q_poly")
+            q = self.gensym("q_poly")
+            q_name = Variable(q)
             q = forms.Horner(numeric_type=numeric_type,
-                             in_names=[g_name],
-                             out_names=[q_name],
+                             in_names=[g_name if not self.useDD else gg],
+                             out_names=[q],
                              monomials=self.in_node.q_monomials,
                              coefficients=self.in_node.q_coefficients,
                              split=self.split)
             block_list.append(q)
 
             # Combine polynomials
-            r_name = self.gensym("r_poly")
-            r = lego_blocks.LegoFPCore(numeric_type=numeric_type,
+            r_name = Variable(self.gensym("r_poly"))
+            if self.useDD:
+                r_name = r_name.setDD(True)
+            
+            r = lego_blocks.LegoFPCore(numeric_type= FPDD if self.useDD else numeric_type,
                                        in_names=[g_name, p_name, q_name],
                                        out_names=[r_name],
-                                       fpc=self.in_node.combiner)
+                                       fpc=self.in_node.combiner,
+                                       return_type= "dd" if self.useDD else "double")
             block_list.append(r)
 
         return block_list
