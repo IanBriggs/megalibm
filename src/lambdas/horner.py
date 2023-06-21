@@ -14,7 +14,6 @@ class Horner(types.Transform):
                  in_node: types.Node,
                  split: int = 0,
                  numeric_type: NumericType = FP64,                 
-                 split: int = 0,
                  useDD: bool = False,
                  split_expr=None):
         # Run Transform initialization
