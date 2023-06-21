@@ -7,10 +7,13 @@ from utils import Logger
 
 logger = Logger(level=Logger.HIGH, color=Logger.green)
 
+EXAMPLE_DIR = path.abspath("")
+GIT_DIR = path.split(EXAMPLE_DIR)[0]
+SRC_DIR = path.join(GIT_DIR, "src")
 
 def compile_file(filename: str,
-                  compiler: str=None,
-                  flags: list=None):
+                 compiler: str = None,
+                 flags: list = None):
     # Defaults
     if compiler is None:
         compiler = "gcc"
@@ -21,11 +24,17 @@ def compile_file(filename: str,
     if path.exists("/opt/homebrew/include"):
         flags.insert(0, "-I/opt/homebrew/include")
 
+    # add our local dir
+    if "GIT_DIR" in globals():
+        flags.insert(0, f"-I{GIT_DIR}/include")
+    else:
+        flags.insert(0, "-Iinclude")
+
     objectname = filename.replace(".c", ".o")
     command = "{} {} {} -c -o {}".format(compiler,
-                                      " ".join(flags),
-                                      filename,
-                                      objectname)
+                                         " ".join(flags),
+                                         filename,
+                                         objectname)
 
     p = subprocess.run(shlex.split(command), capture_output=True)
 
@@ -41,8 +50,8 @@ def compile_file(filename: str,
 
 def link_files(filenames: list,
                binary_name: str,
-               compiler: str=None,
-               link_flags: list=None,
+               compiler: str = None,
+               link_flags: list = None,
                ):
     # Defaults
     if compiler is None:
@@ -56,7 +65,7 @@ def link_files(filenames: list,
 
     command = "{} {} {} -o {}".format(compiler,
                                       " ".join(filenames),
-                                      link_flags,
+                                      " ".join(link_flags),
                                       binary_name)
 
     p = subprocess.run(shlex.split(command), capture_output=True)

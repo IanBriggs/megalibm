@@ -5,7 +5,7 @@ import lambdas
 import lego_blocks
 import lego_blocks.forms as forms
 from lambdas import types
-from numeric_types import FP64, FPDD
+from numeric_types import FP64, FPDD, NumericType
 
 
 class Horner(types.Transform):
@@ -13,10 +13,12 @@ class Horner(types.Transform):
     def __init__(self,
                  in_node: types.Node,
                  split: int = 0,
+                 numeric_type: NumericType = FP64,                 
+                 split: int = 0,
                  useDD: bool = False,
                  split_expr=None):
         # Run Transform initialization
-        super().__init__(in_node)
+        super().__init__(in_node, numeric_type)
 
         # Check and save split
         expect_type("split", split, int)

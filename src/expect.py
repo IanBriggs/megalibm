@@ -3,7 +3,9 @@
 
 def expect_type(name, var, typ):
     if type(var) != typ:
-        msg = f"`{name}` should be of type `{typ}`, given: `{type(var)}`"
+        exp = str(typ)
+        act = str(type(var))
+        msg = f"`{name}` should be of type `{exp}`, given: `{act}`"
         raise TypeError(msg)
 
 def expect_subclass(name, sub, cls):

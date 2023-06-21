@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static mpfr_prec_t ORACLE_PREC = 512;
+static mpfr_prec_t ORACLE_PREC = 106 + 10;
 
 typedef double (*unop_fp64)(double);
 typedef int (*unop_mpfr_fp64)(mpfr_t, double);
@@ -41,7 +41,7 @@ generate_oracle_values_fp64(unop_mpfr_fp64 oracle,
     mpfr_init2(y_R, ORACLE_PREC);
     mpfr_init2(err_R, ORACLE_PREC);
 
-    printf("input\toracle\terror\n");
+    printf("input\tcorrectly_rounded\tdiff\n");
     init_random_double();
     for (size_t i = 0; i < samples; i++)
     {
@@ -106,7 +106,7 @@ generate_oracle_values_fp32(unop_mpfr_fp32 oracle,
     mpfr_init2(y_R, ORACLE_PREC);
     mpfr_init2(err_R, ORACLE_PREC);
 
-    printf("input\toracle\terror\n");
+    printf("input\tcorrectly_rounded\tdiff\n");
     init_random_double();
     for (size_t i = 0; i < samples; i++)
     {
