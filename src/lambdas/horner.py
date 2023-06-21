@@ -50,13 +50,6 @@ class Horner(types.Transform):
 
     def generate(self, numeric_type=FP64):
         # Make sure we type check
-        def getVarStr(var):
-            var = Variable(var)
-            if self.useDD:
-                var = var.setDD(True)
-            varStr = var.to_libm_c(numeric_type=FPDD if self.useDD else numeric_type)
-            return varStr
-
         self.type_check()
         block_list = list()
 
@@ -67,7 +60,7 @@ class Horner(types.Transform):
         g = self.gensym("g")
         g_name = Variable(g)
         if self.useDD:
-            gg = self.getInnerVariable(self.gensym("gg"))
+            gg = self.get_inner_variable(self.gensym("gg"))
             g_name = g_name.setDD(True)
         
         p = self.gensym("p_poly")

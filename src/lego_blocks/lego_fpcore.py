@@ -23,11 +23,14 @@ class LegoFPCore(lego_blocks.LegoBlock):
 
     def to_c(self):
         cdecl = self.return_type
-        out = self.out_names[0].to_libm_c()
+        typ = type(self.out_names[0])
+        out = self.out_names[0] if typ == str else self.out_names[0].to_libm_c()
         fpc = self.fpc
         for i in range(len(self.in_names)):
+            in_type = type(self.in_names[i])
+            inner_name = Variable(self.in_names[i]) if in_type != Variable else self.in_names[i]
             fpc = fpc.substitute(fpc.arguments[i],
-                                 self.in_names[i])
+                                 inner_name)
         lines = [
             f"{cdecl} {out} = {fpc.body.to_libm_c(numeric_type=self.numeric_type)};"
         ]

@@ -31,7 +31,6 @@ asin = fpcore.parse("(FPCore (x) (asin x))")
 
 reference_impl = "amd_fast_asinf.c"
 lambda_expression = \
-    TypeCast(
         InflectionLeft(
             InflectionRight(
                 Estrin(
@@ -49,7 +48,7 @@ lambda_expression = \
                 fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
                 fpcore.parse_expr("(- (/ PI 2) (* 2 y))")),
             fpcore.parse_expr("(- x)"),
-            fpcore.parse_expr("(- y)")), frm=FP32, to=FP32)
+            fpcore.parse_expr("(- y)"))
 
 # |                                                                           |
 # +---------------------------------------------------------------------------+

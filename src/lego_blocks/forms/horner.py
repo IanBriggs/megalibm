@@ -2,6 +2,7 @@
 
 from expect import expect_subclass, expect_type
 import fpcore
+from fpcore.ast import Variable
 from lego_blocks import forms
 
 
@@ -107,7 +108,8 @@ class Horner(forms.Form):
         # Build the horner polynomial as an fpcore ast expression
 
         # Local names for things
-        x = self.in_names[-1]
+        in_type = type(self.in_names[-1])
+        x = Variable(self.in_names[-1]) if in_type != Variable else self.in_names[-1]
         mons = self.monomials.copy()
         coeffs = self.coefficients.copy()
 

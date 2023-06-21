@@ -151,7 +151,7 @@ class Transform(Node):
             raise ValueError(msg)
         return self.parent.rewrite_to_use_var(expr, var)
     
-    def getInnerVariable(self, var):
+    def get_inner_variable(self, var):
         typ = type(var)
         if typ == Variable:
             return var

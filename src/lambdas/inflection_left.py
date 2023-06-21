@@ -105,7 +105,7 @@ class InflectionLeft(types.Transform):
 
         # Reduction
         x_in_name = Variable(self.gensym("x_in"))
-        reduced_name = self.getInnerVariable(so_far[0].in_names[0])
+        reduced_name = self.get_inner_variable(so_far[0].in_names[0])
         red_expr = self.reduction.substitute(
             Variable("x"), x_in_name)
 
@@ -114,10 +114,11 @@ class InflectionLeft(types.Transform):
                                  [reduced_name],
                                  better_float_cast(self.inflection_point),
                                  red_expr.to_libm_c(numeric_type=numeric_type),
-                                 x_in_name.to_libm_c(numeric_type=numeric_type))
+                                 x_in_name.to_libm_c(numeric_type=numeric_type),
+                                 return_type=numeric_type.c_type)
 
         # Reconstruction
-        inner_name = self.getInnerVariable(so_far[-1].out_names[0])
+        inner_name = self.get_inner_variable(so_far[-1].out_names[0])
         y_out_name = Variable(self.gensym("y_out"))
         rec_expr = self.reconstruction.substitute(
             Variable("y"), inner_name)
@@ -127,6 +128,7 @@ class InflectionLeft(types.Transform):
                                  [y_out_name],
                                  better_float_cast(self.inflection_point),
                                  rec_expr.to_libm_c(numeric_type=numeric_type),
-                                 inner_name.to_libm_c(numeric_type=numeric_type))
+                                 inner_name.to_libm_c(numeric_type=numeric_type),
+                                 return_type=numeric_type.c_type)
 
         return [red] + so_far + [rec]
