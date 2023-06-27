@@ -1,7 +1,7 @@
 from mpmath import iv
 from expect import expect_implemented
 from fpcore.ast import ASTNode, Constant, FPCore, Number, Operation, Variable
-from interval import Interval
+import interval
 from utils import add_method
 
 iv.prec = 2**14
@@ -94,7 +94,7 @@ def interval_eval(self, assignment):
     if assignment is not None and self.source not in assignment:
         raise NameError("{} not in evaluation environment".format(self.source))
     val = assignment[self.source]
-    if type(val) == Interval:
+    if type(val) == interval.Interval:
         inf = val[0]
         sup = val[1]
         if hasattr(inf, "eval"):

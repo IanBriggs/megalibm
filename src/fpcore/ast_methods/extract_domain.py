@@ -1,6 +1,6 @@
 from expect import expect_implemented
 from fpcore.ast import ASTNode, FPCore, Operation, Variable
-from interval import Interval
+import interval
 from utils import Logger, add_method
 
 
@@ -95,7 +95,7 @@ def get_domains(precondition_list, arguments):
     # Bring upper and lower bounds together
     domains = dict()
     for name in lower_domains:
-        domains[name] = Interval(lower_domains[name], upper_domains[name])
+        domains[name] = interval.Interval(lower_domains[name], upper_domains[name])
 
     return domains
 

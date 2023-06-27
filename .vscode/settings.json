@@ -107,5 +107,8 @@
     "python.formatting.autopep8Args": ["--ignore","E402"],
     "markdownlint.config": {
         "MD024": false
-    }
+    },
+    "python.analysis.extraPaths": [
+        "./examples"
+    ]
 }

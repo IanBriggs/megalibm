@@ -4,7 +4,7 @@ import subprocess
 import mpmath
 import pandas
 from compile import compile_file, link_files
-from interval import Interval
+import interval
 from numeric_types import FP32, FP64, NumericType
 
 
@@ -14,7 +14,7 @@ def error_function(numeric_type: NumericType,
                    c_code: str,
                    oracle_function_name: str,
                    oracle_code: str,
-                   domain: Interval) -> dict:
+                   domain: interval.Interval) -> dict:
     if c_function_name is None:
         return None
 
@@ -58,7 +58,7 @@ def any_values(is_oracle: bool,
                   samples: int,
                   function_name: str,
                   code: str,
-                  range: Interval):
+                  range: interval.Interval):
     low = numeric_type.num_to_str(range.inf)
     high = numeric_type.num_to_str(range.sup)
 
@@ -105,7 +105,7 @@ def function_values(numeric_type: NumericType,
                   samples: int,
                   function_name: str,
                   code: str,
-                  range: Interval):
+                  range: interval.Interval):
     return any_values(False,
                       numeric_type,
                       samples,
@@ -117,7 +117,7 @@ def oracle_values(numeric_type: NumericType,
                   samples: int,
                   function_name: str,
                   code: str,
-                  range: Interval):
+                  range: interval.Interval):
     return any_values(True,
                       numeric_type,
                       samples,

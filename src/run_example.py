@@ -10,6 +10,7 @@ import fpcore
 import lambdas
 from time_function import time_function
 
+
 EXAMPLE_DIR = path.abspath(path.dirname(__file__))
 GIT_DIR = path.split(EXAMPLE_DIR)[0]
 SRC_DIR = path.join(GIT_DIR, "src")
@@ -21,6 +22,8 @@ from utils import Logger, Timer
 logger = Logger(color=Logger.green, level=Logger.LOW)
 timer = Timer()
 
+import pprint 
+pp = pprint.PrettyPrinter(indent=4)
 
 def parse_arguments(argv):
     parser = argparse.ArgumentParser(description='Example runner')
@@ -52,7 +55,7 @@ def parse_arguments(argv):
         sys.exit(1)
 
     logger.dlog("Settings:")
-    logger.dlog("      dirname: {}", args.dirname)
+    # logger.dlog("      dirname: {}", args.dirname)
     logger.dlog("    verbosity: {}", args.verbosity)
     logger.dlog("     log-file: {}", args.log_file)
     logger.dlog(" example_file: {}", args.example_file)
@@ -72,7 +75,7 @@ def determine_reference(environment):
     if (reference_filename is not None
         and reference_code is None
             and reference_function_name is None):
-        with open(reference_filename, "r") as f:
+        with open( GIT_DIR + "/examples/" + reference_filename, "r") as f:
             reference_code = f.read()
         reference_function_name = reference_filename.rstrip(".c")
     elif (reference_filename is not None
@@ -101,10 +104,13 @@ def main(argv):
     with open(args.example_file, "r") as f:
         example = f.read()
     example_globals = dict()
-    exec(example, globals=example_globals)
+    exec(example, example_globals)
 
     # Get the lambda
     lambda_expression = example_globals.get("lambda_expression")
+    lambda_expression.type_check()
+    # print("YOYO",type(lambda_expression))
+    # print("YOYO",lambda_expression.out_type)
     if lambda_expression is None:
         logger.error("File '{}' must define the variable `lambda_expression`",
                      args.example_file)
@@ -115,16 +121,17 @@ def main(argv):
     if lambda_function_name is None:
         lambda_function_name = "lambda"
 
+    # Precision and impl
+    oracle_impl_type = lambda_expression.out_type
+    precision = lambda_expression.numeric_type
+
     # Generate the code
     lambda_expression.type_check()
     lambda_signature, lines = lambdas.generate_c_code(lambda_expression,
-                                                      lambda_function_name)
+                                                      lambda_function_name, numeric_type=precision)
     lambda_code = "\n".join(lines)
 
-    precision = oracle_impl_type.numeric_type
-
     # Use the function and type to create an oracle
-    oracle_impl_type = lambda_expression.out_type
     oracle_function_name = "oracle"
     oracle_signature, lines = lambdas.generate_mpfr_c_code(oracle_impl_type,
                                                            oracle_function_name,
@@ -143,7 +150,7 @@ def main(argv):
 
     # Prepare output json structure
     json_dict = {
-        "example_filename": args.example_filename,
+        "example_filename": args.example_file,
         "precision": precision,
         "lambda_code": lambda_code,
         "lambda_function_name": lambda_function_name,
@@ -166,40 +173,41 @@ def main(argv):
 
     # Run on all of them and add the data to our `json_dict`
     json_ranges = dict()
-    for range in input_ranges:
+    for domain in input_ranges:
         json_range = {
             "lambda_time": time_function(numeric_type=precision,
-                                         points_per_pad=points_per_pad,
-                                         repeats_per_time=repeats_per_time,
                                          c_function_name=lambda_function_name,
                                          c_code=lambda_code,
-                                         rang=range),
+                                         domain=domain),
             "reference_time": time_function(numeric_type=precision,
-                                            points_per_pad=points_per_pad,
-                                            repeats_per_time=repeats_per_time,
                                             c_function_name=reference_function_name,
                                             c_code=reference_code,
-                                            rang=range),
+                                            domain=domain),
             "lambda_error": error_function(numeric_type=precision,
-                                           regions_per_range=regions_per_range,
-                                           samples_per_region=samples_per_region,
+                                           samples=2**17,
                                            c_function_name=lambda_function_name,
                                            c_code=lambda_code,
                                            oracle_function_name=oracle_function_name,
                                            oracle_code=oracle_code,
-                                           rang=range),
+                                           domain=domain)["f_abs_error"].max(),
             "reference_error": error_function(numeric_type=precision,
-                                              regions_per_range=regions_per_range,
-                                              samples_per_region=samples_per_region,
-                                              c_function_name=reference_function_name,
-                                              c_code=reference_code,
-                                              oracle_function_name=oracle_function_name,
-                                              oracle_code=oracle_code,
-                                              rang=range),
+                                           samples=2**17,
+                                           c_function_name=reference_function_name,
+                                           c_code=reference_code,
+                                           oracle_function_name=oracle_function_name,
+                                           oracle_code=oracle_code,
+                                           domain=domain)["f_abs_error"].max(),
         }
+        # error_function(numeric_type=precision,
+        #                                    samples=regions_per_range,
+        #                                    c_function_name=reference_function_name,
+        #                                    c_code=reference_code,
+        #                                    oracle_function_name=oracle_function_name,
+        #                                    oracle_code=oracle_code,
+        #                                    domain=domain)["f_abs_error"].max(),
         json_ranges[range] = json_range
     json_dict["range_data"] = json_ranges
-
+    pp.pprint(json_ranges)
     # 
 
 if __name__ == "__main__":
