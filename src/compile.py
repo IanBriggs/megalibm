@@ -14,6 +14,7 @@ SRC_DIR = path.join(GIT_DIR, "src")
 def compile_file(filename: str,
                  compiler: str = None,
                  flags: list = None):
+    # TODO: Compilation warnings are ignored
     # Defaults
     if compiler is None:
         compiler = "gcc"
@@ -36,13 +37,15 @@ def compile_file(filename: str,
                                          filename,
                                          objectname)
 
-    p = subprocess.run(shlex.split(command), capture_output=True)
+    p = subprocess.run(shlex.split(command), capture_output=True, text=True)
+
+    # print(p.stdout)
 
     if p.returncode != 0:
         logger.error("Compile command failed")
         logger.error("command: '{}'", command)
-        logger.error("stdout:\n{}", p.stdout.decode("utf8"))
-        logger.error("stderr:\n{}", p.stderr.decode("utf8"))
+        logger.error("stdout:\n{}", p.stdout.encode("utf8"))
+        logger.error("stderr:\n{}", p.stderr.encode("utf8"))
         sys.exit(1)
 
     return objectname

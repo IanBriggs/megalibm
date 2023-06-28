@@ -8,6 +8,7 @@ from error_function import error_function
 
 import fpcore
 import lambdas
+from numeric_types import FP64
 from time_function import time_function
 
 
@@ -106,11 +107,10 @@ def main(argv):
     example_globals = dict()
     exec(example, example_globals)
 
-    # Get the lambda
+    # Get the lambda and type check
     lambda_expression = example_globals.get("lambda_expression")
     lambda_expression.type_check()
-    # print("YOYO",type(lambda_expression))
-    # print("YOYO",lambda_expression.out_type)
+
     if lambda_expression is None:
         logger.error("File '{}' must define the variable `lambda_expression`",
                      args.example_file)
@@ -120,27 +120,36 @@ def main(argv):
     lambda_function_name = example_globals.get("lambda_function_name")
     if lambda_function_name is None:
         lambda_function_name = "lambda"
+    print(f"lambda_expression: {lambda_expression}")
+    print(f"lambda_expression: {type(lambda_expression)}")
+    print(f"out_type: {lambda_expression.out_type}")
+    print("function", lambda_expression.out_type.function)
 
     # Precision and impl
     oracle_impl_type = lambda_expression.out_type
-    precision = lambda_expression.numeric_type
+    precision = example_globals.get("numeric_type", FP64)
+    func_type = example_globals.get("func_type", FP64)
+    # print("prec", precision, type(precision))
 
     # Generate the code
-    lambda_expression.type_check()
     lambda_signature, lines = lambdas.generate_c_code(lambda_expression,
-                                                      lambda_function_name, numeric_type=precision)
+                                                      lambda_function_name, numeric_type=precision, func_type=func_type)
     lambda_code = "\n".join(lines)
+
+    # print("lamda_code",lambda_code)
 
     # Use the function and type to create an oracle
     oracle_function_name = "oracle"
     oracle_signature, lines = lambdas.generate_mpfr_c_code(oracle_impl_type,
                                                            oracle_function_name,
-                                                           numeric_type=precision)
+                                                           numeric_type=func_type)
     oracle_code = "\n".join(lines)
 
     # Get the reference, if present
     reference_function_name, reference_code = determine_reference(
         example_globals)
+    
+    # print("reference_code", reference_code)
 
     # Get some configuration values
     regions_per_range = example_globals.get("regions_per_range", 256)
@@ -175,22 +184,22 @@ def main(argv):
     json_ranges = dict()
     for domain in input_ranges:
         json_range = {
-            "lambda_time": time_function(numeric_type=precision,
+            "lambda_time": time_function(numeric_type=func_type,
                                          c_function_name=lambda_function_name,
                                          c_code=lambda_code,
                                          domain=domain),
-            "reference_time": time_function(numeric_type=precision,
+            "reference_time": time_function(numeric_type=func_type,
                                             c_function_name=reference_function_name,
                                             c_code=reference_code,
                                             domain=domain),
-            "lambda_error": error_function(numeric_type=precision,
+            "lambda_error": error_function(numeric_type=func_type,
                                            samples=2**17,
                                            c_function_name=lambda_function_name,
                                            c_code=lambda_code,
                                            oracle_function_name=oracle_function_name,
                                            oracle_code=oracle_code,
                                            domain=domain)["f_abs_error"].max(),
-            "reference_error": error_function(numeric_type=precision,
+            "reference_error": error_function(numeric_type=func_type,
                                            samples=2**17,
                                            c_function_name=reference_function_name,
                                            c_code=reference_code,
@@ -205,7 +214,8 @@ def main(argv):
         #                                    oracle_function_name=oracle_function_name,
         #                                    oracle_code=oracle_code,
         #                                    domain=domain)["f_abs_error"].max(),
-        json_ranges[range] = json_range
+
+        json_ranges[domain] = json_range
     json_dict["range_data"] = json_ranges
     pp.pprint(json_ranges)
     # 
