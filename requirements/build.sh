@@ -35,7 +35,7 @@ function in_path {
 # python libraries
 echo "Installing python dependencies"
 python3 -m pip install --upgrade --quiet pip
-python3 -m pip install --upgrade --quiet maturin mpmath sly sympy matplotlib z3-solver
+python3 -m pip install --upgrade --quiet maturin mpmath sly sympy matplotlib z3-solver pandas
 echo "  Done"
 
 # snake_egg

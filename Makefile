@@ -4,7 +4,9 @@
 PY_SCRIPTS = src/megalibm_identities.py \
 			 src/megalibm_template_identities.py \
 			 src/megalibm_generate.py \
-			 src/make_website.py
+			 src/make_website.py \
+			 src/make_table.py \
+			 src/run_example.py
 
 PY_BINS = $(foreach p,${PY_SCRIPTS},$(patsubst src/%.py,bin/%,$p))
 SH_BINS = bin/nightly.sh bin/retry.sh

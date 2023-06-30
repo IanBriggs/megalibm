@@ -130,7 +130,7 @@ def generate_mpfr_c_code(impl: lambdas.types.Impl,
     if numeric_type == FP64:
         lines.append("  mpfr_set_d({}, fpx, MPFR_RNDN);".format(in_name))
     elif numeric_type == FP32:
-        lines.append("  mpfr_set_f({}, fpx, MPFR_RNDN);".format(in_name))
+        lines.append("  mpfr_set_flt({}, fpx, MPFR_RNDN);".format(in_name))
     else:
         raise NotImplementedError(f"Unknown numeric type '{numeric_type}'")
 

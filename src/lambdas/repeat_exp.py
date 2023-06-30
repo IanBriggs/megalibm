@@ -65,14 +65,6 @@ class RepeatExp(types.Transform):
 
         return [add] + so_far + [ldexp]
 
-    def type_check(self):
-        if self.type_check_done:
-            return
-
-        # TODO: actually type check
-
-        self.type_check_done = True
-
     @classmethod
     def generate_hole(cls, out_type, egraph):
         # Yash, don't worry about this function for now

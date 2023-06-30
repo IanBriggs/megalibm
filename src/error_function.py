@@ -4,7 +4,7 @@ import subprocess
 import mpmath
 import pandas
 from compile import compile_file, link_files
-from interval import Interval
+import interval
 from numeric_types import FP32, FP64, NumericType
 
 
@@ -14,9 +14,11 @@ def error_function(numeric_type: NumericType,
                    c_code: str,
                    oracle_function_name: str,
                    oracle_code: str,
-                   domain: Interval) -> dict:
+                   domain: interval.Interval) -> dict:
     if c_function_name is None:
         return None
+    
+    # print("func_names", c_function_name, oracle_function_name)
 
     data = oracle_values(numeric_type,
                                 samples,
@@ -58,9 +60,12 @@ def any_values(is_oracle: bool,
                   samples: int,
                   function_name: str,
                   code: str,
-                  range: Interval):
-    low = numeric_type.num_to_str(range.inf)
-    high = numeric_type.num_to_str(range.sup)
+                  range: interval.Interval):
+    # low = numeric_type.num_to_str(range.inf)
+    # high = numeric_type.num_to_str(range.sup)
+
+    low = range.inf.to_libm_c(numeric_type=numeric_type)
+    high = range.sup.to_libm_c(numeric_type=numeric_type)
 
     value_type = "oracle" if is_oracle else "function"
 
@@ -69,8 +74,13 @@ def any_values(is_oracle: bool,
     elif numeric_type == FP32:
         gen = f"generate_{value_type}_values_fp32"
 
+    # print("WTF", numeric_type, gen)
+
     lines = [
         '#include "error_measurement.h"',
+        '#include "double_double.h"',
+        '#include "cody_waite_reduction.h"',
+        
         '',
         code,
         '',
@@ -105,7 +115,7 @@ def function_values(numeric_type: NumericType,
                   samples: int,
                   function_name: str,
                   code: str,
-                  range: Interval):
+                  range: interval.Interval):
     return any_values(False,
                       numeric_type,
                       samples,
@@ -117,7 +127,7 @@ def oracle_values(numeric_type: NumericType,
                   samples: int,
                   function_name: str,
                   code: str,
-                  range: Interval):
+                  range: interval.Interval):
     return any_values(True,
                       numeric_type,
                       samples,

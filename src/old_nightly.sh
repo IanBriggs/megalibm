@@ -8,14 +8,6 @@ SCRIPT_DIR=$(dirname "${0}")
 SCRIPT_LOCATION=$(readlink -f "${SCRIPT_DIR}")
 GIT_LOCATION=$(cd "${SCRIPT_LOCATION}" && cd .. && pwd)
 NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
-GENERATED_LOCATION=${GIT_LOCATION}/generated
-
-if [ ! -d "$GENERATED_LOCATION" ]; then
-    mkdir -p "$GENERATED_LOCATION"
-    echo "Generation directory created: $GENERATED_LOCATION"
-else
-    echo "Generation directory already exists: $GENERATED_LOCATION"
-fi
 
 # Used for generative benchmarks
 # # Benchmarks
@@ -60,17 +52,38 @@ THIS_NIGHTLY_LOCATION=${NIGHTLIES_LOCATION}/${NIGHTLY_TIMESTAMP}
 mkdir -p "${NIGHTLIES_LOCATION}"
 mkdir "${THIS_NIGHTLY_LOCATION}"
 
+# Clean possible remenants
+rm -rf "${GIT_LOCATION}/measurement/timing/generated"
+rm -rf "${GIT_LOCATION}/measurement/error/generated"
+
 # Run the generation in the final directory
-cd "${SCRIPT_LOCATION}"
-for e in "${GIT_LOCATION}"/mlms/*.py ; do
-  time python3 "run_example" "${e}" "$THIS_NIGHTLY_LOCATION"
+cd "${THIS_NIGHTLY_LOCATION}"
+for e in "${GIT_LOCATION}"/examples/*.mlm.py ; do
+  time python3 "${e}"
 done
 
-mv "${GIT_LOCATION}/generated/${NIGHTLY_TIMESTAMP}/generated" "${THIS_NIGHTLY_LOCATION}"
+# Move generated to timing dir
+mv "${THIS_NIGHTLY_LOCATION}/generated" "${GIT_LOCATION}/measurement/timing/"
 
+# Time functions
+cd "${GIT_LOCATION}/measurement/timing/"
+make -j"${CORES}" build
+make -j1 run
+
+# Move generated to error dir
+mv "${GIT_LOCATION}/measurement/timing/generated" "${GIT_LOCATION}/measurement/error/"
+
+# Error measurement
+cd "${GIT_LOCATION}/measurement/error/"
+make -j"${CORES}" build
+make -j"${CORES}" run
+
+# Move generated to final directory
+mv "${GIT_LOCATION}/measurement/error/generated" "${THIS_NIGHTLY_LOCATION}/generated/"
+
+# Generate website
 cd "${THIS_NIGHTLY_LOCATION}"
-"${SCRIPT_LOCATION}"/make_table generated
-
+"${SCRIPT_LOCATION}"/make_website generated
 
 # Copy data and send notification if on the nightly runner
 if [ "$(hostname)" = "nightly" ]; then

@@ -15,8 +15,9 @@ def time_function(numeric_type: NumericType,
     if not c_function_name:
         return None
     
-    low = numeric_type.num_to_str(domain.inf)
-    high = numeric_type.num_to_str(domain.sup)
+
+    low = domain.inf.to_libm_c(numeric_type=numeric_type)
+    high = domain.sup.to_libm_c(numeric_type=numeric_type)
 
 
     if numeric_type == FP64:
@@ -26,6 +27,8 @@ def time_function(numeric_type: NumericType,
 
     lines = [
         '#include "timing_measurement.h"',
+        '#include "double_double.h"',
+        '#include "cody_waite_reduction.h"',
         '',
         c_code,
         '',
