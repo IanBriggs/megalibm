@@ -210,28 +210,12 @@ def main(argv):
     reference_function_name, reference_code = determine_reference(
         example_globals)
     
-
+    # TODO: Get sample and error/time run configs
     # Get some configuration values
     # regions_per_range = example_globals.get("regions_per_range", 256)
     # samples_per_region = example_globals.get("samples_per_region", 4096)
     # points_per_pad = example_globals.get("points_per_pad", 4096)
     # repeats_per_time = example_globals.get("repeats_per_time", 100000)
-
-    # # Prepare output json structure
-    # json_dict = {
-    #     "example_filename": args.example_file,
-    #     "precision": precision,
-    #     "lambda_code": lambda_code,
-    #     "lambda_function_name": lambda_function_name,
-    #     "oracle_code": oracle_code,
-    #     "oracle_function_name": oracle_function_name,
-    #     "reference_code": reference_code,
-    #     "reference_function_name": reference_function_name,
-    #     "regions_per_range": regions_per_range,
-    #     "samples_per_region": samples_per_region,
-    #     "points_per_pad": points_per_pad,
-    #     "repeats_per_time": repeats_per_time,
-    # }
 
     # Get input ranges
     input_ranges = example_globals.get("input_ranges")

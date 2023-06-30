@@ -394,6 +394,15 @@ def make_benchmark_page(benchmark_data,
     return "\n".join(parts)
 
 
+def format_float(number):
+    # Check if the number is smaller than 1 and has an exponent
+    if abs(number) < 1 and 'e' in str(number):
+        # Format the number with 2 digits after the decimal and the correct exponent
+        return "{:.2e}".format(number)
+    else:
+        # Format the number with 2 digits after the decimal
+        return "{:.2f}".format(number)
+
 def make_main_part(generation_dir, benchmark_name, table_data):
     dir = generation_dir
     name = benchmark_name
@@ -401,6 +410,9 @@ def make_main_part(generation_dir, benchmark_name, table_data):
     series_reset = table_data.reset_index(drop=True)
     df =  pd.read_json(table_data.to_json())
     dft = df.T
+    for c in dft.columns:
+        dft[c] = dft[c].map(lambda x: format_float(x))
+
     return f"""
     <div class="rounded-box result-box">
         <h2 class="result-title">
