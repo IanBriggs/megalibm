@@ -10,6 +10,13 @@ GIT_LOCATION=$(cd "${SCRIPT_LOCATION}" && cd .. && pwd)
 NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
 GENERATED_LOCATION=${GIT_LOCATION}/generated
 
+if [ ! -d "$GENERATED_LOCATION" ]; then
+    mkdir -p "$GENERATED_LOCATION"
+    echo "Generation directory created: $GENERATED_LOCATION"
+else
+    echo "Generation directory already exists: $GENERATED_LOCATION"
+fi
+
 # Used for generative benchmarks
 # # Benchmarks
 # BENCH_CORE=${GIT_LOCATION}/benchmarks/core_*.fpcore
@@ -52,11 +59,6 @@ THIS_NIGHTLY_LOCATION=${NIGHTLIES_LOCATION}/${NIGHTLY_TIMESTAMP}
 # Make the final directory
 mkdir -p "${NIGHTLIES_LOCATION}"
 mkdir "${THIS_NIGHTLY_LOCATION}"
-mkdir "${GENERATED_LOCATION}"
-
-# # Clean possible remenants
-# rm -rf "${GIT_LOCATION}/measurement/timing/generated"
-# rm -rf "${GIT_LOCATION}/measurement/error/generated"
 
 # Run the generation in the final directory
 cd "${SCRIPT_LOCATION}"
