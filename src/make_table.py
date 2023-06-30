@@ -400,13 +400,14 @@ def make_main_part(generation_dir, benchmark_name, table_data):
     print("TAB_DATA", table_data, type(table_data))
     series_reset = table_data.reset_index(drop=True)
     df =  pd.read_json(table_data.to_json())
+    dft = df.T
     return f"""
     <div class="rounded-box result-box">
         <h2 class="result-title">
             <a href="{dir}/{name}/index.html">{name}</a>
         </h2>
         <div class="table">
-            {df.to_html()}
+            {dft.to_html()}
         </div>
     </div>
     """.rstrip()
