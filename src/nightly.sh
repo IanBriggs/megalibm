@@ -8,6 +8,7 @@ SCRIPT_DIR=$(dirname "${0}")
 SCRIPT_LOCATION=$(readlink -f "${SCRIPT_DIR}")
 GIT_LOCATION=$(cd "${SCRIPT_LOCATION}" && cd .. && pwd)
 NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
+GENERATED_LOCATION=${GIT_LOCATION}/generated
 
 # Used for generative benchmarks
 # # Benchmarks
@@ -51,6 +52,7 @@ THIS_NIGHTLY_LOCATION=${NIGHTLIES_LOCATION}/${NIGHTLY_TIMESTAMP}
 # Make the final directory
 mkdir -p "${NIGHTLIES_LOCATION}"
 mkdir "${THIS_NIGHTLY_LOCATION}"
+mkdir "${GENERATED_LOCATION}"
 
 # # Clean possible remenants
 # rm -rf "${GIT_LOCATION}/measurement/timing/generated"
