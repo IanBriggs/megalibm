@@ -60,6 +60,7 @@ clean-requirements: requirements/clean.sh
 distclean: clean clean-requirements
 	$(RM) -r bin
 	$(RM) -r nightlies
+	$(RM) -r genrated
 	$(MAKE) -C measurement distclean
 
 
