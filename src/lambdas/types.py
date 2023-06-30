@@ -99,7 +99,7 @@ class Source(Node):
         super().__init__(numeric_type)
         expect_type("function", function, FPCore)
         expect_type("domain", domain, Interval)
-        expect_subclass("numeric_type", numeric_type, NumericType)
+        #expect_subclass("numeric_type", numeric_type, NumericType)
 
         # TODO: determine if function is valid on domain
 

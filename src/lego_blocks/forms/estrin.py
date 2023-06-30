@@ -40,7 +40,7 @@ def expr_estrin(x: fpcore.ast.Expr,
     """
     # TODO: figure out how to fit doctest within 80 columns
     # Check x
-    expect_subclass("x", x, fpcore.ast.FPCore)
+    expect_subclass("x", x, fpcore.ast.ASTNode)
 
     # Check mons
     expect_type("mons", mons, list)

@@ -129,7 +129,8 @@ class Result():
             'f = {};'.format(self.func.to_sollya()),
             'monomials = [|{}|];'.format(monomials_str),
             'formats = [|{}...|];'.format(self.numeric_type.sollya_type),
-            'p = remez(f, monomials, I);',
+            #'p = remez(f, monomials, I);',
+            'p = fpminimax(f, monomials, formats, I, floating);'
         ]
 
         all_coeff = ['coeff(p,{})'.format(m) for m in self.monomials]

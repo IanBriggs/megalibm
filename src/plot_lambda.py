@@ -46,6 +46,10 @@ def plot_lambda(domain: Interval,
     else:
         axes.set_title(f"Absolute error")
 
+    y_min = 0
+    y_max = max(data["f_abs_error"])
+    axes.set_ylim(y_min, y_max)
+
     plt.tight_layout()
 
     return axes

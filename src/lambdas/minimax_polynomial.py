@@ -2,6 +2,7 @@
 import math
 
 import cmd_sollya
+from dirty_equal import dirty_equal
 import lego_blocks.forms as forms
 from better_float_cast import better_float_cast
 from fpcore.ast import FPCore, Operation, Variable
@@ -72,18 +73,16 @@ class MinimaxPolynomial(types.Source):
             pass
 
         # Is the function even, odd, or neither?
-        decomposed_identities = self.out_type.function.decompose_identities()
-        mirrors = decomposed_identities["mirror"]
+        f_x = self.out_type.function
+        x = f_x.arguments[0]
+        f_nx = f_x.substitute(x, -x)
+        nf_nx = - f_nx
 
-        for s, t_arg in mirrors:
-            if better_float_cast(t_arg) == 0:
-                if s == Variable("x"):
-                    monomials += range(2, 2*self.terms+1, 2)
-                    break
-                if s == Operation("-", Variable("x")):
-                    monomials += range(1, 2*self.terms, 2)
-                    break
-        if len(monomials) == 0 or (len(monomials) == 1 and monomials[0] == 0):
+        if dirty_equal(f_x, f_nx, self.out_type.domain):
+            monomials += range(2, 2*self.terms+1, 2)
+        elif dirty_equal(f_x, nf_nx, self.out_type.domain):
+            monomials += range(1, 2*self.terms, 2)
+        else:
             monomials += range(1, self.terms+1)
 
         # Run generation (this may fail since Sollya is picky)

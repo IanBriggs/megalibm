@@ -62,10 +62,16 @@ def add_unary_dunder(dunder_name, fpcore_name):
     if fpcore_name == "":
         def expr(self):
             return self
+        def fpc(self):
+            return self
     else:
         def expr(self):
             return Operation(fpcore_name, self)
+        def fpc(self):
+            return FPCore(self.name, self.arguments, self.properties,
+                          Operation(fpcore_name, self.body))
     setattr(Expr, dunder_name, expr)
+    setattr(FPCore, dunder_name, fpc)
 
 
 def add_binary_dunder(dunder_name, fpcore_name):
