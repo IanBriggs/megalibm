@@ -52,21 +52,38 @@ THIS_NIGHTLY_LOCATION=${NIGHTLIES_LOCATION}/${NIGHTLY_TIMESTAMP}
 mkdir -p "${NIGHTLIES_LOCATION}"
 mkdir "${THIS_NIGHTLY_LOCATION}"
 
-# # Clean possible remenants
-# rm -rf "${GIT_LOCATION}/measurement/timing/generated"
-# rm -rf "${GIT_LOCATION}/measurement/error/generated"
+# Clean possible remenants
+rm -rf "${GIT_LOCATION}/measurement/timing/generated"
+rm -rf "${GIT_LOCATION}/measurement/error/generated"
 
 # Run the generation in the final directory
-cd "${SCRIPT_LOCATION}"
-for e in "${GIT_LOCATION}"/mlms/*.py ; do
-  time python3 "run_example.py" "${e}" "$THIS_NIGHTLY_LOCATION"
+cd "${THIS_NIGHTLY_LOCATION}"
+for e in "${GIT_LOCATION}"/examples/*.mlm.py ; do
+  time python3 "${e}"
 done
 
-mv "${GIT_LOCATION}/generated/${NIGHTLY_TIMESTAMP}/generated" "${THIS_NIGHTLY_LOCATION}"
+# Move generated to timing dir
+mv "${THIS_NIGHTLY_LOCATION}/generated" "${GIT_LOCATION}/measurement/timing/"
 
+# Time functions
+cd "${GIT_LOCATION}/measurement/timing/"
+make -j"${CORES}" build
+make -j1 run
+
+# Move generated to error dir
+mv "${GIT_LOCATION}/measurement/timing/generated" "${GIT_LOCATION}/measurement/error/"
+
+# Error measurement
+cd "${GIT_LOCATION}/measurement/error/"
+make -j"${CORES}" build
+make -j"${CORES}" run
+
+# Move generated to final directory
+mv "${GIT_LOCATION}/measurement/error/generated" "${THIS_NIGHTLY_LOCATION}/generated/"
+
+# Generate website
 cd "${THIS_NIGHTLY_LOCATION}"
-"${SCRIPT_LOCATION}"/make_table.py generated
-
+"${SCRIPT_LOCATION}"/make_website generated
 
 # Copy data and send notification if on the nightly runner
 if [ "$(hostname)" = "nightly" ]; then
