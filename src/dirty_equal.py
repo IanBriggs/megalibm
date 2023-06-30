@@ -5,7 +5,7 @@ from utils import Timer, Logger
 
 import mpmath
 
-logger = Logger(Logger.LOW, color=Logger.blue, def_color=Logger.cyan)
+logger = Logger(Logger.HIGH, color=Logger.blue, def_color=Logger.cyan)
 timer = Timer()
 
 
@@ -32,9 +32,11 @@ def dirty_equal(a: fpcore.ast.ASTNode,
     b_vars = b.get_variables()
     if a_vars != b_vars:
         msg = f"dirty_equal called on incompatible expressions: '{a}' and '{b}'"
+        timer.stop()
         raise ValueError(msg)
     if len(a_vars) != 1:
         msg = f"dirty_equal called on expression with multiple variables: '{a}"
+        timer.stop()
         raise ValueError(msg)
     variable_name = a_vars.pop()
 
@@ -53,13 +55,16 @@ def dirty_equal(a: fpcore.ast.ASTNode,
 
     # This should not occur, but check it anyway
     if inf > sup:
+        timer.stop()
         raise ValueError("Domain was upside down")
 
     # Test the endpoints (this gets messed up with infinity)
     if not try_point(a, b, variable_name, inf):
+        timer.stop()
         return False
 
     if not try_point(a, b, variable_name, sup):
+        timer.stop()
         return False
 
     # Test a bunch of points for equality

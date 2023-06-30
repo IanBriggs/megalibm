@@ -7,9 +7,9 @@ from utils import Logger
 
 logger = Logger(level=Logger.HIGH, color=Logger.green)
 
-EXAMPLE_DIR = path.abspath("")
-GIT_DIR = path.split(EXAMPLE_DIR)[0]
-SRC_DIR = path.join(GIT_DIR, "src")
+THIS_LOC = path.abspath(__file__)
+SRC_DIR = path.split(THIS_LOC)[0]
+GIT_DIR = path.split(SRC_DIR)[0]
 
 def compile_file(filename: str,
                  compiler: str = None,

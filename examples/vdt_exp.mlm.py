@@ -48,7 +48,7 @@ exp_poly = \
 
 reference_impl = "vdt_exp.c"
 mlm = \
-    RepeatExp(exp_poly, 18, 1)
+    RepeatExp(exp_poly, 18, 2)
 
 
 
