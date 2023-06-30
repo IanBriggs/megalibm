@@ -237,7 +237,8 @@ def main(argv):
     
     # Copy header files to run c code and generate data
     os.chdir(OUT_DIR)
-    shutil.copytree(GIT_DIR + "/include", OUT_DIR + "/include")
+    shutil.copytree(GIT_DIR + "/include", OUT_DIR + "/include",
+                    dirs_exist_ok=True)
 
 
     # Run on all of them and add the data to our `json_dict`
