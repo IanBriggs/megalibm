@@ -625,8 +625,8 @@ def make_css():
     table.dataframe {
     border-collapse: collapse;
     width: 100%;
+    padding: 10px; 
     /* border-radius: 20px; */
-    /* margin: 10px; */
     /* display: flex; */
     /* flex-direction: column; */
     }
