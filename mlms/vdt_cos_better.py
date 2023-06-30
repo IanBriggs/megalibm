@@ -4,6 +4,8 @@ import lambdas
 from interval import Interval
 from lambdas import *
 
+from numeric_types import FP64
+
 libm_func_name = "libm_better_dsl_vdt_cos"
 
 input_ranges = [Interval("0", "1.5707963267948966"), Interval("-4", "4")]

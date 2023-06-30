@@ -29,21 +29,20 @@ negate_y = fpcore.parse_expr("(- y)")
 id_y = fpcore.parse_expr("y")
 
 cos_poly = \
-    Horner(
-        FixedPolynomial(
-            cos,
+    Add(
+        fpcore.parse_expr("(- 1 (* (* x x) 0.5))"),
+        Horner(
+            FixedPolynomial(
+                fpcore.parse("(FPCore (x) (- (+ (cos x) (/ (* x x) 2)) 1))"),
             Interval(neg_pi_over_4,
                      pi_over_4),
-            [0, 2, 4, 6, 8, 10, 12, 14],
-            ["1",
-             "-0.5",
-             "4.16666666666665929218E-2",
+            [4, 6, 8, 10, 12, 14],
+            ["4.16666666666665929218E-2",
              "-1.38888888888730564116E-3",
              "2.48015872888517045348E-5",
              "-2.75573141792967388112E-7",
              "2.08757008419747316778E-9",
-             "-1.13585365213876817300E-11"]),
-        split=2)
+             "-1.13585365213876817300E-11"])))
 
 sin_poly = \
     Horner(

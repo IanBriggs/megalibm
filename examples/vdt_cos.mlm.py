@@ -40,8 +40,6 @@ id_y = fpcore.parse_expr("y")
 cos_poly = \
     Add(
         fpcore.parse_expr("(- 1 (* (* x x) 0.5))"),
-        Add(
-            fpcore.parse_expr("1"),
             Horner(
                 FixedPolynomial(
                     fpcore.parse("(FPCore (x) (- (+ (cos x) (/ (* x x) 2)) 1))"),
@@ -53,7 +51,7 @@ cos_poly = \
                      "2.48015872888517045348E-5",
                      "-2.75573141792967388112E-7",
                      "2.08757008419747316778E-9",
-                     "-1.13585365213876817300E-11"]))))
+                     "-1.13585365213876817300E-11"])))
 
 sin_poly = \
     Horner(

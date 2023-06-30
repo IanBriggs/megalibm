@@ -36,4 +36,4 @@ exp_poly = \
         split=0)
 
 lambda_expression = \
-    RepeatExp(exp_poly, 18, 1)
+    RepeatExp(exp_poly, 18, 2)
