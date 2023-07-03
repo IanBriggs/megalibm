@@ -1,5 +1,6 @@
 
 
+from calculate_cody_waite_constants import calculate_cody_waite_constants
 import interval
 import lambdas
 import lego_blocks
@@ -49,12 +50,17 @@ class RepeatExp(types.Transform):
         in_name = self.gensym("in")
         out_red = so_far[0].in_names[0]
         k = self.gensym("k")
+        constant = our_in_type.domain.sup - our_in_type.domain.inf
+        period_strs = calculate_cody_waite_constants(constant,
+                                                     self.bits_per,
+                                                     self.entries)
+        inv_period = 1 / self.constant
+        inv_period = better_float_cast(inv_period)
         add = lego_blocks.CodyWaite(numeric_type,
                                     [in_name],
                                     [out_red, k],
-                                    our_in_type.domain.sup - our_in_type.domain.inf,
-                                    self.bits_per,
-                                    self.entries,
+                                    inv_period,
+                                    period_strs,
                                     self.gensym)
 
         out_name = self.gensym("out")

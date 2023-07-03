@@ -1,5 +1,6 @@
 
 
+from calculate_cody_waite_constants import calculate_cody_waite_constants
 import fpcore
 import lego_blocks
 from better_float_cast import better_float_cast
@@ -148,12 +149,17 @@ class CodyWaite(types.Transform):
         r = self.gensym("r")
         k = self.gensym("r")
 
+        period_strs = calculate_cody_waite_constants(self.constant,
+                                                     self.bits_per,
+                                                     self.entries)
+        inv_period = 1 / self.constant
+        inv_period = better_float_cast(inv_period)
+
         part_0 = lego_blocks.CodyWaite(
             numeric_type,
             [cw_in], [r, k],
-            self.constant,
-            self.bits_per,
-            self.entries,
+            inv_period,
+            period_strs,
             self.gensym,
         )
 
