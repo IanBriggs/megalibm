@@ -26,7 +26,7 @@ class SimpleAdditive(lego_blocks.LegoBlock):
             "k": self.out_names[1],
             "out": self.out_names[0],
             "type": self.numeric_type.c_type,
-            "suffix": self.numeric_type.c_const_suffix()
+            "suffix": self.numeric_type.suffix
         }
         inv_period = fpcore.ast.Operation(
             "/", fpcore.ast.Number("1"), self.period)

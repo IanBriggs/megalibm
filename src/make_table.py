@@ -151,201 +151,6 @@ def abs_rel_to_del_eps(abs_err, rel_err):
         epsilons.append(cur)
     return deltas, epsilons
 
-
-def plot_pareto_front(title, benchmark_data):
-    out_name = "{}_pareto.png".format(title.replace(" ", "_"))
-    logger("Plotting: {}", out_name)
-
-    # Get names
-    bench_name = benchmark_data["error"]["name"]
-    libm_name = f"libm_{bench_name}"
-    gen_names = [k for k in benchmark_data["timing"]["functions"]
-                 if k != libm_name]
-
-    # Get baseline data
-    libm_time = benchmark_data["timing"]["functions"][libm_name]["avg_time_per_sample"]
-    libm_err = max(benchmark_data["error"]
-                   ["functions"][libm_name]["rel_max_errors"])
-
-    # Get generated data
-    gen_times = [benchmark_data["timing"]["functions"][name]["avg_time_per_sample"]
-                 for name in gen_names]
-    gen_errs = [max(benchmark_data["error"]["functions"][name]["rel_max_errors"])
-                for name in gen_names]
-
-    # Normalize so libm = [1,1]
-    gen_speedup_s = list([libm_time / t for t in gen_times])
-    gen_errup_s = list([e / libm_err for e in gen_errs])
-    libm_time = 1.0
-    libm_err = 1.0
-
-    # See how happy we are
-    emoji = determine_emoji(gen_speedup_s, gen_errup_s)
-
-    # Determine pareto points
-    pareto_xs, pareto_ys = pareto_front_points(
-        gen_errup_s, gen_speedup_s)
-
-    # Make the stepped line points
-    pareto_step_xs = double_list(pareto_xs)
-    pareto_step_xs = pareto_step_xs[1:]
-    pareto_step_ys = double_list(pareto_ys)
-    pareto_step_ys = pareto_step_ys[:-1]
-
-    # Plot
-    fig = plt.figure()
-    ax1 = fig.add_subplot()
-
-    # Data
-    ax1.scatter([libm_err], [libm_time], color=libm_color)
-    ax1.scatter(gen_errup_s, gen_speedup_s, color=generated_color)
-
-    ax1.plot(pareto_step_xs, pareto_step_ys, color=generated_color)
-
-    # Scale
-    ax1.set_xscale('log')
-    ax1.invert_xaxis()
-
-    # Labels
-    stripped_title = title[0:title.index("domain ") + len("domain ")]
-    detailed_title = stripped_title + domain_name(benchmark_data)
-    ax1.set_title(detailed_title)
-    ax1.set_xlabel("Maximum Relative Error")
-    ax1.set_ylabel("Speedup vs libm")
-
-    # Set ratio and size
-    scale = 0.7
-    fig.set_size_inches(6.4 * scale, 4.8 * scale)
-    fig.tight_layout()
-
-    # Save and close
-    plt.savefig(out_name, dpi=100)
-    plt.close()
-
-    return out_name, emoji
-
-
-def plot_line(title, benchmark_data, data_type):
-    out_name = "{}_{}.png".format(title.replace(" ", "_"), data_type)
-    logger("Plotting: {}", out_name)
-
-    # Get names
-    bench_name = benchmark_data["error"]["name"]
-    libm_name = f"libm_{bench_name}"
-    gen_names = [k for k in benchmark_data["timing"]["functions"]
-                 if k != libm_name and k != "reference"]
-
-    # Get x values (average of fenceposts)
-    posts = benchmark_data["error"]["regions"]
-    xs = [(low + high) / 2 for low, high in zip(posts, posts[1:])]
-
-    # Plot
-    fig = plt.figure()
-    ax1 = fig.add_subplot()
-
-    # Line at y = 0
-    ax1.axhline(0, color="black", linewidth=1)
-
-    # Line at x = 0 if it is present in the graph
-    if xs[0] <= 0.0 and xs[-1] >= 0.0:
-        ax1.axvline(0, color="black", linewidth=1)
-
-    # Plot all lines sets
-    errors = benchmark_data["error"]["functions"]
-    ax1.plot(xs, errors["reference"][data_type],
-             label="correctly rounded", color=reference_color)
-    ax1.plot(xs, errors[libm_name][data_type], label="libm", color=libm_color)
-    for i, name in enumerate(gen_names):
-        color = color_cycle[i % len(color_cycle)]
-        ax1.plot(xs, errors[name][data_type], label=name, color=color)
-
-    # Label the graph.
-    ax1.set_title(title)
-    ax1.set_xlabel("Input")
-    ax1.set_ylabel(data_type)
-    if len(gen_names) < 8:
-        ax1.legend()
-
-    # Optionally set log scale
-    if "relative" in title:
-        ax1.set_yscale("log")
-
-    # Set ratio and size
-    scale = 1.0
-    fig.set_size_inches(6.4 * scale, 4.8 * scale)
-    fig.tight_layout()
-
-    # Save and close
-    plt.savefig(out_name, dpi=100)
-    plt.close()
-
-    return out_name
-
-
-def plot_eps_del(title, benchmark_data):
-    out_name = "{}_eps_del.png".format(title.replace(" ", "_"))
-    logger("Plotting: {}", out_name)
-
-    # Get names
-    bench_name = benchmark_data["error"]["name"]
-    libm_name = f"libm_{bench_name}"
-    gen_names = [k for k in benchmark_data["timing"]["functions"]
-                 if k != libm_name and k != "reference"]
-
-    # Get reference data
-    ref_abs = benchmark_data["error"]["functions"]["reference"]["abs_max_errors"]
-    ref_rel = benchmark_data["error"]["functions"]["reference"]["rel_max_errors"]
-    ref_del, ref_eps = abs_rel_to_del_eps(ref_abs, ref_rel)
-
-    # Get baseline data
-    libm_abs = benchmark_data["error"]["functions"][libm_name]["abs_max_errors"]
-    libm_rel = benchmark_data["error"]["functions"][libm_name]["rel_max_errors"]
-    libm_del, libm_eps = abs_rel_to_del_eps(libm_abs, libm_rel)
-
-    # Get generated data
-    gen_abs_s = [benchmark_data["error"]["functions"][name]["abs_max_errors"]
-                 for name in gen_names]
-    gen_rel_s = [benchmark_data["error"]["functions"][name]["rel_max_errors"]
-                 for name in gen_names]
-    gen_del_s = list()
-    gen_eps_s = list()
-    for ga, gr in zip(gen_abs_s, gen_rel_s):
-        gd, ge = abs_rel_to_del_eps(ga, gr)
-        gen_del_s.append(gd)
-        gen_eps_s.append(ge)
-
-    # Plot
-    fig = plt.figure()
-    ax1 = fig.add_subplot()
-
-    # Data
-    ax1.plot(ref_del, ref_eps, label="correctly rounded", color=reference_color)
-    ax1.plot(libm_del, libm_eps, label="libm", color=libm_color)
-    for i, gd, ge, name in zip(range(len(gen_names)), gen_del_s, gen_eps_s, gen_names):
-        color = color_cycle[i % len(color_cycle)]
-        ax1.plot(gd, ge, label=name, color=color)
-
-    # Scale
-    ax1.set_xscale('log')
-    ax1.set_yscale('log')
-
-    # Labels
-    ax1.set_title(title)
-    ax1.set_xlabel("Delta")
-    ax1.set_ylabel("Epsilon")
-
-    # Set ratio and size
-    scale = 1.0
-    fig.set_size_inches(6.4 * scale, 4.8 * scale)
-    fig.tight_layout()
-
-    # Save and close
-    plt.savefig(out_name, dpi=100)
-    plt.close()
-
-    return out_name
-
-
 def make_benchmark_page(benchmark_data,
                          abs_err_images, benchmark_name):
     #TODO GET NAME AND BODY
@@ -654,12 +459,6 @@ def main(argv):
 
     benchmark_names = list()
     benchmarks_datas = dict()
-    # pareto_images = dict()
-    # emojis = dict()
-    # value_images = dict()
-    # abs_err_images = dict()
-    # rel_err_images = dict()
-    # eps_del_images = dict()
 
     # Look through directory contents
     for name in sorted(os.listdir(base)):
@@ -687,7 +486,11 @@ def main(argv):
 
         # Plot images
         for idx, dom in enumerate(benchmark_data["table_data"].to_dict()):
-            fname = f"{name}_domain_{idx}_absolute_error_abs_max_errors.png"
+            func_name = benchmark_data["func_name"].iloc[0]
+            # print("bench_col!!!!", benchmark_data["func_name"], type(benchmark_data["func_name"]))
+            # print("corr_!!!!", benchmark_data["func_name"].iloc[0], type(benchmark_data["func_name"].iloc[0]))
+            # print("func_name!!!!", func_name, type(func_name))
+            fname = f"{func_name}_domain_{idx}_absolute_error_abs_max_errors.png"
             abs_err_images[dom] = fname
         # Output benchmark webpage
         html = make_benchmark_page(benchmark_data["table_data"].to_dict(),

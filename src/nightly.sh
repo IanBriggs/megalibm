@@ -9,6 +9,7 @@ SCRIPT_LOCATION=$(readlink -f "${SCRIPT_DIR}")
 GIT_LOCATION=$(cd "${SCRIPT_LOCATION}" && cd .. && pwd)
 NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
 GENERATED_LOCATION=${GIT_LOCATION}/generated
+TDS_LOCATION=${GIT_LOCATION}/autogen
 
 if [ ! -d "$GENERATED_LOCATION" ]; then
     mkdir -p "$GENERATED_LOCATION"
@@ -61,10 +62,13 @@ mkdir -p "${NIGHTLIES_LOCATION}"
 mkdir "${THIS_NIGHTLY_LOCATION}"
 
 # Run the generation in the final directory
+# cd "${SCRIPT_LOCATION}"
+# for e in "${GIT_LOCATION}"/mlms/*.py ; do
+#   time python3 "run_example.py" "${e}" "$THIS_NIGHTLY_LOCATION"
+# done
+
 cd "${SCRIPT_LOCATION}"
-for e in "${GIT_LOCATION}"/mlms/*.py ; do
-  time python3 "run_example" "${e}" "$THIS_NIGHTLY_LOCATION"
-done
+time python3 "run_tds" "$TDS_LOCATION" "$THIS_NIGHTLY_LOCATION"
 
 mv "${GIT_LOCATION}/generated/${NIGHTLY_TIMESTAMP}/generated" "${THIS_NIGHTLY_LOCATION}"
 
