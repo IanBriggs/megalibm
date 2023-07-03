@@ -24,6 +24,8 @@ class FP32(NumericType):
     sollya_type = "single"
     c_type = "float"
     name = "FP32"
+    suffix = "f"
+
 
     @classmethod
     def num_to_str(self, x):
@@ -47,6 +49,7 @@ class FP64(NumericType):
     sollya_type = "double"
     c_type = "double"
     name = "FP64"
+    suffix = ""
 
     @classmethod
     def num_to_str(self, x):
