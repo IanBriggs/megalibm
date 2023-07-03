@@ -5,4 +5,4 @@
   :pre (< (- INFINITY) x INFINITY)
 
 
-  (- (1 (cos x))))
+  (- 1 (cos x)))
