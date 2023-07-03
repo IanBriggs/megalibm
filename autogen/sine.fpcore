@@ -4,4 +4,4 @@
   :name "sine pi x"
   :pre (< (- INFINITY) x INFINITY)
 
-  (sin (/ (* PI x) 180)))
+  (sin (* PI x)))
