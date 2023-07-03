@@ -377,6 +377,8 @@ def handle_work_item(func, nightly_info):
     except Exception as e:
         logger.warning("Caught exception {}", e)
     if not did_generation:
+        # REMOVE generated fir for the function to make website
+        shutil.rmtree(f"{GEN_FOLDER}{c_ize_name(func)}")
         logger.warning("Unable to generate for {}", c_ize_name(func))
     # os.chdir(start)
     return func
