@@ -48,6 +48,8 @@ class Interval():
         return better_float_cast(self.sup.eval({}))
 
     def __str__(self):
+        if self.float_inf and self.float_sup:
+            return f"[{self.float_inf}, {self.float_sup}]"
         return f"[{self.inf}, {self.sup}]"
 
     def __repr__(self):
@@ -105,7 +107,7 @@ class Interval():
                                    str(other.sup).replace("INFINITY", "inf")])
             return other in me
         f_point = better_float_cast(other)
-        return self.float_inf <= f_point and f_point <= self.float(sup)
+        return self.float_inf <= f_point and f_point <= float(self.sup)
 
     def join(self, other):
         if self.sup < other.inf:

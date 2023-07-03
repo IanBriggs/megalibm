@@ -8,7 +8,7 @@ class Hole(types.Source):
         self.out_type = out_type
 
     def __str__(self):
-        body = self.our_type.function.body
+        body = self.out_type.function.body
         inf = self.out_type.domain.inf
         sup = self.out_type.domain.sup
         return f"(Hole {body} [{inf} {sup}])"

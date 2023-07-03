@@ -1,0 +1,8 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+  :name "one minus cos x"
+  :pre (< (- INFINITY) x INFINITY)
+
+
+  (- (1 (cos x))))
