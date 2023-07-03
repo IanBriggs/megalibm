@@ -7,7 +7,7 @@ from numeric_types import FP64
 
 libm_func_name = "libm_vdt_exp"
 
-lambda_function_name = "dsl_vdt_exp_better"
+lambda_function_name = "dsl_vdt_exp_faster"
 
 input_ranges = [Interval("(- (/ (log 2) 2))", "(/ (log 2) 2)"), Interval("-20", "20"), Interval("0", "50")]
 
@@ -18,13 +18,13 @@ reference_filename = "vdt_exp.c"
 exp = fpcore.parse("(FPCore (x) (exp x))")
 
 exp_poly = \
-    Horner(
+    Estrin(
         MinimaxPolynomial(
             exp,
             Interval("(- (/ (log 2) 2))",
                      "(/ (log 2) 2)"),
             11),
-        split=1)
+        split=2)
 
 lambda_expression = \
-    RepeatExp(exp_poly, 30, 2)
+    RepeatExp(exp_poly, 18, 2)

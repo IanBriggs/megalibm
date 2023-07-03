@@ -37,7 +37,7 @@ class RepeatExp(types.Transform):
         self.in_node.type_check()
         our_in_type = self.in_node.out_type
         assert (type(our_in_type) == types.Impl)
-        assert (better_float_cast(our_in_type.domain.inf) == 0.0)
+        #assert (better_float_cast(our_in_type.domain.inf) == 0.0)
 
         self.out_type = types.Impl(our_in_type.function,
                                    Interval("0.0", "INFINITY"))
@@ -52,7 +52,7 @@ class RepeatExp(types.Transform):
         add = lego_blocks.CodyWaite(numeric_type,
                                     [in_name],
                                     [out_red, k],
-                                    our_in_type.domain.sup,
+                                    our_in_type.domain.sup - our_in_type.domain.inf,
                                     self.bits_per,
                                     self.entries,
                                     self.gensym)

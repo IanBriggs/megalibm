@@ -110,5 +110,10 @@
     },
     "python.analysis.extraPaths": [
         "./examples"
-    ]
+    ],
+    "files.associations": {
+        "*.fpcore": "lisp",
+        "*.mlm": "lisp",
+        "cmath": "cpp"
+    }
 }

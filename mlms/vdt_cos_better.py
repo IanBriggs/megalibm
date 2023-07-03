@@ -6,14 +6,15 @@ from lambdas import *
 
 from numeric_types import FP64
 
-libm_func_name = "libm_better_dsl_vdt_cos"
+libm_func_name = "libm_vdt_cos"
 
-input_ranges = [Interval("0", "1.5707963267948966"), Interval("-4", "4")]
+lambda_function_name = "dsl_vdt_cos_better"
 
 reference_filename = "vdt_cos.c"
 
 numeric_type = FP64
 
+input_ranges = [Interval("0", "(/ PI 4)"), Interval("-4", "4")]
 
 cos = fpcore.parse("(FPCore (x) (cos x))")
 sin = fpcore.parse("(FPCore (x) (sin x))")

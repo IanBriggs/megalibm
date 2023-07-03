@@ -3,19 +3,25 @@
 
 #include "double_helpers.h"
 
+#include <math.h>
+
+
 static inline double
 fast_cody_waite_reduce(double x,
                        const double inv_C,
                        const size_t C_len,
                        const double *C,
-                       int *ptr_k)
+                       int *ptr_k,
+                       double *ptr_error)
 {
-    *ptr_k = (int)(x * inv_C + 0.5) - ((int)get_sign_double(x));
-    const double dk = (double)(*ptr_k);
+    const double shifted = inv_C * x + 0.5;
+    const double dk = ((int)shifted) - ((int)signbit(shifted));
+    const int ik = (int) dk;
+    *ptr_k = ik;
     double r = x;
     for (size_t i = 0; i < C_len; i++)
     {
-        r -= dk * C[i];
+        r -= ik * C[i];
     }
     return r;
 }
@@ -31,7 +37,8 @@ cody_waite_reduce(double x,
                   int *ptr_k,
                   double *ptr_error)
 {
-    double dk = (int)(x * inv_C + 0.5) - ((int)get_sign_double(x));
+    double shifted = inv_C * x + 0.5;
+    double dk = ((int)shifted) - ((int)signbit(shifted));
     double error = 0;
     double retval;
     if (dk == 0.0)

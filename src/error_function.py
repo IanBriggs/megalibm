@@ -17,7 +17,7 @@ def error_function(numeric_type: NumericType,
                    domain: interval.Interval) -> dict:
     if c_function_name is None:
         return None
-    
+
     # print("func_names", c_function_name, oracle_function_name)
 
     data = oracle_values(numeric_type,
@@ -26,6 +26,7 @@ def error_function(numeric_type: NumericType,
                                 oracle_code,
                                 domain)
 
+    mpmath.mp.prec = 1024
     data["oracle"] = (
         data["correctly_rounded"].map(lambda d: mpmath.mpf(d))
         + data["diff"].map(lambda d: mpmath.mpf(d))
@@ -80,7 +81,6 @@ def any_values(is_oracle: bool,
         '#include "error_measurement.h"',
         '#include "double_double.h"',
         '#include "cody_waite_reduction.h"',
-        
         '',
         code,
         '',

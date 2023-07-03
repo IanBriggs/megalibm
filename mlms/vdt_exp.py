@@ -9,7 +9,10 @@ libm_func_name = "libm_vdt_exp"
 
 lambda_function_name = "dsl_vdt_exp"
 
-input_ranges = [Interval("0", "(log 2)"), Interval("0", "30"), Interval("-20", "20"), Interval("0", "50")]
+input_ranges = [Interval("(- (/ (log 2) 2))", "(/ (log 2) 2)"),
+                Interval("-20", "20"),
+                Interval("0", "50")
+                ]
 
 numeric_type = FP64
 
@@ -21,8 +24,8 @@ exp_poly = \
     Horner(
         FixedMultiPolynomial(
             exp,
-            Interval("0",
-                     "(log 2)"),
+            Interval("(- (/ (log 2) 2))",
+                     "(/ (log 2) 2)"),
             fpcore.parse("(FPCore (x p q) (+ 1 (* 2 (/ p (- q p)))))"),
             [1, 3, 5],
             ["9.99999999999999999910E-1",

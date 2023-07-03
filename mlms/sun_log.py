@@ -10,8 +10,14 @@ libm_func_name = "libm_sun_log"
 
 lambda_function_name = "dsl_sun_log"
 
-input_ranges = [Interval(fpcore.parse_expr("(/ (sqrt 2) 2)"),
-                  fpcore.parse_expr("(sqrt 2)")), Interval("1", "50")]
+input_ranges = [Interval("7.999969482421875", "8.000030517578125"),
+                Interval("5.4", "5.8"),
+                Interval("2.772588", "5.545177")]
+
+
+
+    #Interval("(/ (sqrt 2) 2)", "(sqrt 2)")),
+    #Interval("1", "50")]
 
 numeric_type = FP64
 

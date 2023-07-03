@@ -62,7 +62,7 @@ mkdir "${THIS_NIGHTLY_LOCATION}"
 
 # Run the generation in the final directory
 cd "${SCRIPT_LOCATION}"
-for e in "${GIT_LOCATION}"/mlms/*.py ; do
+for e in "${GIT_LOCATION}"/mlms/*log*.py ; do
   time python3 "run_example" "${e}" "$THIS_NIGHTLY_LOCATION"
 done
 

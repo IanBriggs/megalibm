@@ -166,7 +166,7 @@ class CodyWaite(types.Transform):
             print(f"k: {n}")
             print(f"Type impl: {type(impl)}")
             genned = impl.generate()
-            print(f"Pavel: {impl.generate}")
+            #print(f"Pavel: {impl.generate}")
             print(f"Genned: {genned}")
             mod_to_lego[n] = genned
 

@@ -110,7 +110,7 @@ def save_domain_plot(left_data, right_data, left_name, right_name, fname, sample
     right_data["max_cr_abs_error"] = left_data["max_cr_abs_error"]
 
     y_min = 0
-    y_max = max(left_data["f_abs_error"] + right_data["f_abs_error"])
+    y_max = max(max(left_data["f_abs_error"]), max(right_data["f_abs_error"]))
 
     _, axes = plt.subplots(nrows=1, ncols=2, figsize=(10, 4))
 
@@ -137,10 +137,6 @@ def save_domain_plot(left_data, right_data, left_name, right_name, fname, sample
     axes[0].set_ylabel("Error")
     axes[1].set_ylabel("Error")
 
-    left_y_min, left_y_max = axes[0].get_ylim()
-    right_y_min, right_y_max = axes[1].get_ylim()
-    y_min = min(left_y_min, right_y_min)
-    y_max = min(left_y_max, right_y_max)
     axes[0].set_ylim(y_min, y_max)
     axes[1].set_ylim(y_min, y_max)
 

@@ -4,6 +4,13 @@ import fpcore
 def var(s: str):
     return fpcore.ast.Variable(s)
 
+def num(s: str):
+    if s[0] == "-":
+        return fpcore.ast.Operation("-",
+                                    fpcore.ast.Number(s[1:]))
+    return fpcore.ast.Number(s)
+
+
 def make_function(args, body):
     return fpcore.ast.FPCore(None, args, list(), body)
 

@@ -7,7 +7,9 @@ from lambdas import *
 from numeric_types import FP64
 
 
-libm_func_name = "libm_better_dsl_amd_fast_asin"
+libm_func_name = "libm_amd_fast_asin"
+
+lambda_function_name = "dsl_amd_fast_asin_better"
 
 input_ranges = [Interval("0", "0.5"), Interval("-1", "1")]
 

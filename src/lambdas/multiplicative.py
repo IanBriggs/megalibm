@@ -1,6 +1,7 @@
 
 
 from math import sqrt
+from calculate_cody_waite_constants import calculate_cody_waite_constants
 import find_reconstruction
 import fpcore
 import lambdas
@@ -113,10 +114,17 @@ class Multiplicative(types.Transform):
         y = so_far[-1].out_names[0]
         rec_out_name = self.gensym("mult_recons_out")
 
-        fpc = fpcore.parse("(FPCore (y k) (+ y (* k q)))")
-        q = numeric_type.num_to_str(self.out_type.function.eval(2))
-        fpc = fpc.substitute(fpcore.ast.Variable("q"),
-                             fpcore.ast.Number(q))
+        fpc = fpcore.parse("(FPCore (y k) (+ (+ y (* k lo)) (* k hi)))")
+
+        v = self.out_type.function.arguments[0]
+        expr = self.out_type.function.body.substitute(v, fpcore.ast.Number("2"))
+        l = calculate_cody_waite_constants(expr, 32, 2)
+        hi = l[0]
+        lo = l[1]
+        fpc = fpc.substitute(fpcore.ast.Variable("lo"),
+                             fpcore.interface.num(lo))
+        fpc = fpc.substitute(fpcore.ast.Variable("hi"),
+                             fpcore.interface.num(hi))
 
         recons = lego_blocks.LegoFPCore(numeric_type,
                                         [y, k],

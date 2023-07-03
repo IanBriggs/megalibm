@@ -29,7 +29,7 @@ class ModSwitch(lego_blocks.LegoBlock):
         for i in range(mod):
             source_lines.append(f"    case ({i}): {{")
             legos = self.mod_to_lego[i]
-            legos[0].in_names[0] = r
+            source_lines.append(f"        {cdecl} {legos[0].in_names[0]} = {r};")
             legos[-1].out_names[0] = switch_out
             for le in legos:
                 source_lines += ["        " + l for l in le.to_c()]

@@ -36,7 +36,7 @@ class CodyWaite(lego_blocks.LegoBlock):
             f"{cdecl} {inv_period} = {1/better_float_cast(self.period)};",
             f"{cdecl} {period}[{len(period_strs)}] = {{{period_str}}};",
             f"int {k};",
-            f"{cdecl} {r} = cody_waite_reduce({cw_in}, {inv_period}, {len(period_strs)}, {period}, &{k}, NULL);",
+            f"{cdecl} {r} = fast_cody_waite_reduce({cw_in}, {inv_period}, {len(period_strs)}, {period}, &{k}, NULL);",
         ]
 
         return source_lines
