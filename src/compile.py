@@ -44,8 +44,8 @@ def compile_file(filename: str,
     if p.returncode != 0:
         logger.error("Compile command failed")
         logger.error("command: '{}'", command)
-        logger.error("stdout:\n{}", p.stdout.encode("utf8"))
-        logger.error("stderr:\n{}", p.stderr.encode("utf8"))
+        logger.error("stdout:\n{}", p.stdout)
+        logger.error("stderr:\n{}", p.stderr)
         sys.exit(1)
 
     return objectname

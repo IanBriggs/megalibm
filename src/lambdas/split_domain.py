@@ -1,5 +1,6 @@
 
 from better_float_cast import better_float_cast
+from lambdas.rewrite import Rewrite
 import lego_blocks
 from interval import Interval
 from lambdas import types
@@ -8,9 +9,11 @@ from numeric_types import FP64
 
 class SplitDomain(types.Transform):
 
-    def __init__(self, domains_to_impls: dict):
+    def __init__(self, domains_to_impls: dict,
+                 useDD=False):
         self.domains_to_impls = domains_to_impls
         self.type_check_done = False
+        self.useDD = useDD
 
     def __str__(self):
         pairs = list()
@@ -80,6 +83,14 @@ class SplitDomain(types.Transform):
                 f = impl.out_type.function
             assert f == impl.out_type.function
 
+        if self.useDD:
+            for dom in self.domains_to_impls:
+                impl = self.domains_to_impls[dom]
+                impl.useDD = True
+                if type(impl) == Rewrite:
+                    impl.in_node.useDD = True
+                self.domains_to_impls[dom] = impl
+
         # Set the output
         self.out_type = types.Impl(f, Interval(full_span_inf, full_span_sup))
         self.type_check_done = True
@@ -104,6 +115,7 @@ class SplitDomain(types.Transform):
                            for dom, impl in self.domains_to_impls.items()}
         inner = lego_blocks.SplitDomain(numeric_type,
                                         [split_in], [split_out],
-                                        domains_to_lego)
+                                        domains_to_lego,
+                                        self.useDD)
 
         return [inner]

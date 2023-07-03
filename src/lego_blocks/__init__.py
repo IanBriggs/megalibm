@@ -3,9 +3,12 @@
 from .lego_block import LegoBlock
 
 from .abs import Abs
+from .addDD import AddDD
+from .assignDD import AssignDD
 from .case import Case
 from .cast import GenerateCast
 from .cody_waite import CodyWaite
+from .createDD import CreateDD
 from .divide import Divide
 from .expression import Expression
 from .if_less import IfLess

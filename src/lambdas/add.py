@@ -13,12 +13,14 @@ class Add(types.Transform):
 
     def __init__(self,
                  expr: fpcore.ast.Expr,
-                 in_node: types.Node):
+                 in_node: types.Node,
+                 useDD=False):
         super().__init__(in_node)
 
         # Check and save expr
         expect_subclass("expr", expr, fpcore.ast.Expr)
         self.expr = expr
+        self.useDD = useDD
 
     def __str__(self):
         return ("(Add"
@@ -87,14 +89,29 @@ class Add(types.Transform):
             fpcore_arguments.append(var)
             lego_arguments.append(types.VariableRequest(var))
 
-        expr = self.expr + p_var
-        fpc = fpcore.ast.FPCore(None,
-                                fpcore_arguments,
-                                [],
-                                expr)
+        these_blocks = list()
 
-        sum = lego_blocks.LegoFPCore(numeric_type=numeric_type,
-                                     in_names=lego_arguments,
-                                     out_names=[self.gensym("add_out")],
-                                     fpc=fpc)
-        return so_far + [sum]
+        if self.useDD:
+            e = fpcore.ast.FPCore(None, fpcore_arguments, [], self.expr)
+            ename = self.gensym("add_intermediate")
+            eblock = lego_blocks.LegoFPCore(numeric_type=numeric_type,
+                                            in_names=lego_arguments,
+                                            out_names=[ename],
+                                            fpc=e)
+            these_blocks.append(eblock)
+            sum = lego_blocks.AssignDD(in_names = [ename, so_far[-1].out_names[0]],
+                                       out_names = [self.gensym("add_out")])
+            these_blocks.append(sum)
+        else:
+            expr = self.expr + p_var
+            fpc = fpcore.ast.FPCore(None,
+                                    fpcore_arguments,
+                                    [],
+                                    expr)
+
+            sum = lego_blocks.LegoFPCore(numeric_type=numeric_type,
+                                         in_names=lego_arguments,
+                                         out_names=[self.gensym("add_out")],
+                                         fpc=fpc)
+            these_blocks.append(sum)
+        return so_far + these_blocks

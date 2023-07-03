@@ -25,6 +25,8 @@ class Rewrite(types.Transform):
         expect_subclass("to_expr", to_expr, fpcore.ast.Expr)
         self.to_expr = to_expr
 
+        self.useDD = False
+
     def __str__(self):
         return ("(Rewrite"
                 f" {self.from_expr}"

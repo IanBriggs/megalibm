@@ -19,7 +19,7 @@ def calculate_cody_waite_constants(constant,
         c_strs = list()
         for _ in range(entries - 1):
             with mpmath.workprec(bits_per):
-                next = 1 * x_mpf
+                next = mpmath.fadd(0, x_mpf, rounding="f")
                 c_str = mpmath_hex_str(next)
             c_strs.append(c_str)
             x_mpf -= next

@@ -11,7 +11,7 @@ from fpcore.ast import Variable
 from interval import Interval
 from lambdas import types
 from lambdas.lambda_utils import find_periods, has_period
-from numeric_types import FP64
+from numeric_types import FP64, FPDD
 from snake_egg_rules import egg_to_fpcore, operations
 from utils import Logger
 
@@ -26,8 +26,10 @@ class Multiplicative(types.Transform):
     """
 
     def __init__(self,
-                 in_node: types.Node):
+                 in_node: types.Node,
+                 useDD=False):
         super().__init__(in_node)
+        self.useDD = useDD
 
     def __str__(self):
         inner = str(self.in_node)
@@ -114,23 +116,31 @@ class Multiplicative(types.Transform):
         y = so_far[-1].out_names[0]
         rec_out_name = self.gensym("mult_recons_out")
 
-        fpc = fpcore.parse("(FPCore (y k) (+ (+ y (* k lo)) (* k hi)))")
-
         v = self.out_type.function.arguments[0]
         expr = self.out_type.function.body.substitute(v, fpcore.ast.Number("2"))
         l = calculate_cody_waite_constants(expr, 32, 2)
-        hi = l[0]
-        lo = l[1]
-        fpc = fpc.substitute(fpcore.ast.Variable("lo"),
-                             fpcore.interface.num(lo))
-        fpc = fpc.substitute(fpcore.ast.Variable("hi"),
-                             fpcore.interface.num(hi))
+        if self.useDD or hasattr(self.in_node, "useDD") and self.in_node.useDD:
+            cname = self.gensym("recons_const")
+            cblock = lego_blocks.CreateDD([k],[cname], l)
+            block_list.append(cblock)
+            recons = lego_blocks.AddDD(self.numeric_type,
+                                       [y, cname],
+                                       [rec_out_name])
+            block_list.append(recons)
+        else:
+            fpc = fpcore.parse("(FPCore (y k) (+ (+ y (* k lo)) (* k hi)))")
+            hi = l[0]
+            lo = l[1]
+            fpc = fpc.substitute(fpcore.ast.Variable("lo"),
+                                 fpcore.interface.num(lo))
+            fpc = fpc.substitute(fpcore.ast.Variable("hi"),
+                                 fpcore.interface.num(hi))
 
-        recons = lego_blocks.LegoFPCore(numeric_type,
-                                        [y, k],
-                                        [rec_out_name],
-                                        fpc)
-        block_list.append(recons)
+            recons = lego_blocks.LegoFPCore(numeric_type,
+                                            [y, k],
+                                            [rec_out_name],
+                                            fpc)
+            block_list.append(recons)
 
         return block_list
 

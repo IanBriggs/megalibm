@@ -67,8 +67,8 @@ class FP64(NumericType):
 
 
 class FPDD(NumericType):
-    sollya_type = "double"
-    c_type = "double"
+    sollya_type = "DD"
+    c_type = "dd"
     name = "FPDD"
 
     @classmethod

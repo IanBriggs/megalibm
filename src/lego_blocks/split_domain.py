@@ -1,16 +1,18 @@
 
 import lego_blocks
 import fpcore
+from numeric_types import FPDD
 
 
 class SplitDomain(lego_blocks.LegoBlock):
 
-    def __init__(self, numeric_type, in_names, out_names, domains_to_lego):
+    def __init__(self, numeric_type, in_names, out_names, domains_to_lego, useDD):
         super().__init__(numeric_type, in_names, out_names)
         assert (len(self.in_names) == 1)
         assert (len(self.out_names) == 1)
 
         self.domains_to_lego = domains_to_lego
+        self.useDD = useDD
 
     def __repr__(self):
         msg = "SplitDomain({}, {}, {}, {})"
@@ -20,8 +22,12 @@ class SplitDomain(lego_blocks.LegoBlock):
                           repr(self.domains_to_lego))
 
     def to_c(self):
+        cdecl = self.numeric_type.c_type
+        out_cdecl = cdecl
+        if self.useDD:
+            out_cdecl = FPDD.c_type
         source_lines = [
-            f"{self.numeric_type.c_type} {self.out_names[0]};",
+            f"{out_cdecl} {self.out_names[0]};",
         ]
 
         points = [(dom, lego) for dom, lego in self.domains_to_lego.items()
@@ -31,7 +37,7 @@ class SplitDomain(lego_blocks.LegoBlock):
             dom, lego = tup
             inf = self.numeric_type.num_to_str(dom.inf)
             source_lines.append(f"if ({self.in_names[0]} == {inf}) {{")
-            source_lines.append(f"    {self.numeric_type.c_type} {lego[0].in_names[0]} = {self.in_names[0]};")
+            source_lines.append(f"    {cdecl} {lego[0].in_names[0]} = {self.in_names[0]};")
             for le in lego:
                 source_lines += ["    " + l for l in le.to_c()]
             source_lines.append(f"    {self.out_names[0]} = {lego[-1].out_names[0]};")
@@ -45,7 +51,7 @@ class SplitDomain(lego_blocks.LegoBlock):
             inf = self.numeric_type.num_to_str(dom.inf)
             sup = self.numeric_type.num_to_str(dom.sup)
             source_lines.append(f"if ({inf} <= {self.in_names[0]} && {self.in_names[0]} <= {sup}) {{")
-            source_lines.append(f"    {self.numeric_type.c_type} {lego[0].in_names[0]} = {self.in_names[0]};")
+            source_lines.append(f"    {cdecl} {lego[0].in_names[0]} = {self.in_names[0]};")
             for le in lego:
                 source_lines += ["    " + l for l in le.to_c()]
             source_lines.append(f"    {self.out_names[0]} = {lego[-1].out_names[0]};")
