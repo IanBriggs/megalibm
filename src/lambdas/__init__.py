@@ -1,5 +1,6 @@
 
 from .add import Add
+from .approx import Approx
 from .cast import TypeCast
 from .cody_waite import CodyWaite
 from .estrin import Estrin
@@ -17,8 +18,10 @@ from .minimax_polynomial import MinimaxPolynomial
 from .mirror_left import MirrorLeft
 from .mirror_right import MirrorRight
 from .multiplicative import Multiplicative
-from .periodic import Periodic
+from .narrow import Narrow
 from .periodic_reconstruction import PeriodicRecons
+from .periodic import Periodic
+from .polynomial import Polynomial
 from .punt_to_libm import PuntToLibm
 from .recharacterize import Recharacterize
 from .repeat_exp import RepeatExp

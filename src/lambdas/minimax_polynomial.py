@@ -13,7 +13,8 @@ from numeric_types import FP64
 
 class MinimaxPolynomial(types.Source):
 
-    def __init__(self, function: FPCore, domain: Interval, terms: int):
+    def __init__(self, function: FPCore, domain: Interval, terms: int,
+                 method: str="fpminimax"):
         """
         Create a minimax polynomial approximation of the function on the domain
 
@@ -29,6 +30,10 @@ class MinimaxPolynomial(types.Source):
                                    self.out_type.domain)
 
         self.terms = terms
+
+        if method not in {"fpminimax", "remez", "chebyshev", "taylor"}:
+            raise TypeError(f"method must be one of fpminimax, remez, chebyshev, taylor")
+        self.method = method
 
     def __str__(self):
         body = self.out_type.function.body
@@ -89,7 +94,8 @@ class MinimaxPolynomial(types.Source):
         res = cmd_sollya.Result(self.out_type.function,
                                 self.out_type.domain,
                                 monomials,
-                                numeric_type)
+                                numeric_type,
+                                self.method)
         self.p_monomials = monomials
         self.p_coefficients = res.coefficients
         self.q_monomials = list()
@@ -105,4 +111,5 @@ class MinimaxPolynomial(types.Source):
 
         # To get this output we just need be constructed with given args
         # TODO: How to pick the number of terms?
-        return [ MinimaxPolynomial(out_type.function, out_type.domain, 14), ]
+        return [ MinimaxPolynomial(out_type.function, out_type.domain, 14,
+                                   method="remez"), ]

@@ -33,12 +33,13 @@ class Result():
         "minimize_target": "relative",
     }
 
-    def __init__(self, func, domain, monomials, numeric_type,
+    def __init__(self, func, domain, monomials, numeric_type, method,
                  config=None, is_retry=False):
         self.func = func
         self.domain = Interval(domain.inf.simplify(), domain.sup.simplify())
         self.monomials = monomials
         self.numeric_type = numeric_type
+        self.method = method
         self.config = config or Result.default_config
 
         self.stdout = None
@@ -127,11 +128,18 @@ class Result():
             'I = [{};{}];'.format(
                 self.domain.inf.to_sollya(), self.domain.sup.to_sollya()),
             'f = {};'.format(self.func.to_sollya()),
+            'monomials_len = {};'.format(len(self.monomials)),
             'monomials = [|{}|];'.format(monomials_str),
             'formats = [|{}...|];'.format(self.numeric_type.sollya_type),
-            #'p = remez(f, monomials, I);',
-            'p = fpminimax(f, monomials, formats, I, floating);'
         ]
+        if self.method == "fpminimax":
+            lines.append('p = fpminimax(f, monomials, formats, I, floating, absolute);')
+        elif self.method == "remez":
+            lines.append('p = remez(f, monomials, I);')
+        elif self.method == "chebyshev":
+            lines.append('p = chebyshevform(f, monomials_len, I)[0];')
+        elif self.method == "taylor":
+            lines.append('p = taylorform(f, monomials_len, I, absolute)[0];')
 
         all_coeff = ['coeff(p,{})'.format(m) for m in self.monomials]
         fmt_coeff = '@"\\", \\""@'.join(all_coeff)
