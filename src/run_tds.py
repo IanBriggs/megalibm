@@ -19,7 +19,7 @@ GIT_DIR = path.split(BIN_DIR)[0]
 SRC_DIR = path.join(GIT_DIR, "src")
 REQ_DIR = path.join(GIT_DIR, "requirements")
 EGG_DIR = path.join(REQ_DIR, "snake_egg", "target", "release")
-TMP_DIR = path.join(GIT_DIR, 'tmp')
+AUTOGEN_DIR = path.join(GIT_DIR, 'autogen')
 
 GEN_DIR = path.join(GIT_DIR, "generated")
 
@@ -65,7 +65,7 @@ def parse_arguments(argv):
     if args.log_file is not None:
         Logger.set_log_filename(args.log_file)
 
-    args.fnames = [path.join(TMP_DIR, fn)
+    args.fnames = [path.join(AUTOGEN_DIR, fn)
                                 for fn in os.listdir(args.dirname)
                                 if fn.endswith(".fpcore")]
     # for fname in os.listdir(args.dirname):
