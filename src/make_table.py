@@ -175,7 +175,7 @@ def make_benchmark_page(benchmark_data,
         </div>
     """.replace("\n    ", "\n").strip()]
 
-    for idx, domain_name in enumerate(benchmark_data):
+    for idx, domain_name in enumerate(sorted(benchmark_data.keys())):
         abs = abs_err_images[domain_name]
         parts.append(f"""
         <div class="rounded-box result-box">
@@ -207,16 +207,23 @@ def format_float(number):
     else:
         # Format the number with 2 digits after the decimal
         return "{:.2f}".format(number)
+    
+def make_table_rows(table_data):
+    lines = []
+    for dom, row in table_data.items():
+        lines.append("              <tr>")
+        lines.append(f"                 <th>{dom}</th>")
+        lines.append(f"                 <td>{format_float(row['MLM time'])}</td>")
+        lines.append(f"                 <td>{format_float(row['Reference time'])}</td>")
+        lines.append(f"                 <td>{format_float(row['MLM error'])}</td>")
+        lines.append(f"                 <td>{format_float(row['Reference error'])}</td>")
+        lines.append("              </tr>")
+    return "\n".join(lines)
+
 
 def make_main_part(generation_dir, benchmark_name, table_data):
     dir = generation_dir
     name = benchmark_name
-    print("TAB_DATA", table_data, type(table_data))
-    series_reset = table_data.reset_index(drop=True)
-    df =  pd.read_json(table_data.to_json())
-    dft = df.T
-    for c in dft.columns:
-        dft[c] = dft[c].map(lambda x: format_float(x))
 
     return f"""
     <div class="rounded-box result-box">
@@ -224,7 +231,20 @@ def make_main_part(generation_dir, benchmark_name, table_data):
             <a href="{dir}/{name}/index.html">{name}</a>
         </h2>
         <div class="table">
-            {dft.to_html()}
+            <table class="dataframe">
+                <thead>
+                    <tr style="text-align: right;">
+                    <th>Domain</th>
+                    <th>MLM time</th>
+                    <th>Reference time</th>
+                    <th>MLM error</th>
+                    <th>Reference error</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {make_table_rows(table_data)}
+                </tbody>
+            </table>
         </div>
     </div>
     """.rstrip()
@@ -285,7 +305,7 @@ def make_main_page(generation_dir, benchmark_names, benchmarks_datas):
 
     for bench_name in benchmark_names:
         parts.append(make_main_part(generation_dir,
-                     bench_name, benchmarks_datas[bench_name]["table_data"]))
+                     bench_name, benchmarks_datas[bench_name]["table_data"].to_dict()))
 
     parts.append("""
     </body>
@@ -485,7 +505,7 @@ def main(argv):
         # os.chdir(name)
 
         # Plot images
-        for idx, dom in enumerate(benchmark_data["table_data"].to_dict()):
+        for idx, dom in enumerate(sorted(benchmark_data["table_data"].to_dict().keys())):
             func_name = benchmark_data["func_name"].iloc[0]
             # print("bench_col!!!!", benchmark_data["func_name"], type(benchmark_data["func_name"]))
             # print("corr_!!!!", benchmark_data["func_name"].iloc[0], type(benchmark_data["func_name"].iloc[0]))

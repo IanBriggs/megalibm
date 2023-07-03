@@ -214,8 +214,8 @@ def save_domain_plot(left_data, right_data, left_name, right_name, fname, sample
     right_y_min, right_y_max = axes[1].get_ylim()
     y_min = min(left_y_min, right_y_min)
     y_max = min(left_y_max, right_y_max)
-    axes[0].set_ylim(y_min, y_max)
-    axes[1].set_ylim(y_min, y_max)
+    axes[0].set_ylim(0, y_max)
+    axes[1].set_ylim(0, y_max)
 
     plt.tight_layout()
 
@@ -231,11 +231,6 @@ def generate_all_code(function, domain, location):
     print("NAME", name)
 
     my_lambdas = synthesize(target)
-
-    gen_lams = list()
-    gen_sigs = list()
-    gen_srcs = list()
-    gen_func_names = list()
 
     # TODO: handle numeric type current only impl FP64
     # CR and Libm source code
@@ -321,6 +316,7 @@ def generate_all_code(function, domain, location):
                 lambda_err_sum += lambda_error["f_abs_error"].max()
             
             if lambda_err_sum < least_err:
+                least_err = lambda_err_sum
                 best_lambda_ranges = json_ranges
                 lambda_func_name = func_name
                 best_lambda_plot_data = plot_data
@@ -339,7 +335,7 @@ def generate_all_code(function, domain, location):
     json_dict["func_name"] = lambda_func_name
 
     # SAVE plots for the best performing lambda
-    for idx, domain in enumerate(domains):
+    for idx, domain in enumerate(sorted(best_lambda_ranges.keys())):
         fname = OUT_DIR + f"/{lambda_func_name}_domain_{idx}_absolute_error_abs_max_errors.png"
         save_domain_plot(best_lambda_plot_data[str(domain)]["lambda_error"], best_lambda_plot_data[str(domain)]["reference_error"], lambda_func_name, libm_func_name, fname)
         
@@ -439,7 +435,6 @@ def main(argv):
 
 if __name__ == "__main__":
     timer.start()
-    # ar = ["py", "/Users/yashlad/workspace/megalibm/tmp", "/Users/yashlad/workspace/megalibm/generated/01212"]
     try:
         return_code = main(sys.argv)
         # return_code = main(ar)

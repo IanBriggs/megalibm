@@ -137,8 +137,8 @@ def save_domain_plot(left_data, right_data, left_name, right_name, fname, sample
     axes[0].set_ylabel("Error")
     axes[1].set_ylabel("Error")
 
-    axes[0].set_ylim(y_min, y_max)
-    axes[1].set_ylim(y_min, y_max)
+    axes[0].set_ylim(0, y_max)
+    axes[1].set_ylim(0, y_max)
 
     plt.tight_layout()
 
