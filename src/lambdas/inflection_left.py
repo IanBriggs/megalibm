@@ -30,10 +30,12 @@ class InflectionLeft(types.Transform):
     def __init__(self,
                  in_node: types.Node,
                  reduction: fpcore.ast.Expr,
-                 reconstruction: fpcore.ast.Expr):
+                 reconstruction: fpcore.ast.Expr,
+                 out_type=None):
         self.reduction = reduction
         self.reconstruction = reconstruction
         super().__init__(in_node)
+        self.out_type = out_type
 
     def __str__(self):
         inner = str(self.in_node)
@@ -103,6 +105,8 @@ class InflectionLeft(types.Transform):
         # Generate the inner code first
         so_far = super().generate(numeric_type=numeric_type)
 
+        blocks = list()
+
         # Reduction
         x_in_name = Variable(self.gensym("x_in"))
         reduced_name = self.get_inner_variable(so_far[0].in_names[0])
@@ -116,6 +120,9 @@ class InflectionLeft(types.Transform):
                                  red_expr.to_libm_c(numeric_type=numeric_type),
                                  x_in_name.to_libm_c(numeric_type=numeric_type),
                                  return_type=numeric_type.c_type)
+        blocks.append(red)
+
+        blocks.extend(so_far)
 
         # Reconstruction
         inner_name = self.get_inner_variable(so_far[-1].out_names[0])
@@ -130,5 +137,15 @@ class InflectionLeft(types.Transform):
                                  rec_expr.to_libm_c(numeric_type=numeric_type),
                                  inner_name.to_libm_c(numeric_type=numeric_type),
                                  return_type=numeric_type.c_type)
+        blocks.append(rec)
 
-        return [red] + so_far + [rec]
+        # Out Type
+        if self.out_type != None:
+            cst = lego_blocks.GenerateCast(
+                    numeric_type,
+                    [y_out_name],
+                    [self.gensym("cast_out")],
+                    self.out_type.c_type)
+            blocks.append(cst)
+
+        return blocks
