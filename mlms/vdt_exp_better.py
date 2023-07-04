@@ -27,4 +27,9 @@ exp_poly = \
         split=1)
 
 lambda_expression = \
-    RepeatExp(exp_poly, 30, 2)
+    Additive(log_2,
+             exp_poly,
+             fpcore.parse("(FPCore (y k) (* k (pow 2 k)))"),
+             method="cody-waite",
+             cw_bits=18,
+             cw_len=2)

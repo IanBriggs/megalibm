@@ -1,4 +1,5 @@
 
+from .additive import Additive
 from .add_expr import Add as AddExpr
 from .add import Add
 from .approx import Approx, ApproxError

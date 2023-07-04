@@ -19,6 +19,7 @@ numeric_type = FP64
 reference_filename = "vdt_exp.c"
 
 exp = fpcore.parse("(FPCore (x) (exp x))")
+log_2 = fpcore.parse_expr("(log 2)")
 
 exp_poly = \
     Horner(
@@ -39,4 +40,10 @@ exp_poly = \
         split=0)
 
 lambda_expression = \
-    RepeatExp(exp_poly, 18, 2)
+    Additive(log_2,
+             exp_poly,
+             fpcore.parse("(FPCore (y k) (* k (pow 2 k)))"),
+             method="cody-waite",
+             cw_bits=18,
+             cw_len=2)
+
