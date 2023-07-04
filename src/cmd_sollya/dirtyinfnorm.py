@@ -27,25 +27,35 @@ class TimeoutDirtyInfNorm(Exception):
                           f"Domain: {self.domain}"])
 
 
-def DirtyInfNorm(fpc_or_expr: fpcore.ast.ASTNode,
+def DirtyInfNorm(poly: fpcore.ast.ASTNode,
+                 fpc: fpcore.ast.ASTNode,
                  domain: Interval,
                  prec: int = 156,
                  points: int = 501):
-    vars = list(fpc_or_expr.get_variables())
-    var = vars[0]
-    for old in vars[1:]:
-        fpc_or_expr = fpc_or_expr.substitute(old, var)
-    sollya_func = fpc_or_expr.to_sollya()
+    poly_vars = list(poly.get_variables())
+    assert len(poly_vars) == 1
+    poly_var = poly_vars[0]
+
+    fpc_vars = list(fpc.get_variables())
+    assert len(fpc_vars) == 1
+    fpc_var = fpc_vars[0]
+
+    if poly_var != fpc_var:
+        fpc = fpc.substitute(fpc_var, poly_var)
+
+    sollya_poly = poly.to_sollya()
+    sollya_fpc = fpc.to_sollya()
     sollya_inf = domain.inf.to_sollya()
     sollya_sup = domain.sup.to_sollya()
     lines = [
-        f"prec = {prec}!",
-        f"points = {points}",
-        f"f = {sollya_func};"
+        f"prec = {prec}!;",
+        f"points = {points}!;",
+        f"p = {sollya_poly};",
+        f"f = {sollya_fpc};",
         f"I = [{sollya_inf};{sollya_sup}];",
-        f"din = dirtyinfnorm(f, I);",
+        f"din = dirtyinfnorm(f-p, I);",
         'print("{");',
-        'print("  \\"din\\" : din");',
+        'print("  \\"din\\" : "@din);',
         'print("}");',
         'quit;'
     ]
@@ -77,15 +87,18 @@ def DirtyInfNorm(fpc_or_expr: fpcore.ast.ASTNode,
             except subprocess.TimeoutExpired:
                 p.kill()
                 logger.warning("Timeout reached, killing Sollya")
-                stdout = ""
-                stderr = ""
-                returncode = -1
                 raise TimeoutDirtyInfNorm(fpc_or_expr,
                                               domain)
 
             stdout = raw_out.decode("utf8").strip()
             stderr = raw_err.decode("utf8").strip()
             returncode = p.returncode
+
+            logger.blog("stdout", stdout)
+            if stderr != "":
+                logger.warning("Sollya printed to stderr")
+                logger.blog("stderr", stderr)
+            logger("Return code: {}", returncode)
 
     data = json.loads(stdout)
     return data["din"]

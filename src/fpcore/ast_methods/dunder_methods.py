@@ -3,6 +3,7 @@
 import re
 from better_float_cast import better_float_cast
 from expect import expect_implemented
+import fpcore
 from fpcore.ast import ASTNode, Expr, FPCore, Number, Operation, Property
 from utils import add_method, Logger
 
@@ -38,10 +39,10 @@ def cast_to_astnode(x):
         logger.dlog("Extracting body from FPCore: {}", x)
         x = x.body
     elif typ == int:
-        x = Number(str(x))
+        x = fpcore.interface.num(str(x))
         x.add_properties([Property("precision", "integer")])
     elif typ == float:
-        x = Number(str(x))
+        x = fpcore.interface.num(str(x))
         x.add_properties([Property("precision", "binary64")])
     elif not issubclass(typ, ASTNode):
         sx = str(x)
@@ -50,7 +51,7 @@ def cast_to_astnode(x):
         except ValueError:
             raise ValueError(f"Non-numeric value: {sx}")
         logger.dlog("Casting {} to Number type: {}", typ, sx)
-        x = Number(sx)
+        x = fpcore.interface.num(sx)
     return x
 
 

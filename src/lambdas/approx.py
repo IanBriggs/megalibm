@@ -52,8 +52,9 @@ class Approx(types.Transform):
         self.in_node.type_check()
 
         in_function = self.in_node.out_type.function
-        difference = in_function.body - self.new_function.body
-        din = cmd_sollya.DirtyInfNorm(difference, self.new_domain)
+        din = cmd_sollya.DirtyInfNorm(in_function.body,
+                                      self.new_function,
+                                      self.new_domain)
 
         if din > self.epsilon:
             raise ApproxError(self.new_function, in_function,

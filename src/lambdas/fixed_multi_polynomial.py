@@ -24,9 +24,10 @@ class FixedMultiPolynomial(types.Source):
         self.out_type = types.Poly(self.out_type.function,
                                    self.out_type.domain)
 
-        # Polynomials require a finite domain
-        if not domain.isfinite():
-            raise ValueError("'domain' must be finite, given: {domain}")
+        # NOT TRUE!!
+        # # Polynomials require a finite domain
+        # if not domain.isfinite():
+        #     raise ValueError("'domain' must be finite, given: {domain}")
 
         # TODO: check that the function is defined on the entire domain
 
