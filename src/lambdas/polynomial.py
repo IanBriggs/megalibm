@@ -37,7 +37,7 @@ def Polynomial(monomials_to_coefficients: dict,
         return lambdas.General(poly)
     elif scheme == "horner":
         return lambdas.Horner(poly, split)
-    elif scheme == "estrn":
+    elif scheme == "estrin":
         return lambdas.Estrin(poly, split)
     else:
-        raise TypeError("scheme must be one of general, horner, or estrin")
+        raise TypeError(f"scheme must be one of general, horner, or estrin, given '{scheme}'")

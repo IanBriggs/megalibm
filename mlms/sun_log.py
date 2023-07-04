@@ -41,13 +41,13 @@ mac_domain = Interval("-9.5367431640625e-7",
                       "9.536743161842053950749686919152736663818359375e-7")
 mac_polynomial = \
     Approx(f_log, mac_domain, 1e-16,
-           Polynomial(
-               {
-                   1:"1",
-                   2: "-0.5",
-                   3:"0.3333333333333333",
-               },
-               split=1))
+           AddExpr(fpcore.parse_expr("x"),
+                   Polynomial(
+                       {
+                           2: "-0.5",
+                           3: "0.3333333333333333",
+                       }),
+                   useDD=True))
 
 
 extra_domain = Interval("0.3799991607666015625",

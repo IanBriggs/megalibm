@@ -21,7 +21,7 @@ lambda_expression = \
     TypeCast(
         InflectionLeft(
             InflectionRight(
-                Approx(asin, Interval("0", "0.5"), 1e-16,
+                Approx(asin, Interval("0", "0.5"), 5.96e-8,
                        Polynomial(
                            {
                                1: "1.0",
@@ -35,7 +35,7 @@ lambda_expression = \
                                17: "0.01218919111033679899",
                                19: "0.00644940526689945226"
                            },
-                           scheme=Estrin,
+                           scheme="estrin",
                            split=1)),
                 fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
                 fpcore.parse_expr("(- (/ PI 2) (* 2 y))")),

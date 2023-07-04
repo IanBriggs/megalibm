@@ -55,7 +55,7 @@ class Rewrite(types.Transform):
         in_domain = self.in_node.out_type.domain
 
         # TODO: Hacked to only work with an `Add` inside
-        assert type(self.in_node) == lambdas.Add
+        assert type(self.in_node) == lambdas.AddExpr
 
         # Make sure the rewrite is valid
         # To do this first rewrite both expressions using known equalities

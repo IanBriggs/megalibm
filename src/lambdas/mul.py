@@ -51,7 +51,7 @@ class Mul(types.Transform):
         logger.dlog("In numerator: {}", in_num_function)
         logger.dlog("In denominator: {}", in_den_function)
 
-        out_body = in_num_function.body / in_den_function.body
+        out_body = in_num_function.body * in_den_function.body
 
         out_function = fpcore.ast.FPCore("",
                                          in_num_function.arguments,

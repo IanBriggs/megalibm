@@ -19,7 +19,7 @@ asin = fpcore.parse("(FPCore (x) (asin x))")
 lambda_expression = \
     InflectionLeft(
         InflectionRight(
-            Approx(asin, Interval("0", "0.5"), 1e-16,
+            Approx(asin, Interval("0", "0.5"), 5.96e-8,
                    Polynomial(
                 {
                     1: "1.0",
