@@ -16,6 +16,7 @@ numeric_type = FP64
 reference_filename = "vdt_exp.c"
 
 exp = fpcore.parse("(FPCore (x) (exp x))")
+log_2 = fpcore.parse_expr("(log 2)")
 
 exp_poly = \
     Horner(

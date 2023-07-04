@@ -31,11 +31,11 @@ class InflectionLeft(types.Transform):
                  in_node: types.Node,
                  reduction: fpcore.ast.Expr,
                  reconstruction: fpcore.ast.Expr,
-                 out_type=None):
+                 out_cast=None):
         self.reduction = reduction
         self.reconstruction = reconstruction
         super().__init__(in_node)
-        self.out_type = out_type
+        self.out_cast = out_cast
 
     def __str__(self):
         inner = str(self.in_node)
@@ -140,12 +140,12 @@ class InflectionLeft(types.Transform):
         blocks.append(rec)
 
         # Out Type
-        if self.out_type != None:
+        if self.out_cast != None:
             cst = lego_blocks.GenerateCast(
                     numeric_type,
                     [y_out_name],
                     [self.gensym("cast_out")],
-                    self.out_type.c_type)
+                    self.out_cast.c_type)
             blocks.append(cst)
 
         return blocks
