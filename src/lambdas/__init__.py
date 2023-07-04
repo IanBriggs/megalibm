@@ -31,4 +31,5 @@ from .recharacterize import Recharacterize
 from .repeat_exp import RepeatExp
 from .rewrite import Rewrite
 from .split_domain import SplitDomain
+from .sub import Sub
 from .neg import Neg
