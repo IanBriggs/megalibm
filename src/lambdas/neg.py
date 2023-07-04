@@ -8,17 +8,16 @@ from lambdas import types
 from numeric_types import FP64
 
 
-class TransformOut(types.Transform):
+class Neg(types.Transform):
 
     def __init__(self,
-                 in_node: types.Node,
-                 expr: fpcore.ast.Expr):
+                 in_node: types.Node):
         super().__init__(in_node)
-        self.expr = expr
+        self.expr = fpcore.parse_expr("(- y)")
 
     def __str__(self):
         inner = str(self.in_node)
-        return f"(TransformOut {self.reduction} {self.reconstruction} {inner})"
+        return f"(Neg {inner})"
 
     def replace_lambda(self, search, replace):
         if self == search:
@@ -53,7 +52,7 @@ class TransformOut(types.Transform):
         t_in = so_far[-1].out_names[0]
         t_out = self.gensym("t_out")
 
-        rec = lego_blocks.TransformOut(
+        rec = lego_blocks.Neg(
             numeric_type,
             [t_in], [t_out],
             self.expr

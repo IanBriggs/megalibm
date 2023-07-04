@@ -21,4 +21,4 @@ from .power import Pow
 from .set_exp import SetExp
 from .simple_additive import SimpleAdditive
 from .split_domain import SplitDomain
-from .transform_out import TransformOut
+from .neg import Neg

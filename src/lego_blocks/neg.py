@@ -4,7 +4,7 @@ from fpcore.ast import Variable
 import lego_blocks
 
 
-class TransformOut(lego_blocks.LegoBlock):
+class Neg(lego_blocks.LegoBlock):
 
     def __init__(self, numeric_type, in_names, out_names, expr):
         super().__init__(numeric_type, in_names, out_names)

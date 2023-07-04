@@ -49,8 +49,8 @@ sin_poly = \
 
 periodic_cases = {
     0: cos_poly,
-    1: TransformOut(in_node=sin_poly, expr=negate_y),
-    2: TransformOut(in_node=cos_poly, expr=negate_y),
+    1: Neg(sin_poly),
+    2: Neg(cos_poly),
     3: sin_poly,
 }
 
