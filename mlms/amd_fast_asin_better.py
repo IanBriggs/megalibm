@@ -21,25 +21,25 @@ asin = fpcore.parse("(FPCore (x) (asin x))")
 
 
 linear_cutoff = "2.1491193328907396e-08"
+linear_region = Interval("0", linear_cutoff)
+
+rest = Interval(linear_cutoff, "1")
+
+core_region = Interval(linear_cutoff, "0.5")
+
 x = fpcore.interface.var("x")
 
 lambda_expression = \
     InflectionLeft(
         SplitDomain({
-            Interval("0", linear_cutoff):
-            Horner(
-                FixedPolynomial(
-                    asin,
-                    Interval("0", linear_cutoff),
-                    [1],
-                    [1]
-                )),
-            Interval(linear_cutoff, "1"):
+            linear_region:
+                Approx(asin, linear_region, 1e-16, Polynomial({1:"1"})),
+            rest:
             InflectionRight(
                 Estrin(
                     MinimaxPolynomial(
                         asin,
-                        Interval(linear_cutoff, "0.5"),
+                        core_region,
                         13
                     ),
                     split=1),

@@ -11,7 +11,7 @@ def better_float_cast(x):
     x = x.rstrip("f")  # drop C float suffix
     x = x.rstrip("d")  # drop C double suffix
 
-    if x.startswith("0x"):
+    if x.startswith("0x") or x.startswith("-0x"):
         try:
             return float.fromhex(x)  # read as C's %a format
         except ValueError as e:

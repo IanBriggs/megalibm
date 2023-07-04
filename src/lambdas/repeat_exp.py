@@ -54,7 +54,7 @@ class RepeatExp(types.Transform):
         period_strs = calculate_cody_waite_constants(constant,
                                                      self.bits_per,
                                                      self.entries)
-        inv_period = 1 / self.constant
+        inv_period = 1 / constant
         inv_period = better_float_cast(inv_period)
         add = lego_blocks.CodyWaite(numeric_type,
                                     [in_name],

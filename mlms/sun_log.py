@@ -23,7 +23,6 @@ domain = Interval(fpcore.parse_expr("(/ (sqrt 2) 2)"),
 
 x_to_f_remap = fpcore.parse("(FPCore (x) (- x 1))")
 f_log = fpcore.parse("(FPCore (f) (log (+ f 1)))")
-f_log_sub_f = fpcore.parse("(FPCore (f) (- (log (+ f 1)) f))")
 f_domain = Interval(fpcore.parse_expr("(- (/ (sqrt 2) 2) 1)"),
                     fpcore.parse_expr("(- (sqrt 2) 1)"))
 
@@ -38,17 +37,20 @@ s_domain = Interval(
 #zero_point = Interval(0, 0)
 #zero_polynomial = Horner(FixedPolynomial(f_log, zero_point, [0], ["0"]))
 
-mac_domain = Interval(-9.5367431640625e-7,
-                      9.536743161842053950749686919152736663818359375e-7)
+mac_domain = Interval("-9.5367431640625e-7",
+                      "9.536743161842053950749686919152736663818359375e-7")
 mac_polynomial = \
-    Add(fpcore.parse_expr("f"),
-        Horner(
-            FixedPolynomial(f_log_sub_f,
-                            mac_domain,
-                            [2, 3],
-                            ["-0.5", "0.3333333333333333"])))
+    Approx(f_log, mac_domain, 1e-16,
+           Polynomial(
+               {
+                   1:"1",
+                   2: "-0.5",
+                   3:"0.3333333333333333",
+               },
+               split=1))
 
-extra_domain = Interval(0.3799991607666015625,
+
+extra_domain = Interval("0.3799991607666015625",
                         f_domain.sup)
 
 extra_polynomial = \
@@ -57,24 +59,25 @@ extra_polynomial = \
         f_to_s_remap,
         Rewrite(
             fpcore.parse_expr("(* 2 s)"),
-            fpcore.parse_expr("(+ (- f (* (* f f) 0.5)) (* s (* (* f f) 0.5)))"),
-            Add(fpcore.parse_expr("(* 2 s)"),
-                Horner(
-                FixedMultiPolynomial(
-                    s_log_sub_two_s,
-                    s_domain,
-                    fpcore.parse(
-                        "(FPCore (x p q) (* x (+ p q)))"),
-                    [4, 8, 12],
-                    ["3.999999999940941908e-01",
-                     "2.222219843214978396e-01",
-                     "1.531383769920937332e-01",],
-                    [2, 6, 10, 14],
-                    ["6.666666666666735130e-01",
-                     "2.857142874366239149e-01",
-                     "1.818357216161805012e-01",
-                     "1.479819860511658591e-01"])),
-                useDD=True)))
+            fpcore.parse_expr(
+                "(+ (- f (* (* f f) 0.5)) (* s (* (* f f) 0.5)))"),
+            AddExpr(fpcore.parse_expr("(* 2 s)"),
+                    Approx(s_log_sub_two_s, s_domain, 1e-16,
+                    Mul(Polynomial({1: "1"}),
+                        Add(Polynomial(
+                            {
+                                4: "3.999999999940941908e-01",
+                                8: "2.222219843214978396e-01",
+                                12: "1.531383769920937332e-01"
+                            }),
+                        Polynomial(
+                            {
+                                2: "6.666666666666735130e-01",
+                                6: "2.857142874366239149e-01",
+                                10: "1.818357216161805012e-01",
+                                14: "1.479819860511658591e-01"
+                            })))),
+                    useDD=True)))
 
 f_polynomial = \
     Recharacterize(
@@ -83,23 +86,23 @@ f_polynomial = \
         Rewrite(
             fpcore.parse_expr("(* 2 s)"),
             fpcore.parse_expr("(fma (- s) f f)"),
-            Add(fpcore.parse_expr("(* 2 s)"),
-                Horner(
-                FixedMultiPolynomial(
-                    s_log_sub_two_s,
-                    s_domain,
-                    fpcore.parse(
-                        "(FPCore (x p q) (* x (+ p q)))"),
-                    [4, 8, 12],
-                    ["3.999999999940941908e-01",
-                     "2.222219843214978396e-01",
-                     "1.531383769920937332e-01",],
-                    [2, 6, 10, 14],
-                    ["6.666666666666735130e-01",
-                     "2.857142874366239149e-01",
-                     "1.818357216161805012e-01",
-                     "1.479819860511658591e-01"])),
-                useDD=True)))
+            AddExpr(fpcore.parse_expr("(* 2 s)"),
+                    Approx(s_log_sub_two_s, s_domain, 1e-16,
+                    Mul(Polynomial({1: "1"}),
+                        Add(Polynomial(
+                            {
+                                4: "3.999999999940941908e-01",
+                                8: "2.222219843214978396e-01",
+                                12: "1.531383769920937332e-01"
+                            }),
+                        Polynomial(
+                            {
+                                2: "6.666666666666735130e-01",
+                                6: "2.857142874366239149e-01",
+                                10: "1.818357216161805012e-01",
+                                14: "1.479819860511658591e-01"
+                            })))),
+                    useDD=True)))
 
 lambda_expression = \
     Multiplicative(
@@ -107,9 +110,9 @@ lambda_expression = \
             log,
             x_to_f_remap,
             SplitDomain({
-                #zero_point: zero_polynomial,
+                # zero_point: zero_polynomial,
                 mac_domain: mac_polynomial,
                 extra_domain: extra_polynomial,
                 f_domain: f_polynomial,
             },
-                        useDD=True)), useDD=True)
+                useDD=True)), useDD=True)

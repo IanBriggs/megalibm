@@ -9,7 +9,7 @@ from utils.logging import Logger
 
 logger = Logger(color=Logger.green, level=Logger.HIGH)
 
-class Add(types.Transform):
+class Sub(types.Transform):
 
     def __init__(self,
                  num_node: types.Node,
@@ -18,12 +18,12 @@ class Add(types.Transform):
         self.den_node = den_node
 
     def __str__(self):
-        return ("(Add"
+        return ("(Sub"
                 f" {self.in_node} "
                 f" {self.den_node})")
 
     def __repr__(self):
-        return ("Add(",
+        return ("Sub(",
                 f"{self.in_node} "
                 f"{self.den_node})")
 
@@ -32,7 +32,7 @@ class Add(types.Transform):
             return replace
         new_num_node = self.in_node.replace_lambda(search, replace)
         new_den_node = self.den_node.replace_lambda(search, replace)
-        return Add(new_num_node, new_den_node)
+        return Sub(new_num_node, new_den_node)
 
     def type_check(self):
         if self.type_check_done:
@@ -75,13 +75,13 @@ class Add(types.Transform):
             if den_so_far[i].in_names[0] == other_name:
                 den_so_far[i].in_names[0] = x_name
 
-        y_name = self.gensym("add_out")
+        y_name = self.gensym("sub_out")
 
-        add_block = lego_blocks.LegoFPCore(
+        sub_block = lego_blocks.LegoFPCore(
             numeric_type=numeric_type,
             in_names=[num_so_far[-1].out_names[0], den_so_far[-1].out_names[0]],
             out_names=[y_name],
-            fpc=fpcore.parse("(FPCore (a b) (+ a b))")
+            fpc=fpcore.parse("(FPCore (a b) (- a b))")
         )
 
-        return num_so_far + den_so_far + [add_block]
+        return num_so_far + den_so_far + [sub_block]

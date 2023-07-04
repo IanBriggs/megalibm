@@ -128,7 +128,7 @@ class Result():
             'I = [{};{}];'.format(
                 self.domain.inf.to_sollya(), self.domain.sup.to_sollya()),
             'f = {};'.format(self.func.to_sollya()),
-            'monomials_len = {};'.format(len(self.monomials)),
+            'max_monomial = {};'.format(max(self.monomials)),
             'monomials = [|{}|];'.format(monomials_str),
             'formats = [|{}...|];'.format(self.numeric_type.sollya_type),
         ]
@@ -137,9 +137,9 @@ class Result():
         elif self.method == "remez":
             lines.append('p = remez(f, monomials, I);')
         elif self.method == "chebyshev":
-            lines.append('p = chebyshevform(f, monomials_len, I)[0];')
+            lines.append('p = chebyshevform(f, max_monomial, I)[0];')
         elif self.method == "taylor":
-            lines.append('p = taylorform(f, monomials_len, I, absolute)[0];')
+            lines.append('p = taylorform(f, max_monomial, I, absolute)[0];')
 
         all_coeff = ['coeff(p,{})'.format(m) for m in self.monomials]
         fmt_coeff = '@"\\", \\""@'.join(all_coeff)
