@@ -282,6 +282,7 @@ def main(argv):
 
     json_dict["table_data"] = json_ranges
     json_dict["func_name"] = lambda_function_name
+    json_dict["func_body"] = str(lambda_expression)
 
     with open( OUT_DIR + 'data.json' , 'w') as json_file:
         json.dump(json_dict, json_file)
@@ -289,9 +290,10 @@ def main(argv):
 
 if __name__ == "__main__":
     timer.start()
-
+    # ar = ["py","/Users/yashlad/workspace/megalibm/mlms/amd_fast_asin.py", "/Users/yashlad/workspace/megalibm/generated/0141414"]
     try:
         return_code = main(sys.argv)
+        # return_code = main(ar)
     except KeyboardInterrupt:
         return_code = 130  # meaning "Script terminated by Control-C"
         print("")

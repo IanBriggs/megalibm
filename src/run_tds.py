@@ -259,7 +259,7 @@ def generate_all_code(function, domain, location):
     json_dict = dict()
     best_lambda_ranges = None
     best_lambda_plot_data = dict()
-    lambda_func_name = None
+    best_lambda_func_name = None
     least_err  = float("inf")
     for i, lam in enumerate(my_lambdas):
         try:
@@ -318,8 +318,9 @@ def generate_all_code(function, domain, location):
             if lambda_err_sum < least_err:
                 least_err = lambda_err_sum
                 best_lambda_ranges = json_ranges
-                lambda_func_name = func_name
+                best_lambda_func_name = func_name
                 best_lambda_plot_data = plot_data
+                best_lambda_body = str(lam)
 
             # gen_sigs.append(sig)
             # gen_srcs.append(src)
@@ -332,12 +333,15 @@ def generate_all_code(function, domain, location):
         return False
     
     json_dict["table_data"] = best_lambda_ranges
-    json_dict["func_name"] = lambda_func_name
+    json_dict["func_name"] = best_lambda_func_name
+    json_dict["func_body"] = best_lambda_body
 
     # SAVE plots for the best performing lambda
     for idx, domain in enumerate(sorted(best_lambda_ranges.keys())):
-        fname = OUT_DIR + f"/{lambda_func_name}_domain_{idx}_absolute_error_abs_max_errors.png"
-        save_domain_plot(best_lambda_plot_data[str(domain)]["lambda_error"], best_lambda_plot_data[str(domain)]["reference_error"], lambda_func_name, libm_func_name, fname)
+        fname = OUT_DIR + f"/{best_lambda_func_name}_domain_{idx}_absolute_error_abs_max_errors.png"
+        save_domain_plot(best_lambda_plot_data[str(domain)]["lambda_error"],
+                         best_lambda_plot_data[str(domain)]["reference_error"],
+                         best_lambda_func_name, libm_func_name, fname)
         
     with open( OUT_DIR + 'data.json' , 'w') as json_file:
         json.dump(json_dict, json_file)
@@ -436,6 +440,7 @@ def main(argv):
 if __name__ == "__main__":
     timer.start()
     try:
+        ar = ["pu", "/Users/yashlad/workspace/megalibm/autogen", "/Users/yashlad/workspace/megalibm/generated/0141414"]
         return_code = main(sys.argv)
         # return_code = main(ar)
     except KeyboardInterrupt:

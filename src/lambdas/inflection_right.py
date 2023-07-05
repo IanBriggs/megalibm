@@ -1,10 +1,13 @@
 
 
+import math
 import fpcore
+import lambdas
+from lambdas.lambda_utils import get_mirrors, get_mirrors_at
 import lego_blocks
 from better_float_cast import better_float_cast
 from dirty_equal import dirty_equal
-from fpcore.ast import Operation, Variable
+from fpcore.ast import Number, Operation, Variable
 from interval import Interval
 from lambdas import types
 from numeric_types import FP32, FP64, FPDD
@@ -30,21 +33,25 @@ class InflectionRight(types.Transform):
                  in_node: types.Node,
                  reductions: list[ExprIfLess] | Operation,
                  reconstructions: list[ExprIfLess] | Operation,
-                 useDD=False):
+                 useDD: bool=False,
+                 synthesize: bool=False):
         self.reduction = reductions
         self.reconstruction = reconstructions
         self.useDD = useDD
+        self.synthesize = synthesize
         super().__init__(in_node)
 
     def __str__(self):
         inner = str(self.in_node)
+        if not self.reduction:
+            return f"(InflectionRight <Pending Hole> {self.reconstruction} {inner})"
         return f"(InflectionRight {self.reduction[0].false_expr} {self.reconstruction[0].false_expr} {inner})"
 
     def replace_lambda(self, search, replace):
         if self == search:
             return replace
         new_in_node = self.in_node.replace_lambda(search, replace)
-        return InflectionRight(new_in_node, self.reduction, self.reconstruction)
+        return InflectionRight(new_in_node, self.reduction, self.reconstruction, synthesize=True)
 
     def type_check(self):
         if self.type_check_done:
@@ -58,42 +65,78 @@ class InflectionRight(types.Transform):
         a = domain.inf
         b = domain.sup
 
-        # If reductions and recunstructions are fpcore convert to list
-        if type(self.reduction) != list:
-            assert(type(self.reduction) == Operation)
-            red = self.reduction
-            ifless_expr = ExprIfLess(None, red)
-            self.reduction = [ifless_expr]
+        if self.synthesize:
+            if not self.reduction:
+                # TODO: Check
+                red_expr = Operation("-",  Number(str(better_float_cast(2 * b))), Variable("x"))
+                self.reduction = red_expr
 
-        if type(self.reconstruction) != list:
-            assert(type(self.reconstruction) == Operation)
-            rec = self.reconstruction
-            ifless_expr = ExprIfLess(None, rec)
-            self.reconstruction = [ifless_expr]
+            assert type(inner_impl_type) == types.Impl
+             # Its an error if the identity is not present
+            red_exprs = get_mirrors_at(f, b)
+            found_s = False
+            for expr in red_exprs:
+                if expr == self.reconstruction:
+                    found_s = True
+                    break
 
-        # Using f(x)'s domain [a,b] we need to check that:
-        #   for x in [b, b+(b-a)] that red(x) is in [a,b]
-        upper_domain = Interval(b, b + (b - a))
-        reduced = Interval.try_symbolic_interval_eval(self.reduction[0].false_expr,
-                                                      upper_domain)
-        assert (domain.contains(reduced))
+            if not found_s:
+                msg = "InflectionRight requires that '{}' is mirrored about x={}"
+                raise TypeError(msg.format(self.function, b))
+            self.inflection_point = b
+            # TODO: Check
+            out_domain = Interval(a, b + (b - a))
+            self.out_type = types.Impl(f, out_domain)
+            if type(self.reduction) != list:
+                assert(type(self.reduction) == Operation)
+                red = self.reduction
+                ifless_expr = ExprIfLess(None, red)
+                self.reduction = [ifless_expr]
 
-        # We also need to check that:
-        #  rec(f(red(x))) == f(x)
-        x = Variable("x")
-        y = Variable("y")
-        rec_f = self.reconstruction[0].false_expr.substitute(y, f.body)
-        rec_f_red = rec_f.substitute(x, self.reduction[0].false_expr)
+            if type(self.reconstruction) != list:
+                assert(type(self.reconstruction) == Operation)
+                rec = self.reconstruction
+                ifless_expr = ExprIfLess(None, rec)
+                self.reconstruction = [ifless_expr]
+            self.type_check_done = True
+        else:
+            upper_domain = Interval(b, b + (b- a))
 
-        # For now let's use a sympy based equality (egg??) ((mpmath???))
-        assert (dirty_equal(f, rec_f_red, domain))
-        # assert(f.egg_equal(rec_f_red))
-        # assert(sympy_based_equal(rec_f_red, f))
+            # If reductions and recunstructions are fpcore convert to list
+            if type(self.reduction) != list:
+                assert(type(self.reduction) == Operation)
+                red = self.reduction
+                ifless_expr = ExprIfLess(None, red)
+                self.reduction = [ifless_expr]
 
-        # Set the values that might be used for outer lambda expressions
-        self.inflection_point = b
-        self.out_type = types.Impl(f, Interval(domain.inf, upper_domain.sup))
-        self.type_check_done = True
+            if type(self.reconstruction) != list:
+                assert(type(self.reconstruction) == Operation)
+                rec = self.reconstruction
+                ifless_expr = ExprIfLess(None, rec)
+                self.reconstruction = [ifless_expr]
+
+            # Using f(x)'s domain [a,b] we need to check that:
+            #   for x in [b, b+(b-a)] that red(x) is in [a,b]
+            reduced = Interval.try_symbolic_interval_eval(self.reduction[0].false_expr,
+                                                        upper_domain)
+            assert (domain.contains(reduced))
+
+            # We also need to check that:
+            #  rec(f(red(x))) == f(x)
+            x = Variable("x")
+            y = Variable("y")
+            rec_f = self.reconstruction[0].false_expr.substitute(y, f.body)
+            rec_f_red = rec_f.substitute(x, self.reduction[0].false_expr)
+
+            # For now let's use a sympy based equality (egg??) ((mpmath???))
+            assert (dirty_equal(f, rec_f_red, domain))
+            # assert(f.egg_equal(rec_f_red))
+            # assert(sympy_based_equal(rec_f_red, f))
+
+            # Set the values that might be used for outer lambda expressions
+            self.inflection_point = b
+            self.out_type = types.Impl(f, Interval(domain.inf, upper_domain.sup))
+            self.type_check_done = True
 
     def generate(self, numeric_type=FP64):
         # x_in = ...
@@ -166,6 +209,7 @@ class InflectionRight(types.Transform):
         in_name = so_far[-1].out_names[0]
         inner_name = self.get_inner_variable(in_name)  
         y_out_name = Variable(self.gensym("y_out"))
+        recons_expr_obj.false_expr = recons_expr_obj.false_expr.substitute(Variable("x"), Variable("y"))
         rec_expr = recons_expr_obj.false_expr.substitute(
             Variable("y"), inner_name)
 
@@ -191,3 +235,100 @@ class InflectionRight(types.Transform):
                                  return_type=recons_expr_obj.return_type)
 
         return red + so_far + [rec]
+
+    @classmethod
+    def generate_hole(cls, out_type):
+        # We only output
+        # (Impl (func) low high)
+        # where (func) is mirrored at point inside [low, high]
+        #   plus extra constraints outlined below
+        if type(out_type) != types.Impl:
+            return list()
+
+        # For each mirror point we check to see if our out domain contains it.
+        # Then we create the required in domain.
+        # This is then used to calculate the actual out domain that would be
+        #   made from the in domain.
+        # From here er may decide that the mirror point and domain cause too
+        #   small an output and so cannot be used, the mirror point is exactly
+        #   in the center and required no modification, or the output domain is
+        #   too large and requires narrowing.
+        # There is a special case for infinite domains since all mirror points
+        #   are valid, and infinities can screw up calculations.
+        #
+        # Eg in this case the mirror point is exactly where it needs to be
+        # out domain:      <-----[#############################]----->
+        # mirror point:                         |
+        # in domain:       <-----[##############]-------------------->
+        # real out domain: <-----[##############|##############]----->
+        #
+        # Eg in this case the mirror point is too far to the left to achieve
+        #   the full output by mirror
+        # out domain:      <-----[#############################]----->
+        # mirror point:              |
+        # in domain:       <-----[###]------------------------------->
+        # real out domain: <-----[###|###]--------------------------->
+        #
+        # Eg in this case the mirror point means we don't gain anything from
+        #   this transformation, so don't generate it
+        # out domain:      <-----[#############################]----->
+        # mirror point:                                        |
+        # in domain:       <-----[#############################]----->
+        # real out domain: <-----[#############################|#####>
+        #
+        # Eg in this case the mirror point pushes the out to be too wide and
+        #   require narrowing
+        # out domain:      <-----[#############################]----->
+        # mirror point:                           |
+        # in domain:       <-----[################]------------------>
+        # real out domain: <-----[################|################]->
+        #
+
+        out_domain = out_type.domain
+        mirrors = get_mirrors(out_type.function)
+        new_holes = list()
+        for reconstruction_expr, point in mirrors:
+            if (point.contains_op("thefunc") or not point.is_constant()
+                or not out_domain.contains(point)
+                    or reconstruction_expr.contains_op("thefunc")):
+                continue
+            in_domain = Interval(out_domain.inf, point)
+            in_type = types.Impl(out_type.function, in_domain)
+
+            complex = {"sin", "cos", "tan"}
+            if any([reconstruction_expr.contains_op(c) for c in complex]):
+                continue
+
+            # check for [-inf, inf]
+            if (math.isinf(better_float_cast(out_domain.inf))
+                and math.copysign(1.0, better_float_cast(out_domain.inf)) == -1.0
+                and math.isinf(better_float_cast(out_domain.sup))
+                    and math.copysign(1.0, better_float_cast(out_domain.sup)) == 1.0):
+                new_holes.append(InflectionRight(
+                    lambdas.Hole(in_type), None, reconstruction_expr, synthesize=True))
+                continue
+
+            # check for four cases
+            real_out_domain = Interval(in_domain.inf,
+                                       in_domain.sup + in_domain.width())
+
+            # TODO: epsilon comparison
+            # match
+            if abs(better_float_cast(real_out_domain.sup - out_domain.sup)) < 1e-16:
+                new_holes.append(InflectionRight(
+                    lambdas.Hole(in_type), None, reconstruction_expr, synthesize=True))
+                continue
+
+            # too small
+            if better_float_cast(real_out_domain.sup) < better_float_cast(out_domain.sup):
+                continue
+
+            # won't gain anything
+            if abs(better_float_cast(in_domain.sup - out_domain.sup)) < 1e-16:
+                continue
+
+            # needs narrowing
+            new_holes.append(
+                lambdas.Narrow(InflectionRight(lambdas.Hole(in_type), None, reconstruction_expr, synthesize=True), out_domain))
+
+        return new_holes

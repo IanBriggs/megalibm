@@ -6,6 +6,7 @@ import sympy
 from better_float_cast import better_float_cast
 import fpcore
 import mpmath
+from fpcore.ast import Operation
 from sympy_solve_equality import sympy_to_fpcore
 
 from utils.logging import Logger
@@ -101,8 +102,18 @@ class Interval():
             me = mpmath.iv.mpf([inf, sup])
             return other in me
         if type(other) == Interval:
-            me = mpmath.iv.mpf([str(self.inf).replace("INFINITY", "inf"),
-                                str(self.sup).replace("INFINITY", "inf")])
+            if type(self.inf) == Operation:
+                inf_str = str(self.inf.eval()).replace("INFINITY", "inf")
+            else:
+                inf_str = str(self.inf).replace("INFINITY", "inf")
+
+            if type(self.sup) == Operation:
+                sup_str = str(self.sup.eval()).replace("INFINITY", "inf")
+            else:
+                sup_str = str(self.sup).replace("INFINITY", "inf")
+
+            me = mpmath.iv.mpf([inf_str[:4200],
+                                sup_str[:4200]])
             other = mpmath.iv.mpf([str(other.inf).replace("INFINITY", "inf"),
                                    str(other.sup).replace("INFINITY", "inf")])
             return other in me

@@ -151,7 +151,7 @@ def abs_rel_to_del_eps(abs_err, rel_err):
         epsilons.append(cur)
     return deltas, epsilons
 
-def make_benchmark_page(benchmark_data,
+def make_benchmark_page(benchmark_data, benchmark_body,
                          abs_err_images, benchmark_name):
     #TODO GET NAME AND BODY
     # benchmark_name = benchmark_data["func_name"]
@@ -172,6 +172,9 @@ def make_benchmark_page(benchmark_data,
     <body>
         <div class="rounded-box top-box">
             <h1 class="main-title">{benchmark_name}</h1>
+            <div class="fpcore">
+                {benchmark_body}
+            </div>
         </div>
     """.replace("\n    ", "\n").strip()]
 
@@ -513,7 +516,9 @@ def main(argv):
             fname = f"{func_name}_domain_{idx}_absolute_error_abs_max_errors.png"
             abs_err_images[dom] = fname
         # Output benchmark webpage
-        html = make_benchmark_page(benchmark_data["table_data"].to_dict(),
+        # func_body = "LAMBDA"
+        func_body = benchmark_data["func_body"].iloc[0]
+        html = make_benchmark_page(benchmark_data["table_data"].to_dict(), func_body,
                                    abs_err_images, name)
         logger("Writing benchmark webpage: {}", name)
         with open(f"{name}/index.html", "w") as f:
