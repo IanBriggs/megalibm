@@ -290,7 +290,7 @@ def main(argv):
 
 if __name__ == "__main__":
     timer.start()
-    ar = ["py","/Users/yashlad/workspace/megalibm/mlms/amd_fast_asin.py", "/Users/yashlad/workspace/megalibm/generated/0141414"]
+    # ar = ["py","/Users/yashlad/workspace/megalibm/mlms/amd_fast_asin.py", "/Users/yashlad/workspace/megalibm/generated/0141414"]
     try:
         return_code = main(sys.argv)
         # return_code = main(ar)

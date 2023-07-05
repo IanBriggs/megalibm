@@ -100,10 +100,8 @@ class InflectionRight(types.Transform):
                 self.reconstruction = [ifless_expr]
             self.type_check_done = True
         else:
-            f = inner_impl_type.function
-            domain = inner_impl_type.domain
-            a = domain.inf
-            b = domain.sup
+            upper_domain = Interval(b, b + (b- a))
+
             # If reductions and recunstructions are fpcore convert to list
             if type(self.reduction) != list:
                 assert(type(self.reduction) == Operation)
@@ -119,12 +117,6 @@ class InflectionRight(types.Transform):
 
             # Using f(x)'s domain [a,b] we need to check that:
             #   for x in [b, b+(b-a)] that red(x) is in [a,b]
-            # TODO: Check
-            # inf_str = str(float(a))
-            # sup_str = str(float(b + (b - a)))
-            # inff = b
-            # supp = (b + (b - a))
-            upper_domain = Interval(b, b + (b - a))
             reduced = Interval.try_symbolic_interval_eval(self.reduction[0].false_expr,
                                                         upper_domain)
             assert (domain.contains(reduced))
@@ -136,8 +128,8 @@ class InflectionRight(types.Transform):
             rec_f = self.reconstruction[0].false_expr.substitute(y, f.body)
             rec_f_red = rec_f.substitute(x, self.reduction[0].false_expr)
 
-            # # For now let's use a sympy based equality (egg??) ((mpmath???))
-            # assert (dirty_equal(f, rec_f_red, domain))
+            # For now let's use a sympy based equality (egg??) ((mpmath???))
+            assert (dirty_equal(f, rec_f_red, domain))
             # assert(f.egg_equal(rec_f_red))
             # assert(sympy_based_equal(rec_f_red, f))
 
@@ -217,6 +209,7 @@ class InflectionRight(types.Transform):
         in_name = so_far[-1].out_names[0]
         inner_name = self.get_inner_variable(in_name)  
         y_out_name = Variable(self.gensym("y_out"))
+        recons_expr_obj.false_expr = recons_expr_obj.false_expr.substitute(Variable("x"), Variable("y"))
         rec_expr = recons_expr_obj.false_expr.substitute(
             Variable("y"), inner_name)
 
