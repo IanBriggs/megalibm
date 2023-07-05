@@ -17,7 +17,7 @@ def compile_file(filename: str,
     # TODO: Compilation warnings are ignored
     # Defaults
     if compiler is None:
-        compiler = "gcc"
+        compiler = "clang"
     if flags is None:
         flags = ["-O3", "-mtune=native", "-fno-builtin", "-DNDEBUG"]
 
@@ -58,7 +58,7 @@ def link_files(filenames: list,
                ):
     # Defaults
     if compiler is None:
-        compiler = "gcc"
+        compiler = "clang"
     if link_flags is None:
         link_flags = ["-lmpfr", "-lgmp", "-lm"]
 
