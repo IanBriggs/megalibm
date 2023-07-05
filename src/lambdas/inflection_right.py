@@ -1,6 +1,7 @@
 
 
 import fpcore
+from lambdas.lambda_utils import get_mirrors_at
 import lego_blocks
 from better_float_cast import better_float_cast
 from dirty_equal import dirty_equal
@@ -30,10 +31,12 @@ class InflectionRight(types.Transform):
                  in_node: types.Node,
                  reductions: list[ExprIfLess] | Operation,
                  reconstructions: list[ExprIfLess] | Operation,
-                 useDD=False):
+                 useDD: bool=False,
+                 synthesize: bool=False):
         self.reduction = reductions
         self.reconstruction = reconstructions
         self.useDD = useDD
+        self.synthesize = synthesize
         super().__init__(in_node)
 
     def __str__(self):
@@ -58,18 +61,32 @@ class InflectionRight(types.Transform):
         a = domain.inf
         b = domain.sup
 
-        # If reductions and recunstructions are fpcore convert to list
-        if type(self.reduction) != list:
-            assert(type(self.reduction) == Operation)
-            red = self.reduction
-            ifless_expr = ExprIfLess(None, red)
-            self.reduction = [ifless_expr]
+        if self.synthesize:
+            assert type(inner_impl_type) == types.Impl
+             # Its an error if the identity is not present
+            red_exprs = get_mirrors_at(f, b)
+            found_s = False
+            for expr in red_exprs:
+                if expr == self.reconstruction:
+                    found_s = True
+                    break
 
-        if type(self.reconstruction) != list:
-            assert(type(self.reconstruction) == Operation)
-            rec = self.reconstruction
-            ifless_expr = ExprIfLess(None, rec)
-            self.reconstruction = [ifless_expr]
+            if not found_s:
+                msg = "MirrorRight requires that '{}' is mirrored about x={}"
+                raise TypeError(msg.format(self.function, b))
+        else:
+            # If reductions and recunstructions are fpcore convert to list
+            if type(self.reduction) != list:
+                assert(type(self.reduction) == Operation)
+                red = self.reduction
+                ifless_expr = ExprIfLess(None, red)
+                self.reduction = [ifless_expr]
+
+            if type(self.reconstruction) != list:
+                assert(type(self.reconstruction) == Operation)
+                rec = self.reconstruction
+                ifless_expr = ExprIfLess(None, rec)
+                self.reconstruction = [ifless_expr]
 
         # Using f(x)'s domain [a,b] we need to check that:
         #   for x in [b, b+(b-a)] that red(x) is in [a,b]

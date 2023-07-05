@@ -87,7 +87,7 @@ def to_snake_egg(self, to_rule):
 @add_method(Number)
 def to_snake_egg(self, to_rule):
     try:
-        return int(self.source)
+        return int(float(self.source))
     except ValueError:
         pass
 

@@ -8,7 +8,7 @@ logger = Logger(color=Logger.green, level=Logger.LOW)
 def synthesize(target, fuel=10):
     transforms = [
         # lambdas.NegMirrorLeft,
-        lambdas.MirrorLeft,
+        lambdas.InflectionLeft,
         lambdas.MirrorRight,
         lambdas.MinimaxPolynomial,
         lambdas.Horner,
