@@ -40,4 +40,4 @@ lambda_expression = \
             fpcore.parse_expr("(- (/ PI 2) (* 2 y))")),
         fpcore.parse_expr("(- x)"),
         fpcore.parse_expr("(- y)"),
-        out_type=FP32)
+        out_cast=FP32)

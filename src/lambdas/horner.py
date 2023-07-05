@@ -111,4 +111,4 @@ class Horner(types.Transform):
         # To get this output we need as input
         # (Poly (func) low high)
         in_type = types.Poly(out_type.function, out_type.domain)
-        return [Horner(lambdas.Hole(in_type)), ]
+        return [Horner(lambdas.Hole(in_type), split=1), ]

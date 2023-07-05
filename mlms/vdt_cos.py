@@ -56,19 +56,20 @@ sin_poly = \
                },
            split=1))
 
-periodic_cases = {
-    0: cos_poly,
-    1: Neg(sin_poly),
-    2: Neg(cos_poly),
-    3: sin_poly,
-}
 
 lambda_expression = \
     InflectionLeft(
-        CodyWaite(cos,
-                  pi_over_2,
-                  periodic_cases,
-                  53 - 30,
-                  2),
+        Additive(pi_over_2,
+                 [
+                     cos_poly,
+                     Neg(sin_poly),
+                     Neg(cos_poly),
+                     sin_poly
+                 ],
+                 fpcore.parse("(FPCore (y k) y)"),
+                 method="cody-waite",
+                 cw_func=cos,
+                 cw_bits=23,
+                 cw_len=2),
         negate_x,
         id_y)

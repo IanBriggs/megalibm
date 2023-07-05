@@ -1,4 +1,5 @@
 
+from .additive import Additive
 from .add_expr import Add as AddExpr
 from .add import Add
 from .approx import Approx, ApproxError
@@ -30,4 +31,5 @@ from .recharacterize import Recharacterize
 from .repeat_exp import RepeatExp
 from .rewrite import Rewrite
 from .split_domain import SplitDomain
+from .sub import Sub
 from .neg import Neg
