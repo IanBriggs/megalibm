@@ -79,6 +79,8 @@ class InflectionLeft(types.Transform):
                 red_expr = Operation("-",  Number(str(better_float_cast(a))), Variable("x"))
                 self.reduction = red_expr
             logger("Evaluating: {}", self.reduction)
+
+            #Check t(f(s(x))) == f(x)
             assert type(inner_impl_type) == types.Impl
              # Its an error if the identity is not present
             red_exprs = get_mirrors_at(f, a)

@@ -9,7 +9,8 @@ def synthesize(target, fuel=10):
     transforms = [
         # lambdas.NegMirrorLeft,
         lambdas.InflectionLeft,
-        lambdas.MirrorRight,
+        lambdas.InflectionRight,
+        # lambdas.MirrorRight,
         lambdas.MinimaxPolynomial,
         lambdas.Horner,
         lambdas.Periodic,
