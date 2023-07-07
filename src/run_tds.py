@@ -56,7 +56,7 @@ def parse_arguments(argv):
                         help="Redirect logging to given file.")
     parser.add_argument("dirname",
                         help="Directory with the fpcore files")
-    parser.add_argument("nightly_location", 
+    parser.add_argument("nightly_location",
                         help="Nightly location")
     args = parser.parse_args(argv[1:])
 
@@ -175,7 +175,7 @@ def format_float(number):
     else:
         # Format the number with 2 digits after the decimal
         return "{:.2f}".format(number)
-    
+
 
 def save_domain_plot(left_data, right_data, left_name, right_name, fname, samples= 1 << 17):
     left_data["max_cr_abs_error"] = left_data["cr_abs_error"].rolling(
@@ -242,15 +242,15 @@ def generate_all_code(function, domain, location):
     mpfr_sig, mpfr_src = lambdas.generate_mpfr_c_code(target, mpfr_func_name)
     logger.blog("C mpfr function", "\n".join(mpfr_src))
 
-    OUT_DIR = location + f"{name}/" 
+    OUT_DIR = location + f"{name}/"
     if not os.path.exists(OUT_DIR):
-        os.mkdir(OUT_DIR) 
-    
+        os.mkdir(OUT_DIR)
+
     # Copy header files to run c code and generate data
     os.chdir(OUT_DIR)
     shutil.copytree(GIT_DIR + "/include", OUT_DIR + "/include",
                     dirs_exist_ok=True)
-    
+
     domains = get_domains(domain)
 
     # Move to out dir to compile and link files
@@ -297,13 +297,13 @@ def generate_all_code(function, domain, location):
                                                 oracle_function_name=mpfr_func_name,
                                                 oracle_code=oracle_code,
                                                 domain=domain)
-                
+
                 if domain_str not in plot_data:
                     plot_data[domain_str] = dict()
 
                 plot_data[domain_str]["lambda_error"] = lambda_error
                 plot_data[domain_str]["reference_error"] = reference_error
-                
+
                 json_range = {
                     "MLM time": float(format_float(lambda_time)),
                     "Reference time": float(format_float(reference_time)),
@@ -312,9 +312,9 @@ def generate_all_code(function, domain, location):
                 }
 
                 json_ranges[domain_str] = json_range
-                
+
                 lambda_err_sum += lambda_error["f_abs_error"].max()
-            
+
             if lambda_err_sum < least_err:
                 least_err = lambda_err_sum
                 best_lambda_ranges = json_ranges
@@ -331,7 +331,7 @@ def generate_all_code(function, domain, location):
 
     if not best_lambda_ranges:
         return False
-    
+
     json_dict["table_data"] = best_lambda_ranges
     json_dict["func_name"] = best_lambda_func_name
     json_dict["func_body"] = best_lambda_body
@@ -342,7 +342,7 @@ def generate_all_code(function, domain, location):
         save_domain_plot(best_lambda_plot_data[str(domain)]["lambda_error"],
                          best_lambda_plot_data[str(domain)]["reference_error"],
                          best_lambda_func_name, libm_func_name, fname)
-        
+
     with open( OUT_DIR + 'data.json' , 'w') as json_file:
         json.dump(json_dict, json_file)
 
@@ -360,22 +360,20 @@ def handle_work_item(func, nightly_info):
         func.arguments[0] = x
         func = func.substitute(var, x)
 
-   # Create gen dirs 
+   # Create gen dirs
     THIS_GEN_DIR = GEN_DIR + f"/{nightly_info['nightly_timestamp']}/"
     if not os.path.exists(THIS_GEN_DIR):
-        os.mkdir(THIS_GEN_DIR) 
+        os.mkdir(THIS_GEN_DIR)
     GEN_FOLDER = THIS_GEN_DIR + "generated/"
     if not os.path.exists(GEN_FOLDER):
-        os.mkdir(GEN_FOLDER) 
+        os.mkdir(GEN_FOLDER)
 
     # func.extract_domain()
     domain = func.extract_domain()["x"] if  "x" in func.extract_domain() else func.extract_domain()
     did_generation = False
-    try:
-        # DEF something weird
-        did_generation = generate_all_code(func, domain, GEN_FOLDER)
-    except Exception as e:
-        logger.warning("Caught exception {}", e)
+
+    # DEF something weird
+    did_generation = generate_all_code(func, domain, GEN_FOLDER)
     if not did_generation:
         # REMOVE generated fir for the function to make website
         shutil.rmtree(f"{GEN_FOLDER}{c_ize_name(func)}")

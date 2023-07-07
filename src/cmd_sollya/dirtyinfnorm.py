@@ -30,7 +30,7 @@ class TimeoutDirtyInfNorm(Exception):
 def DirtyInfNorm(poly: fpcore.ast.ASTNode,
                  fpc: fpcore.ast.ASTNode,
                  domain: Interval,
-                 prec: int = 156,
+                 prec: int = 512,
                  points: int = 501):
     poly_vars = list(poly.get_variables())
     assert len(poly_vars) == 1

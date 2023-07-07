@@ -24,6 +24,10 @@ class FailedGenError(Exception):
         self.func = func
         self.domain = domain
 
+c_to_sollya = {
+    "double": "double",
+    "float": "single",
+}
 
 class Result():
 
@@ -33,12 +37,16 @@ class Result():
         "minimize_target": "relative",
     }
 
-    def __init__(self, func, domain, monomials, numeric_type, method,
+    def __init__(self, func, domain, monomials, numeric_types, method,
                  config=None, is_retry=False):
         self.func = func
         self.domain = Interval(domain.inf.simplify(), domain.sup.simplify())
         self.monomials = monomials
-        self.numeric_type = numeric_type
+        if type(numeric_types) == list:
+            self.numeric_types = [c_to_sollya[t] for t in numeric_types]
+        else:
+            self.numeric_types = [numeric_types.sollya_type
+                                  for _ in range(len(monomials))]
         self.method = method
         self.config = config or Result.default_config
 
@@ -76,7 +84,7 @@ class Result():
 
         # Try [inf-small, sup + small]
         if not have_res:
-            logger.warning("Sollya call failed, trying [inf, sup + small]")
+            logger.warning("Sollya call failed, trying [inf - small, sup + small]")
             self.domain = Interval(domain.inf - fpcore.ast.Number("0.00390625"),
                                   domain.sup + fpcore.ast.Number("0.00390625"))
             self._generate_query()
@@ -130,8 +138,11 @@ class Result():
             'f = {};'.format(self.func.to_sollya()),
             'max_monomial = {};'.format(max(self.monomials)),
             'monomials = [|{}|];'.format(monomials_str),
-            'formats = [|{}...|];'.format(self.numeric_type.sollya_type),
         ]
+
+        if self.numeric_types:
+            lines.append('formats = [|{}|];'.format(",".join(self.numeric_types)))
+
         if self.method == "fpminimax":
             lines.append('p = fpminimax(f, monomials, formats, I, floating, absolute);')
         elif self.method == "remez":
