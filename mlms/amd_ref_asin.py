@@ -38,9 +38,9 @@ lambda_expression = \
                      "-3.28431505720958658909889444194",
                      " 2.76568859157270989520376345954",
                      "-0.943639137032492685763471240072",
-                     " 0.105869422087204370341222318533"]), useDD=True),
-            [ExprIfLess(None, fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"), return_type="dd", compute="dd"),
-             ],
+                     " 0.105869422087204370341222318533"]), 
+                     useDD=True),
+            [ExprIfLess(None, fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"), return_type="dd", compute="dd")],
             [ExprIfLess(None, fpcore.parse_expr("(- (/ PI 2) (* 2 y))"), "double", compute="dd")], useDD=True),
         fpcore.parse_expr("(- x)"),
         fpcore.parse_expr("(- y)"))
