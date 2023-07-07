@@ -71,13 +71,13 @@ cd "${SCRIPT_LOCATION}"
 for e in "${GIT_LOCATION}"/mlms/*.py ; do
   time python3 "run_example" "${e}" "$THIS_NIGHTLY_LOCATION"
 done
-time python3 "run_tds" "$TDS_LOCATION" "$THIS_NIGHTLY_LOCATION"
+# time python3 "run_tds" "$TDS_LOCATION" "$THIS_NIGHTLY_LOCATION"
 
 
 mv "${GIT_LOCATION}/generated/${NIGHTLY_TIMESTAMP}/generated" "${THIS_NIGHTLY_LOCATION}"
 
 cd "${THIS_NIGHTLY_LOCATION}"
-"${SCRIPT_LOCATION}"/make_table generated
+"${SCRIPT_LOCATION}"/make_latex generated
 
 
 # Copy data and send notification if on the nightly runner

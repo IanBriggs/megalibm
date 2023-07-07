@@ -276,7 +276,8 @@ def main(argv):
             "MLM error": float(format_float(lambda_error["f_abs_error"].max())),
             "Reference error":float(format_float(reference_error["f_abs_error"].max())),
         }
-        dom_str = str(domain)
+        # dom_str = str(domain)
+        dom_str = f"[{str(domain.float_inf)[:7]}, {str(domain.float_sup)[:7]}]"
         json_ranges[dom_str] = json_range
     pp.pprint(json_ranges)
 
