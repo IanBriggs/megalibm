@@ -62,51 +62,15 @@ mkdir -p "${NIGHTLIES_LOCATION}"
 mkdir "${THIS_NIGHTLY_LOCATION}"
 
 cd "${SCRIPT_LOCATION}"
-for e in "${GIT_LOCATION}"/mlms_core/*.py ; do
+for e in "${GIT_LOCATION}"/mlms/*.py ; do
   time python3 "run_example" "${e}" "$THIS_NIGHTLY_LOCATION"
 done
-# time python3 "run_tds" "$TDS_LOCATION" "$THIS_NIGHTLY_LOCATION"
+time python3 "run_tds" "$TDS_LOCATION" "$THIS_NIGHTLY_LOCATION"
 
 
 mv "${GIT_LOCATION}/generated/${NIGHTLY_TIMESTAMP}/generated" "${THIS_NIGHTLY_LOCATION}"
 
 cd "${THIS_NIGHTLY_LOCATION}"
-"${SCRIPT_LOCATION}"/make_latex generated
-
-NEXT_NIGHTLY_TIMESTAMP=$(date +%s)
-NEXT_NIGHTLY_LOCATION=${NIGHTLIES_LOCATION}/${NEXT_NIGHTLY_TIMESTAMP}
-
-# Make the final directory
-mkdir "${NEXT_NIGHTLY_LOCATION}"
-
-cd "${SCRIPT_LOCATION}"
-for e in "${GIT_LOCATION}"/mlms_better/*.py ; do
-  time python3 "run_example" "${e}" "$NEXT_NIGHTLY_LOCATION"
-done
-
-mv "${GIT_LOCATION}/generated/${NEXT_NIGHTLY_TIMESTAMP}/generated" "${NEXT_NIGHTLY_LOCATION}"
-
-
-cd "${NEXT_NIGHTLY_LOCATION}"
-"${SCRIPT_LOCATION}"/make_latex generated
-
-
-FINAL_TIMESTAMP=$(date +%s)
-FINAL_NIGHTLY_LOCATION=${NIGHTLIES_LOCATION}/${FINAL_TIMESTAMP}
-
-# Make the final directory
-mkdir "${FINAL_NIGHTLY_LOCATION}"
-
-SYNTH_LOCATION=${GIT_LOCATION}/mlms_synth
-
-
-cd "${SCRIPT_LOCATION}"
-time python3 "run_tds" "$SYNTH_LOCATION" "$FINAL_NIGHTLY_LOCATION"
-
-mv "${GIT_LOCATION}/generated/${FINAL_TIMESTAMP}/generated" "${FINAL_NIGHTLY_LOCATION}"
-
-
-cd "${FINAL_NIGHTLY_LOCATION}"
 "${SCRIPT_LOCATION}"/make_latex generated
 
 
