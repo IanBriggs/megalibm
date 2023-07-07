@@ -45,9 +45,10 @@ lambda_expression = \
                              "-2.40339491173441421878e+00",
                              " 2.02094576023350569471e+00",
                              "-6.88283971605453293030e-01",
-                             " 7.70381505559019352791e-02"])),
-                    fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"),
-                    fpcore.parse_expr("(- (/ PI 2) (* 2 y))"), useDD=True),
+                             " 7.70381505559019352791e-02"]),
+                             useDD=True),
+            [ExprIfLess(None, fpcore.parse_expr("(sqrt (/ (- 1 x) 2))"), return_type="dd", compute="dd")],
+            [ExprIfLess(None, fpcore.parse_expr("(- (/ PI 2) (* 2 y))"), "double", compute="dd")], useDD=True),
         }),
         fpcore.parse_expr("(- x)"),
         fpcore.parse_expr("(- y)"))
