@@ -67,7 +67,7 @@ class Horner(types.Transform):
         p = self.gensym("p_poly")
         p_name = Variable(p)
         p = forms.Horner(numeric_type=numeric_type,
-                         in_names=[g_name] if not self.useDD else [g_name, gg],
+                         in_names=[g_name],
                          out_names=[p],
                          monomials=self.in_node.p_monomials,
                          coefficients=self.in_node.p_coefficients,
@@ -80,7 +80,7 @@ class Horner(types.Transform):
             q = self.gensym("q_poly")
             q_name = Variable(q)
             q = forms.Horner(numeric_type=numeric_type,
-                             in_names=[g_name if not self.useDD else gg],
+                             in_names=[g_name],
                              out_names=[q],
                              monomials=self.in_node.q_monomials,
                              coefficients=self.in_node.q_coefficients,

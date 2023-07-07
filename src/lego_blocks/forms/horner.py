@@ -110,6 +110,13 @@ class Horner(forms.Form):
         # Local names for things
         in_type = type(self.in_names[-1])
         x = Variable(self.in_names[-1]) if in_type != Variable else self.in_names[-1]
+        var = self.in_names[-1]
+        var_src = None
+        if in_type == Variable:
+            var_src = var.source if not var.isDD else var.source + "_hi"
+        if var_src:
+            x = Variable(var_src)
+
         mons = self.monomials.copy()
         coeffs = self.coefficients.copy()
 
@@ -150,13 +157,14 @@ class Horner(forms.Form):
         # The last pow isn't based on a difference of monomials
         if mon != 0:
             x_pow = tree_pow(x, mon)
-            if self.split_expr:
-                for i in range(len(self.in_names)):
+            for i in range(len(self.in_names)):
                     sub_name = self.in_names[i]
                     if sub_name.isDD:
                         sub_name = fpcore.ast.Variable(sub_name.to_libm_c() + "_hi")
-                    self.split_expr = self.split_expr.substitute(self.split_expr.args[i], sub_name)
-                x_pow = self.split_expr
+                    # self.split_expr = self.split_expr.substitute(self.split_expr.args[i], sub_name)
+            # if self.split_expr:
+                
+            #     x_pow = self.split_expr
             poly = x_pow * poly
 
         # Now build up the general form

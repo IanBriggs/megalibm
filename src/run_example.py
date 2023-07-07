@@ -291,10 +291,10 @@ def main(argv):
 
 if __name__ == "__main__":
     timer.start()
-    # ar = ["py","/Users/yashlad/workspace/megalibm/mlms/amd_fast_asin.py", "/Users/yashlad/workspace/megalibm/generated/0141414"]
+    argv = sys.argv
+    # argv = ["py","/Users/ianbriggs/Desktop/Gits/MEGALIBM/clean-main/mlms/amd_ref_asin.py", "tmp"]
     try:
-        return_code = main(sys.argv)
-        # return_code = main(ar)
+        return_code = main(argv)
     except KeyboardInterrupt:
         return_code = 130  # meaning "Script terminated by Control-C"
         print("")
