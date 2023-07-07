@@ -150,4 +150,4 @@ def to_libm_c(self, numeric_type=FP64):
 @add_method(FPCore)
 def to_libm_c(self, numeric_type=FP64):
     # TODO: create a function signature here
-    return self.body.to_libm_c()
+    return self.body.to_libm_c(numeric_type=numeric_type)

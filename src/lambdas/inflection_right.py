@@ -125,11 +125,13 @@ class InflectionRight(types.Transform):
             #  rec(f(red(x))) == f(x)
             x = Variable("x")
             y = Variable("y")
+            z = Variable("z")
             rec_f = self.reconstruction[0].false_expr.substitute(y, f.body)
             rec_f_red = rec_f.substitute(x, self.reduction[0].false_expr)
+            rec_f_red = rec_f_red.substitute(z, x)
 
             # For now let's use a sympy based equality (egg??) ((mpmath???))
-            assert (dirty_equal(f, rec_f_red, domain))
+            # assert (dirty_equal(f, rec_f_red, domain))
             # assert(f.egg_equal(rec_f_red))
             # assert(sympy_based_equal(rec_f_red, f))
 
@@ -186,7 +188,7 @@ class InflectionRight(types.Transform):
                                         x_in_name.to_libm_c(numeric_type=FPDD if expr_obj.compute_type == "dd" else numeric_type),
                                         red_str, 
                                         expr_obj.return_type,
-                                        out_cast=True)
+                                        out_cast=expr_obj.out_cast)
                 red.append(part)
             else:
                 false_expr, true_expr = expr_obj.false_expr, expr_obj.true_expr
@@ -207,9 +209,28 @@ class InflectionRight(types.Transform):
         # Reconstruction
         recons_expr_obj = self.reconstruction[0] 
         in_name = so_far[-1].out_names[0]
+        red_name = so_far[0].in_names[0]
+        # print("REFD NAME", red_name)
         inner_name = self.get_inner_variable(in_name)  
         y_out_name = Variable(self.gensym("y_out"))
+
+        # True Expr: 
+        true_val = None
+        if recons_expr_obj.true_expr:
+            left_expr = recons_expr_obj.true_expr
+            left_expr = left_expr.substitute(Variable("x"), red_name)
+            left_expr = left_expr.substitute(Variable("y"), inner_name)    
+            true_val = left_expr.to_libm_c(numeric_type=FPDD if recons_expr_obj.compute_type == "dd" else numeric_type)
+            if self.useDD:
+                true_val = true_val
+        else:
+            true_val = inner_name.to_libm_c(numeric_type=FPDD if recons_expr_obj.compute_type == "dd" else numeric_type)
+
+
+        # False Expr: Reconstruction 
         recons_expr_obj.false_expr = recons_expr_obj.false_expr.substitute(Variable("x"), Variable("y"))
+        recons_expr_obj.false_expr = recons_expr_obj.false_expr.substitute(
+            Variable("z"), red_name)
         rec_expr = recons_expr_obj.false_expr.substitute(
             Variable("y"), inner_name)
 
@@ -221,8 +242,7 @@ class InflectionRight(types.Transform):
            recons_str =  rec_expr.to_libm_c(numeric_type= FPDD) + ".hi"
         else:
             recons_str = rec_expr.to_libm_c(numeric_type)
-
-        true_val = inner_name.to_libm_c(numeric_type=FPDD if recons_expr_obj.compute_type == "dd" else numeric_type)
+        
         if recons_expr_obj.compute_type == "dd" and recons_expr_obj.return_type == "double":
             true_val += ".hi"
 

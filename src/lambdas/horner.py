@@ -91,11 +91,18 @@ class Horner(types.Transform):
             r_name = Variable(self.gensym("r_poly"))
             if self.useDD:
                 r_name = r_name.setDD(True)
-            
+
+            fpc = self.in_node.combiner
+            in_names = None
+            if len(fpc.arguments) == 3:
+                in_names = [g_name, p_name, q_name]
+            else:
+                in_names = [p_name, q_name]
+                
             r = lego_blocks.LegoFPCore(numeric_type= FPDD if self.useDD else numeric_type,
-                                       in_names=[g_name, p_name, q_name],
+                                       in_names=in_names,
                                        out_names=[r_name],
-                                       fpc=self.in_node.combiner,
+                                       fpc=fpc,
                                        return_type= "dd" if self.useDD else "double")
             block_list.append(r)
 

@@ -33,7 +33,7 @@ class FixedMultiPolynomial(types.Source):
 
         # Check and save combiner
         expect_type("combiner", combiner, FPCore)
-        if len(combiner.arguments) != 3:
+        if len(combiner.arguments) != 3 or len(combiner.arguments) != 2:
             msg = ("'combiner' FPCore must take in 3 arguments, given: "
                    f"{len(combiner.arguments)} arguments")
             raise ValueError(msg)
