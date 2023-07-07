@@ -26,6 +26,7 @@ from utils.expr_if_less import ExprIfLess
 #     for x in [b, b+(b-a)] that red(x) is in [a,b]
 #     and red(f(rec(x))) == f(x)
 
+# Note: list code can be removed for 
 
 class InflectionRight(types.Transform):
 
@@ -43,6 +44,8 @@ class InflectionRight(types.Transform):
 
     def __str__(self):
         inner = str(self.in_node)
+        if type(self.reduction) == fpcore.ast.Operation:
+            return f"(InflectionRight {self.reduction} {self.reconstruction} {inner})"
         if not self.reduction:
             return f"(InflectionRight <Pending Hole> {self.reconstruction} {inner})"
         return f"(InflectionRight {self.reduction[0].false_expr} {self.reconstruction[0].false_expr} {inner})"
@@ -188,6 +191,7 @@ class InflectionRight(types.Transform):
                                         expr_obj.return_type,
                                         out_cast=True)
                 red.append(part)
+            # Note: probably not needed
             else:
                 false_expr, true_expr = expr_obj.false_expr, expr_obj.true_expr
                 true_var = self.get_inner_variable(prevOut.source + "_hi")

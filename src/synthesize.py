@@ -41,7 +41,10 @@ def paper_synthesize(lam,
     for i in range(fuel):
         new_partials = list()
         for partial in old_partials:
-            logger("Finishing partial impl: {}", partial)
+            try:
+                logger("Finishing partial impl: {}", partial)
+            except TypeError:
+                pass # just make it run
             holes = partial.find_lambdas(lambda l: type(l) == lambdas.Hole)
 
             # The expression had no holes,

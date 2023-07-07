@@ -1,5 +1,6 @@
 
 
+import copy
 from expect import expect_implemented, expect_implemented_class, expect_subclass, expect_type
 import fpcore
 from fpcore.ast import FPCore, Variable
@@ -121,7 +122,7 @@ class Source(Node):
     def replace_lambda(self, search, replace):
         if self == search:
             return replace
-        return self.copy()
+        return copy.copy(self)
 
     def type_check(self):
         if self.type_check_done:

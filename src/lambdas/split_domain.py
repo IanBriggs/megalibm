@@ -27,6 +27,20 @@ class SplitDomain(types.Transform):
     def __repr__(self):
         return f"SplitDomain({repr(self.domains_to_impls)})"
 
+    def find_lambdas(self, predicate, _found=None):
+        # Setup default args
+        if _found is None:
+            _found = set()
+
+        for impl in self.domains_to_impls.values():
+            impl.find_lambdas(predicate, _found)
+
+        # Mark this node
+        if predicate(self):
+            _found.add(self)
+
+        return _found
+
     def replace_lambda(self, search, replace):
         new_d_to_i = dict()
         for dom, impl in self.domains_to_impls.items():

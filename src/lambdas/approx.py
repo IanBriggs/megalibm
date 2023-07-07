@@ -42,7 +42,7 @@ class Approx(types.Transform):
         if self == search:
             return replace
         new_in_node = self.in_node.replace_lambda(search, replace)
-        return Approx(self.new_function, self.epsilon, self.in_node)
+        return Approx(self.new_function, self.new_domain, self.epsilon, new_in_node)
 
     def type_check(self):
         if self.type_check_done:
