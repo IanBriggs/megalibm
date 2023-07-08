@@ -24,7 +24,8 @@ def paper_synthesize(lam,
                      powers: str="auto", # for poly
                      precisions: list=None, # for poly
                      fixed_terms: dict=None, # for poly
-                     fuel=10):
+                     fuel=10,
+                     scheme: str="horner"):
 
     transforms = []
     if "tds" in tools:
@@ -78,7 +79,8 @@ def paper_synthesize(lam,
                                                      t,
                                                      powers,
                                                      precisions,
-                                                     fixed_terms)
+                                                     fixed_terms,
+                                                     scheme=scheme)
                         found_at_least_one = True
                         new_partials.append(partial.replace_lambda(hole, tay))
                     if "chebyshev" in tools:
@@ -88,7 +90,8 @@ def paper_synthesize(lam,
                                                      t,
                                                      powers,
                                                      precisions,
-                                                     fixed_terms)
+                                                     fixed_terms,
+                                                     scheme=scheme)
                         found_at_least_one = True
                         new_partials.append(partial.replace_lambda(hole, tay))
                     if "remez" in tools:
@@ -98,7 +101,8 @@ def paper_synthesize(lam,
                                                      t,
                                                      powers,
                                                      precisions,
-                                                     fixed_terms)
+                                                     fixed_terms,
+                                                     scheme=scheme)
                         found_at_least_one = True
                         new_partials.append(partial.replace_lambda(hole, tay))
                     if "fpminimax" in tools:
@@ -108,7 +112,8 @@ def paper_synthesize(lam,
                                                      t,
                                                      powers,
                                                      precisions,
-                                                     fixed_terms)
+                                                     fixed_terms,
+                                                     scheme=scheme)
                         found_at_least_one = True
                         new_partials.append(partial.replace_lambda(hole, tay))
 
@@ -141,7 +146,8 @@ def fill_sollya_polynomial(func: fpcore.ast.FPCore,
                            terms: int,
                            powers: str="auto",
                            precisions: list=None,
-                           fixed_terms: dict=None):
+                           fixed_terms: dict=None,
+                           scheme: str="horner"):
     if method not in {"fpminimax", "remez", "chebyshev", "taylor"}:
         raise TypeError(f"method must be one of fpminimax, remez, chebyshev, taylor")
     assert powers in {"odd", "even", "auto", "all"}
@@ -179,7 +185,7 @@ def fill_sollya_polynomial(func: fpcore.ast.FPCore,
         elif dirty_equal(f_x, nf_nx, domain):
             powers = "odd"
         else:
-            power = "all"
+            powers = "all"
 
     # Fix known terms
     x = func.arguments[0]
@@ -216,7 +222,7 @@ def fill_sollya_polynomial(func: fpcore.ast.FPCore,
     # get coefficients out
     for m,c in zip(monomials, res.coefficients):
         poly_terms[m] = fpcore.interface.num(c)
-    poly = lambdas.Polynomial(poly_terms, split=1)
+    poly = lambdas.Polynomial(poly_terms, scheme=scheme,split=1)
 
     # round up the epsilon just incase
     eps = cmd_sollya.DirtyInfNorm(poly.in_node.out_type.function, func, domain)

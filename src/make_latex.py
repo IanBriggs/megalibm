@@ -28,6 +28,9 @@ def format_float(number):
     if abs(number) < 1 and 'e' in str(number):
         # Format the number with 2 digits after the decimal and the correct exponent
         return "{:.2e}".format(number)
+    elif abs(number) > 100:
+        # Format large numbers in scientific notation
+        return "{:.2e}".format(number)
     else:
         # Format the number with 2 digits after the decimal
         return "{:.2f}".format(number)
@@ -93,12 +96,12 @@ def make_func_rows(funcs, lib, accumulator):
 
             # domain = ", ".join(list(map(lambda x: format_float(x), dom.strip("[]").split(","))))
             # dom_out = f"[{domain}]"
-            err_mlm = format_float(row['MLM error'])
-            err_lib = format_float(row['Reference error'])
-            time_mlm = format_float(row['MLM time'])
-            time_lib = format_float(row['Reference time'])
-            is_err_mlm_better = err_mlm <= err_lib
-            is_time_mlm_better = time_mlm <= time_lib
+            err_mlm = format_float(float(row['MLM error']))
+            err_lib = format_float(float(row['Reference error']))
+            time_mlm = format_float(float(row['MLM time']))
+            time_lib = format_float(float(row['Reference time']))
+            is_err_mlm_better = float(err_mlm) <= float(err_lib)
+            is_time_mlm_better = float(time_mlm) <= float(time_lib)
             text_mlm_err = r"\textbf{" + f"{err_mlm}" + r"}" if is_err_mlm_better else f"{err_mlm}"
             text_mlm_time =  r"\textbf{" + f"{time_mlm}" + r"}" if is_time_mlm_better else f"{time_mlm}"
             text_lib_err = r"\textbf{" + f"{err_lib}" + r"}" if not is_err_mlm_better else f"{err_lib}"
@@ -119,7 +122,7 @@ def make_func_rows(funcs, lib, accumulator):
 
 
 
-def make_table_rows(data):
+def make_latex_table_rows(data):
     lines = []
     for lib in data.keys():
         funcs_data = data[lib]
@@ -135,11 +138,55 @@ def make_latex_table(data):
     return f"""
     {table_head}
     {table_cols}
-    {make_table_rows(data)}
+    {make_latex_table_rows(data)}
     {table_end}
     """.replace("\n    ", "\n").strip()
 
-def make_main_page(data):
+
+
+   
+def make_table_rows(table_data):
+    lines = []
+    for dom, row in table_data.items():
+        lines.append("              <tr>")
+        lines.append(f"                 <th>{dom}</th>")
+        lines.append(f"                 <td>{format_float(row['MLM time'])}</td>")
+        lines.append(f"                 <td>{format_float(row['Reference time'])}</td>")
+        lines.append(f"                 <td>{format_float(row['MLM error'])}</td>")
+        lines.append(f"                 <td>{format_float(row['Reference error'])}</td>")
+        lines.append("              </tr>")
+    return "\n".join(lines)
+
+
+def make_main_part(generation_dir, benchmark_name, table_data):
+    dir = generation_dir
+    name = benchmark_name
+
+    return f"""
+    <div class="rounded-box result-box">
+        <h2 class="result-title">
+            <a href="{dir}/{name}/index.html">{name}</a>
+        </h2>
+        <div class="table">
+            <table class="dataframe">
+                <thead>
+                    <tr style="text-align: right;">
+                    <th>Domain</th>
+                    <th>MLM time</th>
+                    <th>Reference time</th>
+                    <th>MLM error</th>
+                    <th>Reference error</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {make_table_rows(table_data)}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    """.rstrip()
+
+def make_main_page(generation_dir, benchmark_names, benchmarks_datas):
     today = datetime.date.today()
     y = today.year
     m = today.month
@@ -159,17 +206,43 @@ def make_main_page(data):
         <div class="rounded-box top-box">
             <h1 class="main-title">General Metrics</h1>
             <p class="description">
-                Each benchmark has different domains that we examine for
+                Each benchmark has 4 different domains that we examine for
                 both error and speed.
+
+                For each of these we create a plot shown here providing an
+                overview of generated functions as well as the default libm
+                on the system.
+
+                These plots show error and speed normalized such that the
+                system libm is [1,1].
+
+                Error is on the X axis, with further to the left being
+                higher error.
+
+                Specifically, this is the maximum relative error found from
+                sampling thea domain.
+
+                Speedup is on the Y axis, with further up being faster code.
+
+                All points are plotted, but the pareto front is plotted as
+                a stepped line.
+            </p>
+            <h2 class="subtitle">TL:DR</h2>
+            <p class="description">
+            <ul class="description">
+                <li>up and right are better</li>
+                <li>blue dot is libm</li>
+                <li>orange dots are generated</li>
+                <li>line shows best generated</li>
+            </ul>
             </p>
         </div>
     """.replace("\n    ", "\n").strip()]
-    table_data = make_latex_table(data)
-    parts.append(f"""
-                 <p>
-                    {table_data}
-                 </p>
-                 """)
+
+    for bench_name in benchmark_names:
+        parts.append(make_main_part(generation_dir,
+                     bench_name, benchmarks_datas[bench_name]["table_data"].to_dict()))
+
     parts.append("""
     </body>
 
@@ -178,7 +251,7 @@ def make_main_page(data):
 
     text = "\n".join(parts)
 
-    return text, table_data
+    return text
 
 
 
@@ -340,7 +413,10 @@ def main(argv):
     print("DIRNAME", args.dirname)
 
     benchmark_names = list()
+    latex_table_data = dict()
     benchmarks_datas = dict()
+
+
 
     # Look through directory contents
     for name in sorted(os.listdir(base)):
@@ -353,33 +429,43 @@ def main(argv):
 
         # Read data for the benchmark
         benchmark_data = read_data(name)
-
-        print("BENECHMARK_DATA", type(benchmark_data))
-        print("BENECHMARK_DATA", benchmark_data["table_data"].to_dict())
-
+        
         # Setup collections
         benchmark_names.append(name)
+        benchmarks_datas[name] = benchmark_data
+
+        #Plot Images
+        abs_err_images = dict()
+        for idx, dom in enumerate(sorted(benchmark_data["table_data"].to_dict().keys())):
+            func_name = benchmark_data["func_name"].iloc[0]
+            fname = f"{func_name}_domain_{idx}_absolute_error_abs_max_errors.png"
+            abs_err_images[dom] = fname
+
+        # Collect latex table data
         splitted_name = name.split("_")
         library = splitted_name[1]
         version = "_".join(splitted_name[2:])
-        if library not in benchmarks_datas:
-            benchmarks_datas[library] = dict()
-        benchmarks_datas[library][version] = benchmark_data["table_data"].to_dict()
+        if library not in latex_table_data:
+            latex_table_data[library] = dict()
+        latex_table_data[library][version] = benchmark_data["table_data"].to_dict()
 
-        # # func_body = benchmark_data["func_body"].iloc[0]
-        # html = make_benchmark_page(benchmarks_datas, name)
-        # logger("Writing benchmark webpage: {}", name)
-        # with open(f"{name}/index.html", "w") as f:
-        #     f.write(html)
+        func_body = benchmark_data["func_body"].iloc[0]
+        html = make_benchmark_page(benchmark_data["table_data"].to_dict(), func_body,
+                                   abs_err_images, name)
+        logger("Writing benchmark webpage: {}", name)
+        with open(f"{name}/index.html", "w") as f:
+            f.write(html)
 
     # Make webpages
     gen_dir = path.split(base)[1]
-    html, latex_table = make_main_page(benchmarks_datas)
+    html = make_main_page(gen_dir ,benchmark_names, benchmarks_datas)
     logger("Writing main index.html")
     logger("Writing main .tex")
     os.chdir(base)
     os.chdir("..")
 
+    latex_table = make_latex_table(latex_table_data)
+    # TODO: split table parts
     with open("table.tex", "w") as f:
         f.write(latex_table)
 
@@ -393,9 +479,7 @@ def main(argv):
 if __name__ == "__main__":
     return_code = 0
     try:
-        # ar = ["py", "/Users/yashlad/workspace/megalibm/nightlies/1688682758/generated"]
         return_code = main(sys.argv)
-        # return_code = main(ar)
     except KeyboardInterrupt:
         print("Goodbye")
 

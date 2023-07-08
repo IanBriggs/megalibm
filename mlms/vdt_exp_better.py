@@ -3,7 +3,11 @@ import lambdas
 
 from interval import Interval
 from lambdas import *
+from lambdas.types import Impl
 from numeric_types import FP64
+from fpcore.interface import *
+from synthesize import paper_synthesize
+
 
 libm_func_name = "libm_vdt_exp"
 
@@ -18,14 +22,10 @@ reference_filename = "vdt_exp.c"
 exp = fpcore.parse("(FPCore (x) (exp x))")
 log_2 = fpcore.parse_expr("(log 2)")
 
-exp_poly = \
-    Horner(
-        MinimaxPolynomial(
-            exp,
-            Interval("(- (/ (log 2) 2))",
-                     "(/ (log 2) 2)"),
-            11),
-        split=1)
+x = fpcore.interface.var("x")
+h = Hole(Impl(exp, Interval("(- (/ (log 2) 2))",
+                     "(/ (log 2) 2)")))
+exp_poly = paper_synthesize(h, tools=["fpminimax"], terms=[11])[0]
 
 lambda_expression = \
     Additive(log_2,
