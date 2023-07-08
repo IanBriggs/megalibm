@@ -31,7 +31,6 @@ log_2 = fpcore.parse_expr("(log 2)")
 
 
 # TODO: Ian, don't know how to pass split=2 to paper_synthesize
-x = fpcore.interface.var("x")
 h = Hole(Impl(exp, Interval("(- (/ (log 2) 2))",
                      "(/ (log 2) 2)")))
 exp_poly = paper_synthesize(h, tools=["fpminimax"], terms=[11], scheme="estrin")[0]
