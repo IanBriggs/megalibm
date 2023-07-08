@@ -479,9 +479,7 @@ def main(argv):
 if __name__ == "__main__":
     return_code = 0
     try:
-        ar = ["py", "/Users/yashlad/workspace/megalibm/nightlies/1688763981/generated"]
-        # return_code = main(sys.argv)
-        return_code = main(ar)
+        return_code = main(sys.argv)
     except KeyboardInterrupt:
         print("Goodbye")
 
