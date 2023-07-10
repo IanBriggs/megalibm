@@ -1,12 +1,7 @@
 
-from bs4 import BeautifulSoup
-import requests
 import datetime
 import os.path as path
 import sys
-
-from urllib.request import urlopen
-from urllib.request import HTTPError
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -189,95 +184,33 @@ def read_data_local(ruler, megalibm):
             for type in ["error", "timing"]:
             
                 # Read the file
+                
                 fname = f"{dirname}{type}_data_{i}.json"
                 print("  {}", fname)
-                with open(fname, 'r') as f:
 
-                    page = f.read()
-                    one_run = json.load(page)
-                    # print(one_run)
-                    # with open(f"oopsla23/{mode}/{fname.split('/')[-2] + '/' + fname.split('/')[-1]}", "w") as f:
-                    #    f.write(json.dumps(one_run))
+                try: 
+                    with open(fname, 'r') as f:
 
-                    benchmark_data[i][type] = one_run
-                    # print(f"I made it with {dirname} and {i}, {type}")
-        
-                    # Since json doesn't like nan, we encode nan as a string
-                    # print("this is one run")
-                    # print(one_run)
-                    if type == "error":
-                        for fname in one_run["functions"]:
-                            for dname in one_run["functions"][fname]:
-                                data = one_run["functions"][fname][dname]
-                                data = [float(item) for item in data]
-                                one_run["functions"][fname][dname] = data
-                    
-    
-        # Light data validation
-        # print(benchmark_data)
-        # print(i)
-        # print(result)
-        if "error" in benchmark_data[0]:
-            name = benchmark_data[0]["error"]["name"]
-            print(name)
-            body = benchmark_data[0]["error"]["body"]
-            for domain, data in benchmark_data.items():
-                for type, data in data.items():
-                    assert name == data["name"], "Wrong name!"
-                    assert body == data["body"], "Wrong body!"
-            # print(benchmark_data[0].keys())
-            result[mode] = benchmark_data
-            # print(result[mode][0].keys())
+                        page = f.read()
+                        one_run = json.loads(page)
+                        # print(one_run)
+                        # with open(f"oopsla23/{mode}/{fname.split('/')[-2] + '/' + fname.split('/')[-1]}", "w") as f:
+                        #    f.write(json.dumps(one_run))
 
-    # print("will ret")
-    # print(result[0][0].keys())
+                        benchmark_data[i][type] = one_run
+                        # print(f"I made it with {dirname} and {i}, {type}")
 
-    return (result[0], result[1])
-
-
-
-def read_data(ruler, megalibm):
-# def read_data(dirname):
-
-    # For each domain size
-    result = [None, None]
-    for mode, dirname in enumerate([ruler, megalibm]):
-        print("Reading from directory: {}", dirname)
-        benchmark_data = dict()
-        for i in range(4):
-            benchmark_data[i] = dict()
-    
-            # For the two measurement types
-            for type in ["error", "timing"]:
-            
-                # Read the file
-                fname = f"{dirname}{type}_data_{i}.json"
-                print("  {}", fname)
-                try:
-                    page = urlopen(fname)
-                    one_run = json.load(page)
-                    # print(one_run)
-                    with open(f"oopsla23/{mode}/{fname.split('/')[-2] + '/' + fname.split('/')[-1]}", "w") as f:
-                       f.write(json.dumps(one_run))
-
-                    benchmark_data[i][type] = one_run
-                    # print(f"I made it with {dirname} and {i}, {type}")
-        
-                    # Since json doesn't like nan, we encode nan as a string
-                    # print("this is one run")
-                    # print(one_run)
-                    if type == "error":
-                        for fname in one_run["functions"]:
-                            for dname in one_run["functions"][fname]:
-                                data = one_run["functions"][fname][dname]
-                                data = [float(item) for item in data]
-                                one_run["functions"][fname][dname] = data
-                except HTTPError as err:
-                    # if error, then...
-                    # one_run = None
-                    print("ERROR!")
-                    # print(result[0][0].keys())
-                    
+                        # Since json doesn't like nan, we encode nan as a string
+                        # print("this is one run")
+                        # print(one_run)
+                        if type == "error":
+                            for fname in one_run["functions"]:
+                                for dname in one_run["functions"][fname]:
+                                    data = one_run["functions"][fname][dname]
+                                    data = [float(item) for item in data]
+                                    one_run["functions"][fname][dname] = data
+                except FileNotFoundError:
+                    print(f"{fname} does not exist!")
     
         # Light data validation
         # print(benchmark_data)
@@ -502,7 +435,7 @@ def main(argv):
     list_ruler = listFD(base_ruler, ext)
     list_megalibm = listFD(base_megalibm, ext)
 
-    benchmarks = list(set(list_ruler + list_megalibm))
+    benchmarks = list(set([f"{x}/" for x in list_ruler + list_megalibm]))
     print(benchmarks)
 
     # # Look through directory contents
