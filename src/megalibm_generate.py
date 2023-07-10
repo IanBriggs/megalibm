@@ -327,10 +327,10 @@ def handle_work_item(func):
         os.mkdir("generated")
     os.chdir("generated")
     did_generation = False
-    try:
-        did_generation = generate_all_code(func, domain)
-    except Exception as e:
-        logger.warning("Caught exception {}", e)
+    # try:
+    did_generation = generate_all_code(func, domain)
+    # except Exception as e:
+        # logger.warning("Caught exception {}", e)
     if not did_generation:
         logger.warning("Unable to generate for {}", c_ize_name(func))
     os.chdir(start)
