@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 # kick the tires
 mkdir results

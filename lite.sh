@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 # for this one, we're running megalibm from pre-set renumo rules
 # we want to generate the comparison between baseline and new here.
