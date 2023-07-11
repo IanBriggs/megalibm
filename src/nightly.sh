@@ -7,7 +7,7 @@ set -e
 SCRIPT_DIR=$(dirname "${0}")
 SCRIPT_LOCATION=$(readlink -f "${SCRIPT_DIR}")
 GIT_LOCATION=$(cd "${SCRIPT_LOCATION}" && cd .. && pwd)
-NIGHTLIES_LOCATION=${GIT_LOCATION}/nightlies
+NIGHTLIES_LOCATION=${GIT_LOCATION}/results/
 
 # Benchmarks
 BENCH_CORE=${GIT_LOCATION}/benchmarks/core_*.fpcore
@@ -43,7 +43,7 @@ if [ $# -gt 0 ]; then
 fi
 
 # Data
-NIGHTLY_TIMESTAMP=$(date +%s)
+NIGHTLY_TIMESTAMP="run"
 CORES="$(getconf _NPROCESSORS_ONLN)"
 THIS_NIGHTLY_LOCATION=${NIGHTLIES_LOCATION}/${NIGHTLY_TIMESTAMP}
 

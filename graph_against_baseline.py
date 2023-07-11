@@ -165,7 +165,7 @@ def plot_pareto_front(title, benchmark_data):
     fig.tight_layout()
 
     # Save and close
-    plt.savefig("plots/" + out_name, dpi=100)
+    plt.savefig("results/plots/" + out_name, dpi=100)
     plt.close()
 
     return out_name
@@ -382,12 +382,9 @@ def make_main_page(benchmark_names, pareto_images ):
 def parse_arguments(argv):
     parser = argparse.ArgumentParser(
         description='')
-    parser.add_argument("-r", "--ruler",
+    parser.add_argument("-d", "--directory",
                         type=str,
-                        help="Redirect logging to given file.")
-    parser.add_argument("-m", "--megalibm",
-                        type=str,
-                        help="Redirect logging to given file.")
+                        help="Load results from given directory.")
     # parser.add_argument("dirname",
     #                     help="Directory with the generated functions and data")
     args = parser.parse_args(argv[1:])
@@ -408,13 +405,12 @@ def parse_arguments(argv):
 def main(argv):
     # data location should be latest run... e.g. http://nightly.cs.washington.edu/reports/megalibm/1679665857/generated/core_function_asin/error_data_1.json
     args = parse_arguments(argv)
-
+    
     # 1679665857
 
-    # base = path.abspath(args.dirname)
-    base_ruler = f"http://nightly.cs.washington.edu/reports/megalibm/{args.ruler}/generated/"
-    base_megalibm = f"http://nightly.cs.washington.edu/reports/megalibm/{args.megalibm}/generated/"
+    base_ruler = args.directory
     
+    # need to have an option to run fresh 
     base_ruler = "oopsla23/tool/"
     base_megalibm = "oopsla23/megalibm/"
 
@@ -493,8 +489,8 @@ def main(argv):
 
     # Make webpages
     html = make_main_page(benchmark_names, pareto_images)
-    print("Writing main index.html")
-    with open("index.html", "w") as f:
+    print("Writing pareto.html")
+    with open("results/pareto.html", "w") as f:
         f.write(html)
 
 if __name__ == "__main__":
