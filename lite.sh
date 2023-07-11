@@ -13,4 +13,4 @@ make
 make nightly
 
 # now run comparison 
-python graph_against_baseline.py --directory=results/run/
+python graph_against_baseline.py --directory=results/run/generated/

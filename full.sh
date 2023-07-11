@@ -9,12 +9,12 @@
 cargo test --release --package ruler --test exponential -- test::run --exact --nocapture >> out/log.txt
 cargo test --release --package ruler --test rational    -- test::run --exact --nocapture >> out/log.txt
 cargo test --release --package ruler --test trig        -- test::run --exact --nocapture >> out/log.txt
-cp ../../../nightly/data/output.json *
+cp ../../../nightly/data/output.json .
 
 make
 make nightly
 
 # now run comparison 
-python graph_against_baseline.py --directory=nightlies/run/
+python graph_against_baseline.py --directory=nightlies/run/generated/
 
 # also, write to results
