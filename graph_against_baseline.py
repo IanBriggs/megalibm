@@ -411,7 +411,7 @@ def main(argv):
     base_ruler = args.directory
     
     # need to have an option to run fresh 
-    base_ruler = "oopsla23/tool/"
+    # base_ruler = "oopsla23/tool/"
     base_megalibm = "oopsla23/megalibm/"
 
     benchmark_names = list()
