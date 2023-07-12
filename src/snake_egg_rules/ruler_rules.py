@@ -180,9 +180,9 @@ def scrape_and_grab_json():
     DOMS_TO_COMBINE = ['rational_replicate', 'exponential', 'trig']
     TYPE_NAME = "baseline"
     # OPTIONAL_DOMS = ['trig']
-
+    all_rules = []
     # rule_save_path = "ruler_rules/"
-    with open("output.json", "r") as f:
+    with open("../../output.json", "r") as f:
         page = f.read()
         json_file = json.loads(page)
         # json_file = json.load(urlopen(page_to_scrape))
