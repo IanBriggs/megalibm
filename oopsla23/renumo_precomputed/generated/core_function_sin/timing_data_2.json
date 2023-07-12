@@ -1,0 +1,39 @@
+{
+  "name": "core_function_sin",
+  "body": "<pre>\n(FPCore \"core function sin\" (x)\n    :name \"core function sin\"\n    :pre (<= (- INFINITY) x INFINITY)\n  (sin x))\n</pre>",
+  "functions": {
+    "libm_core_function_sin": {
+      "avg_time_per_sample": 7.17912598e+00
+    },
+    "my_core_function_sin_0": {
+      "avg_time_per_sample": 7.42307129e+00
+    },
+    "my_core_function_sin_1": {
+      "avg_time_per_sample": 7.75917969e+00
+    },
+    "my_core_function_sin_2": {
+      "avg_time_per_sample": 9.25202637e+00
+    },
+    "my_core_function_sin_3": {
+      "avg_time_per_sample": 9.04355469e+00
+    },
+    "my_core_function_sin_4": {
+      "avg_time_per_sample": 1.02404297e+01
+    },
+    "my_core_function_sin_5": {
+      "avg_time_per_sample": 9.93784180e+00
+    },
+    "my_core_function_sin_6": {
+      "avg_time_per_sample": 1.04909912e+01
+    },
+    "my_core_function_sin_7": {
+      "avg_time_per_sample": 1.07807129e+01
+    },
+    "my_core_function_sin_8": {
+      "avg_time_per_sample": 1.01366699e+01
+    },
+    "my_core_function_sin_9": {
+      "avg_time_per_sample": 1.02138672e+01
+    }
+  }
+}

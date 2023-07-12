@@ -1,0 +1,33 @@
+{
+  "name": "core_function_tan",
+  "body": "<pre>\n(FPCore \"core function tan\" (x)\n    :name \"core function tan\"\n    :pre (<= (- INFINITY) x INFINITY)\n  (tan x))\n</pre>",
+  "functions": {
+    "libm_core_function_tan": {
+      "avg_time_per_sample": 1.01853271e+01
+    },
+    "my_core_function_tan_0": {
+      "avg_time_per_sample": 7.42365723e+00
+    },
+    "my_core_function_tan_1": {
+      "avg_time_per_sample": 7.63081055e+00
+    },
+    "my_core_function_tan_2": {
+      "avg_time_per_sample": 7.59404297e+00
+    },
+    "my_core_function_tan_3": {
+      "avg_time_per_sample": 7.85429688e+00
+    },
+    "my_core_function_tan_4": {
+      "avg_time_per_sample": 1.05456787e+01
+    },
+    "my_core_function_tan_5": {
+      "avg_time_per_sample": 1.00079834e+01
+    },
+    "my_core_function_tan_6": {
+      "avg_time_per_sample": 1.02689453e+01
+    },
+    "my_core_function_tan_7": {
+      "avg_time_per_sample": 9.99865723e+00
+    }
+  }
+}

@@ -1,0 +1,209 @@
+<!doctype html>
+<meta charset="UTF-8">
+<html>
+
+<head>
+    <title>core_function_cos Results for 2023-7-11</title>
+    <link rel="stylesheet" href="../../style.css">
+</head>
+
+<body>
+    <div class="rounded-box top-box">
+        <h1 class="main-title">core_function_cos</h1>
+        <div class="fpcore">
+            <pre>
+(FPCore "core function cos" (x)
+:name "core function cos"
+:pre (<= (- INFINITY) x INFINITY)
+  (cos x))
+</pre>
+        </div>
+        <h2 class="subtitle">Legend</h2>
+        <ul class="legend">
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #7e1e9c"></div>
+            <span class=legend>Gen 0: (periodic (+ PI PI) (Horner (MinimaxPolynomial (cos x) [0.0 (+ PI PI)])))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #15b01a"></div>
+            <span class=legend>Gen 1: (periodic (+ PI PI) (Horner (MinimaxPolynomial (cos x) [(/ (* PI (- 2)) 2) (/ (+ PI PI) 2)])))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #0343df"></div>
+            <span class=legend>Gen 2: (periodic (+ PI PI) (MirrorLeft (- x) (Horner (MinimaxPolynomial (cos x) [PI (+ PI PI)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ff81c0"></div>
+            <span class=legend>Gen 3: (periodic (+ PI PI) (MirrorRight (- x) (Horner (MinimaxPolynomial (cos x) [0.0 PI]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #653700"></div>
+            <span class=legend>Gen 4: (periodic (+ PI PI) (MirrorLeft (- (* x (- 2)) (- (* x (- 2)) x)) (Horner (MinimaxPolynomial (cos x) [0 (/ (+ PI PI) 2)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #e50000"></div>
+            <span class=legend>Gen 5: (periodic (+ PI PI) (MirrorLeft (- (+ (* x 2) (* x 2)) (- x (* x (- 2)))) (Horner (MinimaxPolynomial (cos x) [0 (/ (+ PI PI) 2)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #95d0fc"></div>
+            <span class=legend>Gen 6: (periodic (+ PI PI) (MirrorLeft (- (* x 2) x) (Horner (MinimaxPolynomial (cos x) [0 (/ (+ PI PI) 2)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #029386"></div>
+            <span class=legend>Gen 7: (periodic (+ PI PI) (MirrorLeft (/ (* x 2) 2) (Horner (MinimaxPolynomial (cos x) [0 (/ (+ PI PI) 2)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #f97306"></div>
+            <span class=legend>Gen 8: (periodic (+ PI PI) (MirrorLeft (- (- x (* x (- 2))) (* x 2)) (Horner (MinimaxPolynomial (cos x) [0 (/ (+ PI PI) 2)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #96f97b"></div>
+            <span class=legend>Gen 9: (periodic (+ PI PI) (MirrorLeft (* x (pow x 0)) (Horner (MinimaxPolynomial (cos x) [0 (/ (+ PI PI) 2)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #c20078"></div>
+            <span class=legend>Gen 10: (periodic (+ PI PI) (MirrorLeft (+ (+ (* x 2) (* x 2)) (- (* x (- 2)) x)) (Horner (MinimaxPolynomial (cos x) [0 (/ (+ PI PI) 2)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ffff14"></div>
+            <span class=legend>Gen 11: (periodic (+ PI PI) (MirrorRight (- (* x (- 2)) (- (* x (- 2)) x)) (Horner (MinimaxPolynomial (cos x) [(/ (* PI (- 2)) 2) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #75bbfd"></div>
+            <span class=legend>Gen 12: (periodic (+ PI PI) (MirrorRight (- (+ (* x 2) (* x 2)) (- x (* x (- 2)))) (Horner (MinimaxPolynomial (cos x) [(/ (* PI (- 2)) 2) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #929591"></div>
+            <span class=legend>Gen 13: (periodic (+ PI PI) (MirrorRight (- (* x 2) x) (Horner (MinimaxPolynomial (cos x) [(/ (* PI (- 2)) 2) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #89fe05"></div>
+            <span class=legend>Gen 14: (periodic (+ PI PI) (MirrorRight (/ (* x 2) 2) (Horner (MinimaxPolynomial (cos x) [(/ (* PI (- 2)) 2) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #bf77f6"></div>
+            <span class=legend>Gen 15: (periodic (+ PI PI) (MirrorRight (- (- x (* x (- 2))) (* x 2)) (Horner (MinimaxPolynomial (cos x) [(/ (* PI (- 2)) 2) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #9a0eea"></div>
+            <span class=legend>Gen 16: (periodic (+ PI PI) (MirrorRight (* x (pow x 0)) (Horner (MinimaxPolynomial (cos x) [(/ (* PI (- 2)) 2) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #033500"></div>
+            <span class=legend>Gen 17: (periodic (+ PI PI) (MirrorRight (+ (+ (* x 2) (* x 2)) (- (* x (- 2)) x)) (Horner (MinimaxPolynomial (cos x) [(/ (* PI (- 2)) 2) 0]))))</span>
+        </li>
+        </ul>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 0: [-32.0, 32.0]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_0_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_0_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_0_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_0_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 1: [-8.0, 8.0]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_1_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_1_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_1_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_1_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 2: [-2.0, 2.0]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_2_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_2_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_2_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_2_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 3: [-1.0, 1.0]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_3_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_3_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_3_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_cos_domain_3_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
