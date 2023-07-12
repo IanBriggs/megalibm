@@ -1,0 +1,207 @@
+{
+  "name": "core_function_sin",
+  "body": "<pre>\n(FPCore \"core function sin\" (x)\n    :name \"core function sin\"\n    :pre (<= (- INFINITY) x INFINITY)\n  (sin x))\n</pre>",
+  "functions": {
+    "libm_core_function_sin": {
+      "avg_time_per_sample": 1.29911133e+01
+    },
+    "my_core_function_sin_0": {
+      "avg_time_per_sample": 7.40925293e+00
+    },
+    "my_core_function_sin_1": {
+      "avg_time_per_sample": 8.00139160e+00
+    },
+    "my_core_function_sin_2": {
+      "avg_time_per_sample": 7.33779297e+00
+    },
+    "my_core_function_sin_3": {
+      "avg_time_per_sample": 8.13430176e+00
+    },
+    "my_core_function_sin_4": {
+      "avg_time_per_sample": 7.81926270e+00
+    },
+    "my_core_function_sin_5": {
+      "avg_time_per_sample": 7.80800781e+00
+    },
+    "my_core_function_sin_6": {
+      "avg_time_per_sample": 1.12217285e+01
+    },
+    "my_core_function_sin_7": {
+      "avg_time_per_sample": 1.10784912e+01
+    },
+    "my_core_function_sin_8": {
+      "avg_time_per_sample": 1.17092529e+01
+    },
+    "my_core_function_sin_9": {
+      "avg_time_per_sample": 1.06231445e+01
+    },
+    "my_core_function_sin_10": {
+      "avg_time_per_sample": 1.08362305e+01
+    },
+    "my_core_function_sin_11": {
+      "avg_time_per_sample": 1.12422119e+01
+    },
+    "my_core_function_sin_12": {
+      "avg_time_per_sample": 1.16621826e+01
+    },
+    "my_core_function_sin_13": {
+      "avg_time_per_sample": 1.14442139e+01
+    },
+    "my_core_function_sin_14": {
+      "avg_time_per_sample": 1.05969482e+01
+    },
+    "my_core_function_sin_15": {
+      "avg_time_per_sample": 1.16861084e+01
+    },
+    "my_core_function_sin_16": {
+      "avg_time_per_sample": 1.02632080e+01
+    },
+    "my_core_function_sin_17": {
+      "avg_time_per_sample": 1.03402832e+01
+    },
+    "my_core_function_sin_18": {
+      "avg_time_per_sample": 1.14491943e+01
+    },
+    "my_core_function_sin_19": {
+      "avg_time_per_sample": 1.05057373e+01
+    },
+    "my_core_function_sin_20": {
+      "avg_time_per_sample": 1.03444092e+01
+    },
+    "my_core_function_sin_21": {
+      "avg_time_per_sample": 1.04718506e+01
+    },
+    "my_core_function_sin_22": {
+      "avg_time_per_sample": 1.11748535e+01
+    },
+    "my_core_function_sin_23": {
+      "avg_time_per_sample": 1.11271240e+01
+    },
+    "my_core_function_sin_24": {
+      "avg_time_per_sample": 1.10777100e+01
+    },
+    "my_core_function_sin_25": {
+      "avg_time_per_sample": 1.03992432e+01
+    },
+    "my_core_function_sin_26": {
+      "avg_time_per_sample": 1.02596680e+01
+    },
+    "my_core_function_sin_27": {
+      "avg_time_per_sample": 1.09357422e+01
+    },
+    "my_core_function_sin_28": {
+      "avg_time_per_sample": 1.04708984e+01
+    },
+    "my_core_function_sin_29": {
+      "avg_time_per_sample": 1.06633545e+01
+    },
+    "my_core_function_sin_30": {
+      "avg_time_per_sample": 1.09569336e+01
+    },
+    "my_core_function_sin_31": {
+      "avg_time_per_sample": 1.06765381e+01
+    },
+    "my_core_function_sin_32": {
+      "avg_time_per_sample": 1.24005371e+01
+    },
+    "my_core_function_sin_33": {
+      "avg_time_per_sample": 1.13387451e+01
+    },
+    "my_core_function_sin_34": {
+      "avg_time_per_sample": 1.05994385e+01
+    },
+    "my_core_function_sin_35": {
+      "avg_time_per_sample": 1.15501953e+01
+    },
+    "my_core_function_sin_36": {
+      "avg_time_per_sample": 1.17938721e+01
+    },
+    "my_core_function_sin_37": {
+      "avg_time_per_sample": 1.12581055e+01
+    },
+    "my_core_function_sin_38": {
+      "avg_time_per_sample": 1.15740723e+01
+    },
+    "my_core_function_sin_39": {
+      "avg_time_per_sample": 1.11851563e+01
+    },
+    "my_core_function_sin_40": {
+      "avg_time_per_sample": 1.08436279e+01
+    },
+    "my_core_function_sin_41": {
+      "avg_time_per_sample": 1.01973389e+01
+    },
+    "my_core_function_sin_42": {
+      "avg_time_per_sample": 1.05121094e+01
+    },
+    "my_core_function_sin_43": {
+      "avg_time_per_sample": 1.05422607e+01
+    },
+    "my_core_function_sin_44": {
+      "avg_time_per_sample": 1.12913818e+01
+    },
+    "my_core_function_sin_45": {
+      "avg_time_per_sample": 1.01895508e+01
+    },
+    "my_core_function_sin_46": {
+      "avg_time_per_sample": 1.05836426e+01
+    },
+    "my_core_function_sin_47": {
+      "avg_time_per_sample": 1.02968750e+01
+    },
+    "my_core_function_sin_48": {
+      "avg_time_per_sample": 1.03552002e+01
+    },
+    "my_core_function_sin_49": {
+      "avg_time_per_sample": 1.13264893e+01
+    },
+    "my_core_function_sin_50": {
+      "avg_time_per_sample": 1.01886475e+01
+    },
+    "my_core_function_sin_51": {
+      "avg_time_per_sample": 1.04571533e+01
+    },
+    "my_core_function_sin_52": {
+      "avg_time_per_sample": 1.07678223e+01
+    },
+    "my_core_function_sin_53": {
+      "avg_time_per_sample": 1.02123535e+01
+    },
+    "my_core_function_sin_54": {
+      "avg_time_per_sample": 1.09330811e+01
+    },
+    "my_core_function_sin_55": {
+      "avg_time_per_sample": 1.05540039e+01
+    },
+    "my_core_function_sin_56": {
+      "avg_time_per_sample": 1.09096436e+01
+    },
+    "my_core_function_sin_57": {
+      "avg_time_per_sample": 1.08456055e+01
+    },
+    "my_core_function_sin_58": {
+      "avg_time_per_sample": 1.12496338e+01
+    },
+    "my_core_function_sin_59": {
+      "avg_time_per_sample": 1.12881836e+01
+    },
+    "my_core_function_sin_60": {
+      "avg_time_per_sample": 1.09683105e+01
+    },
+    "my_core_function_sin_61": {
+      "avg_time_per_sample": 1.12354248e+01
+    },
+    "my_core_function_sin_62": {
+      "avg_time_per_sample": 1.07649658e+01
+    },
+    "my_core_function_sin_63": {
+      "avg_time_per_sample": 1.08877441e+01
+    },
+    "my_core_function_sin_64": {
+      "avg_time_per_sample": 1.03841064e+01
+    },
+    "my_core_function_sin_65": {
+      "avg_time_per_sample": 1.05189453e+01
+    }
+  }
+}

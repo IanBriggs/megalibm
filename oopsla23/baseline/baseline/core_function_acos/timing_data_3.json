@@ -1,0 +1,18 @@
+{
+  "name": "core_function_acos",
+  "body": "<pre>\n(FPCore \"core function acos\" (x)\n    :name \"core function acos\"\n    :pre (<= (- 1) x 1)\n  (acos x))\n</pre>",
+  "functions": {
+    "libm_core_function_acos": {
+      "avg_time_per_sample": 3.90734863e+00
+    },
+    "my_core_function_acos_0": {
+      "avg_time_per_sample": 5.65930176e+00
+    },
+    "my_core_function_acos_1": {
+      "avg_time_per_sample": 7.02543945e+00
+    },
+    "my_core_function_acos_2": {
+      "avg_time_per_sample": 7.15551758e+00
+    }
+  }
+}

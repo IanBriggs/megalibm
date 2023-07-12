@@ -1,0 +1,170 @@
+<!doctype html>
+<meta charset="UTF-8">
+<html>
+
+<head>
+    <title>Main Megalibm Results for 2023-7-12</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="rounded-box top-box">
+        <h1 class="main-title">General Metrics</h1>
+        <p class="description">
+            Each benchmark has 4 different domains that we examine for
+            both error and speed.
+
+            For each of these we create a plot shown here providing an
+            overview of generated functions as well as the default libm
+            on the system.
+
+            These plots show error and speed normalized such that the
+            system libm is [1,1].
+
+            Error is on the X axis, with further to the left being
+            higher error.
+
+            Specifically, this is the maximum relative error found from
+            sampling thea domain.
+
+            Speedup is on the Y axis, with further up being faster code.
+
+            All points are plotted, but the pareto front is plotted as
+            a stepped line.
+        </p>
+        <h2 class="subtitle">TL:DR</h2>
+        <p class="description">
+        <ul class="description">
+            <li>up and right are better</li>
+            <li>blue dot is libm</li>
+            <li>orange dots are generated</li>
+            <li>line shows best generated</li>
+        </ul>
+        </p>
+    </div>
+    <div class="rounded-box top-box">
+        <h1 class="main-title">Summary</h1>
+        <p class="summary">
+        <ul class="summary">
+            <li>Generated always worse 😞: 4</li>
+            <li>Generated sometimes better 🙂: 12</li>
+            <li>Generated always better 😀: 0</li>
+            <li>Something went wrong 😕: 0</li>
+        </ul>
+        </p>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">
+            <a href="baseline/core_function_acos/index.html">core_function_acos</a>
+        </h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_acos/core_function_acos_domain_0_pareto.png">
+                </div>
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_acos/core_function_acos_domain_1_pareto.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_acos/core_function_acos_domain_2_pareto.png">
+                </div>
+                <div class="plot">
+                    <div class="emoji-indicator">😞</div>
+                    <img class="plot-image" src="baseline/core_function_acos/core_function_acos_domain_3_pareto.png">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">
+            <a href="baseline/core_function_asin/index.html">core_function_asin</a>
+        </h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_asin/core_function_asin_domain_0_pareto.png">
+                </div>
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_asin/core_function_asin_domain_1_pareto.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_asin/core_function_asin_domain_2_pareto.png">
+                </div>
+                <div class="plot">
+                    <div class="emoji-indicator">😞</div>
+                    <img class="plot-image" src="baseline/core_function_asin/core_function_asin_domain_3_pareto.png">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">
+            <a href="baseline/core_function_cos/index.html">core_function_cos</a>
+        </h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_cos/core_function_cos_domain_0_pareto.png">
+                </div>
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_cos/core_function_cos_domain_1_pareto.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_cos/core_function_cos_domain_2_pareto.png">
+                </div>
+                <div class="plot">
+                    <div class="emoji-indicator">😞</div>
+                    <img class="plot-image" src="baseline/core_function_cos/core_function_cos_domain_3_pareto.png">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">
+            <a href="baseline/core_function_sin/index.html">core_function_sin</a>
+        </h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_sin/core_function_sin_domain_0_pareto.png">
+                </div>
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_sin/core_function_sin_domain_1_pareto.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <div class="emoji-indicator">🙂</div>
+                    <img class="plot-image" src="baseline/core_function_sin/core_function_sin_domain_2_pareto.png">
+                </div>
+                <div class="plot">
+                    <div class="emoji-indicator">😞</div>
+                    <img class="plot-image" src="baseline/core_function_sin/core_function_sin_domain_3_pareto.png">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -19,5 +19,5 @@ cp -r results/run/generated results/generated
 cp results/run/index.html results/renumo_run.html
 cp results/run/style.css results/style.css
 
-cp -r oopsla23/baseline/generated results/baseline
+cp -r oopsla23/baseline/baseline results/baseline
 cp oopsla23/baseline/index.html results/baseline.html

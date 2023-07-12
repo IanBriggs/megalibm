@@ -1,0 +1,18 @@
+{
+  "name": "core_function_asin",
+  "body": "<pre>\n(FPCore \"core function asin\" (x)\n    :name \"core function asin\"\n    :pre (<= (- 1) x 1)\n  (asin x))\n</pre>",
+  "functions": {
+    "libm_core_function_asin": {
+      "avg_time_per_sample": 7.32504883e+00
+    },
+    "my_core_function_asin_0": {
+      "avg_time_per_sample": 5.13127441e+00
+    },
+    "my_core_function_asin_1": {
+      "avg_time_per_sample": 5.86911621e+00
+    },
+    "my_core_function_asin_2": {
+      "avg_time_per_sample": 6.11867676e+00
+    }
+  }
+}

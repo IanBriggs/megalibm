@@ -1,0 +1,134 @@
+<!doctype html>
+<meta charset="UTF-8">
+<html>
+
+<head>
+    <title>core_function_acos Results for 2023-7-12</title>
+    <link rel="stylesheet" href="../../style.css">
+</head>
+
+<body>
+    <div class="rounded-box top-box">
+        <h1 class="main-title">core_function_acos</h1>
+        <div class="fpcore">
+            <pre>
+(FPCore "core function acos" (x)
+:name "core function acos"
+:pre (<= (- 1) x 1)
+  (acos x))
+</pre>
+        </div>
+        <h2 class="subtitle">Legend</h2>
+        <ul class="legend">
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #7e1e9c"></div>
+            <span class=legend>Gen 0: (Horner (MinimaxPolynomial (acos x) [(- 1) 1]))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #15b01a"></div>
+            <span class=legend>Gen 1: (MirrorLeft (- PI x) (Horner (MinimaxPolynomial (acos x) [0 1])))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #0343df"></div>
+            <span class=legend>Gen 2: (MirrorRight (- PI x) (Horner (MinimaxPolynomial (acos x) [(- 1) 0])))</span>
+        </li>
+        </ul>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 0: [-1.0, 1.0]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_0_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_0_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_0_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_0_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 1: [-0.5, 0.5]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_1_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_1_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_1_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_1_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 2: [-0.25, 0.25]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_2_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_2_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_2_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_2_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 3: [-0.125, 0.125]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_3_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_3_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_3_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_acos_domain_3_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,449 @@
+<!doctype html>
+<meta charset="UTF-8">
+<html>
+
+<head>
+    <title>core_function_sin Results for 2023-7-12</title>
+    <link rel="stylesheet" href="../../style.css">
+</head>
+
+<body>
+    <div class="rounded-box top-box">
+        <h1 class="main-title">core_function_sin</h1>
+        <div class="fpcore">
+            <pre>
+(FPCore "core function sin" (x)
+:name "core function sin"
+:pre (<= (- INFINITY) x INFINITY)
+  (sin x))
+</pre>
+        </div>
+        <h2 class="subtitle">Legend</h2>
+        <ul class="legend">
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #7e1e9c"></div>
+            <span class=legend>Gen 0: (periodic (* PI 6) (Horner (MinimaxPolynomial (sin x) [0.0 (* PI 6)])))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #15b01a"></div>
+            <span class=legend>Gen 1: (periodic (* PI 6) (Horner (MinimaxPolynomial (sin x) [(- (* PI 3)) (* PI 3)])))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #0343df"></div>
+            <span class=legend>Gen 2: (periodic (* PI 4) (Horner (MinimaxPolynomial (sin x) [0.0 (* PI 4)])))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ff81c0"></div>
+            <span class=legend>Gen 3: (periodic (* PI 4) (Horner (MinimaxPolynomial (sin x) [(- (+ PI PI)) (+ PI PI)])))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #653700"></div>
+            <span class=legend>Gen 4: (periodic (+ PI PI) (Horner (MinimaxPolynomial (sin x) [0.0 (+ PI PI)])))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #e50000"></div>
+            <span class=legend>Gen 5: (periodic (+ PI PI) (Horner (MinimaxPolynomial (sin x) [(- PI) PI])))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #95d0fc"></div>
+            <span class=legend>Gen 6: (periodic (* PI 6) (MirrorLeft (+ (- (- x 2)) (- 2)) (Horner (MinimaxPolynomial (sin x) [0 (* PI 3)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #029386"></div>
+            <span class=legend>Gen 7: (periodic (* PI 6) (MirrorLeft (- (+ (+ PI PI) (- (* PI 4) x)) (* PI 6)) (Horner (MinimaxPolynomial (sin x) [0 (* PI 3)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #f97306"></div>
+            <span class=legend>Gen 8: (periodic (* PI 6) (MirrorLeft (- (* PI 4) (+ x (* PI 4))) (Horner (MinimaxPolynomial (sin x) [0 (* PI 3)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #96f97b"></div>
+            <span class=legend>Gen 9: (periodic (* PI 6) (MirrorLeft (/ (* 2 x) (- 2)) (Horner (MinimaxPolynomial (sin x) [0 (* PI 3)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #c20078"></div>
+            <span class=legend>Gen 10: (periodic (* PI 6) (MirrorLeft (+ (- (- (- (+ PI PI)) (- (* PI 4) x))) (- (* PI 6))) (Horner (MinimaxPolynomial (sin x) [0 (* PI 3)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ffff14"></div>
+            <span class=legend>Gen 11: (periodic (* PI 6) (MirrorLeft (+ (- (- x 1)) (- 1)) (Horner (MinimaxPolynomial (sin x) [0 (* PI 3)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #75bbfd"></div>
+            <span class=legend>Gen 12: (periodic (* PI 6) (MirrorLeft (- (* PI 6) (+ (+ PI PI) (+ x (* PI 4)))) (Horner (MinimaxPolynomial (sin x) [0 (* PI 3)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #929591"></div>
+            <span class=legend>Gen 13: (periodic (* PI 6) (MirrorLeft (- (- (+ PI PI)) (- x (+ PI PI))) (Horner (MinimaxPolynomial (sin x) [0 (* PI 3)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #89fe05"></div>
+            <span class=legend>Gen 14: (periodic (* PI 6) (MirrorLeft (* (* 2 x) (- (/ 1 2))) (Horner (MinimaxPolynomial (sin x) [0 (* PI 3)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #bf77f6"></div>
+            <span class=legend>Gen 15: (periodic (* PI 6) (MirrorLeft (- x) (Horner (MinimaxPolynomial (sin x) [0 (* PI 3)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #9a0eea"></div>
+            <span class=legend>Gen 16: (periodic (* PI 6) (MirrorRight (+ (- (- x 2)) (- 2)) (Horner (MinimaxPolynomial (sin x) [(- (* PI 3)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #033500"></div>
+            <span class=legend>Gen 17: (periodic (* PI 6) (MirrorRight (- (+ (+ PI PI) (- (* PI 4) x)) (* PI 6)) (Horner (MinimaxPolynomial (sin x) [(- (* PI 3)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #06c2ac"></div>
+            <span class=legend>Gen 18: (periodic (* PI 6) (MirrorRight (- (* PI 4) (+ x (* PI 4))) (Horner (MinimaxPolynomial (sin x) [(- (* PI 3)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #c79fef"></div>
+            <span class=legend>Gen 19: (periodic (* PI 6) (MirrorRight (/ (* 2 x) (- 2)) (Horner (MinimaxPolynomial (sin x) [(- (* PI 3)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #00035b"></div>
+            <span class=legend>Gen 20: (periodic (* PI 6) (MirrorRight (+ (- (- (- (+ PI PI)) (- (* PI 4) x))) (- (* PI 6))) (Horner (MinimaxPolynomial (sin x) [(- (* PI 3)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #d1b26f"></div>
+            <span class=legend>Gen 21: (periodic (* PI 6) (MirrorRight (+ (- (- x 1)) (- 1)) (Horner (MinimaxPolynomial (sin x) [(- (* PI 3)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #00ffff"></div>
+            <span class=legend>Gen 22: (periodic (* PI 6) (MirrorRight (- (* PI 6) (+ (+ PI PI) (+ x (* PI 4)))) (Horner (MinimaxPolynomial (sin x) [(- (* PI 3)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #13eac9"></div>
+            <span class=legend>Gen 23: (periodic (* PI 6) (MirrorRight (- (- (+ PI PI)) (- x (+ PI PI))) (Horner (MinimaxPolynomial (sin x) [(- (* PI 3)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #06470c"></div>
+            <span class=legend>Gen 24: (periodic (* PI 6) (MirrorRight (* (* 2 x) (- (/ 1 2))) (Horner (MinimaxPolynomial (sin x) [(- (* PI 3)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ae7181"></div>
+            <span class=legend>Gen 25: (periodic (* PI 6) (MirrorRight (- x) (Horner (MinimaxPolynomial (sin x) [(- (* PI 3)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #35063e"></div>
+            <span class=legend>Gen 26: (periodic (* PI 4) (MirrorLeft (+ (- (- x 2)) (- 2)) (Horner (MinimaxPolynomial (sin x) [0 (+ PI PI)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #01ff07"></div>
+            <span class=legend>Gen 27: (periodic (* PI 4) (MirrorLeft (- (+ (+ PI PI) (- (* PI 4) x)) (* PI 6)) (Horner (MinimaxPolynomial (sin x) [0 (+ PI PI)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #650021"></div>
+            <span class=legend>Gen 28: (periodic (* PI 4) (MirrorLeft (- (* PI 4) (+ x (* PI 4))) (Horner (MinimaxPolynomial (sin x) [0 (+ PI PI)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #6e750e"></div>
+            <span class=legend>Gen 29: (periodic (* PI 4) (MirrorLeft (/ (* 2 x) (- 2)) (Horner (MinimaxPolynomial (sin x) [0 (+ PI PI)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ff796c"></div>
+            <span class=legend>Gen 30: (periodic (* PI 4) (MirrorLeft (+ (- (- (- (+ PI PI)) (- (* PI 4) x))) (- (* PI 6))) (Horner (MinimaxPolynomial (sin x) [0 (+ PI PI)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #e6daa6"></div>
+            <span class=legend>Gen 31: (periodic (* PI 4) (MirrorLeft (+ (- (- x 1)) (- 1)) (Horner (MinimaxPolynomial (sin x) [0 (+ PI PI)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #0504aa"></div>
+            <span class=legend>Gen 32: (periodic (* PI 4) (MirrorLeft (- (* PI 6) (+ (+ PI PI) (+ x (* PI 4)))) (Horner (MinimaxPolynomial (sin x) [0 (+ PI PI)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #001146"></div>
+            <span class=legend>Gen 33: (periodic (* PI 4) (MirrorLeft (- (- (+ PI PI)) (- x (+ PI PI))) (Horner (MinimaxPolynomial (sin x) [0 (+ PI PI)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #cea2fd"></div>
+            <span class=legend>Gen 34: (periodic (* PI 4) (MirrorLeft (* (* 2 x) (- (/ 1 2))) (Horner (MinimaxPolynomial (sin x) [0 (+ PI PI)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #000000"></div>
+            <span class=legend>Gen 35: (periodic (* PI 4) (MirrorLeft (- x) (Horner (MinimaxPolynomial (sin x) [0 (+ PI PI)]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ff028d"></div>
+            <span class=legend>Gen 36: (periodic (* PI 4) (MirrorRight (+ (- (- x 2)) (- 2)) (Horner (MinimaxPolynomial (sin x) [(- (+ PI PI)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ad8150"></div>
+            <span class=legend>Gen 37: (periodic (* PI 4) (MirrorRight (- (+ (+ PI PI) (- (* PI 4) x)) (* PI 6)) (Horner (MinimaxPolynomial (sin x) [(- (+ PI PI)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #c7fdb5"></div>
+            <span class=legend>Gen 38: (periodic (* PI 4) (MirrorRight (- (* PI 4) (+ x (* PI 4))) (Horner (MinimaxPolynomial (sin x) [(- (+ PI PI)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ffb07c"></div>
+            <span class=legend>Gen 39: (periodic (* PI 4) (MirrorRight (/ (* 2 x) (- 2)) (Horner (MinimaxPolynomial (sin x) [(- (+ PI PI)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #677a04"></div>
+            <span class=legend>Gen 40: (periodic (* PI 4) (MirrorRight (+ (- (- (- (+ PI PI)) (- (* PI 4) x))) (- (* PI 6))) (Horner (MinimaxPolynomial (sin x) [(- (+ PI PI)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #cb416b"></div>
+            <span class=legend>Gen 41: (periodic (* PI 4) (MirrorRight (+ (- (- x 1)) (- 1)) (Horner (MinimaxPolynomial (sin x) [(- (+ PI PI)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #8e82fe"></div>
+            <span class=legend>Gen 42: (periodic (* PI 4) (MirrorRight (- (* PI 6) (+ (+ PI PI) (+ x (* PI 4)))) (Horner (MinimaxPolynomial (sin x) [(- (+ PI PI)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #53fca1"></div>
+            <span class=legend>Gen 43: (periodic (* PI 4) (MirrorRight (- (- (+ PI PI)) (- x (+ PI PI))) (Horner (MinimaxPolynomial (sin x) [(- (+ PI PI)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #aaff32"></div>
+            <span class=legend>Gen 44: (periodic (* PI 4) (MirrorRight (* (* 2 x) (- (/ 1 2))) (Horner (MinimaxPolynomial (sin x) [(- (+ PI PI)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #380282"></div>
+            <span class=legend>Gen 45: (periodic (* PI 4) (MirrorRight (- x) (Horner (MinimaxPolynomial (sin x) [(- (+ PI PI)) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ceb301"></div>
+            <span class=legend>Gen 46: (periodic (+ PI PI) (MirrorLeft (+ (- (- x 2)) (- 2)) (Horner (MinimaxPolynomial (sin x) [0 PI]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ffd1df"></div>
+            <span class=legend>Gen 47: (periodic (+ PI PI) (MirrorLeft (- (+ (+ PI PI) (- (* PI 4) x)) (* PI 6)) (Horner (MinimaxPolynomial (sin x) [0 PI]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #7e1e9c"></div>
+            <span class=legend>Gen 48: (periodic (+ PI PI) (MirrorLeft (- (* PI 4) (+ x (* PI 4))) (Horner (MinimaxPolynomial (sin x) [0 PI]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #15b01a"></div>
+            <span class=legend>Gen 49: (periodic (+ PI PI) (MirrorLeft (/ (* 2 x) (- 2)) (Horner (MinimaxPolynomial (sin x) [0 PI]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #0343df"></div>
+            <span class=legend>Gen 50: (periodic (+ PI PI) (MirrorLeft (+ (- (- (- (+ PI PI)) (- (* PI 4) x))) (- (* PI 6))) (Horner (MinimaxPolynomial (sin x) [0 PI]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ff81c0"></div>
+            <span class=legend>Gen 51: (periodic (+ PI PI) (MirrorLeft (+ (- (- x 1)) (- 1)) (Horner (MinimaxPolynomial (sin x) [0 PI]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #653700"></div>
+            <span class=legend>Gen 52: (periodic (+ PI PI) (MirrorLeft (- (* PI 6) (+ (+ PI PI) (+ x (* PI 4)))) (Horner (MinimaxPolynomial (sin x) [0 PI]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #e50000"></div>
+            <span class=legend>Gen 53: (periodic (+ PI PI) (MirrorLeft (- (- (+ PI PI)) (- x (+ PI PI))) (Horner (MinimaxPolynomial (sin x) [0 PI]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #95d0fc"></div>
+            <span class=legend>Gen 54: (periodic (+ PI PI) (MirrorLeft (* (* 2 x) (- (/ 1 2))) (Horner (MinimaxPolynomial (sin x) [0 PI]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #029386"></div>
+            <span class=legend>Gen 55: (periodic (+ PI PI) (MirrorLeft (- x) (Horner (MinimaxPolynomial (sin x) [0 PI]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #f97306"></div>
+            <span class=legend>Gen 56: (periodic (+ PI PI) (MirrorRight (+ (- (- x 2)) (- 2)) (Horner (MinimaxPolynomial (sin x) [(- PI) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #96f97b"></div>
+            <span class=legend>Gen 57: (periodic (+ PI PI) (MirrorRight (- (+ (+ PI PI) (- (* PI 4) x)) (* PI 6)) (Horner (MinimaxPolynomial (sin x) [(- PI) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #c20078"></div>
+            <span class=legend>Gen 58: (periodic (+ PI PI) (MirrorRight (- (* PI 4) (+ x (* PI 4))) (Horner (MinimaxPolynomial (sin x) [(- PI) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #ffff14"></div>
+            <span class=legend>Gen 59: (periodic (+ PI PI) (MirrorRight (/ (* 2 x) (- 2)) (Horner (MinimaxPolynomial (sin x) [(- PI) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #75bbfd"></div>
+            <span class=legend>Gen 60: (periodic (+ PI PI) (MirrorRight (+ (- (- (- (+ PI PI)) (- (* PI 4) x))) (- (* PI 6))) (Horner (MinimaxPolynomial (sin x) [(- PI) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #929591"></div>
+            <span class=legend>Gen 61: (periodic (+ PI PI) (MirrorRight (+ (- (- x 1)) (- 1)) (Horner (MinimaxPolynomial (sin x) [(- PI) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #89fe05"></div>
+            <span class=legend>Gen 62: (periodic (+ PI PI) (MirrorRight (- (* PI 6) (+ (+ PI PI) (+ x (* PI 4)))) (Horner (MinimaxPolynomial (sin x) [(- PI) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #bf77f6"></div>
+            <span class=legend>Gen 63: (periodic (+ PI PI) (MirrorRight (- (- (+ PI PI)) (- x (+ PI PI))) (Horner (MinimaxPolynomial (sin x) [(- PI) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #9a0eea"></div>
+            <span class=legend>Gen 64: (periodic (+ PI PI) (MirrorRight (* (* 2 x) (- (/ 1 2))) (Horner (MinimaxPolynomial (sin x) [(- PI) 0]))))</span>
+        </li>
+
+        <li class=legend>
+            <div class=legend-color style="background-color: #033500"></div>
+            <span class=legend>Gen 65: (periodic (+ PI PI) (MirrorRight (- x) (Horner (MinimaxPolynomial (sin x) [(- PI) 0]))))</span>
+        </li>
+        </ul>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 0: [-32.0, 32.0]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_0_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_0_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_0_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_0_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 1: [-8.0, 8.0]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_1_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_1_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_1_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_1_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 2: [-2.0, 2.0]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_2_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_2_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_2_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_2_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-box result-box">
+        <h2 class="result-title">Domain 3: [-1.0, 1.0]</h2>
+        <div class="result-quad">
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_3_value_avg_value.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_3_absolute_error_abs_max_errors.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_3_relative_error_rel_max_errors.png">
+                </div>
+                <div class="plot">
+                    <img class="plot-image" src="core_function_sin_domain_3_epsilon_vs_delta_eps_del.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

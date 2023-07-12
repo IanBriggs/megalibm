@@ -1,0 +1,57 @@
+{
+  "name": "core_function_cos",
+  "body": "<pre>\n(FPCore \"core function cos\" (x)\n    :name \"core function cos\"\n    :pre (<= (- INFINITY) x INFINITY)\n  (cos x))\n</pre>",
+  "functions": {
+    "libm_core_function_cos": {
+      "avg_time_per_sample": 1.17941895e+01
+    },
+    "my_core_function_cos_0": {
+      "avg_time_per_sample": 8.30021973e+00
+    },
+    "my_core_function_cos_1": {
+      "avg_time_per_sample": 8.30019531e+00
+    },
+    "my_core_function_cos_2": {
+      "avg_time_per_sample": 7.95581055e+00
+    },
+    "my_core_function_cos_3": {
+      "avg_time_per_sample": 8.16450195e+00
+    },
+    "my_core_function_cos_4": {
+      "avg_time_per_sample": 1.08764893e+01
+    },
+    "my_core_function_cos_5": {
+      "avg_time_per_sample": 1.12670654e+01
+    },
+    "my_core_function_cos_6": {
+      "avg_time_per_sample": 1.09687256e+01
+    },
+    "my_core_function_cos_7": {
+      "avg_time_per_sample": 1.05515869e+01
+    },
+    "my_core_function_cos_8": {
+      "avg_time_per_sample": 1.12113281e+01
+    },
+    "my_core_function_cos_9": {
+      "avg_time_per_sample": 1.15403076e+01
+    },
+    "my_core_function_cos_10": {
+      "avg_time_per_sample": 1.09899414e+01
+    },
+    "my_core_function_cos_11": {
+      "avg_time_per_sample": 1.15081543e+01
+    },
+    "my_core_function_cos_12": {
+      "avg_time_per_sample": 1.06281494e+01
+    },
+    "my_core_function_cos_13": {
+      "avg_time_per_sample": 1.07656006e+01
+    },
+    "my_core_function_cos_14": {
+      "avg_time_per_sample": 1.14302734e+01
+    },
+    "my_core_function_cos_15": {
+      "avg_time_per_sample": 1.08481689e+01
+    }
+  }
+}
