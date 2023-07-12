@@ -1,1 +1,12 @@
-{"name": "core_function_acos", "body": "<pre>\n(FPCore \"core function acos\" (x)\n    :name \"core function acos\"\n    :pre (<= (- 1) x 1)\n  (acos x))\n</pre>", "functions": {"libm_core_function_acos": {"avg_time_per_sample": 9.16799316}, "my_core_function_acos_0": {"avg_time_per_sample": 6.06123047}}}
+{
+  "name": "core_function_acos",
+  "body": "<pre>\n(FPCore \"core function acos\" (x)\n    :name \"core function acos\"\n    :pre (<= (- 1) x 1)\n  (acos x))\n</pre>",
+  "functions": {
+    "libm_core_function_acos": {
+      "avg_time_per_sample": 6.59189453e+00
+    },
+    "my_core_function_acos_0": {
+      "avg_time_per_sample": 4.64824219e+00
+    }
+  }
+}

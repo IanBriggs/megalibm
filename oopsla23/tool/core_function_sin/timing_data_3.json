@@ -1,1 +1,39 @@
-{"name": "core_function_sin", "body": "<pre>\n(FPCore \"core function sin\" (x)\n    :name \"core function sin\"\n    :pre (<= (- INFINITY) x INFINITY)\n  (sin x))\n</pre>", "functions": {"libm_core_function_sin": {"avg_time_per_sample": 7.03369141}, "my_core_function_sin_0": {"avg_time_per_sample": 9.11745605}, "my_core_function_sin_1": {"avg_time_per_sample": 9.5512207}, "my_core_function_sin_2": {"avg_time_per_sample": 12.9733643}, "my_core_function_sin_3": {"avg_time_per_sample": 11.7039795}, "my_core_function_sin_4": {"avg_time_per_sample": 12.5690674}, "my_core_function_sin_5": {"avg_time_per_sample": 11.9706543}, "my_core_function_sin_6": {"avg_time_per_sample": 13.5683594}, "my_core_function_sin_7": {"avg_time_per_sample": 13.21875}, "my_core_function_sin_8": {"avg_time_per_sample": 13.2620361}, "my_core_function_sin_9": {"avg_time_per_sample": 13.5425537}}}
+{
+  "name": "core_function_sin",
+  "body": "<pre>\n(FPCore \"core function sin\" (x)\n    :name \"core function sin\"\n    :pre (<= (- INFINITY) x INFINITY)\n  (sin x))\n</pre>",
+  "functions": {
+    "libm_core_function_sin": {
+      "avg_time_per_sample": 5.70505371e+00
+    },
+    "my_core_function_sin_0": {
+      "avg_time_per_sample": 6.98901367e+00
+    },
+    "my_core_function_sin_1": {
+      "avg_time_per_sample": 7.77390137e+00
+    },
+    "my_core_function_sin_2": {
+      "avg_time_per_sample": 8.53928223e+00
+    },
+    "my_core_function_sin_3": {
+      "avg_time_per_sample": 8.66064453e+00
+    },
+    "my_core_function_sin_4": {
+      "avg_time_per_sample": 9.81191406e+00
+    },
+    "my_core_function_sin_5": {
+      "avg_time_per_sample": 9.85187988e+00
+    },
+    "my_core_function_sin_6": {
+      "avg_time_per_sample": 1.07481201e+01
+    },
+    "my_core_function_sin_7": {
+      "avg_time_per_sample": 1.04821289e+01
+    },
+    "my_core_function_sin_8": {
+      "avg_time_per_sample": 9.82263184e+00
+    },
+    "my_core_function_sin_9": {
+      "avg_time_per_sample": 9.41916504e+00
+    }
+  }
+}

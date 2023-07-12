@@ -1,1 +1,12 @@
-{"name": "core_function_asin", "body": "<pre>\n(FPCore \"core function asin\" (x)\n    :name \"core function asin\"\n    :pre (<= (- 1) x 1)\n  (asin x))\n</pre>", "functions": {"libm_core_function_asin": {"avg_time_per_sample": 7.55192871}, "my_core_function_asin_0": {"avg_time_per_sample": 5.85327148}}}
+{
+  "name": "core_function_asin",
+  "body": "<pre>\n(FPCore \"core function asin\" (x)\n    :name \"core function asin\"\n    :pre (<= (- 1) x 1)\n  (asin x))\n</pre>",
+  "functions": {
+    "libm_core_function_asin": {
+      "avg_time_per_sample": 5.72231445e+00
+    },
+    "my_core_function_asin_0": {
+      "avg_time_per_sample": 4.74499512e+00
+    }
+  }
+}
