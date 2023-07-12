@@ -8,7 +8,7 @@
 
 rm -rf results/run
 rm -rf results/plots
-mkdir plots
+mkdir results/plots
 
 # run the rules locally. 
 cp oopsla23/precomputed.json output.json
