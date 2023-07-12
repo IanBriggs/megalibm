@@ -11,3 +11,5 @@ cp oopsla23/baseline/index.html results/baseline.html
 
 cp oopsla23/renumo_precomputed/renumo_run.html results/renumo_run.html
 cp -r oopsla23/renumo_precomputed/generated/ results/generated/
+
+cp oopsla23/precomputed_identities.log results/identities.log

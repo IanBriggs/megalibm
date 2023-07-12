@@ -1,0 +1,28 @@
+2023-07-12 15:28:57.841524 synthesize: In generating "core function acos", we used the following identities:
+2023-07-12 15:28:57.909246 extract_domain: WARNING: Turning exclusive bound to inclusive: (< x INFINITY)
+2023-07-12 15:28:59.107964 synthesize: WARNING: Unable to fill hole!
+2023-07-12 15:29:00.318751 synthesize: In generating "core function asin", we used the following identities:
+2023-07-12 15:29:05.301012 synthesize: In generating "core function atanh", we used the following identities:
+2023-07-12 15:29:47.343134 synthesize: In generating "core function cos", we used the following identities:
+2023-07-12 15:29:47.343157 synthesize: (/ (* (thefunc (- 0 x)) 2) 2)
+2023-07-12 15:29:47.343172 synthesize: (- (thefunc (- PI x)) (* (thefunc (- PI x)) 2))
+2023-07-12 15:29:47.343182 synthesize: (thefunc (+ x (+ PI PI)))
+2023-07-12 15:29:47.343196 synthesize: (* (thefunc (- PI x)) (- (pow (thefunc (- PI x)) 0)))
+2023-07-12 15:29:47.343205 synthesize: (- (thefunc (- PI x)))
+2023-07-12 15:30:08.241812 synthesize: In generating "core function sin", we used the following identities:
+2023-07-12 15:30:08.241827 synthesize: (thefunc (+ x (+ PI PI)))
+2023-07-12 15:30:08.241835 synthesize: (thefunc (- PI x))
+2023-07-12 15:30:08.241849 synthesize: (+ (thefunc (- 0 x)) (* (thefunc (- 0 x)) (- 2)))
+2023-07-12 15:30:08.241858 synthesize: (- (thefunc (- 0 x)))
+2023-07-12 15:30:08.241867 synthesize: (thefunc (- (- PI) x))
+2023-07-12 15:30:08.241877 synthesize: (/ (* (thefunc (- 0 x)) (- 2)) 2)
+2023-07-12 15:31:42.646236 synthesize: In generating "core function tan", we used the following identities:
+2023-07-12 15:31:42.646250 synthesize: (thefunc (+ x PI))
+2023-07-12 15:31:42.646264 synthesize: (thefunc (+ x (- (* PI (- 2)))))
+2023-07-12 15:31:48.417721 result: WARNING: Sollya printed to stderr
+2023-07-12 15:31:48.418777 result: WARNING: Sollya call failed, trying [inf - small, sup] 
+2023-07-12 15:31:58.067494 result: WARNING: Sollya printed to stderr
+2023-07-12 15:31:58.068558 result: WARNING: Sollya call failed, trying [inf - small, sup] 
+2023-07-12 15:32:13.362333 result: WARNING: Sollya printed to stderr
+2023-07-12 15:32:13.363516 result: WARNING: Sollya call failed, trying [inf - small, sup] 
+2023-07-12 15:31:42.646287 synthesize: (- (+ (thefunc (- PI x)) (* (thefunc (- PI x)) 2)) (* (* (thefunc (- PI x)) (- 2)) (- 2)))
