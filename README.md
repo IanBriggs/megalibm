@@ -4,7 +4,7 @@ Figure 8's graphs and table.
 
 ## Kick the tires
 To re-generate plots from Figure 8, you should run 
-`./kick-tires.sh`.
+`./kick-tires.sh`. The script should complete in less than a minute.
 From there, you can go to `results/` and open
 `pareto.html` in browser, which should display 
 a number of plots.
@@ -31,7 +31,7 @@ via multiple applications.
 ## Lite
 In the lite version of the artifact, we re-run the results of megalibm
 given some pre-generated rules from Renumo. To get started,
-run `./lite.sh`.
+run `./lite.sh`. The script should complete in the order of 5-10 minutes.
 The script will generate a fresh `renumo_run.html` file,
 which will appear in the `results/` folder.
 The script will also re-generate the `pareto.html` file,

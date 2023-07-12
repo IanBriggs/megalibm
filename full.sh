@@ -12,6 +12,8 @@ cargo test --release --package ruler --test trig        -- test::run --exact --n
 cp ../../../nightly/data/output.json .
 
 rm -rf results/run
+rm -rf results/plots
+mkdir plots
 
 make
 make nightly

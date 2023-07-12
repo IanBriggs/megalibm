@@ -7,9 +7,11 @@
 # comparison plots. 
 
 rm -rf results/run
+rm -rf results/plots
+mkdir plots
 
 # run the rules locally. 
-cp oopsla23/renumo_rules_1688715491.json output.json
+cp oopsla23/precomputed.json output.json
 
 make
 make nightly
