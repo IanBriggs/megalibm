@@ -9,7 +9,7 @@
 rm -rf results/run
 
 # run the rules locally. 
-cp oopsla23/renumo_rules_1688715491.json rules.json
+cp oopsla23/renumo_rules_1688715491.json output.json
 
 make
 make nightly
