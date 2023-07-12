@@ -6,6 +6,8 @@
 # use make nightly, get all the relevant json, and run the script that generates
 # comparison plots. 
 
+rm -rf results/run
+
 # run the rules locally. 
 cp oopsla23/renumo_rules_1688715491.json rules.json
 

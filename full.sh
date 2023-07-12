@@ -11,11 +11,13 @@ cargo test --release --package ruler --test rational    -- test::run --exact --n
 cargo test --release --package ruler --test trig        -- test::run --exact --nocapture >> out/log.txt
 cp ../../../nightly/data/output.json .
 
+rm -rf results/run
+
 make
 make nightly
 
 # now run comparison 
-python graph_against_baseline.py --directory=nightlies/run/generated/
+python graph_against_baseline.py --directory=results/run/generated/
 
 # also, write to results
 cp -r results/run/generated results/generated
